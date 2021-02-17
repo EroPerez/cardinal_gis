@@ -1,0 +1,55 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'org.greenrobot:greendao-gradle-plugin:3.3.0' // add plugin
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral() // add repository
+        google()
+        maven {
+            url "http://nexus.prod.uci.cu/repository/maven-central/"
+        }
+
+        maven {
+            url "http://nexus.prod.uci.cu/repository/maven.google.com/"
+        }
+    }
+    ext {
+        myApplicationId = "eu.hydrologis.geopaparazzi"
+        myVersionCode = 99
+        myVersionName = "6.0.3"
+
+        mycompileSdkVersion = 28
+        mybuildToolsVersion = "27.0.1"
+        myminSdkVersion = 21
+        mytargetSdkVersion = 28
+
+        gdxVersion = "1.9.9"
+        gwtVersion = "2.8.2"
+        slf4jVersion = "1.7.29"
+    }
+    if (JavaVersion.current().isJava8Compatible()) {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+            logging.captureStandardError LogLevel.INFO
+            logging.captureStandardOutput LogLevel.INFO
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

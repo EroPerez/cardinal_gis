@@ -1,0 +1,46 @@
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Eclipse project files
+#.classpath
+#.project
+.directory
+
+# transifex stuff
+tx.exe
+
+*.swp
+*~
+
+# gradle stuff
+.gradle
+**/build/
+build/
+
+# android-studio stuff
+.idea/
+*.iml
+
+.DS_Store
+**/.DS_Store
+ant.properties
+
+geopaparazzi_app/release/
+geopaparazzi_app/debug/
+
+# Project specific
+wms_nww/

@@ -1,0 +1,21 @@
+[main]
+host = https://www.transifex.com
+type = ANDROID
+lang_map = pt_BR: pt-rBR, zh_CN: zh-rCN, th_TH: th-rTH, sw_KE: sw-rKE, es_419: es-rLA
+
+[geopaparazzi.geopaparazzi-app-stringsxml]
+file_filter = geopaparazzi_core/src/main/res/values-<lang>/strings.xml
+source_file = geopaparazzi_core/src/main/res/values/strings.xml
+source_lang = en
+
+[geopaparazzi.geopaparazzi-library-stringsxml]
+file_filter = geopaparazzi_library/src/main/res/values-<lang>/strings.xml
+source_file = geopaparazzi_library/src/main/res/values/strings.xml
+source_lang = en
+
+[geopaparazzi.geopaparazzi-spatialite-stringsxml]
+file_filter = geopaparazzi_map/src/main/res/values-<lang>/strings.xml
+source_file = geopaparazzi_map/src/main/res/values/strings.xml
+source_lang = en
+
+

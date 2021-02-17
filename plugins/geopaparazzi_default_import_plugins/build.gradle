@@ -1,0 +1,21 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion project.ext.mycompileSdkVersion
+    buildToolsVersion project.ext.mybuildToolsVersion
+
+    defaultConfig {
+        minSdkVersion project.ext.myminSdkVersion
+        targetSdkVersion project.ext.mytargetSdkVersion
+        vectorDrawables.useSupportLibrary = true
+    }
+    compileOptions {
+        encoding = 'UTF-8'
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation project(':geopaparazzi_core')
+}
