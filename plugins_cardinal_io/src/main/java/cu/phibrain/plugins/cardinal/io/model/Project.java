@@ -292,9 +292,7 @@ public class Project implements Serializable {
         myDao.update(this);
     }
 
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 2081800561)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

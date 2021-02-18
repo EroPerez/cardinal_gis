@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 
 
 /**
@@ -52,6 +53,46 @@ public class MapObjecTypeState implements Serializable
      */
     public MapObjecTypeState() {
     }
+
+@Generated(hash = 263499671)
+public MapObjecTypeState(Long id, String description, String color, Long mapObjecTypeId) {
+    this.id = id;
+    this.description = description;
+    this.color = color;
+    this.mapObjecTypeId = mapObjecTypeId;
+}
+
+public Long getId() {
+    return this.id;
+}
+
+public void setId(Long id) {
+    this.id = id;
+}
+
+public String getDescription() {
+    return this.description;
+}
+
+public void setDescription(String description) {
+    this.description = description;
+}
+
+public String getColor() {
+    return this.color;
+}
+
+public void setColor(String color) {
+    this.color = color;
+}
+
+public Long getMapObjecTypeId() {
+    return this.mapObjecTypeId;
+}
+
+public void setMapObjecTypeId(Long mapObjecTypeId) {
+    this.mapObjecTypeId = mapObjecTypeId;
+}
 
 
 }

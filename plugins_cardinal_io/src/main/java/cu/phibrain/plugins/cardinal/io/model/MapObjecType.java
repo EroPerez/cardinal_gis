@@ -236,6 +236,103 @@ public class MapObjecType implements Serializable {
 
 
     /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 107888718)
+    public List<MapObjectTypeAttribute> getAttributes() {
+        if (attributes == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjectTypeAttributeDao targetDao = daoSession.getMapObjectTypeAttributeDao();
+            List<MapObjectTypeAttribute> attributesNew = targetDao
+                    ._queryMapObjecType_Attributes(id);
+            synchronized (this) {
+                if (attributes == null) {
+                    attributes = attributesNew;
+                }
+            }
+        }
+        return attributes;
+    }
+
+
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
+    @Generated(hash = 1697487056)
+    public synchronized void resetAttributes() {
+        attributes = null;
+    }
+
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 897256307)
+    public List<MapObjecTypeState> getStates() {
+        if (states == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjecTypeStateDao targetDao = daoSession.getMapObjecTypeStateDao();
+            List<MapObjecTypeState> statesNew = targetDao._queryMapObjecType_States(id);
+            synchronized (this) {
+                if (states == null) {
+                    states = statesNew;
+                }
+            }
+        }
+        return states;
+    }
+
+
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
+    @Generated(hash = 63018479)
+    public synchronized void resetStates() {
+        states = null;
+    }
+
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 1336070364)
+    public List<MapObjecTypeDefect> getDefects() {
+        if (defects == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjecTypeDefectDao targetDao = daoSession.getMapObjecTypeDefectDao();
+            List<MapObjecTypeDefect> defectsNew = targetDao._queryMapObjecType_Defects(id);
+            synchronized (this) {
+                if (defects == null) {
+                    defects = defectsNew;
+                }
+            }
+        }
+        return defects;
+    }
+
+
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
+    @Generated(hash = 494192730)
+    public synchronized void resetDefects() {
+        defects = null;
+    }
+
+
+    /**
      * called by internal mechanisms, do not call yourself.
      */
     @Generated(hash = 1500504985)
