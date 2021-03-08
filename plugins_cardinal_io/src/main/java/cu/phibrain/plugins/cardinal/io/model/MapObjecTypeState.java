@@ -1,13 +1,14 @@
 
 package cu.phibrain.plugins.cardinal.io.model;
 
-import java.io.Serializable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
+
+import java.io.Serializable;
 
 
 /**
@@ -24,8 +25,7 @@ import org.greenrobot.greendao.annotation.Generated;
         generateGettersSetters = true
 )
 
-public class MapObjecTypeState implements Serializable
-{
+public class MapObjecTypeState implements Serializable {
 
     @Id(autoincrement = true)
     @SerializedName("id")
@@ -40,7 +40,6 @@ public class MapObjecTypeState implements Serializable
     @Expose
     private String color;
 
-
     @SerializedName("map_object_type")
     @Expose
     private Long mapObjecTypeId;
@@ -49,50 +48,49 @@ public class MapObjecTypeState implements Serializable
 
     /**
      * No args constructor for use in serialization
-     *
      */
     public MapObjecTypeState() {
     }
 
-@Generated(hash = 263499671)
-public MapObjecTypeState(Long id, String description, String color, Long mapObjecTypeId) {
-    this.id = id;
-    this.description = description;
-    this.color = color;
-    this.mapObjecTypeId = mapObjecTypeId;
-}
+    @Generated(hash = 263499671)
+    public MapObjecTypeState(Long id, String description, String color, Long mapObjecTypeId) {
+        this.id = id;
+        this.description = description;
+        this.color = color;
+        this.mapObjecTypeId = mapObjecTypeId;
+    }
 
-public Long getId() {
-    return this.id;
-}
+    public Long getId() {
+        return this.id;
+    }
 
-public void setId(Long id) {
-    this.id = id;
-}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-public String getDescription() {
-    return this.description;
-}
+    public String getDescription() {
+        return this.description;
+    }
 
-public void setDescription(String description) {
-    this.description = description;
-}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-public String getColor() {
-    return this.color;
-}
+    public String getColor() {
+        return this.color;
+    }
 
-public void setColor(String color) {
-    this.color = color;
-}
+    public void setColor(String color) {
+        this.color = color;
+    }
 
-public Long getMapObjecTypeId() {
-    return this.mapObjecTypeId;
-}
+    public Long getMapObjecTypeId() {
+        return this.mapObjecTypeId;
+    }
 
-public void setMapObjecTypeId(Long mapObjecTypeId) {
-    this.mapObjecTypeId = mapObjecTypeId;
-}
+    public void setMapObjecTypeId(Long mapObjecTypeId) {
+        this.mapObjecTypeId = mapObjecTypeId;
+    }
 
 
 }

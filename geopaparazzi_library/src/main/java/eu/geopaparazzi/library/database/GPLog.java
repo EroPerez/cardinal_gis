@@ -95,7 +95,7 @@ public class GPLog {
      */
     public static void createTables(SQLiteDatabase sqliteDatabase) throws IOException {
         StringBuilder sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_LOG);
         sB.append(" (");
         sB.append(COLUMN_ID);
@@ -106,7 +106,7 @@ public class GPLog {
         String CREATE_TABLE = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX " + TABLE_LOG + "_" + COLUMN_ID + " ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS " + TABLE_LOG + "_" + COLUMN_ID + " ON ");
         sB.append(TABLE_LOG);
         sB.append(" ( ");
         sB.append(COLUMN_ID);
@@ -114,7 +114,7 @@ public class GPLog {
         String CREATE_INDEX = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX " + TABLE_LOG + "_" + COLUMN_DATAORA + " ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS " + TABLE_LOG + "_" + COLUMN_DATAORA + " ON ");
         sB.append(TABLE_LOG);
         sB.append(" ( ");
         sB.append(COLUMN_DATAORA);

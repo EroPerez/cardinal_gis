@@ -112,11 +112,41 @@ public class DatabaseManager {
             this.databaseFile = databaseFile;
         }
 
+        private boolean existsTables() {
+            boolean notExists = false;
+            StringBuilder sB = new StringBuilder();
+            sB.append("name='").append(TableDescriptions.TABLE_METADATA)
+                    .append("' OR name='").append(GPLog.TABLE_LOG)
+                    .append("' OR name='").append(TableDescriptions.TABLE_NOTES)
+                    .append("' OR name='").append(TableDescriptions.TABLE_IMAGES)
+                    .append("' OR name='").append(TableDescriptions.TABLE_IMAGE_DATA)
+                    .append("' OR name='").append(TableDescriptions.TABLE_GPSLOGS)
+                    .append("' OR name='").append(TableDescriptions.TABLE_GPSLOG_DATA)
+                    .append("' OR name='").append(TableDescriptions.TABLE_GPSLOG_PROPERTIES)
+                    .append('\'');
+
+            String sql = "SELECT count(name) FROM sqlite_master WHERE type ='table' AND ( " + sB.toString() + " );";
+            Cursor cursor = null;
+            try {
+                cursor = db.rawQuery(sql, null);
+                cursor.moveToFirst();
+                if (!cursor.isAfterLast()) {
+                    int value = cursor.getInt(0);
+                    notExists = value == 8;
+                }
+            } finally {
+                if (cursor != null)
+                    cursor.close();
+            }
+            return notExists;
+        }
+
         public void open(Context context) throws IOException {
-            if (databaseFile.exists()) {
+            db = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
+
+            if (databaseFile.exists() && existsTables()) {
                 if (Debug.D)
                     Log.i("SQLiteHelper", "Opening database at " + databaseFile);
-                db = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
 
                 try {
                     // check if metadata and log are here
@@ -153,9 +183,10 @@ public class DatabaseManager {
                     Log.i("SQLiteHelper", "db folder exists: " + databaseFile.getParentFile().exists());
                     Log.i("SQLiteHelper", "db folder is writable: " + databaseFile.getParentFile().canWrite());
                 }
-                db = SQLiteDatabase.openOrCreateDatabase(databaseFile, null);
+
                 create(context);
             }
+
         }
 
         public void close() {

@@ -1,13 +1,34 @@
 package cu.phibrain.plugins.cardinal.io;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
+import cu.phibrain.plugins.cardinal.io.database.entity.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.GroupOfLayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeDefectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.ProjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.StockOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.ZoneOperations;
 import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
+import cu.phibrain.plugins.cardinal.io.model.GroupOfLayer;
+import cu.phibrain.plugins.cardinal.io.model.Layer;
+import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.model.Project;
+import cu.phibrain.plugins.cardinal.io.model.Stock;
 import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.model.Worker;
+import cu.phibrain.plugins.cardinal.io.model.Zone;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import eu.geopaparazzi.library.R;
@@ -107,31 +128,78 @@ public enum WebDataProjectManager {
     /**
      * Downloads a project from the given server via GET.
      *
-     * @param context the {@link Context} to use.
-     * @param server  the server from which to download.
-     * @param user    the username for authentication.
-     * @param passwd  the password for authentication.
+     * @param context    the {@link Context} to use.
+     * @param server     the server from which to download.
+     * @param user       the username for authentication.
+     * @param passwd     the password for authentication.
+     * @param webproject the project to download.
      * @return The path to the downloaded file
      */
-    public String downloadData(Context context, String server, String user, String passwd, String postJson, String outputFileName) throws DownloadError {
-        String downloadedProjectFileName = "no information available";
+    public String downloadProject(Context context, String server, String user, String passwd, WebDataProjectModel webproject, String outputFileName) throws DownloadError {
         try {
-            File outputDir = ResourcesManager.getInstance(context).getApplicationSupporterDir();
-            File downloadeddataFile = new File(outputDir, outputFileName);
-            if (downloadeddataFile.exists()) {
-                String wontOverwrite = context.getString(R.string.the_file_exists_wont_overwrite) + " " + downloadeddataFile.getName();
+            //File outputDir = ResourcesManager.getInstance(context).getApplicationSupporterDir();
+            File outputDir = ResourcesManager.getInstance(context).getMainStorageDir();
+            File downloadedProjectFile = new File(outputDir, outputFileName);
+            Log.i("WebDataProjectManager", "New project path: " + downloadedProjectFile.getPath());
+            if (downloadedProjectFile.exists()) {
+                String wontOverwrite = context.getString(R.string.the_file_exists_wont_overwrite) + " " + downloadedProjectFile.getName();
                 throw new DownloadError(wontOverwrite);
             }
-            String loginUrl = addActionPath(server, LOGIN_URL);
-            server = addActionPath(server, DOWNLOAD_PROJECT_DATA);
-            NetworkUtilitiesCardinalOl.sendPostForFile(context, server, postJson, user, passwd, downloadeddataFile, loginUrl);
+            server = addActionPath(server, "");
+            //First login into cardinal cloud service
+            AuthToken token = NetworkUtilitiesCardinalOl.sendGetAuthToken(server, user, passwd);
+            Project project = NetworkUtilitiesCardinalOl.sendGetProjectData(server, token, webproject.id);
+            List<Worker> workers = project.getWorkers();
+            List<Stock> stocks = project.getStocks();
+            List<Zone> zones = project.getZone();
 
-            long fileLength = downloadeddataFile.length();
+            List<GroupOfLayer> groupOfLayers = project.getGroupoflayers();
+
+            DaoSessionManager.getInstance().setContext(context);
+            DaoSessionManager.getInstance().setDatabaseName(downloadedProjectFile.getPath());
+            DaoSessionManager.getInstance().resetDaoSession();
+
+            ProjectOperations.getInstance().insertProject(project);
+            WorkerOperations.getInstance().insertWorkerList(workers);
+            ContractOperations.getInstance().insertContractList(project.getId(), workers, true);
+            StockOperations.getInstance().insertStockList(stocks);
+            ZoneOperations.getInstance().insertZoneList(zones);
+            GroupOfLayerOperations.getInstance().insertGroupList(groupOfLayers);
+
+            // Save all layers in groups
+
+            List<Layer> layerList = new ArrayList<>();
+            for (GroupOfLayer group :
+                    groupOfLayers) {
+                layerList.addAll(group.getLayers());
+            }
+            LayerOperations.getInstance().insertLayerList(layerList);
+
+            // Get and save all mapobjectypes in layer
+
+            List<MapObjecType> objecTypeList = new ArrayList<>();
+            for (Layer layer :
+                    layerList) {
+                objecTypeList.addAll(layer.getMapobjectypes());
+            }
+
+            MapObjecTypeOperations.getInstance().insertMapObjecTypesList(objecTypeList);
+
+            // Get and save all extra mapobject type properties
+            for (MapObjecType mapObjecType :
+                    objecTypeList) {
+                MapObjectTypeAttributeOperations.getInstance().insertMapObjectTypeAttributeList(mapObjecType.getAttributes());
+                MapObjecTypeStateOperations.getInstance().insertMapObjecTypeStateList(mapObjecType.getStates());
+                MapObjecTypeDefectOperations.getInstance().insertMapObjecTypeDefectList(mapObjecType.getDefects());
+            }
+
+
+            long fileLength = downloadedProjectFile.length();
             if (fileLength == 0) {
                 throw new DownloadError("Error in downloading file.");
             }
 
-            return downloadeddataFile.getCanonicalPath();
+            return downloadedProjectFile.getCanonicalPath();
         } catch (DownloadError e) {
             GPLog.error(this, null, e);
             throw e;

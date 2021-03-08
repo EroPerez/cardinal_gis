@@ -259,7 +259,7 @@ public class DaoBookmarks {
      */
     public static void createTables(SQLiteDatabase sqliteDatabase) throws IOException {
         StringBuilder sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_BOOKMARKS);
         sB.append(" (");
         sB.append(COLUMN_ID);
@@ -272,7 +272,7 @@ public class DaoBookmarks {
         String CREATE_TABLE_BOOKMARKS = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX bookmarks_x_by_y_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS bookmarks_x_by_y_idx ON ");
         sB.append(TABLE_BOOKMARKS);
         sB.append(" ( ");
         sB.append(COLUMN_LON);

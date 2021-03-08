@@ -29,6 +29,7 @@ import java.util.Map;
 
 import cu.phibrain.plugins.cardinal.io.exceptions.ServerError;
 import cu.phibrain.plugins.cardinal.io.model.LoginModel;
+import cu.phibrain.plugins.cardinal.io.model.Project;
 import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
 import cu.phibrain.plugins.cardinal.io.network.api.ApiClient;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
@@ -416,8 +417,8 @@ public class NetworkUtilitiesCardinalOl {
      * @return AuthToken   the logged token
      * @throws Exception if something goes wrong.
      */
-    public static AuthToken sendGetAuthToken(String server, String user, String passwd) throws Exception {
-        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, passwd)).execute();
+    public static AuthToken sendGetAuthToken(String server, String user, String password) throws Exception {
+        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).execute();
         if (response.isSuccessful()) {
             return response.body();
         }
@@ -427,8 +428,9 @@ public class NetworkUtilitiesCardinalOl {
     /**
      * Send via HTTP GET a request to obtain project data list
      *
-     * @param server the base url to which to send to.
-     * @param token  the auth token login credential
+     * @param server  the base url to which to send to.
+     * @param token   the auth token login credential
+     * @param filters the filters to apply to query project
      * @return List<WebDataProjectModel>   List of remote projects to import
      * @throws Exception if something goes wrong.
      */
@@ -438,6 +440,27 @@ public class NetworkUtilitiesCardinalOl {
 
         if (response.isSuccessful()) {
             return response.body().getResults();
+        }
+        throw new ServerError(response.message(), response.code());
+
+    }
+
+
+    /**
+     * Send via HTTP GET a request to obtain a project data
+     *
+     * @param server the base url to which to send to.
+     * @param token  the auth token login credential
+     * @param id     the selected project ID
+     * @return Project   A current remote selected projects to import
+     * @throws Exception if something goes wrong.
+     */
+
+    public static Project sendGetProjectData(String server, AuthToken token, int id) throws Exception {
+        Response<Project> response = ApiClient.getApiService(server).getProject(token.toString(), id).execute();
+
+        if (response.isSuccessful()) {
+            return response.body();
         }
         throw new ServerError(response.message(), response.code());
 

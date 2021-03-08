@@ -28,7 +28,7 @@ public class Debug {
      *
      * <p>For release = <code>false</code>.
      */
-    public final static boolean D = false;
+    public final static boolean D = true;
 
     /**
      * Flag to define if the tags file should be overwritten.

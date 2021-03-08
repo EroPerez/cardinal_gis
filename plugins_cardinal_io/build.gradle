@@ -1,6 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'org.greenrobot.greendao' // apply plugin
 
+
+greendao {
+    // Database version number, the database must be modified here after the modification, otherwise it will report no such table
+    schemaVersion 9
+}
+
 android {
     compileSdkVersion project.ext.mycompileSdkVersion
     buildToolsVersion project.ext.mybuildToolsVersion

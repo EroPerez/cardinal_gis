@@ -79,7 +79,7 @@ public class DaoImages implements IImagesDbHelper {
         String CREATE_TABLE_IMAGES = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX images_ts_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS images_ts_idx ON ");
         sB.append(TABLE_IMAGES);
         sB.append(" ( ");
         sB.append(ImageTableFields.COLUMN_TS.getFieldName());
@@ -87,7 +87,7 @@ public class DaoImages implements IImagesDbHelper {
         String CREATE_INDEX_IMAGES_TS = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX images_x_by_y_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS images_x_by_y_idx ON ");
         sB.append(TABLE_IMAGES);
         sB.append(" ( ");
         sB.append(ImageTableFields.COLUMN_LON.getFieldName());
@@ -97,7 +97,7 @@ public class DaoImages implements IImagesDbHelper {
         String CREATE_INDEX_IMAGES_X_BY_Y = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX images_noteid_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS images_noteid_idx ON ");
         sB.append(TABLE_IMAGES);
         sB.append(" ( ");
         sB.append(ImageTableFields.COLUMN_NOTE_ID.getFieldName());
@@ -105,7 +105,7 @@ public class DaoImages implements IImagesDbHelper {
         String CREATE_INDEX_IMAGES_NOTEID = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX images_isdirty_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS images_isdirty_idx ON ");
         sB.append(TABLE_IMAGES);
         sB.append(" ( ");
         sB.append(ImageTableFields.COLUMN_ISDIRTY.getFieldName());
@@ -113,7 +113,7 @@ public class DaoImages implements IImagesDbHelper {
         String CREATE_INDEX_IMAGES_ISDIRTY = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_IMAGE_DATA);
         sB.append(" (");
         sB.append(ImageDataTableFields.COLUMN_ID.getFieldName());

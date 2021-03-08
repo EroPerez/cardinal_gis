@@ -50,7 +50,7 @@ public class DaoNotes implements INotesDbHelper {
      */
     public static void createTables(SQLiteDatabase sqliteDatabase) throws IOException {
         StringBuilder sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_NOTES);
         sB.append(" (");
         sB.append(NotesTableFields.COLUMN_ID.getFieldName());
@@ -68,7 +68,7 @@ public class DaoNotes implements INotesDbHelper {
         String CREATE_TABLE_NOTES = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX notes_ts_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS notes_ts_idx ON ");
         sB.append(TABLE_NOTES);
         sB.append(" ( ");
         sB.append(NotesTableFields.COLUMN_TS.getFieldName());
@@ -76,7 +76,7 @@ public class DaoNotes implements INotesDbHelper {
         String CREATE_INDEX_NOTES_TS = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX notes_x_by_y_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS notes_x_by_y_idx ON ");
         sB.append(TABLE_NOTES);
         sB.append(" ( ");
         sB.append(NotesTableFields.COLUMN_LON.getFieldName());
@@ -86,7 +86,7 @@ public class DaoNotes implements INotesDbHelper {
         String CREATE_INDEX_NOTES_X_BY_Y = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX notes_isdirty_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS notes_isdirty_idx ON ");
         sB.append(TABLE_NOTES);
         sB.append(" ( ");
         sB.append(NotesTableFields.COLUMN_ISDIRTY.getFieldName());

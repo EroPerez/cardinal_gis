@@ -71,7 +71,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
     /**
      * Create log tables.
      *
-     * @param db
+     * @param sqliteDatabase
      * @throws IOException if something goes wrong.
      */
     public static void createTables(SQLiteDatabase sqliteDatabase) throws IOException {
@@ -82,7 +82,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
          * gps log table
          */
         StringBuilder sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_GPSLOGS);
         sB.append(" (");
         sB.append(GpsLogsTableFields.COLUMN_ID.getFieldName() + " INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -103,7 +103,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
          * gps log data table
          */
         sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_GPSLOG_DATA);
         sB.append(" (");
         sB.append(GpsLogsDataTableFields.COLUMN_ID.getFieldName() + " INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -121,7 +121,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
         String CREATE_TABLE_GPSLOG_DATA = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX gpslog_id_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS gpslog_id_idx ON ");
         sB.append(TABLE_GPSLOG_DATA);
         sB.append(" ( ");
         sB.append(GpsLogsDataTableFields.COLUMN_LOGID.getFieldName());
@@ -129,7 +129,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
         String CREATE_INDEX_GPSLOG_ID = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX gpslog_ts_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS gpslog_ts_idx ON ");
         sB.append(TABLE_GPSLOG_DATA);
         sB.append(" ( ");
         sB.append(GpsLogsDataTableFields.COLUMN_DATA_TS.getFieldName());
@@ -137,7 +137,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
         String CREATE_INDEX_GPSLOG_TS = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX gpslog_x_by_y_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS gpslog_x_by_y_idx ON ");
         sB.append(TABLE_GPSLOG_DATA);
         sB.append(" ( ");
         sB.append(GpsLogsDataTableFields.COLUMN_DATA_LON.getFieldName());
@@ -147,7 +147,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
         String CREATE_INDEX_GPSLOG_X_BY_Y = sB.toString();
 
         sB = new StringBuilder();
-        sB.append("CREATE INDEX gpslog_logid_x_y_idx ON ");
+        sB.append("CREATE INDEX IF NOT EXISTS gpslog_logid_x_y_idx ON ");
         sB.append(TABLE_GPSLOG_DATA);
         sB.append(" ( ");
         sB.append(GpsLogsDataTableFields.COLUMN_LOGID.getFieldName());
@@ -172,7 +172,7 @@ public class DaoGpsLog implements IGpsLogDbHelper {
          * properties table
          */
         sB = new StringBuilder();
-        sB.append("CREATE TABLE ");
+        sB.append("CREATE TABLE IF NOT EXISTS ");
         sB.append(TABLE_GPSLOG_PROPERTIES);
         sB.append(" (");
         sB.append(GpsLogsPropertiesTableFields.COLUMN_ID.getFieldName());

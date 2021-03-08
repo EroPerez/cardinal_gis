@@ -2,11 +2,14 @@
 
 buildscript {
     repositories {
+        maven {
+            url "http://nexus.prod.uci.cu/repository/maven.google.com/"
+        }
         jcenter()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:4.1.2'
         classpath 'org.greenrobot:greendao-gradle-plugin:3.3.0' // add plugin
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -33,7 +36,7 @@ allprojects {
         myVersionName = "6.0.3"
 
         mycompileSdkVersion = 28
-        mybuildToolsVersion = "27.0.1"
+        mybuildToolsVersion = "29.0.2"
         myminSdkVersion = 21
         mytargetSdkVersion = 28
 

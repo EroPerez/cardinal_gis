@@ -3,6 +3,7 @@ package cu.phibrain.plugins.cardinal.io.importer;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,15 +34,16 @@ import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.WebDataProjectManager;
 import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
 import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
+import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.core.utilities.Constants;
 import eu.geopaparazzi.library.core.ResourcesManager;
+import eu.geopaparazzi.library.database.DatabaseUtilities;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
+import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.StringAsyncTask;
 import eu.geopaparazzi.library.util.TextRunnable;
 import eu.geopaparazzi.library.util.TimeUtilities;
-
-import org.greenrobot.greendao.database.Database;
 
 /**
  * Web projects listing activity.
@@ -65,7 +67,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
     private String url;
 
     private ProgressDialog downloadDataListDialog;
-    private ProgressDialog cloudProgressDialog;
+    //private ProgressDialog cloudProgressDialog;
     private StringAsyncTask stringAsyncTask;
 
 
@@ -77,9 +79,9 @@ public class CardinalProjectImporterActivity extends ListActivity {
         JodaTimeAndroid.init(this);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
-        final String pwd = preferences.getString(Constants.PREF_KEY_PWD, "geopaparazzipwd"); //$NON-NLS-1$
-        final String url = preferences.getString(Constants.PREF_KEY_SERVER, ""); //$NON-NLS-1$
+        user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
+        pwd = preferences.getString(Constants.PREF_KEY_PWD, "geopaparazzipwd"); //$NON-NLS-1$
+        url = preferences.getString(Constants.PREF_KEY_SERVER, ""); //$NON-NLS-1$
 
         filterText = (EditText) findViewById(R.id.search_box);
         filterText.addTextChangedListener(filterTextWatcher);
@@ -121,84 +123,76 @@ public class CardinalProjectImporterActivity extends ListActivity {
             public void onClick(View v) {
                 String defaultName = getDefaultName();
 
-                GPDialogs.inputMessageDialog(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, "Set name for downloaded project database", defaultName, new TextRunnable() {
+                GPDialogs.inputMessageDialog(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, getString(R.string.enter_a_name_for_downloaded_project), defaultName, new TextRunnable() {
 
                     @Override
                     public void run() {
-                        StringBuilder sb = new StringBuilder();
+
                         for (WebDataProjectModel dataLayer : dataListToLoad) {
                             if (dataLayer.isSelected) {
-                                sb.append(",").append("\"").append(dataLayer.name).append("\"");
+                                downloadProject(dataLayer);
+                                break;
                             }
                         }
-
-                        String names = sb.substring(1);
-                        String json = "{ \"layers\": [ " + names + "] }";
-
-                        downloadData(json);
-
                     }
 
-                    private void downloadData(final String json) {
+                    private void downloadProject(final WebDataProjectModel projectModel) {
+//                        cloudProgressDialog = ProgressDialog.show(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, getString(eu.geopaparazzi.library.R.string.downloading),
+//                                getString(eu.geopaparazzi.library.R.string.downloading_project), true, false);
 
-//                        stringAsyncTask = new StringAsyncTask(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this) {
-//                            protected String dbFile;
-//                            @Override
-//                            protected String doBackgroundWork() {
-//                                cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity context = cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this;
-//                                try {
-//                                    dbFile = WebDataManager.INSTANCE.downloadData(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, url, user, pwd, json, theTextToRunOn);
-//                                    return ASYNC_OK; //$NON-NLS-1$
-//                                } catch (Exception e) {
-//                                    GPLog.error(this, null, e);
-//                                    return e.getLocalizedMessage();
-//                                }
-//                            }
-//
-//                            @Override
-//                            protected void doUiPostWork(String response) {
-//                                dispose();
-//                                cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity context = cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this;
-//                                if (ASYNC_OK.equals(response)) {
-//                                    SpatialiteSourcesManager.INSTANCE.addSpatialiteMapFromFile(new File(dbFile));
-//                                    List<SpatialiteMap> maps = SpatialiteSourcesManager.INSTANCE.getSpatialiteMaps();
-//                                    for (SpatialiteMap map: maps) {
-//                                        if (dbFile.equals(map.databasePath)) {
-//                                            map.isVisible = true;
-//                                        }
-//                                    }
-//                                    String okMsg = getString(R.string.data_successfully_downloaded);
-//                                    GPDialogs.infoDialog(context, okMsg, new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            Intent intent = getIntent();
-//                                            intent.putExtra(LibraryConstants.DATABASE_ID, theTextToRunOn);
-//                                            cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this.setResult(RESULT_OK, intent);
-//                                            finish();
-//                                        }
-//                                    });
-//                                }
-//                                else {
-//                                    GPDialogs.warningDialog(context, response, null);
-//                                }
-//                            }
-//
-//                            @Override
-//                            protected void onCancelled() {
-//                                super.onCancelled();
-//                            }
-//
-//                            @Override
-//                            protected void onCancelled(String s) {
-//                                super.onCancelled(s);
-//                            }
-//                        };
+                        stringAsyncTask = new StringAsyncTask(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this) {
+                            protected String dbFile;
+
+                            @Override
+                            protected String doBackgroundWork() {
+                                cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity context = cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this;
+                                try {
+                                    dbFile = WebDataProjectManager.INSTANCE.downloadProject(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, url, user, pwd, projectModel, theTextToRunOn);
+                                    DatabaseUtilities.setNewDatabase(context, GeopaparazziApplication.getInstance(), dbFile);
+                                    return ASYNC_OK; //$NON-NLS-1$
+                                } catch (Exception e) {
+                                    GPLog.error(this, null, e);
+                                    return e.getLocalizedMessage();
+                                }
+                            }
+
+                            @Override
+                            protected void doUiPostWork(String response) {
+                                //GPDialogs.dismissProgressDialog(cloudProgressDialog);
+                                dispose();
+                                cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity context = cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this;
+                                if (ASYNC_OK.equals(response)) {
+                                    String okMsg = getString(R.string.data_successfully_downloaded);
+                                    GPDialogs.infoDialog(context, okMsg, new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Intent intent = getIntent();
+                                            intent.putExtra(LibraryConstants.DATABASE_ID, theTextToRunOn);
+                                            cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this.setResult(RESULT_OK, intent);
+                                            finish();
+                                        }
+                                    });
+                                } else {
+                                    GPDialogs.warningDialog(context, response, null);
+                                }
+                            }
+
+                            @Override
+                            protected void onCancelled() {
+                                super.onCancelled();
+                            }
+
+                            @Override
+                            protected void onCancelled(String s) {
+                                super.onCancelled(s);
+                            }
+                        };
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-//                                stringAsyncTask.setProgressDialog(getString(R.string.downloading), getString(R.string.downloading_data_from_server), false, null);
-//                                stringAsyncTask.execute();
+                                stringAsyncTask.setProgressDialog(getString(R.string.downloading), getString(R.string.downloading_data_from_server), false, null);
+                                stringAsyncTask.execute();
                             }
                         });
 
@@ -245,14 +239,14 @@ public class CardinalProjectImporterActivity extends ListActivity {
         }
         if (outputDir == null) {
             timestamp = TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date());
-            return prefix + "_" + timestamp + ".sqlite";
+            return prefix + "_" + timestamp + LibraryConstants.GEOPAPARAZZI_DB_EXTENSION;
         } else {
             timestamp = TimeUtilities.INSTANCE.DATEONLY_FORMATTER.format(new Date()).replace("-", "");
             String baseName = prefix + "_" + timestamp;
-            File f = new File(outputDir, baseName + ".sqlite");
+            File f = new File(outputDir, baseName + LibraryConstants.GEOPAPARAZZI_DB_EXTENSION);
             int i = 1;
             while (f.exists()) {
-                f = new File(outputDir, baseName + "_" + i + ".sqlite");
+                f = new File(outputDir, baseName + "_" + i + LibraryConstants.GEOPAPARAZZI_DB_EXTENSION);
                 i++;
             }
             return f.getName();
@@ -269,7 +263,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
     @Override
     protected void onPause() {
         GPDialogs.dismissProgressDialog(downloadDataListDialog);
-        GPDialogs.dismissProgressDialog(cloudProgressDialog);
+        //GPDialogs.dismissProgressDialog(cloudProgressDialog);
         super.onPause();
     }
 
@@ -323,8 +317,8 @@ public class CardinalProjectImporterActivity extends ListActivity {
 
                 nameText.setText(projectModel.name);
                 descriptionText.setText(android.text.Html.fromHtml(projectModel.description).toString().trim());
-                createdAtText.setText("Creado: " + JodaTimeHelper.calculateAge(DateTime.parse(projectModel.created_at)));
-                idText.setText("ID: " + projectModel.id);
+                createdAtText.setText(getString(R.string.geometry_type) + JodaTimeHelper.calculateAge(DateTime.parse(projectModel.created_at)));
+                idText.setText(getString(R.string.srid) + projectModel.id);
                 return rowView;
             }
         };
