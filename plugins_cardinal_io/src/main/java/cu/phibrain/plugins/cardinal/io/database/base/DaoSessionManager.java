@@ -1,6 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.database.base;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,11 @@ public class DaoSessionManager implements Subject {
     private Context mContext;
     private List<Observer> observers;
     private boolean changed;
+    private SQLiteDatabase db;
+
+    public SQLiteDatabase getSQLiteDatabase() {
+        return db;
+    }
 
     private DaoSessionManager() {
         databaseName = null;
@@ -53,6 +59,7 @@ public class DaoSessionManager implements Subject {
     public DaoMaster getDaoMaster() {
 
         MySQLiteOpenHelper mHelper = new MySQLiteOpenHelper(mContext, databaseName, null);
+        db = mHelper.getWritableDatabase();
         daoMaster = new DaoMaster(mHelper.getWritableDb());
         return daoMaster;
     }

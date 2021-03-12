@@ -118,7 +118,11 @@ public class TableDescriptions {
         /**
          * Teh device id if available.
          */
-        KEY_DEVICEID("deviceid", "Device Id", String.class);
+        KEY_DEVICEID("deviceid", "Device Id", String.class),
+        /**
+         * The project key to use.
+         */
+        PROJECT_ID("projectId", "Project Id", String.class);
 
         private String fieldLabel;
         private String fieldName;

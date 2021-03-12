@@ -113,7 +113,7 @@ public class DatabaseManager {
         }
 
         private boolean existsTables() {
-            boolean notExists = false;
+            boolean exists = false;
             StringBuilder sB = new StringBuilder();
             sB.append("name='").append(TableDescriptions.TABLE_METADATA)
                     .append("' OR name='").append(GPLog.TABLE_LOG)
@@ -132,13 +132,13 @@ public class DatabaseManager {
                 cursor.moveToFirst();
                 if (!cursor.isAfterLast()) {
                     int value = cursor.getInt(0);
-                    notExists = value == 8;
+                    exists = value == 8;
                 }
             } finally {
                 if (cursor != null)
                     cursor.close();
             }
-            return notExists;
+            return exists;
         }
 
         public void open(Context context) throws IOException {
@@ -208,10 +208,23 @@ public class DatabaseManager {
             db.setVersion(DATABASE_VERSION);
 
             // CREATE TABLES
-            GPLog.createTables(db);
-            DaoMetadata.createTables(db);
-            String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
-            DaoMetadata.initProjectMetadata(db, null, null, null, null, uniqueDeviceId);
+            try {
+                GPLog.createTables(db);
+                // check if metadata are here
+                String sql = "SELECT name FROM sqlite_master WHERE type ='table' AND name='" + TableDescriptions.TABLE_METADATA + "';";
+                Cursor cursor = db.rawQuery(sql, null);
+                if (!cursor.moveToFirst()) {
+                    cursor.close();
+                    // create table
+                    DaoMetadata.createTables(db);
+                    String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
+                    DaoMetadata.initProjectMetadata(db, null, null, null, null, uniqueDeviceId);
+                } else {
+                    cursor.close();
+                }
+            } catch (Exception e) {
+                Log.e("DATABASEMANAGER", "Error while creating the metadata/log tables", e);
+            }
             DaoNotes.createTables(db);
             DaoGpsLog.createTables(db);
             DaoBookmarks.createTables(db);

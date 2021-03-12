@@ -54,4 +54,8 @@ public class ProjectOperations extends BaseRepo {
         dao.updateInTx(project);
     }
 
+    public Project load(Long projectId) {
+        return dao.load(projectId);
+    }
+
 }

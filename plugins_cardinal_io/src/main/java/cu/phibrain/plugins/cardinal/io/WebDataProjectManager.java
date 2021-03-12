@@ -1,6 +1,7 @@
 package cu.phibrain.plugins.cardinal.io;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
@@ -31,9 +32,12 @@ import cu.phibrain.plugins.cardinal.io.model.Worker;
 import cu.phibrain.plugins.cardinal.io.model.Zone;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
+import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.library.R;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.database.TableDescriptions;
+import eu.geopaparazzi.library.util.Utilities;
 
 
 /**
@@ -140,26 +144,40 @@ public enum WebDataProjectManager {
             //File outputDir = ResourcesManager.getInstance(context).getApplicationSupporterDir();
             File outputDir = ResourcesManager.getInstance(context).getMainStorageDir();
             File downloadedProjectFile = new File(outputDir, outputFileName);
-            Log.i("WebDataProjectManager", "New project path: " + downloadedProjectFile.getPath());
+            String newDbFileName = downloadedProjectFile.getPath();
+            Log.i("WebDataProjectManager", "New project path: " + newDbFileName);
             if (downloadedProjectFile.exists()) {
                 String wontOverwrite = context.getString(R.string.the_file_exists_wont_overwrite) + " " + downloadedProjectFile.getName();
                 throw new DownloadError(wontOverwrite);
             }
+
             server = addActionPath(server, "");
             //First login into cardinal cloud service
             AuthToken token = NetworkUtilitiesCardinalOl.sendGetAuthToken(server, user, passwd);
             Project project = NetworkUtilitiesCardinalOl.sendGetProjectData(server, token, webproject.id);
+
             List<Worker> workers = project.getWorkers();
             List<Stock> stocks = project.getStocks();
             List<Zone> zones = project.getZone();
-
             List<GroupOfLayer> groupOfLayers = project.getGroupoflayers();
 
             DaoSessionManager.getInstance().setContext(context);
-            DaoSessionManager.getInstance().setDatabaseName(downloadedProjectFile.getPath());
+            DaoSessionManager.getInstance().setDatabaseName(newDbFileName);
             DaoSessionManager.getInstance().resetDaoSession();
 
             ProjectOperations.getInstance().insertProject(project);
+
+            // update project metadata
+            SQLiteDatabase db = DaoSessionManager.getInstance().getSQLiteDatabase();
+
+            // create table
+            DaoMetadata.createTables(db);
+            String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
+            DaoMetadata.initProjectMetadata(db, project.getName(), project.getDescription(), null, user, uniqueDeviceId);
+            DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
+            DaoMetadata.insertNewItem(db, TableDescriptions.MetadataTableDefaultValues.PROJECT_ID.getFieldName(),
+                    TableDescriptions.MetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
+
             WorkerOperations.getInstance().insertWorkerList(workers);
             ContractOperations.getInstance().insertContractList(project.getId(), workers, true);
             StockOperations.getInstance().insertStockList(stocks);
@@ -167,7 +185,6 @@ public enum WebDataProjectManager {
             GroupOfLayerOperations.getInstance().insertGroupList(groupOfLayers);
 
             // Save all layers in groups
-
             List<Layer> layerList = new ArrayList<>();
             for (GroupOfLayer group :
                     groupOfLayers) {
@@ -176,7 +193,6 @@ public enum WebDataProjectManager {
             LayerOperations.getInstance().insertLayerList(layerList);
 
             // Get and save all mapobjectypes in layer
-
             List<MapObjecType> objecTypeList = new ArrayList<>();
             for (Layer layer :
                     layerList) {
@@ -196,7 +212,7 @@ public enum WebDataProjectManager {
 
             long fileLength = downloadedProjectFile.length();
             if (fileLength == 0) {
-                throw new DownloadError("Error in downloading file.");
+                throw new DownloadError("Error downloading project from cloud server.");
             }
 
             return downloadedProjectFile.getCanonicalPath();

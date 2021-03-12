@@ -93,6 +93,7 @@ public class DaoMetadata {
      * @throws java.io.IOException if something goes wrong.
      */
     public static void initProjectMetadata(SQLiteDatabase sqliteDatabase, String name, String description, String notes, String creationUser, String uniqueId) throws IOException {
+
         Date creationDate = new Date();
         if (name == null) {
             name = "";
@@ -198,6 +199,39 @@ public class DaoMetadata {
     }
 
     /**
+     * Insert a new metadata item.
+     *
+     * @param key   the key to use.
+     * @param label a readable label for the item. if null, the key is used.
+     * @param value a value of the item. It can be "" but not null.
+     * @throws IOException
+     */
+
+    public static void insertNewItem(SQLiteDatabase sqliteDatabase, String key, String label, String value) throws IOException {
+        if (sqliteDatabase == null)
+            sqliteDatabase = GeopaparazziApplication.getInstance().getDatabase();
+
+        sqliteDatabase.beginTransaction();
+        try {
+            if (label == null) label = key;
+            ContentValues values = new ContentValues();
+            values.put(MetadataTableFields.COLUMN_KEY.getFieldName(), key);
+            values.put(MetadataTableFields.COLUMN_LABEL.getFieldName(), label);
+            values.put(MetadataTableFields.COLUMN_VALUE.getFieldName(), value);
+            sqliteDatabase.insertOrThrow(TABLE_METADATA, null, values);
+
+            sqliteDatabase.setTransactionSuccessful();
+        } catch (Exception e) {
+            sqliteDatabase.endTransaction();
+            GPLog.error("DaoMetadata", e.getLocalizedMessage(), e);
+            // try the old way
+            oldInsertNewItem(key, value);
+        } finally {
+            sqliteDatabase.endTransaction();
+        }
+    }
+
+    /**
      * Old insert a new metadata item.
      *
      * @param key   the key to use.
@@ -259,6 +293,24 @@ public class DaoMetadata {
         String where = MetadataTableFields.COLUMN_KEY.getFieldName() + "='" + key + "'";
 
         SQLiteDatabase sqliteDatabase = GeopaparazziApplication.getInstance().getDatabase();
+        sqliteDatabase.update(TABLE_METADATA, updatedValues, where, null);
+    }
+
+    /**
+     * Set a value of the metadata.
+     *
+     * @param key   the key to use (from {@link TableDescriptions.MetadataTableFields}).
+     * @param value the value to set.
+     * @throws java.io.IOException if something goes wrong.
+     */
+
+    public static void setValue(SQLiteDatabase sqliteDatabase, String key, String value) throws IOException {
+        ContentValues updatedValues = new ContentValues();
+        updatedValues.put(MetadataTableFields.COLUMN_VALUE.getFieldName(), value);
+
+        String where = MetadataTableFields.COLUMN_KEY.getFieldName() + "='" + key + "'";
+        if (sqliteDatabase == null)
+            sqliteDatabase = GeopaparazziApplication.getInstance().getDatabase();
         sqliteDatabase.update(TABLE_METADATA, updatedValues, where, null);
     }
 

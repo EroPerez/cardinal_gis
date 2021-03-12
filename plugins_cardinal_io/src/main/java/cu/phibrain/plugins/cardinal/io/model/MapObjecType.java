@@ -8,6 +8,7 @@ import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.ToOne;
 
@@ -35,10 +36,12 @@ public class MapObjecType implements Serializable {
     @Expose
     private Long id;
 
-    @ToOne(joinProperty = "id")
     @SerializedName("parent")
     @Expose
-    private MapObjecType parent;
+    private long parentId;
+
+    @ToOne(joinProperty = "parentId")
+    private MapObjecType parentObj;
 
     @SerializedName("icon")
     @Expose
@@ -89,9 +92,8 @@ public class MapObjecType implements Serializable {
     @Generated(hash = 1887801799)
     private transient MapObjecTypeDao myDao;
 
-    @Generated(hash = 1293412156)
-    private transient Long parent__resolvedKey;
-
+    @Generated(hash = 22875058)
+    private transient Long parentObj__resolvedKey;
 
     /**
      * No args constructor for use in serialization
@@ -99,141 +101,64 @@ public class MapObjecType implements Serializable {
     public MapObjecType() {
     }
 
-
-    @Generated(hash = 902182871)
-    public MapObjecType(Long id, String icon, String caption, String description,
-                        Long layerId) {
+    @Generated(hash = 1658160018)
+    public MapObjecType(Long id, long parentId, String icon, String caption,
+                        String description, Long layerId) {
         this.id = id;
+        this.parentId = parentId;
         this.icon = icon;
         this.caption = caption;
         this.description = description;
         this.layerId = layerId;
     }
-
 
     public Long getId() {
         return this.id;
     }
 
-
     public void setId(Long id) {
         this.id = id;
     }
 
+    public Long getParentId() {
+        return this.parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
 
     public String getIcon() {
         return this.icon;
     }
 
-
     public void setIcon(String icon) {
         this.icon = icon;
     }
-
 
     public String getCaption() {
         return this.caption;
     }
 
-
     public void setCaption(String caption) {
         this.caption = caption;
     }
-
 
     public String getDescription() {
         return this.description;
     }
 
-
     public void setDescription(String description) {
         this.description = description;
     }
-
 
     public Long getLayerId() {
         return this.layerId;
     }
 
-
     public void setLayerId(Long layerId) {
         this.layerId = layerId;
     }
-
-
-    /**
-     * To-one relationship, resolved on first access.
-     */
-    @Generated(hash = 1655725988)
-    public MapObjecType getParent() {
-        Long __key = this.id;
-        if (parent__resolvedKey == null || !parent__resolvedKey.equals(__key)) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            MapObjecTypeDao targetDao = daoSession.getMapObjecTypeDao();
-            MapObjecType parentNew = targetDao.load(__key);
-            synchronized (this) {
-                parent = parentNew;
-                parent__resolvedKey = __key;
-            }
-        }
-        return parent;
-    }
-
-
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
-    @Generated(hash = 1754508159)
-    public void setParent(MapObjecType parent) {
-        synchronized (this) {
-            this.parent = parent;
-            id = parent == null ? null : parent.getId();
-            parent__resolvedKey = id;
-        }
-    }
-
-
-    /**
-     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 128553479)
-    public void delete() {
-        if (myDao == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        myDao.delete(this);
-    }
-
-
-    /**
-     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#refresh(Object)}.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 1942392019)
-    public void refresh() {
-        if (myDao == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        myDao.refresh(this);
-    }
-
-
-    /**
-     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#update(Object)}.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 713229351)
-    public void update() {
-        if (myDao == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        myDao.update(this);
-    }
-
 
     /**
      * To-many relationship, resolved on first access (and after reset).
@@ -258,7 +183,6 @@ public class MapObjecType implements Serializable {
         return attributes;
     }
 
-
     /**
      * Resets a to-many relationship, making the next get call to query for a fresh result.
      */
@@ -266,7 +190,6 @@ public class MapObjecType implements Serializable {
     public synchronized void resetAttributes() {
         attributes = null;
     }
-
 
     /**
      * To-many relationship, resolved on first access (and after reset).
@@ -290,7 +213,6 @@ public class MapObjecType implements Serializable {
         return states;
     }
 
-
     /**
      * Resets a to-many relationship, making the next get call to query for a fresh result.
      */
@@ -298,7 +220,6 @@ public class MapObjecType implements Serializable {
     public synchronized void resetStates() {
         states = null;
     }
-
 
     /**
      * To-many relationship, resolved on first access (and after reset).
@@ -322,7 +243,6 @@ public class MapObjecType implements Serializable {
         return defects;
     }
 
-
     /**
      * Resets a to-many relationship, making the next get call to query for a fresh result.
      */
@@ -331,6 +251,82 @@ public class MapObjecType implements Serializable {
         defects = null;
     }
 
+    public void setParentId(long parentId) {
+        this.parentId = parentId;
+    }
+
+    /**
+     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
+     * Entity must attached to an entity context.
+     */
+    @Generated(hash = 128553479)
+    public void delete() {
+        if (myDao == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        myDao.delete(this);
+    }
+
+    /**
+     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#refresh(Object)}.
+     * Entity must attached to an entity context.
+     */
+    @Generated(hash = 1942392019)
+    public void refresh() {
+        if (myDao == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        myDao.refresh(this);
+    }
+
+    /**
+     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#update(Object)}.
+     * Entity must attached to an entity context.
+     */
+    @Generated(hash = 713229351)
+    public void update() {
+        if (myDao == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        myDao.update(this);
+    }
+
+    /**
+     * To-one relationship, resolved on first access.
+     */
+    @Generated(hash = 591080823)
+    public MapObjecType getParentObj() {
+        long __key = this.parentId;
+        if (parentObj__resolvedKey == null || !parentObj__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjecTypeDao targetDao = daoSession.getMapObjecTypeDao();
+            MapObjecType parentObjNew = targetDao.load(__key);
+            synchronized (this) {
+                parentObj = parentObjNew;
+                parentObj__resolvedKey = __key;
+            }
+        }
+        return parentObj;
+    }
+
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
+    @Generated(hash = 1923743242)
+    public void setParentObj(@NotNull MapObjecType parentObj) {
+        if (parentObj == null) {
+            throw new DaoException(
+                    "To-one property 'parentId' has not-null constraint; cannot set to-one to null");
+        }
+        synchronized (this) {
+            this.parentObj = parentObj;
+            parentId = parentObj.getId();
+            parentObj__resolvedKey = parentId;
+        }
+    }
 
     /**
      * called by internal mechanisms, do not call yourself.
