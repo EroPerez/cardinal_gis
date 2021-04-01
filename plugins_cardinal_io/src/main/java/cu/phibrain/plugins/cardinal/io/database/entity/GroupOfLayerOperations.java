@@ -1,5 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.database.entity;
 
+import org.greenrobot.greendao.query.WhereCondition;
+
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.BaseRepo;
@@ -45,7 +47,9 @@ public class GroupOfLayerOperations extends BaseRepo {
         return dao.queryBuilder()
                 .list();
     }
-
+    public List<GroupOfLayer> getGroupListByProject(Long project_id) {
+        return dao.queryBuilder().where( GroupOfLayerDao.Properties.ProjectId.eq(project_id), new WhereCondition[0]).build().list();
+    }
     public void delete(Long groupId) {
         dao.deleteByKey(groupId);
     }
