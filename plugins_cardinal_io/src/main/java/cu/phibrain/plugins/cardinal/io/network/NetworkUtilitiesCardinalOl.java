@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Map;
 
 import cu.phibrain.plugins.cardinal.io.exceptions.ServerError;
+import cu.phibrain.plugins.cardinal.io.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.model.LoginModel;
 import cu.phibrain.plugins.cardinal.io.model.Project;
+import cu.phibrain.plugins.cardinal.io.model.Supplier;
 import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
 import cu.phibrain.plugins.cardinal.io.network.api.ApiClient;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
@@ -461,6 +463,48 @@ public class NetworkUtilitiesCardinalOl {
 
         if (response.isSuccessful()) {
             return response.body();
+        }
+        throw new ServerError(response.message(), response.code());
+
+    }
+
+
+    /**
+     * Send via HTTP GET a request to obtain a project data
+     *
+     * @param server the base url to which to send to.
+     * @param token  the auth token login credential
+     * @param id     the selected project ID
+     * @return Project   A current remote selected projects to import
+     * @throws Exception if something goes wrong.
+     */
+
+    public static List<Supplier> sendGetSuppliers(String server, AuthToken token, Map<String, String> filters) throws Exception {
+        Response<Envolve<List<Supplier>>> response = ApiClient.getApiService(server).getSupplierList(token.toString(), filters).execute();
+
+        if (response.isSuccessful()) {
+            return response.body().getResults();
+        }
+        throw new ServerError(response.message(), response.code());
+
+    }
+
+
+    /**
+     * Send via HTTP GET a request to obtain a project data
+     *
+     * @param server the base url to which to send to.
+     * @param token  the auth token login credential
+     * @param id     the selected project ID
+     * @return Project   A current remote selected projects to import
+     * @throws Exception if something goes wrong.
+     */
+
+    public static List<LabelMaterial> sendGetLabelMaterials(String server, AuthToken token, Map<String, String> filters) throws Exception {
+        Response<Envolve<List<LabelMaterial>>> response = ApiClient.getApiService(server).getLabelMaterialList(token.toString(), filters).execute();
+
+        if (response.isSuccessful()) {
+            return response.body().getResults();
         }
         throw new ServerError(response.message(), response.code());
 
