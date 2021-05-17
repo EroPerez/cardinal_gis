@@ -1,4 +1,3 @@
-
 package cu.phibrain.plugins.cardinal.io.model;
 
 import com.google.gson.annotations.Expose;
@@ -8,14 +7,14 @@ import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
-import java.io.Serializable;
+import java.util.Date;
 
 /**
- * Created by Ero on 17/02/2021.
- * Entity mapped to table "MapobjectypeAttribute".
+ * Created by Ero on 04/05/2021.
+ * Entity mapped to table "zone".
  */
 @Entity(
-        nameInDb = "CARDINAL_MAP_OBJECT_TYPE_ATTRIBUTE",
+        nameInDb = "MANAGER_SUPPLIER",
         // Whether an all properties constructor should be generated.
         // A no-args constructor is always required.
         generateConstructors = true,
@@ -23,38 +22,32 @@ import java.io.Serializable;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-
-public class MapObjectTypeAttribute implements Serializable {
+public class Supplier {
 
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose
     private Long id;
 
-    @SerializedName("atype")
-    @Expose
-    private Integer atype;
-
-    @SerializedName("name")
+    @SerializedName("fullname")
     @Expose
     private String name;
 
-    @SerializedName("map_object_type")
+    @SerializedName("created_at")
     @Expose
-    private Long mapObjecTypeId;
+    private Date createdAt;
 
-    private final static long serialVersionUID = -376582677171152532L;
+    private final static long serialVersionUID = -9160043438657824243L;
 
-    @Generated(hash = 1596388437)
-    public MapObjectTypeAttribute(Long id, Integer atype, String name, Long mapObjecTypeId) {
+    @Generated(hash = 354435328)
+    public Supplier(Long id, String name, Date createdAt) {
         this.id = id;
-        this.atype = atype;
         this.name = name;
-        this.mapObjecTypeId = mapObjecTypeId;
+        this.createdAt = createdAt;
     }
 
-    @Generated(hash = 407216157)
-    public MapObjectTypeAttribute() {
+    @Generated(hash = 1051229294)
+    public Supplier() {
     }
 
     public Long getId() {
@@ -65,14 +58,6 @@ public class MapObjectTypeAttribute implements Serializable {
         this.id = id;
     }
 
-    public Integer getAtype() {
-        return this.atype;
-    }
-
-    public void setAtype(Integer atype) {
-        this.atype = atype;
-    }
-
     public String getName() {
         return this.name;
     }
@@ -81,12 +66,11 @@ public class MapObjectTypeAttribute implements Serializable {
         this.name = name;
     }
 
-    public Long getMapObjecTypeId() {
-        return this.mapObjecTypeId;
+    public Date getCreatedAt() {
+        return this.createdAt;
     }
 
-    public void setMapObjecTypeId(Long mapObjecTypeId) {
-        this.mapObjecTypeId = mapObjecTypeId;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
-
 }

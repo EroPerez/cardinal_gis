@@ -11,27 +11,51 @@ import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.ContractOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.GroupOfLayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.LabelBatchesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.LabelMaterialOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.LabelSubLotOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeDefectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasDefectHasImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasDefectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectMetadataOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MaterialOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.ProjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.SignalEventsOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.StockOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.SupplierOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.TopologicalRuleOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.WorkerRouteOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.ZoneOperations;
 import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
-import cu.phibrain.plugins.cardinal.io.model.GroupOfLayer;
+import cu.phibrain.plugins.cardinal.io.model.Contract;
+import cu.phibrain.plugins.cardinal.io.model.LabelBatches;
+import cu.phibrain.plugins.cardinal.io.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.model.Layer;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.model.MapObjectHasDefect;
+import cu.phibrain.plugins.cardinal.io.model.Networks;
 import cu.phibrain.plugins.cardinal.io.model.Project;
 import cu.phibrain.plugins.cardinal.io.model.Stock;
+import cu.phibrain.plugins.cardinal.io.model.Supplier;
 import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.model.Worker;
 import cu.phibrain.plugins.cardinal.io.model.Zone;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
+import cu.phibrain.plugins.cardinal.io.utils.CardinalMetadataTableDefaultValues;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.library.R;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -52,75 +76,7 @@ public enum WebDataProjectManager {
      */
     INSTANCE;
 
-    /**
-     * The relative path appended to the server url to compose the get layers info url.
-     */
-    public static String GET_PROJECTS_INFO = "projects/flat_list/";
 
-    /**
-     * The relative path appended to the server url to compose the download data url.
-     */
-    public static String DOWNLOAD_PROJECT_DATA = "projects/";
-
-    public static String UPLOAD_PROJECT_DATA = "projects/";
-
-    /**
-     * Relative URL endpoint to upload data and continue edition, maintaining the server lock on the layers
-     */
-//    public static String UPLOAD_AND_CONTINUE_DATA = "sync/commit/";
-
-    public static String LOGIN_URL = "api-auth/login/";
-
-
-    /**
-     * Uploads a project folder as zip to the given server via POST.
-     *
-     * @param context the {@link Context} to use.
-     * @param fileToUpload  the file to upload.
-     * @param server  the server to which to upload.
-     * @param user    the username for authentication.
-     * @param passwd  the password for authentication.
-     * @return the return message.
-     */
-//    public String uploadData(Context context, File fileToUpload, String server, String user, String passwd) throws SyncError {
-//        return uploadData(context, fileToUpload, server, user, passwd, UPLOAD_DATA);
-//    }
-
-    /**
-     * Uploads a project folder as zip to the given server via POST.
-     *
-     * @param context      the {@link Context} to use.
-     * @param fileToUpload the file to upload.
-     * @param server       the server to which to upload.
-     * @param user         the username for authentication.
-     * @param passwd       the password for authentication.
-     * @param action       {@link #UPLOAD_PROJECT_DATA} or {@link #UPLOAD_AND_CONTINUE_DATA}
-     * @return the return message.
-     */
-//    public String uploadData(Context context, File fileToUpload, String server, String user, String passwd, String action) throws SyncError {
-//        try {
-//            String loginUrl = addActionPath(server, LOGIN_URL);
-//            if (UPLOAD_AND_CONTINUE_DATA.equals(action)) {
-//                server = addActionPath(server, UPLOAD_AND_CONTINUE_DATA);
-//            }
-//            else {
-//                server = addActionPath(server, UPLOAD_DATA);
-//            }
-//            String result = NetworkUtilitiesCardinalOl.sendFilePost(context, server, fileToUpload, user, passwd, loginUrl);
-//            if (GPLog.LOG) {
-//                GPLog.addLogEntry(this, result);
-//            }
-//            return result;
-//        }
-//        catch (ServerError e) {
-//            GPLog.error(this, null, e);
-//            throw e;
-//        }
-//        catch (Exception e) {
-//            GPLog.error(this, null, e);
-//            throw new SyncError(e);
-//        }
-//    }
     private String addActionPath(String server, String path) {
         if (server.endsWith("/")) {
             return server + path;
@@ -154,18 +110,38 @@ public enum WebDataProjectManager {
             server = addActionPath(server, "");
             //First login into cardinal cloud service
             AuthToken token = NetworkUtilitiesCardinalOl.sendGetAuthToken(server, user, passwd);
+            //First download nomencladores
+            //material, supplier
+            List<Supplier> suppliersList = NetworkUtilitiesCardinalOl.sendGetSuppliers(server, token, null);
+            SupplierOperations.getInstance().insertAll(suppliersList);
+            List<LabelMaterial> labelMaterialList = NetworkUtilitiesCardinalOl.sendGetLabelMaterials(server, token, null);
+            LabelMaterialOperations.getInstance().insertAll(labelMaterialList);
+
+            //download a project referenced to id
             Project project = NetworkUtilitiesCardinalOl.sendGetProjectData(server, token, webproject.id);
 
-            List<Worker> workers = project.getWorkers();
-            List<Stock> stocks = project.getStocks();
-            List<Zone> zones = project.getZone();
-            List<GroupOfLayer> groupOfLayers = project.getGroupoflayers();
+            //Extract all worker and sessions from project contracts
+            List<Contract> contractList = project.getContracts();
+            List<Worker> workerList = new ArrayList<>();
+            List<WorkSession> workSessionList = new ArrayList<>();
+            for (Contract contract :
+                    contractList) {
+                Worker worker = contract.getTheWorker();
+                contract.setWorkerId(worker.getId());
+                workerList.add(worker);
+                workSessionList.addAll(contract.getWorkSessions());
+            }
+
+            List<Stock> stockList = project.getStocks();
+            List<Zone> zoneList = project.getZone();
+            List<Networks> networksList = project.getNetworks();
+            List<LabelBatches> labelBatchesList = project.getLabelBatches();
 
             DaoSessionManager.getInstance().setContext(context);
             DaoSessionManager.getInstance().setDatabaseName(newDbFileName);
             DaoSessionManager.getInstance().resetDaoSession();
 
-            ProjectOperations.getInstance().insertProject(project);
+            ProjectOperations.getInstance().insert(project);
 
             // update project metadata
             SQLiteDatabase db = DaoSessionManager.getInstance().getSQLiteDatabase();
@@ -175,22 +151,24 @@ public enum WebDataProjectManager {
             String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
             DaoMetadata.initProjectMetadata(db, project.getName(), project.getDescription(), null, user, uniqueDeviceId);
             DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
-            DaoMetadata.insertNewItem(db, TableDescriptions.MetadataTableDefaultValues.PROJECT_ID.getFieldName(),
-                    TableDescriptions.MetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(),
+                    CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
 
-            WorkerOperations.getInstance().insertWorkerList(workers);
-            ContractOperations.getInstance().insertContractList(project.getId(), workers, true);
-            StockOperations.getInstance().insertStockList(stocks);
-            ZoneOperations.getInstance().insertZoneList(zones);
-            GroupOfLayerOperations.getInstance().insertGroupList(groupOfLayers);
+            //Inserts Operations
+            WorkerOperations.getInstance().insertAll(workerList);
+            ContractOperations.getInstance().insertAll(contractList);
+            StockOperations.getInstance().insertAll(stockList);
+            ZoneOperations.getInstance().insertAll(zoneList);
+            NetworksOperations.getInstance().insertAll(networksList);
+            LabelBatchesOperations.getInstance().insertAll(labelBatchesList);
 
-            // Save all layers in groups
+            // Save all layers in networks
             List<Layer> layerList = new ArrayList<>();
-            for (GroupOfLayer group :
-                    groupOfLayers) {
-                layerList.addAll(group.getLayers());
+            for (Networks network :
+                    networksList) {
+                layerList.addAll(network.getLayers());
             }
-            LayerOperations.getInstance().insertLayerList(layerList);
+            LayerOperations.getInstance().insertAll(layerList);
 
             // Get and save all mapobjectypes in layer
             List<MapObjecType> objecTypeList = new ArrayList<>();
@@ -199,16 +177,48 @@ public enum WebDataProjectManager {
                 objecTypeList.addAll(layer.getMapobjectypes());
             }
 
-            MapObjecTypeOperations.getInstance().insertMapObjecTypesList(objecTypeList);
+            MapObjecTypeOperations.getInstance().insertAll(objecTypeList);
 
             // Get and save all extra mapobject type properties
             for (MapObjecType mapObjecType :
                     objecTypeList) {
-                MapObjectTypeAttributeOperations.getInstance().insertMapObjectTypeAttributeList(mapObjecType.getAttributes());
-                MapObjecTypeStateOperations.getInstance().insertMapObjecTypeStateList(mapObjecType.getStates());
-                MapObjecTypeDefectOperations.getInstance().insertMapObjecTypeDefectList(mapObjecType.getDefects());
+                MapObjectTypeAttributeOperations.getInstance().insertAll(mapObjecType.getAttributes());
+                MapObjecTypeStateOperations.getInstance().insertAll(mapObjecType.getStates());
+                MapObjecTypeDefectOperations.getInstance().insertAll(mapObjecType.getDefects());
+                TopologicalRuleOperations.getInstance().insertAll(mapObjecType.getTopoRule());
             }
 
+            WorkSessionOperations.getInstance().insertAll(workSessionList);
+            //Get and save all objects in worksessions
+            List<MapObject> mapObjectList = new ArrayList<>();
+            for (WorkSession session :
+                    workSessionList) {
+                WorkerRouteOperations.getInstance().insertAll(session.getWorkerRoute());
+                MaterialOperations.getInstance().insertAll(session.getMaterials());
+                LabelSubLotOperations.getInstance().insertAll(session.getLabels());
+                SignalEventsOperations.getInstance().insertAll(session.getEvents());
+                mapObjectList.addAll(session.getMapObjects());
+            }
+
+
+            MapObjectOperations.getInstance().insertAll(mapObjectList);
+            //Get and save all object in mapObjects
+            List<MapObjectHasDefect> mapObjectHasDefectList = new ArrayList<>();
+            for (MapObject mapObject :
+                    mapObjectList) {
+                RouteSegmentOperations.getInstance().insertAll(mapObject.getRouteSegments());
+                MapObjectHasStateOperations.getInstance().insertAll(mapObject.getStates());
+                MapObjectImagesOperations.getInstance().insertAll(mapObject.getImages());
+                MapObjectMetadataOperations.getInstance().insertAll(mapObject.getMetadata());
+                mapObjectHasDefectList.addAll(mapObject.getDefects());
+
+            }
+            MapObjectHasDefectOperations.getInstance().insertAll(mapObjectHasDefectList);
+
+            for (MapObjectHasDefect mapObjectdefect :
+                    mapObjectHasDefectList) {
+                MapObjectHasDefectHasImagesOperations.getInstance().insertAll(mapObjectdefect.getImages());
+            }
 
             long fileLength = downloadedProjectFile.length();
             if (fileLength == 0) {
