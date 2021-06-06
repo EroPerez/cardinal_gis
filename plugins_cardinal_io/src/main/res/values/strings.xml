@@ -13,5 +13,6 @@
     <string name="geometry_type">Created At:</string>
     <string name="srid">ID</string>
     <string name="enter_a_name_for_downloaded_project">Set name for downloaded project database</string>
-    <string name="layername_edges">Project Edges</string>
+    <string name="layername_edges">Cardinal Edges</string>
+    <string name="layername_mot">Cardinal Map Object Type</string>
 </resources>

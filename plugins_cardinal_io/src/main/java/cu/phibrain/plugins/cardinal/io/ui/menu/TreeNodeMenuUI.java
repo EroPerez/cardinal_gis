@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 import cu.phibrain.plugins.cardinal.io.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.ui.layer.MapObjectLayer;
+
 public class TreeNodeMenuUI implements TreeNodeMenuUIEventListener {
     private List<TreeNodeMenuUI> children = new ArrayList();
     private ImgButtonMapObjectTypeUI dataUi = null;
@@ -151,6 +152,7 @@ public class TreeNodeMenuUI implements TreeNodeMenuUIEventListener {
 
                 DaoNotes.addNote(lon, lat, 16.0d, System.currentTimeMillis(), String.valueOf(this.dataUi.getAdapterMot().getId()), "POI", "", null);
                 activity.getMapView().reloadLayer(EdgesLayer.class);
+
 
             } catch (Exception e) {
                 GPLog.error(this, null, e);

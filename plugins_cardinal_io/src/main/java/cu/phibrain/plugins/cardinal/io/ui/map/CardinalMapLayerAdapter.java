@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.ui.layer.CardinalLayerManager;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.style.ColorUtilities;
@@ -67,7 +68,6 @@ import eu.geopaparazzi.map.R;
 import eu.geopaparazzi.map.gui.MapLayerItem;
 import eu.geopaparazzi.map.gui.MapLayerListFragment;
 import eu.geopaparazzi.map.layers.ELayerTypes;
-import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.userlayers.GeopackageTableLayer;
 import eu.geopaparazzi.map.layers.utils.ColorStrokeObject;
@@ -136,7 +136,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            LayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
+            CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
         });
         if (item.isSystem) {
             holder.moreButton.setVisibility(View.INVISIBLE);
@@ -220,7 +220,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                             try {
                                 if (actionName.equals(remove_layer)) {
                                     mapLayerListFragment.removeItemAtIndex(0, finalSelIndex);
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     userLayersDefinitions.remove(finalSelIndex);
 
                                     // if db layers we can release the db if no one uses it
@@ -234,7 +234,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                                     }
                                     notifyDataSetChanged();
                                 } else if (actionName.equals(toggle3d)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     if (jsonObject.has(IGpLayer.LAYERDO3D_TAG)) {
                                         boolean do3D = jsonObject.getBoolean(IGpLayer.LAYERDO3D_TAG);
@@ -244,7 +244,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                                         jsonObject.put(IGpLayer.LAYERDO3D_TAG, false);
                                     }
                                 } else if (actionName.equals(toggleLabels)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     if (jsonObject.has(IGpLayer.LAYERDOLABELS_TAG)) {
                                         boolean doLabels = jsonObject.getBoolean(IGpLayer.LAYERDOLABELS_TAG);
@@ -253,7 +253,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                                         jsonObject.put(IGpLayer.LAYERDOLABELS_TAG, false);
                                     }
                                 } else if (actionName.equals(zoomTo)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     String tableName = jsonObject.getString(IGpLayer.LAYERNAME_TAG);
                                     String dbPath = jsonObject.getString(IGpLayer.LAYERPATH_TAG);
@@ -314,7 +314,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
 
                                     }
                                 } else if (actionName.equals(setAlpha)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     int def = 100;
                                     if (jsonObject.has(IGpLayer.LAYERALPHA_TAG))
@@ -350,7 +350,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                                     });
 
                                 } else if (actionName.equals(setStyle)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     String tableName = jsonObject.getString(IGpLayer.LAYERNAME_TAG);
                                     String dbPath = jsonObject.getString(IGpLayer.LAYERPATH_TAG);
@@ -424,14 +424,14 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                                     });
 
                                 } else if (actionName.equals(disableEditing)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     jsonObject.put(IGpLayer.LAYEREDITING_TAG, false);
                                     selMapLayerItem.isEditing = false;
 
                                     notifyDataSetChanged();
                                 } else if (actionName.equals(enableEditing)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     List<MapLayerItem> mapItemList = getItemList();
                                     for (int i = 0; i < userLayersDefinitions.size(); i++) {
                                         JSONObject jsonObject = userLayersDefinitions.get(i);
@@ -447,7 +447,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
                                     notifyDataSetChanged();
 
                                 } else if (actionName.equals(labelling)) {
-                                    List<JSONObject> userLayersDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                    List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                     String tableName = jsonObject.getString(IGpLayer.LAYERNAME_TAG);
                                     String dbPath = jsonObject.getString(IGpLayer.LAYERPATH_TAG);

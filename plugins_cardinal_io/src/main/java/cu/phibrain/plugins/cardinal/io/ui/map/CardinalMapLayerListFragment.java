@@ -52,6 +52,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.ui.layer.CardinalLayerManager;
+import cu.phibrain.plugins.cardinal.io.ui.layer.EdgesLayer;
+import cu.phibrain.plugins.cardinal.io.ui.layer.MapObjectLayer;
+import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
 import eu.geopaparazzi.library.util.FileUtilities;
@@ -295,17 +299,43 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 //        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
 
         try {
+            //addCardinalLayerColumn();
             addUserLayersColumn();
             addSystemLayersColumn();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    //Gestiona las capas cardinal
+    private void addCardinalLayerColumn()throws Exception {
+        GPApplication  context = GPApplication.getInstance();
+        JSONObject jo = new JSONObject();
+        jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, MapObjectLayer.getName(context));
+        jo.put(IGpLayer.LAYERENABLED_TAG, true);
+
+        final ArrayList<MapLayerItem> mItemArray = new ArrayList<>();
+        MapLayerItem MapOnjItem = getMapLayerItem(0, jo);
+        mItemArray.add(MapOnjItem);
+
+        jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+        jo.put(IGpLayer.LAYERENABLED_TAG, true);
+        MapLayerItem EdgesItem = getMapLayerItem(1, jo);
+        mItemArray.add(EdgesItem);
+
+        final CardinalMapLayerAdapter listAdapter = new CardinalMapLayerAdapter(this, mItemArray, R.layout.column_item, R.id.item_layout, true);
+        final View header = View.inflate(getActivity(), R.layout.column_header, null);
+        ((TextView) header.findViewById(R.id.text)).setText(getString(R.string.cardinal_layers));
+        ((TextView) header.findViewById(R.id.item_count)).setText("");
+
+        mBoardView.addColumn(listAdapter, header, header, false);
+    }
 
     private void addUserLayersColumn() throws Exception {
         final ArrayList<MapLayerItem> mItemArray = new ArrayList<>();
 
-        List<JSONObject> layerDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+        List<JSONObject> layerDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
         int index = 0;
         for (JSONObject layerDefinition : layerDefinitions) {
             MapLayerItem layerItem = getMapLayerItem(index, layerDefinition);
@@ -324,7 +354,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
     private void addSystemLayersColumn() throws Exception {
         final ArrayList<MapLayerItem> mItemArray = new ArrayList<>();
 
-        List<JSONObject> layerDefinitions = LayerManager.INSTANCE.getSystemLayersDefinitions();
+        List<JSONObject> layerDefinitions = CardinalLayerManager.INSTANCE.getSystemLayersDefinitions();
         int index = 0;
         for (JSONObject layerDefinition : layerDefinitions) {
             MapLayerItem layerItem = getMapLayerItem(index, layerDefinition);

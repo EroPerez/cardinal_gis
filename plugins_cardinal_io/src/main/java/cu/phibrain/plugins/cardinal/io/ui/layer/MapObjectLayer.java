@@ -44,13 +44,12 @@ import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.map.GPMapView;
-import eu.geopaparazzi.map.R;
+import cu.phibrain.plugins.cardinal.io.R;
 import eu.geopaparazzi.map.layers.LayerGroups;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_TEXT_VISIBLE;
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_VISIBLE;
-
 public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer {
     private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
     private static final int BG_COLOR = 0x80FF69B4; // 50 percent pink. AARRGGBB
@@ -91,7 +90,7 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
 
     public static String getName(Context context) {
         if (NAME == null) {
-            NAME = context.getString(R.string.layername_notes);
+            NAME = context.getString(R.string.layername_mot);
         }
         return NAME;
     }

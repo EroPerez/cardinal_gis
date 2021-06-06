@@ -292,6 +292,28 @@ public class MapObjecType implements Serializable {
     }
 
     /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 1526497422)
+    public List<MapObjecType> getMapobjectypes() {
+        if (mapobjectypes == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjecTypeDao targetDao = daoSession.getMapObjecTypeDao();
+            List<MapObjecType> mapobjectypesNew = targetDao._queryLayer_Mapobjectypes(id);
+            synchronized (this) {
+                if (mapobjectypes == null) {
+                    mapobjectypes = mapobjectypesNew;
+                }
+            }
+        }
+        return mapobjectypes;
+    }
+
+    /**
      * To-one relationship, resolved on first access.
      */
     @Generated(hash = 591080823)

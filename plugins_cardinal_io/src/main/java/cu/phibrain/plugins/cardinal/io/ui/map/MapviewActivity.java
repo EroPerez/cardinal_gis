@@ -64,6 +64,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import cu.phibrain.plugins.cardinal.io.ui.layer.CardinalLayerManager;
 import eu.geopaparazzi.core.R;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -141,7 +142,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     public static final String MAPSCALE_X = "MAPSCALE_X"; //$NON-NLS-1$
     public static final String MAPSCALE_Y = "MAPSCALE_Y"; //$NON-NLS-1$
     private DecimalFormat formatter = new DecimalFormat("00"); //$NON-NLS-1$
-    private GPMapView mapView;
+    private CardinalGpMapView mapView;
     private SharedPreferences mPeferences;
 
 
@@ -236,7 +237,8 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         /*
          * create main mapview
          */
-        mapView = new GPMapView(this);
+        mapView = new CardinalGpMapView(this);
+       // CardinalLayerManager.INSTANCE.createGroups(mapView);
         mapView.setClickable(true);
         mapView.setOnTouchListener(this);
 
@@ -360,7 +362,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     @Override
     protected void onPause() {
         if (mapView != null) {
-            LayerManager.INSTANCE.onPause(mapView);
+            CardinalLayerManager.INSTANCE.onPause(mapView);
             mapView.onPause();
         }
         super.onPause();
@@ -370,7 +372,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     protected void onResume() {
         if (mapView != null) {
             mapView.onResume();
-            LayerManager.INSTANCE.onResume(mapView, this);
+            CardinalLayerManager.INSTANCE.onResume(mapView, this);
 
             GPMapPosition mapPosition = mapView.getMapPosition();
             setNewCenter(mapPosition.getLongitude() + 0.000001, mapPosition.getLatitude() + 0.000001);
@@ -426,7 +428,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
 
 
         try {
-            LayerManager.INSTANCE.dispose(mapView);
+            CardinalLayerManager.INSTANCE.dispose(mapView);
         } catch (JSONException e) {
             GPLog.error(this, null, e);
         }
@@ -1129,7 +1131,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         return this.mapView;
     }
 
-    public void setMapView(GPMapView mapView2) {
+    public void setMapView(CardinalGpMapView mapView2) {
         this.mapView = mapView2;
     }
     @Override

@@ -126,7 +126,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer {
                 c.moveToNext();
             }
 
-            }
+        }
         update();
     }
 
@@ -197,3 +197,4 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer {
     }
 
 }
+
