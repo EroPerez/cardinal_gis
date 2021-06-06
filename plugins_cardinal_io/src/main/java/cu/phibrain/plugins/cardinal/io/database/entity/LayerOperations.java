@@ -1,5 +1,6 @@
 package cu.phibrain.plugins.cardinal.io.database.entity;
 
+
 import org.greenrobot.greendao.query.WhereCondition;
 
 import java.util.List;
@@ -8,10 +9,9 @@ import cu.phibrain.plugins.cardinal.io.database.base.BaseRepo;
 import cu.phibrain.plugins.cardinal.io.model.Layer;
 import cu.phibrain.plugins.cardinal.io.model.LayerDao;
 
-public class LayerOperations extends BaseRepo {
+public class LayerOperations extends BaseRepo<Layer, LayerDao> {
 
     private static LayerOperations mInstance = null;
-    private LayerDao dao;
 
     private LayerOperations() {
         super();
@@ -29,6 +29,7 @@ public class LayerOperations extends BaseRepo {
     protected void initEntityDao() {
         dao = daoSession.getLayerDao();
     }
+
 
     public void insertLayerList(List<Layer> layerList) {
         dao.insertOrReplaceInTx(layerList);

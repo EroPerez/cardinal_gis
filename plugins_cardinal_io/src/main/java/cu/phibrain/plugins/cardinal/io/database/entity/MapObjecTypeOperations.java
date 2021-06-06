@@ -8,7 +8,7 @@ import cu.phibrain.plugins.cardinal.io.database.base.BaseRepo;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecTypeDao;
 
-public class MapObjecTypeOperations extends BaseRepo {
+public class MapObjecTypeOperations extends BaseRepo<MapObjecType, MapObjecTypeDao> {
 
     private static MapObjecTypeOperations mInstance = null;
     private MapObjecTypeDao dao;
@@ -29,6 +29,7 @@ public class MapObjecTypeOperations extends BaseRepo {
     protected void initEntityDao() {
         dao = daoSession.getMapObjecTypeDao();
     }
+
 
     public void insertMapObjecTypesList(List<MapObjecType> mapObjecTypeList) {
         dao.insertOrReplaceInTx(mapObjecTypeList);
@@ -65,4 +66,5 @@ public class MapObjecTypeOperations extends BaseRepo {
     public void update(MapObjecType mapObjecType) {
         dao.updateInTx(mapObjecType);
     }
+
 }
