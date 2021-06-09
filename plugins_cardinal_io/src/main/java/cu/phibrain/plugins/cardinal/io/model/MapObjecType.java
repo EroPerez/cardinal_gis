@@ -119,6 +119,10 @@ public class MapObjecType implements Serializable {
     @Expose
     private GeomType geomType;
 
+    @SerializedName("is_abstract")
+    @Expose
+    private boolean isAbstract;
+
 
     private final static long serialVersionUID = -5405345251211056739L;
 
@@ -143,9 +147,9 @@ public class MapObjecType implements Serializable {
     public MapObjecType() {
     }
 
-    @Generated(hash = 1173535207)
+    @Generated(hash = 150850807)
     public MapObjecType(Long id, long parentId, String icon, String caption, String description,
-                        Long layerId, GeomType geomType) {
+            Long layerId, GeomType geomType, boolean isAbstract) {
         this.id = id;
         this.parentId = parentId;
         this.icon = icon;
@@ -153,6 +157,7 @@ public class MapObjecType implements Serializable {
         this.description = description;
         this.layerId = layerId;
         this.geomType = geomType;
+        this.isAbstract = isAbstract;
     }
 
     public Long getId() {
@@ -409,6 +414,14 @@ public class MapObjecType implements Serializable {
     @Generated(hash = 819251379)
     public synchronized void resetTopoRule() {
         topoRule = null;
+    }
+
+    public boolean getIsAbstract() {
+        return this.isAbstract;
+    }
+
+    public void setIsAbstract(boolean isAbstract) {
+        this.isAbstract = isAbstract;
     }
 
     /** called by internal mechanisms, do not call yourself. */
