@@ -5,15 +5,14 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.R;
-import cu.phibrain.plugins.cardinal.io.database.entity.GroupOfLayerOperations;
+/*import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.model.GroupOfLayer;
 import cu.phibrain.plugins.cardinal.io.model.Layer;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
-import eu.geopaparazzi.library.database.TableDescriptions;
+import eu.geopaparazzi.library.database.TableDescriptions;*/
 
 public class UtilTools {
 
@@ -21,12 +20,12 @@ public class UtilTools {
 
     }
 
-    private static TreeNodeMenuUI LoadChild(TreeNodeMenuUI node){
+   /* private static TreeNodeMenuUI LoadChild(TreeNodeMenuUI node){
         //if(node.paren)
-    }
+    }*/
 
     public static void loadDataProgect(Context context, ViewGroup layout) {
-        try {
+        /*try {
             Context context2 = context;
             ViewGroup viewGroup = layout;
             MapObjectTypeUI rootMOT = new MapObjectTypeUI(R.drawable.ic_mapview_mot_parent_24dp, R.color.gpsred_fill, Long.parseLong("1"));
@@ -66,7 +65,7 @@ public class UtilTools {
         }
         catch(Exception ex){
 
-        }
+        }*/
     }
 
 }

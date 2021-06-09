@@ -2,9 +2,9 @@
 
 buildscript {
     repositories {
-       // maven {
-       //     url "http://nexus.prod.uci.cu/repository/maven.google.com/"
-       // }
+        maven {
+            url "http://nexus.prod.uci.cu/repository/maven.google.com/"
+        }
         jcenter()
         google()
     }
@@ -22,13 +22,13 @@ allprojects {
         jcenter()
         mavenCentral() // add repository
         google()
-      //  maven {
-       //     url "http://nexus.prod.uci.cu/repository/maven-central/"
-       // }
+        maven {
+            url "http://nexus.prod.uci.cu/repository/maven-central/"
+        }
 
-       // maven {
-       //    url "http://nexus.prod.uci.cu/repository/maven.google.com/"
-       // }
+        maven {
+           url "http://nexus.prod.uci.cu/repository/maven.google.com/"
+        }
     }
     ext {
         myApplicationId = "eu.hydrologis.geopaparazzi"
