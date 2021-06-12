@@ -13,6 +13,19 @@
                 <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
             </intent-filter>
         </activity>
+        <activity
+            android:name="cu.phibrain.plugins.cardinal.io.ui.map.MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar" />
+
+        <activity
+            android:name="cu.phibrain.plugins.cardinal.io.ui.map.CardinalMapLayerListActivity"
+            android:label="Layers View"
+            android:parentActivityName="cu.phibrain.plugins.cardinal.io.ui.map.MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cu.phibrain.plugins.cardinal.io.ui.map.MapviewActivity" />
+        </activity>
         <service android:name="cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterMenuProvider"
             android:exported="false">
             <intent-filter>

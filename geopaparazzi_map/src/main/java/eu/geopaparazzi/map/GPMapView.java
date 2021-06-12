@@ -13,6 +13,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.Layer;
+import org.oscim.map.Layers;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.VtmThemes;
 
@@ -219,6 +220,7 @@ public class GPMapView extends org.oscim.android.MapView {
      * @param layerClass teh class of the layer to reload.
      */
     public void reloadLayer(Class<? extends IGpLayer> layerClass) throws Exception {
+        Layers layers = map().layers();
         for (Layer layer : map().layers()) {
             if (layer.getClass().isAssignableFrom(layerClass)) {
                 ((IGpLayer) layer).reloadData();

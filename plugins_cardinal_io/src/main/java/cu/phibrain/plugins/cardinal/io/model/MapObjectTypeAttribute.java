@@ -43,50 +43,78 @@ public class MapObjectTypeAttribute implements Serializable {
     @Expose
     private Long mapObjecTypeId;
 
+    @SerializedName("default_value")
+    @Expose
+    private String defaultValue;
+
+    @SerializedName("description")
+    @Expose
+    private String description;
+
     private final static long serialVersionUID = -376582677171152532L;
 
-    @Generated(hash = 1596388437)
-    public MapObjectTypeAttribute(Long id, Integer atype, String name, Long mapObjecTypeId) {
-        this.id = id;
-        this.atype = atype;
-        this.name = name;
-        this.mapObjecTypeId = mapObjecTypeId;
-    }
+@Generated(hash = 2090174285)
+public MapObjectTypeAttribute(Long id, Integer atype, String name, Long mapObjecTypeId,
+        String defaultValue, String description) {
+    this.id = id;
+    this.atype = atype;
+    this.name = name;
+    this.mapObjecTypeId = mapObjecTypeId;
+    this.defaultValue = defaultValue;
+    this.description = description;
+}
 
-    @Generated(hash = 407216157)
-    public MapObjectTypeAttribute() {
-    }
+@Generated(hash = 407216157)
+public MapObjectTypeAttribute() {
+}
 
-    public Long getId() {
-        return this.id;
-    }
+public Long getId() {
+    return this.id;
+}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+public void setId(Long id) {
+    this.id = id;
+}
 
-    public Integer getAtype() {
-        return this.atype;
-    }
+public Integer getAtype() {
+    return this.atype;
+}
 
-    public void setAtype(Integer atype) {
-        this.atype = atype;
-    }
+public void setAtype(Integer atype) {
+    this.atype = atype;
+}
 
-    public String getName() {
-        return this.name;
-    }
+public String getName() {
+    return this.name;
+}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+public void setName(String name) {
+    this.name = name;
+}
 
-    public Long getMapObjecTypeId() {
-        return this.mapObjecTypeId;
-    }
+public Long getMapObjecTypeId() {
+    return this.mapObjecTypeId;
+}
 
-    public void setMapObjecTypeId(Long mapObjecTypeId) {
-        this.mapObjecTypeId = mapObjecTypeId;
-    }
+public void setMapObjecTypeId(Long mapObjecTypeId) {
+    this.mapObjecTypeId = mapObjecTypeId;
+}
+
+public String getDefaultValue() {
+    return this.defaultValue;
+}
+
+public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+}
+
+public String getDescription() {
+    return this.description;
+}
+
+public void setDescription(String description) {
+    this.description = description;
+}
+
 
 }

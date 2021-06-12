@@ -17,7 +17,7 @@ android {
             //signingConfig signingConfigs.config
         }
         debug {
-            debuggable true
+            debuggable false
         }
     }
     lintOptions {
