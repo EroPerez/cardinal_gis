@@ -141,4 +141,13 @@
     <color name="transparent_mot">#00000000</color>
     <color name="transparent_white">#bfffffff</color>
     <color name="white">#ffffffff</color>
+
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#FF5252</color>
+    <color name="colorPrimaryText">#212121</color>
+    <color name="colorSecondaryText">#757575</color>
+    <color name="colorWhite">#CCFFFFFF</color>
+    <color name="colorDivider">#ECECEC</color>
+
 </resources>

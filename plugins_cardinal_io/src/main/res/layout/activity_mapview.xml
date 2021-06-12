@@ -12,11 +12,12 @@
         android:layout_height="fill_parent">
 
         <LinearLayout
-            android:id="@+id/seekbarlayout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|bottom"
-            android:orientation="vertical">
+            android:layout_gravity="top|center"
+            android:orientation="horizontal">
+
+
 
             <ImageButton
                 android:id="@+id/toggleLabels"
@@ -40,7 +41,7 @@
                 android:id="@+id/zoomlevel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_gravity="center_vertical"
                 android:layout_margin="@dimen/mapview_sides_space"
                 android:shadowColor="@color/main_background"
                 android:shadowDx="2"
@@ -59,6 +60,8 @@
                 android:layout_margin="@dimen/mapview_bottom_space"
                 android:background="@null"
                 app:srcCompat="@drawable/ic_mapview_zoomout_24dp" />
+
+
         </LinearLayout>
     </RelativeLayout>
 
@@ -117,54 +120,54 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
-        <ScrollView android:layout_gravity="right" android:orientation="vertical" android:background="@color/scroll_mot" android:layout_width="70dp" android:layout_height="match_parent" android:layout_marginTop="80dp" android:layout_marginBottom="70dp">
-            <androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_gravity="bottom" android:orientation="vertical" android:id="@+id/seekbarlayout_mot" android:layout_width="match_parent" android:layout_height="match_parent"/>
-        </ScrollView>
-        <!-- the zoombar -->
+        <!-- <ScrollView android:layout_gravity="right" android:orientation="vertical" android:background="@color/scroll_mot" android:layout_width="70dp" android:layout_height="match_parent" android:layout_marginTop="80dp" android:layout_marginBottom="70dp">
+             <androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_gravity="bottom" android:orientation="vertical" android:id="@+id/seekbarlayout_mot" android:layout_width="match_parent" android:layout_height="match_parent"/>
+         </ScrollView>
+          the zoombar -->
 
         <!-- the tools buttons -->
 
-        <LinearLayout
-            android:id="@+id/maptoolslayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|bottom"
-            android:orientation="vertical">
+<!--        <LinearLayout-->
+<!--            android:id="@+id/maptoolslayout"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="left|bottom"-->
+<!--            android:orientation="vertical">-->
 
-            <ImageButton
-                android:id="@+id/addnotebytagbutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_mapview_notes_24dp" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/addnotebytagbutton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="@dimen/mapview_sides_space"-->
+<!--                android:background="@null"-->
+<!--                app:srcCompat="@drawable/ic_mapview_notes_24dp" />-->
 
-            <ImageButton
-                android:id="@+id/addbookmarkbutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_mapview_bookmarks_24dp" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/addbookmarkbutton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="@dimen/mapview_sides_space"-->
+<!--                android:background="@null"-->
+<!--                app:srcCompat="@drawable/ic_mapview_bookmarks_24dp" />-->
 
-            <ImageButton
-                android:id="@+id/toggleloginfobutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_mapview_loginfo_off_24dp" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/toggleloginfobutton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="@dimen/mapview_sides_space"-->
+<!--                android:background="@null"-->
+<!--                app:srcCompat="@drawable/ic_mapview_loginfo_off_24dp" />-->
 
-            <ImageButton
-                android:id="@+id/togglemeasuremodebutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/mapview_sides_space"
-                android:layout_marginTop="@dimen/mapview_sides_space"
-                android:layout_marginBottom="@dimen/mapview_bottom_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_mapview_measuremode_off_24dp" />
-        </LinearLayout>
+<!--            <ImageButton-->
+<!--                android:id="@+id/togglemeasuremodebutton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="@dimen/mapview_sides_space"-->
+<!--                android:layout_marginTop="@dimen/mapview_sides_space"-->
+<!--                android:layout_marginBottom="@dimen/mapview_bottom_space"-->
+<!--                android:background="@null"-->
+<!--                app:srcCompat="@drawable/ic_mapview_measuremode_off_24dp" />-->
+<!--        </LinearLayout>-->
         <!-- the center on gps button -->
 
         <LinearLayout
@@ -176,6 +179,7 @@
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
+
 
                 <ImageButton
                     android:id="@+id/battery"
@@ -211,33 +215,46 @@
                 android:background="@null"
                 app:srcCompat="@drawable/ic_mapview_center_gps_red_24dp" />
 
+<!--            <ImageButton-->
+<!--                android:id="@+id/toggleEditingButton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="@dimen/mapview_sides_space"-->
+<!--                android:layout_marginTop="@dimen/mapview_sides_space"-->
+<!--                android:layout_marginBottom="@dimen/mapview_bottom_space"-->
+<!--                android:background="@null"-->
+<!--                app:srcCompat="@drawable/ic_mapview_toggle_editing_off_24dp" />-->
+
             <ImageButton
-                android:id="@+id/toggleEditingButton"
+                android:id="@+id/buttom_sheet_background"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/mapview_sides_space"
                 android:layout_marginTop="@dimen/mapview_sides_space"
                 android:layout_marginBottom="@dimen/mapview_bottom_space"
                 android:background="@null"
-                app:srcCompat="@drawable/ic_mapview_toggle_editing_off_24dp" />
+                app:srcCompat="@drawable/ic_mapview_notes_24dp" />
+
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/layers_map_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/actionbar_tilesource"
+                android:layout_marginLeft="@dimen/mapview_sides_space"
+                android:layout_marginTop="@dimen/mapview_sides_space"
+                android:layout_marginBottom="@dimen/mapview_bottom_space"
+                />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/menu_map_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/mapview_sides_space"
+                android:layout_marginTop="@dimen/mapview_sides_space"
+                android:layout_marginBottom="@dimen/mapview_bottom_space"
+                app:srcCompat="@drawable/ic_menu2_24dp" />
         </LinearLayout>
     </FrameLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/menu_map_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_menu2_24dp" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/layers_map_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/actionbar_tilesource" />
 
     <LinearLayout
         android:id="@+id/editingToolsLayout"
@@ -246,7 +263,9 @@
         android:layout_gravity="start|bottom"
         android:orientation="vertical"
         android:paddingLeft="@dimen/mapview_sides_space"
-        android:paddingBottom="@dimen/mapview_sides_space" />
+        android:paddingBottom="@dimen/mapview_sides_space"
+        android:visibility="invisible"
+        />
 
     <eu.geopaparazzi.map.features.editing.EditingView
         android:id="@+id/editingview"

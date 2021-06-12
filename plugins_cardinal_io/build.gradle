@@ -37,6 +37,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     api 'com.android.support:appcompat-v7:28.0.0'
     api 'com.android.support:support-v4:28.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     testImplementation 'junit:junit:4.12'
     implementation project(':geopaparazzi_core')
     implementation project(':geopaparazzi_library')
@@ -52,11 +53,14 @@ dependencies {
     implementation 'net.danlew:android.joda:2.10.6.1'
     // Dependency for GreenDao
     implementation 'org.greenrobot:greendao:3.3.0' // add library
+    api "com.android.support:recyclerview-v7:28.0.0"
+    implementation 'com.hereshem.lib:awesomelib:2.0.1'
+
 }
 
 repositories {
-     mavenCentral() // add repository
-     google()
+    // mavenCentral() // add repository
+    // google()
     maven {
         url "http://nexus.prod.uci.cu/repository/maven-central/"
     }

@@ -148,10 +148,10 @@ public class TreeNodeMenuUI implements TreeNodeMenuUIEventListener {
                 }
                 DaoNotes.addNote(lon, lat, 16.0d, System.currentTimeMillis(), String.valueOf(this.dataUi.getAdapterMot().getId()), "POI", "", null);
                 MapviewActivity activity = (MapviewActivity) this.dataUi.getContext();
-                activity.getMapView().reloadLayer(MapObjectLayer.class);
+                //activity.getMapView().reloadLayer(MapObjectLayer.class);
 
                 DaoNotes.addNote(lon, lat, 16.0d, System.currentTimeMillis(), String.valueOf(this.dataUi.getAdapterMot().getId()), "POI", "", null);
-                activity.getMapView().reloadLayer(EdgesLayer.class);
+                //activity.getMapView().reloadLayer(EdgesLayer.class);
 
 
             } catch (Exception e) {

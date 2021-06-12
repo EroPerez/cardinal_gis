@@ -65,6 +65,7 @@ public class CardinalApplication extends GPApplication {
     public DaoSession getDaoSession() {
         return daoSession;
     }
+    public AppContainer appContainer = new AppContainer();
 
     @Override
     protected void attachBaseContext(Context base) {

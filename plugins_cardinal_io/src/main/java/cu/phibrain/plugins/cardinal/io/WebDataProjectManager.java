@@ -112,9 +112,9 @@ public enum WebDataProjectManager {
             AuthToken token = NetworkUtilitiesCardinalOl.sendGetAuthToken(server, user, passwd);
             //First download nomencladores
             //material, supplier
-            List<Supplier> suppliersList = NetworkUtilitiesCardinalOl.sendGetSuppliers(server, token, null);
+            List<Supplier> suppliersList = NetworkUtilitiesCardinalOl.sendGetSuppliers(server, token, new HashMap<String, String>());
             SupplierOperations.getInstance().insertAll(suppliersList);
-            List<LabelMaterial> labelMaterialList = NetworkUtilitiesCardinalOl.sendGetLabelMaterials(server, token, null);
+            List<LabelMaterial> labelMaterialList = NetworkUtilitiesCardinalOl.sendGetLabelMaterials(server, token, new HashMap<String, String>());
             LabelMaterialOperations.getInstance().insertAll(labelMaterialList);
 
             //download a project referenced to id

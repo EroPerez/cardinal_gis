@@ -17,6 +17,7 @@
  */
 package cu.phibrain.plugins.cardinal.io.ui.map;
 
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -41,18 +43,23 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
@@ -64,7 +71,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import cu.phibrain.plugins.cardinal.io.ui.layer.CardinalLayerManager;
+import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
+import cu.phibrain.plugins.cardinal.io.ui.menu.MtoAdapter;
+import cu.phibrain.plugins.cardinal.io.ui.menu.MtoModel;
+import cu.phibrain.plugins.cardinal.io.ui.menu.NetorksModel;
 import eu.geopaparazzi.core.R;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -130,8 +140,10 @@ import static eu.geopaparazzi.library.util.LibraryConstants.ROUTE;
 import static eu.geopaparazzi.library.util.LibraryConstants.TMPPNGIMAGENAME;
 import static eu.geopaparazzi.library.util.LibraryConstants.ZOOMLEVEL;
 
-
-public class MapviewActivity extends AppCompatActivity implements IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
+/**
+ * @author Andrea Antonello (www.hydrologis.com)
+ */
+public class MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
     private final int INSERTCOORD_RETURN_CODE = 666;
     private final int ZOOM_RETURN_CODE = 667;
     private final int MENU_GO_TO = 1;
@@ -142,7 +154,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     public static final String MAPSCALE_X = "MAPSCALE_X"; //$NON-NLS-1$
     public static final String MAPSCALE_Y = "MAPSCALE_Y"; //$NON-NLS-1$
     private DecimalFormat formatter = new DecimalFormat("00"); //$NON-NLS-1$
-    private CardinalGpMapView mapView;
+    private GPMapView mapView;
     private SharedPreferences mPeferences;
 
 
@@ -150,6 +162,8 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     private double[] lastGpsPosition;
 
     private TextView zoomLevelText;
+    private TextView descriptorMto;
+    private  ImageButton buttom_sheet_background;
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -168,10 +182,11 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     private String latString;
     private String lonString;
     private TextView batteryText;
-    private ImageButton toggleEditingButton;
+    private Spinner filterNetworks;
+    //private ImageButton toggleEditingButton;
     private ImageButton toggleLabelsButton;
     private boolean hasLabelledLayers;
-    private CoordinatorLayout seekbarlayout_mot;
+
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(cu.phibrain.plugins.cardinal.io.R.layout.activity_mapview);
@@ -217,7 +232,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         layerButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mapTagsIntent = new Intent(MapviewActivity.this, CardinalMapLayerListActivity.class);
+                Intent mapTagsIntent = new Intent(MapviewActivity.this, MapLayerListActivity.class);
                 startActivity(mapTagsIntent);
             }
         });
@@ -237,8 +252,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         /*
          * create main mapview
          */
-        mapView = new CardinalGpMapView(this);
-       // CardinalLayerManager.INSTANCE.createGroups(mapView);
+        mapView = new GPMapView(this);
         mapView.setClickable(true);
         mapView.setOnTouchListener(this);
 
@@ -252,10 +266,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         setTextScale();
 
         final RelativeLayout rl = findViewById(R.id.innerlayout);
-        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(cu.phibrain.plugins.cardinal.io.R.id.seekbarlayout_mot);
-        this.seekbarlayout_mot = coordinatorLayout;
-        cu.phibrain.plugins.cardinal.io.ui.menu.UtilTools.loadDataProgect(this, coordinatorLayout);
-        rl.addView(mapView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        rl.addView(mapView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         ImageButton zoomInButton = findViewById(R.id.zoomin);
         zoomInButton.setOnClickListener(this);
@@ -273,25 +284,27 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         centerOnGps = findViewById(R.id.center_on_gps_btn);
         centerOnGps.setOnClickListener(this);
         centerOnGps.setOnLongClickListener(this);
+        buttom_sheet_background = findViewById(cu.phibrain.plugins.cardinal.io.R.id.buttom_sheet_background);
+        buttom_sheet_background.setOnClickListener(this);
+        buttom_sheet_background.setOnLongClickListener(this);
+//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+//        addnotebytagButton.setOnClickListener(this);
+//        addnotebytagButton.setOnLongClickListener(this);
+//
+//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
+//        addBookmarkButton.setOnClickListener(this);
+//        addBookmarkButton.setOnLongClickListener(this);
+//
+//        final ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+//        toggleMeasuremodeButton.setOnClickListener(this);
+//        toggleMeasuremodeButton.setOnLongClickListener(this);
+//
+//        final ImageButton toggleLogInfoButton = findViewById(R.id.toggleloginfobutton);
+//        toggleLogInfoButton.setOnClickListener(this);
+//        toggleLogInfoButton.setOnLongClickListener(this);
 
-        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-        addnotebytagButton.setOnClickListener(this);
-        addnotebytagButton.setOnLongClickListener(this);
-
-        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-        addBookmarkButton.setOnClickListener(this);
-        addBookmarkButton.setOnLongClickListener(this);
-
-        final ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
-        toggleMeasuremodeButton.setOnClickListener(this);
-        toggleMeasuremodeButton.setOnLongClickListener(this);
-
-        final ImageButton toggleLogInfoButton = findViewById(R.id.toggleloginfobutton);
-        toggleLogInfoButton.setOnClickListener(this);
-        toggleLogInfoButton.setOnLongClickListener(this);
-
-        toggleEditingButton = findViewById(R.id.toggleEditingButton);
-        toggleEditingButton.setOnClickListener(this);
+//        toggleEditingButton = findViewById(R.id.toggleEditingButton);
+//        toggleEditingButton.setOnClickListener(this);
 
         toggleLabelsButton = findViewById(R.id.toggleLabels);
         toggleLabelsButton.setOnClickListener(this);
@@ -362,7 +375,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     @Override
     protected void onPause() {
         if (mapView != null) {
-            CardinalLayerManager.INSTANCE.onPause(mapView);
+            LayerManager.INSTANCE.onPause(mapView);
             mapView.onPause();
         }
         super.onPause();
@@ -372,7 +385,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     protected void onResume() {
         if (mapView != null) {
             mapView.onResume();
-            CardinalLayerManager.INSTANCE.onResume(mapView, this);
+            LayerManager.INSTANCE.onResume(mapView, this);
 
             GPMapPosition mapPosition = mapView.getMapPosition();
             setNewCenter(mapPosition.getLongitude() + 0.000001, mapPosition.getLatitude() + 0.000001);
@@ -428,7 +441,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
 
 
         try {
-            CardinalLayerManager.INSTANCE.dispose(mapView);
+            LayerManager.INSTANCE.dispose(mapView);
         } catch (JSONException e) {
             GPLog.error(this, null, e);
         }
@@ -596,7 +609,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
                             }
                             DaoGpsLog logDumper = new DaoGpsLog();
                             SQLiteDatabase sqliteDatabase = logDumper.getDatabase();
-                            long now = new Date().getTime();
+                            long now = new java.util.Date().getTime();
                             long newLogId = logDumper.addGpsLog(now, now, 0, name, DEFAULT_LOG_WIDTH, ColorUtilities.BLUE.getHex(), true); //$NON-NLS-1$
 
                             sqliteDatabase.beginTransaction();
@@ -638,7 +651,6 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
                 }
                 break;
             }
-
             case (NotesLayer.FORMUPDATE_RETURN_CODE): {
                 if (resultCode == Activity.RESULT_OK) {
                     FormInfoHolder formInfoHolder = (FormInfoHolder) data.getSerializableExtra(FormInfoHolder.BUNDLE_KEY_INFOHOLDER);
@@ -741,9 +753,9 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     }
 
     /**
-     * Set center coords and zoom ready for the {@link MapviewActivity} to focus again.
+     * Set center coords and zoom ready for the {@link eu.geopaparazzi.core.mapview.MapviewActivity} to focus again.
      * <p/>
-     * <p>In {@link MapviewActivity} the {@link MapviewActivity#onWindowFocusChanged(boolean)}
+     * <p>In {@link eu.geopaparazzi.core.mapview.MapviewActivity} the {@link eu.geopaparazzi.core.mapview.MapviewActivity#onWindowFocusChanged(boolean)}
      * will take care to zoom properly.
      *
      * @param centerX the lon coordinate. Can be <code>null</code>.
@@ -1011,9 +1023,11 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
                 EditManager.INSTANCE.setActiveTool(null);
                 mapView.releaseMapBlock();
             }
-        } else if (i == R.id.toggleEditingButton) {
-            toggleEditing();
-        } else if (i == R.id.toggleLabels) {
+        }
+//        else if (i == R.id.toggleEditingButton) {
+//            toggleEditing();
+//        }
+        else if (i == R.id.toggleLabels) {
             Tool activeTool = EditManager.INSTANCE.getActiveTool();
             if (activeTool instanceof PanLabelsTool) {
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_labels_off_24dp));
@@ -1028,7 +1042,60 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
                 EditManager.INSTANCE.setActiveTool(panLabelsTool);
                 mapView.blockMap();
             }
+        }else if (i == cu.phibrain.plugins.cardinal.io.R.id.buttom_sheet_background) {
+            List<MtoModel> mtoModelList = new ArrayList<>();
+
+            String[] names = {"Richard","Alice","Hannah","David"};
+
+            MtoAdapter usersAdapter;
+            View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                    .inflate(
+                            cu.phibrain.plugins.cardinal.io.R.layout.layout_bottom_sheet,
+                            (LinearLayout) findViewById(cu.phibrain.plugins.cardinal.io.R.id.bottomSheetContainer)
+                    );
+
+            //Recivler View Menu Mto
+            RecyclerView recyclerView = bottomSheetView.findViewById(cu.phibrain.plugins.cardinal.io.R.id.rvMto);
+
+            LinearLayoutManager horizontalLayoutManager
+                    = new LinearLayoutManager(bottomSheetView.getContext(), LinearLayoutManager.HORIZONTAL, false);
+            recyclerView.setLayoutManager(horizontalLayoutManager);
+            recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(),DividerItemDecoration.VERTICAL));
+
+            for(String s:names){
+                MtoModel userModel = new MtoModel(s);
+                mtoModelList.add(userModel);
+            }
+
+
+            MtoAdapter mtoAdapter = new MtoAdapter(mtoModelList,this);
+            recyclerView.setAdapter(mtoAdapter);
+
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+                    MapviewActivity.this,
+                    cu.phibrain.plugins.cardinal.io.R.style.BottomSheetDialogTheme
+            );
+            descriptorMto = bottomSheetView.findViewById(cu.phibrain.plugins.cardinal.io.R.id.descriptorMto);
+
+            //filter Networks
+            List<NetorksModel> networks = loadNetworksByProject();
+            ArrayAdapter networksAdapter = new ArrayAdapter(this, cu.phibrain.plugins.cardinal.io.R.layout.spinner, networks);
+            filterNetworks = bottomSheetView.findViewById(cu.phibrain.plugins.cardinal.io.R.id.spinnerNetworks);
+            filterNetworks.setAdapter(networksAdapter);
+
+            bottomSheetDialog.setContentView(bottomSheetView);
+
+            bottomSheetDialog.show();
+
         }
+    }
+
+    private List<NetorksModel> loadNetworksByProject() {
+        List<NetorksModel> networksModel = new ArrayList<>();
+        networksModel.add(new NetorksModel(1,"Test 1"));
+        networksModel.add(new NetorksModel(2,"Test 2"));
+        networksModel.add(new NetorksModel(3,"Test 3"));
+        return networksModel;
     }
 
     private void toggleEditing() {
@@ -1041,7 +1108,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
             disableEditing();
             mapView.releaseMapBlock();
         } else {
-            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+           // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
             IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
             if (editLayer == null) {
                 // if not layer is
@@ -1063,7 +1130,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     }
 
     private void disableEditing() {
-        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
+       // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
         Tool activeTool = EditManager.INSTANCE.getActiveTool();
         if (activeTool != null) {
             activeTool.disable();
@@ -1078,47 +1145,47 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     }
 
     private void setLeftButtoonsEnablement(boolean enable) {
-        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
-        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
+//        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
+//        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
         if (enable) {
-            addnotebytagButton.setVisibility(View.VISIBLE);
-            addBookmarkButton.setVisibility(View.VISIBLE);
-            toggleLoginfoButton.setVisibility(View.VISIBLE);
-            toggleMeasuremodeButton.setVisibility(View.VISIBLE);
+//            addnotebytagButton.setVisibility(View.VISIBLE);
+//            addBookmarkButton.setVisibility(View.VISIBLE);
+//            toggleLoginfoButton.setVisibility(View.VISIBLE);
+//            toggleMeasuremodeButton.setVisibility(View.VISIBLE);
         } else {
-            addnotebytagButton.setVisibility(View.GONE);
-            addBookmarkButton.setVisibility(View.GONE);
-            toggleLoginfoButton.setVisibility(View.GONE);
-            toggleMeasuremodeButton.setVisibility(View.GONE);
+//            addnotebytagButton.setVisibility(View.GONE);
+//            addBookmarkButton.setVisibility(View.GONE);
+//            toggleLoginfoButton.setVisibility(View.GONE);
+//            toggleMeasuremodeButton.setVisibility(View.GONE);
         }
     }
 
     private void setAllButtoonsEnablement(boolean enable) {
-        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
-        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
+//        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
+//        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
         ImageButton zoomInButton = findViewById(R.id.zoomin);
         TextView zoomLevelTextview = findViewById(R.id.zoomlevel);
         ImageButton zoomOutButton = findViewById(R.id.zoomout);
-        ImageButton toggleEditingButton = findViewById(R.id.toggleEditingButton);
+        //ImageButton toggleEditingButton = findViewById(R.id.toggleEditingButton);
 
         int visibility = View.VISIBLE;
         if (!enable) {
             visibility = View.GONE;
         }
-        addnotebytagButton.setVisibility(visibility);
-        addBookmarkButton.setVisibility(visibility);
-        toggleLoginfoButton.setVisibility(visibility);
-        toggleMeasuremodeButton.setVisibility(visibility);
+//        addnotebytagButton.setVisibility(visibility);
+//        addBookmarkButton.setVisibility(visibility);
+//        toggleLoginfoButton.setVisibility(visibility);
+//        toggleMeasuremodeButton.setVisibility(visibility);
         batteryButton.setVisibility(visibility);
         centerOnGps.setVisibility(visibility);
         zoomInButton.setVisibility(visibility);
         zoomLevelTextview.setVisibility(visibility);
         zoomOutButton.setVisibility(visibility);
-        toggleEditingButton.setVisibility(visibility);
+       // toggleEditingButton.setVisibility(visibility);
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -1127,13 +1194,7 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         }
         return super.onKeyDown(keyCode, event);
     }
-    public GPMapView getMapView() {
-        return this.mapView;
-    }
 
-    public void setMapView(CardinalGpMapView mapView2) {
-        this.mapView = mapView2;
-    }
     @Override
     public void onCoordinateInserted(double lon, double lat) {
         setNewCenter(lon, lat);
@@ -1145,4 +1206,8 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         return this;
     }
 
+    @Override
+    public void selectedMto(MtoModel _mtoModel) {
+        descriptorMto.setText(_mtoModel.getUserName());
+    }
 }
