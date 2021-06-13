@@ -1,10 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.database.base;
-
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.query.QueryBuilder;
-
 import java.util.List;
-
 import cu.phibrain.plugins.cardinal.io.model.DaoMaster;
 import cu.phibrain.plugins.cardinal.io.model.DaoSession;
 import cu.phibrain.plugins.cardinal.io.utils.Observer;
@@ -71,11 +68,12 @@ public class BaseRepo<Entity, Dao extends AbstractDao<Entity, Long>> implements 
     }
 
     public void insertAll(List<Entity> entityList) {
-        dao.insertOrReplaceInTx(entityList);
+        if (entityList != null && !entityList.isEmpty())
+            dao.insertOrReplaceInTx(entityList);
     }
 
     public void insert(Entity entity) {
-        dao.insertOrReplaceInTx(entity);
+        if (entity != null) dao.insertOrReplaceInTx(entity);
     }
 
     public void delete(Long Id) {
@@ -83,13 +81,14 @@ public class BaseRepo<Entity, Dao extends AbstractDao<Entity, Long>> implements 
     }
 
     public void update(Entity entity) {
-        dao.updateInTx(entity);
+
+        if (entity != null) dao.updateInTx(entity);
     }
 
     /**
      * @return QueryBuilder for complex query.
      */
     public QueryBuilder<Entity> queryBuilder() {
-        return  dao.queryBuilder();
+        return dao.queryBuilder();
     }
 }

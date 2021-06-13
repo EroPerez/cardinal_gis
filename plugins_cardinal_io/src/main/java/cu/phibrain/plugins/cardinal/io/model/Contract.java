@@ -119,7 +119,9 @@ public class Contract implements Serializable {
         this.active = active;
     }
 
-
+    public Worker getWorker() {
+        return theWorker;
+    }
     /**
      * To-one relationship, resolved on first access.
      */
@@ -236,5 +238,7 @@ public class Contract implements Serializable {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getContractDao() : null;
     }
+
+
 
 }

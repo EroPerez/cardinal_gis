@@ -25,4 +25,10 @@ public class MySQLiteOpenHelper extends DaoMaster.OpenHelper {
         MigrationHelper.migrate(db, DaoHelper.getAllDaos());
         Log.i("MySQLiteOpenHelper", "Database Upgrade:  " + db);
     }
+
+    @Override
+    public void onCreate(Database db) {
+        Log.i("greenDAO", "Creating tables for schema version " + DaoMaster.SCHEMA_VERSION);
+        DaoMaster.createAllTables(db, true);
+    }
 }

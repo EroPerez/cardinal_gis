@@ -8,7 +8,6 @@ import cu.phibrain.plugins.cardinal.io.model.ZoneDao;
 public class ZoneOperations extends BaseRepo<Zone, ZoneDao> {
 
     private static ZoneOperations mInstance = null;
-    private ZoneDao dao;
 
     private ZoneOperations() {
         super();

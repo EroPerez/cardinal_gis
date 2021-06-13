@@ -52,7 +52,7 @@ public class LabelBatches {
     private long supplierId;
 
     @ToOne(joinProperty = "supplierId")
-    Supplier supplier;
+    Supplier supplierObj;
 
     @SerializedName("sheet_material")
     @Expose
@@ -156,44 +156,11 @@ public void setProjectId(long projectId) {
     this.projectId = projectId;
 }
 
-@Generated(hash = 138112684)
-private transient Long supplier__resolvedKey;
-
-/** To-one relationship, resolved on first access. */
-@Generated(hash = 111163280)
-public Supplier getSupplier() {
-    long __key = this.supplierId;
-    if (supplier__resolvedKey == null || !supplier__resolvedKey.equals(__key)) {
-        final DaoSession daoSession = this.daoSession;
-        if (daoSession == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        SupplierDao targetDao = daoSession.getSupplierDao();
-        Supplier supplierNew = targetDao.load(__key);
-        synchronized (this) {
-            supplier = supplierNew;
-            supplier__resolvedKey = __key;
-        }
-    }
-    return supplier;
-}
-
-/** called by internal mechanisms, do not call yourself. */
-@Generated(hash = 42879468)
-public void setSupplier(@NotNull Supplier supplier) {
-    if (supplier == null) {
-        throw new DaoException(
-                "To-one property 'supplierId' has not-null constraint; cannot set to-one to null");
-    }
-    synchronized (this) {
-        this.supplier = supplier;
-        supplierId = supplier.getId();
-        supplier__resolvedKey = supplierId;
-    }
-}
-
 @Generated(hash = 1369517329)
 private transient Long labelMaterial__resolvedKey;
+
+@Generated(hash = 1162353279)
+private transient Long supplierObj__resolvedKey;
 
 /** To-one relationship, resolved on first access. */
 @Generated(hash = 1877343169)
@@ -262,6 +229,39 @@ public void update() {
         throw new DaoException("Entity is detached from DAO context");
     }
     myDao.update(this);
+}
+
+/** To-one relationship, resolved on first access. */
+@Generated(hash = 2030208375)
+public Supplier getSupplierObj() {
+    long __key = this.supplierId;
+    if (supplierObj__resolvedKey == null || !supplierObj__resolvedKey.equals(__key)) {
+        final DaoSession daoSession = this.daoSession;
+        if (daoSession == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        SupplierDao targetDao = daoSession.getSupplierDao();
+        Supplier supplierObjNew = targetDao.load(__key);
+        synchronized (this) {
+            supplierObj = supplierObjNew;
+            supplierObj__resolvedKey = __key;
+        }
+    }
+    return supplierObj;
+}
+
+/** called by internal mechanisms, do not call yourself. */
+@Generated(hash = 121269031)
+public void setSupplierObj(@NotNull Supplier supplierObj) {
+    if (supplierObj == null) {
+        throw new DaoException(
+                "To-one property 'supplierId' has not-null constraint; cannot set to-one to null");
+    }
+    synchronized (this) {
+        this.supplierObj = supplierObj;
+        supplierId = supplierObj.getId();
+        supplierObj__resolvedKey = supplierId;
+    }
 }
 
 /** called by internal mechanisms, do not call yourself. */
