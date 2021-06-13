@@ -85,6 +85,8 @@ public enum WebDataProjectManager {
         }
     }
 
+
+
     /**
      * Downloads a project from the given server via GET.
      *
@@ -113,9 +115,9 @@ public enum WebDataProjectManager {
             //First download nomencladores
             //material, supplier
             List<Supplier> suppliersList = NetworkUtilitiesCardinalOl.sendGetSuppliers(server, token, new HashMap<String, String>());
-            SupplierOperations.getInstance().insertAll(suppliersList);
+
             List<LabelMaterial> labelMaterialList = NetworkUtilitiesCardinalOl.sendGetLabelMaterials(server, token, new HashMap<String, String>());
-            LabelMaterialOperations.getInstance().insertAll(labelMaterialList);
+
 
             //download a project referenced to id
             Project project = NetworkUtilitiesCardinalOl.sendGetProjectData(server, token, webproject.id);
@@ -126,7 +128,7 @@ public enum WebDataProjectManager {
             List<WorkSession> workSessionList = new ArrayList<>();
             for (Contract contract :
                     contractList) {
-                Worker worker = contract.getTheWorker();
+                Worker worker = contract.getWorker();
                 contract.setWorkerId(worker.getId());
                 workerList.add(worker);
                 workSessionList.addAll(contract.getWorkSessions());
@@ -141,6 +143,8 @@ public enum WebDataProjectManager {
             DaoSessionManager.getInstance().setDatabaseName(newDbFileName);
             DaoSessionManager.getInstance().resetDaoSession();
 
+            SupplierOperations.getInstance().insertAll(suppliersList);
+            LabelMaterialOperations.getInstance().insertAll(labelMaterialList);
             ProjectOperations.getInstance().insert(project);
 
             // update project metadata
@@ -151,8 +155,7 @@ public enum WebDataProjectManager {
             String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
             DaoMetadata.initProjectMetadata(db, project.getName(), project.getDescription(), null, user, uniqueDeviceId);
             DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
-            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(),
-                    CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
 
             //Inserts Operations
             WorkerOperations.getInstance().insertAll(workerList);

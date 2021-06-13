@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
 import cu.phibrain.plugins.cardinal.io.exceptions.ServerError;
 import cu.phibrain.plugins.cardinal.io.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.model.LoginModel;
@@ -459,12 +460,18 @@ public class NetworkUtilitiesCardinalOl {
      */
 
     public static Project sendGetProjectData(String server, AuthToken token, int id) throws Exception {
-        Response<Project> response = ApiClient.getApiService(server).getProject(token.toString(), id).execute();
+        try {
+            Response<Project> response = ApiClient.getApiService(server).getProject(token.toString(), id).execute();
 
-        if (response.isSuccessful()) {
-            return response.body();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+            throw new ServerError(response.message(), response.code());
+        } catch (IOException e) {
+
+            // handle error
+            throw new DownloadError(e.getMessage(), e);
         }
-        throw new ServerError(response.message(), response.code());
 
     }
 

@@ -8,7 +8,6 @@ import cu.phibrain.plugins.cardinal.io.model.StockDao;
 public class StockOperations extends BaseRepo<Stock, StockDao> {
 
     private static StockOperations mInstance = null;
-    private StockDao dao;
 
     private StockOperations() {
         super();

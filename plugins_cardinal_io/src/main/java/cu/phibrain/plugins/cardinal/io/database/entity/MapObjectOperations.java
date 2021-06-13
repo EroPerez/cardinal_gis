@@ -7,7 +7,6 @@ import cu.phibrain.plugins.cardinal.io.model.MapObjectDao;
 public class MapObjectOperations extends BaseRepo<MapObject, MapObjectDao> {
 
     private static MapObjectOperations mInstance = null;
-    private MapObjectDao dao;
 
     private MapObjectOperations() {
         super();

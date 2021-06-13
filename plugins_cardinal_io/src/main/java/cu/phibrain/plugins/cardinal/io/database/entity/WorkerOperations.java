@@ -8,7 +8,6 @@ import cu.phibrain.plugins.cardinal.io.model.WorkerDao;
 public class WorkerOperations extends BaseRepo<Worker, WorkerDao> {
 
     private static WorkerOperations mInstance = null;
-    private WorkerDao dao;
 
     private WorkerOperations() {
         super();

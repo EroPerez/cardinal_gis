@@ -45,7 +45,7 @@ public class WorkSession implements Serializable {
     private long zoneId;
 
     @ToOne(joinProperty = "zoneId")
-    private Zone zone;
+    private Zone zoneObj;
 
     @SerializedName("active")
     @Expose
@@ -57,7 +57,7 @@ public class WorkSession implements Serializable {
     private List<WorkerRoute> workerRoute;
 
     @ToOne(joinProperty = "contractId")
-    private Contract contract;
+    private Contract contractObj;
 
     @SerializedName("contract")
     @Expose
@@ -161,85 +161,11 @@ public class WorkSession implements Serializable {
         this.contractId = contractId;
     }
 
-    @Generated(hash = 1183090274)
-    private transient Long zone__resolvedKey;
+    @Generated(hash = 140960598)
+    private transient Long contractObj__resolvedKey;
 
-    /**
-     * To-one relationship, resolved on first access.
-     */
-    @Generated(hash = 1514737146)
-    public Zone getZone() {
-        long __key = this.zoneId;
-        if (zone__resolvedKey == null || !zone__resolvedKey.equals(__key)) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            ZoneDao targetDao = daoSession.getZoneDao();
-            Zone zoneNew = targetDao.load(__key);
-            synchronized (this) {
-                zone = zoneNew;
-                zone__resolvedKey = __key;
-            }
-        }
-        return zone;
-    }
-
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
-    @Generated(hash = 1947031018)
-    public void setZone(@NotNull Zone zone) {
-        if (zone == null) {
-            throw new DaoException(
-                    "To-one property 'zoneId' has not-null constraint; cannot set to-one to null");
-        }
-        synchronized (this) {
-            this.zone = zone;
-            zoneId = zone.getId();
-            zone__resolvedKey = zoneId;
-        }
-    }
-
-    @Generated(hash = 257880743)
-    private transient Long contract__resolvedKey;
-
-    /**
-     * To-one relationship, resolved on first access.
-     */
-    @Generated(hash = 1392990114)
-    public Contract getContract() {
-        long __key = this.contractId;
-        if (contract__resolvedKey == null || !contract__resolvedKey.equals(__key)) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            ContractDao targetDao = daoSession.getContractDao();
-            Contract contractNew = targetDao.load(__key);
-            synchronized (this) {
-                contract = contractNew;
-                contract__resolvedKey = __key;
-            }
-        }
-        return contract;
-    }
-
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
-    @Generated(hash = 9229498)
-    public void setContract(@NotNull Contract contract) {
-        if (contract == null) {
-            throw new DaoException(
-                    "To-one property 'contractId' has not-null constraint; cannot set to-one to null");
-        }
-        synchronized (this) {
-            this.contract = contract;
-            contractId = contract.getId();
-            contract__resolvedKey = contractId;
-        }
-    }
+    @Generated(hash = 915656327)
+    private transient Long zoneObj__resolvedKey;
 
     /**
      * To-many relationship, resolved on first access (and after reset).
@@ -425,6 +351,72 @@ public class WorkSession implements Serializable {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+    /** To-one relationship, resolved on first access. */
+    @Generated(hash = 1260959430)
+    public Contract getContractObj() {
+        long __key = this.contractId;
+        if (contractObj__resolvedKey == null || !contractObj__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            ContractDao targetDao = daoSession.getContractDao();
+            Contract contractObjNew = targetDao.load(__key);
+            synchronized (this) {
+                contractObj = contractObjNew;
+                contractObj__resolvedKey = __key;
+            }
+        }
+        return contractObj;
+    }
+
+    /** called by internal mechanisms, do not call yourself. */
+    @Generated(hash = 171903385)
+    public void setContractObj(@NotNull Contract contractObj) {
+        if (contractObj == null) {
+            throw new DaoException(
+                    "To-one property 'contractId' has not-null constraint; cannot set to-one to null");
+        }
+        synchronized (this) {
+            this.contractObj = contractObj;
+            contractId = contractObj.getId();
+            contractObj__resolvedKey = contractId;
+        }
+    }
+
+    /** To-one relationship, resolved on first access. */
+    @Generated(hash = 843009192)
+    public Zone getZoneObj() {
+        long __key = this.zoneId;
+        if (zoneObj__resolvedKey == null || !zoneObj__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            ZoneDao targetDao = daoSession.getZoneDao();
+            Zone zoneObjNew = targetDao.load(__key);
+            synchronized (this) {
+                zoneObj = zoneObjNew;
+                zoneObj__resolvedKey = __key;
+            }
+        }
+        return zoneObj;
+    }
+
+    /** called by internal mechanisms, do not call yourself. */
+    @Generated(hash = 806374319)
+    public void setZoneObj(@NotNull Zone zoneObj) {
+        if (zoneObj == null) {
+            throw new DaoException(
+                    "To-one property 'zoneId' has not-null constraint; cannot set to-one to null");
+        }
+        synchronized (this) {
+            this.zoneObj = zoneObj;
+            zoneId = zoneObj.getId();
+            zoneObj__resolvedKey = zoneId;
+        }
     }
 
     /** called by internal mechanisms, do not call yourself. */
