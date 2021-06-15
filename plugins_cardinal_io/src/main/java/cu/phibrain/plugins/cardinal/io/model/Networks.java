@@ -11,6 +11,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -163,11 +164,17 @@ public class Networks implements Serializable {
         myDao.update(this);
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1697597019)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getNetworksDao() : null;
     }
+
 
 }

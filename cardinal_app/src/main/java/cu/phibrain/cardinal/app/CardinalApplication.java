@@ -32,6 +32,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.WorkerRouteOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.ZoneOperations;
+import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.model.DaoSession;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 
@@ -40,6 +41,10 @@ public class CardinalApplication extends GeopaparazziApplication {
     private DaoSession daoSession;
     private static Context context;
 
+    public CardinalApplication() {
+    }
+
+
     public static Context getContext() {
         return context;
     }
@@ -47,7 +52,7 @@ public class CardinalApplication extends GeopaparazziApplication {
     public DaoSession getDaoSession() {
         return daoSession;
     }
-
+    public AppContainer appContainer ;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -86,7 +91,7 @@ public class CardinalApplication extends GeopaparazziApplication {
             WorkerRouteOperations.getInstance().attachTo(DaoSessionManager.getInstance());
             WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
 
-
+            appContainer = new AppContainer();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -49,7 +49,7 @@ android {
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             applicationVariants.all { variant ->
                 variant.outputs.each { output ->
-                    output.outputFileName = "GeoPaparazzi_" + android.defaultConfig.versionName + ".apk"
+                    output.outputFileName = "Cardinal_" + android.defaultConfig.versionName + ".apk"
                 }
             }
         }
