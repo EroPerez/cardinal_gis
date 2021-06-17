@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Cardinal</string>
     <string name="reset_route">Nueva Ruta</string>
+    <string name="seleccione_un_objeto_de_mapa">Seleccione un Objeto de Mapa</string>
 </resources>
