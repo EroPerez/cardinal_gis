@@ -452,6 +452,7 @@
     <string name="loading_data_process">Loading data...</string>
     <string name="metadata_sure_remove_entry">Are you sure you want to remove the entry:</string>
     <string name="add_new_metadata_title">Add new metadata item</string>
+    <string name="net_project_active">You don\'t hava an active project.</string>
 
 
 </resources>

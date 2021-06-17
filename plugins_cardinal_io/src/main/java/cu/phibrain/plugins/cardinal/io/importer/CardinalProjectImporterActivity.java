@@ -149,6 +149,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
                                 try {
                                     dbFile = WebDataProjectManager.INSTANCE.downloadProject(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, url, user, pwd, projectModel, theTextToRunOn);
                                     DatabaseUtilities.setNewDatabase(context, GeopaparazziApplication.getInstance(), dbFile);
+
                                     return ASYNC_OK; //$NON-NLS-1$
                                 } catch (Exception e) {
                                     GPLog.error(this, null, e);
@@ -168,7 +169,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
                                         public void run() {
                                             Intent intent = getIntent();
                                             intent.putExtra(LibraryConstants.DATABASE_ID, theTextToRunOn);
-                                            cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this.setResult(RESULT_OK, intent);
+                                            cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this.setResult(DOWNLOADDATA_RETURN_CODE, intent);
                                             finish();
                                         }
                                     });
@@ -325,6 +326,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
 
         setListAdapter(arrayAdapter);
     }
+
 
 
     private TextWatcher filterTextWatcher = new TextWatcher() {

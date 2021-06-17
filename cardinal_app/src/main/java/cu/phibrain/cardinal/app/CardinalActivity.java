@@ -6,16 +6,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 import java.io.IOException;
 
-import cu.phibrain.plugins.cardinal.io.ui.fragment.CardinalActivityFragment;
+import cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment;
 import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoBookmarks;
-import eu.geopaparazzi.core.mapview.MapviewActivity;
-import cu.phibrain.plugins.cardinal.io.ui.fragment.CardinalActivityFragment;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.permissions.AChainedPermissionHelper;
@@ -33,7 +32,7 @@ import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_DATABASE_T
 public class CardinalActivity extends GeopaparazziCoreActivity {
     private AChainedPermissionHelper permissionHelper = new PermissionWriteStorage();
     private CardinalActivityFragment cardinalActivityFragment;
-
+    public static final int DOWNLOADDATA_RETURN_CODE = 667;
     // configure the GeopaparazziCoreActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +57,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         setSupportActionBar(toolbar);
 
     }
+
 
 
     private void init() {

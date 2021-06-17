@@ -177,7 +177,9 @@ public class MapObjecType implements Serializable {
     }
 
     public byte[] getIconAsByteArray() {
-        return Base64.decode(this.icon, 0);
+        if(!this.icon.isEmpty())
+            return Base64.decode(this.icon.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
+        return null;
     }
 
     public String getIcon() {
@@ -430,6 +432,7 @@ public class MapObjecType implements Serializable {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getMapObjecTypeDao() : null;
     }
+
 
 
 }

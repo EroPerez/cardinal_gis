@@ -22,7 +22,7 @@ import cu.phibrain.plugins.cardinal.io.model.converter.SignalTypesConverter;
  * Entity mapped to table "zone".
  */
 @Entity(
-        nameInDb = "CARDINAL_TOPOLOGICAL_RULE",
+        nameInDb = "CARDINAL_SIGNAL_EVENTS",
         // Whether an all properties constructor should be generated.
         // A no-args constructor is always required.
         generateConstructors = true,
