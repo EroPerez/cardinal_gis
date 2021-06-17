@@ -75,6 +75,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -242,7 +243,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         layerButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mapTagsIntent = new Intent(MapviewActivity.this, MapLayerListActivity.class);
+                Intent mapTagsIntent = new Intent(MapviewActivity.this,CardinalMapLayerListActivity.class);
                 startActivity(mapTagsIntent);
             }
         });
@@ -277,7 +278,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         final RelativeLayout rl = findViewById(R.id.innerlayout);
         rl.addView(mapView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
+        rl.setVisibility(View.VISIBLE);
         ImageButton zoomInButton = findViewById(R.id.zoomin);
         zoomInButton.setOnClickListener(this);
         zoomInButton.setOnLongClickListener(this);

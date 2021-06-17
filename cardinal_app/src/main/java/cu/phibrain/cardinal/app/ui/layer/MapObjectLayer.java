@@ -44,18 +44,17 @@ import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.map.GPMapView;
 import cu.phibrain.plugins.cardinal.io.R;
-import eu.geopaparazzi.map.layers.LayerGroups;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_TEXT_VISIBLE;
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_VISIBLE;
-public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer {
+public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, ICardinalLayer {
     private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
     private static final int BG_COLOR = 0x80FF69B4; // 50 percent pink. AARRGGBB
     private static final int TRANSP_WHITE = 0x80FFFFFF; // 50 percent white. AARRGGBB
     private static String NAME = null;
     public static final String NONFORMSTART = "@";
-
+    public static Long ID;
     public static final int FORMUPDATE_RETURN_CODE = 669;
     private static Bitmap notesBitmap;
     private GPMapView mapView;
@@ -320,7 +319,7 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
     @Override
     public void load() {
         Layers layers = map().layers();
-        layers.add(this, LayerGroups.GROUP_SYSTEM_TOP.getGroupId());
+        layers.add(this, CardinalLayerGroups.GROUP_CARDINALLAYERS.getGroupId());
     }
 
     @Override
