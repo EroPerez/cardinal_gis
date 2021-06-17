@@ -79,6 +79,7 @@ import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
+import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
@@ -131,7 +132,6 @@ import eu.geopaparazzi.map.features.tools.impl.PointMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.impl.PolygonMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.interfaces.Tool;
 import eu.geopaparazzi.map.features.tools.interfaces.ToolGroup;
-import eu.geopaparazzi.map.gui.MapLayerListActivity;
 import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
@@ -265,7 +265,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         layerButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mapTagsIntent = new Intent(MapviewActivity.this, MapLayerListActivity.class);
+                Intent mapTagsIntent = new Intent(MapviewActivity.this, CardinalMapLayerListActivity.class);
                 startActivity(mapTagsIntent);
             }
         });
@@ -300,7 +300,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         final RelativeLayout rl = findViewById(R.id.innerlayout);
         rl.addView(mapView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
+        rl.setVisibility(View.VISIBLE);
         ImageButton zoomInButton = findViewById(R.id.zoomin);
         zoomInButton.setOnClickListener(this);
         zoomInButton.setOnLongClickListener(this);

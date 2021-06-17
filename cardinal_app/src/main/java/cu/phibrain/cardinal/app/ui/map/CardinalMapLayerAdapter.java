@@ -78,7 +78,7 @@ import eu.geopaparazzi.map.layers.utils.SpatialiteConnectionsHandler;
 import eu.geopaparazzi.map.layers.utils.SpatialiteLabelDialogFragment;
 import eu.geopaparazzi.map.utils.MapUtilities;
 
-class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapLayerAdapter.ViewHolder> {
+class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.cardinal.app.ui.map.CardinalMapLayerAdapter.ViewHolder> {
 
     private CardinalMapLayerListFragment mapLayerListFragment;
     private int mLayoutId;
@@ -120,13 +120,13 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CardinalMapLayerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(mLayoutId, parent, false);
-        return new ViewHolder(view);
+        return new cu.phibrain.cardinal.app.ui.map.CardinalMapLayerAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull cu.phibrain.cardinal.app.ui.map.CardinalMapLayerAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
         MapLayerItem item = mItemList.get(position);
         holder.nameView.setText(item.name);
@@ -135,7 +135,12 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
+            if (item instanceof ICardinalItem) {
+                CardinalLayerManager.INSTANCE.setEnabled(item.position, item.enabled);
+            } else {
+                CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
+            }
+
         });
         if (item.isSystem) {
             holder.moreButton.setVisibility(View.INVISIBLE);
@@ -514,7 +519,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
         holder.itemView.setTag(mItemList.get(position));
     }
 
-    private void updateEditingColor(@NonNull ViewHolder holder, boolean isEditing) {
+    private void updateEditingColor(@NonNull cu.phibrain.cardinal.app.ui.map.CardinalMapLayerAdapter.ViewHolder holder, boolean isEditing) {
         Context context = mapLayerListFragment.getContext();
         if (context != null) {
             if (isEditing) {
@@ -559,3 +564,4 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, CardinalMapL
         }
     }
 }
+

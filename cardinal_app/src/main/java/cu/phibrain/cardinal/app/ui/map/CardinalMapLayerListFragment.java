@@ -53,9 +53,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
-import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
-import cu.phibrain.cardinal.app.ui.layer.MapObjectLayer;
-import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
 import eu.geopaparazzi.library.util.FileUtilities;
@@ -67,7 +64,6 @@ import eu.geopaparazzi.library.util.types.ESpatialDataSources;
 import eu.geopaparazzi.map.R;
 import eu.geopaparazzi.map.gui.MapLayerItem;
 import eu.geopaparazzi.map.layers.ELayerTypes;
-import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.utils.EOnlineTileSources;
 
@@ -114,7 +110,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
             @Override
             public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
                 if (fromRow != toRow) {
-                    LayerManager.INSTANCE.changeLayerPosition(fromColumn == 1, fromRow, toRow);
+                    CardinalLayerManager.INSTANCE.changeLayerPosition(fromColumn, fromRow, toRow);
                 }
             }
 
@@ -266,7 +262,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                             EOnlineTileSources source = EOnlineTileSources.getByName(names[i]);
                             int index = 0;
                             try {
-                                index = LayerManager.INSTANCE.addBitmapTileService(source.getName(), source.getUrl(), source.getTilePath(), source.getMaxZoom(), 1f, null);
+                                index = CardinalLayerManager.INSTANCE.addBitmapTileService(source.getName(), source.getUrl(), source.getTilePath(), source.getMaxZoom(), 1f, null);
                                 MapLayerItem item = new MapLayerItem();
                                 item.position = index;
                                 item.name = source.getName();
@@ -299,37 +295,13 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 //        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
 
         try {
-            //addCardinalLayerColumn();
-            addUserLayersColumn();
+
             addSystemLayersColumn();
+            addCardinalLayersColumn();
+            addUserLayersColumn();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    //Gestiona las capas cardinal
-    private void addCardinalLayerColumn()throws Exception {
-        GPApplication  context = GPApplication.getInstance();
-        JSONObject jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, MapObjectLayer.getName(context));
-        jo.put(IGpLayer.LAYERENABLED_TAG, true);
-
-        final ArrayList<MapLayerItem> mItemArray = new ArrayList<>();
-        MapLayerItem MapOnjItem = getMapLayerItem(0, jo);
-        mItemArray.add(MapOnjItem);
-
-        jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
-        jo.put(IGpLayer.LAYERENABLED_TAG, true);
-        MapLayerItem EdgesItem = getMapLayerItem(1, jo);
-        mItemArray.add(EdgesItem);
-
-        final CardinalMapLayerAdapter listAdapter = new CardinalMapLayerAdapter(this, mItemArray, R.layout.column_item, R.id.item_layout, true);
-        final View header = View.inflate(getActivity(), R.layout.column_header, null);
-        ((TextView) header.findViewById(R.id.text)).setText(getString(R.string.cardinal_layers));
-        ((TextView) header.findViewById(R.id.item_count)).setText("");
-
-        mBoardView.addColumn(listAdapter, header, header, false);
     }
 
     private void addUserLayersColumn() throws Exception {
@@ -371,6 +343,25 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         mBoardView.addColumn(listAdapter, header, header, false);
     }
 
+    private void addCardinalLayersColumn() throws Exception {
+        final ArrayList<MapLayerItem> mItemArray = new ArrayList<>();
+
+        List<JSONObject> layerDefinitions = CardinalLayerManager.INSTANCE.getCardinalLayersDefinitions();
+        int index = 0;
+        for (JSONObject layerDefinition : layerDefinitions) {
+            CardinalMapLayerItem layerItem = getCardinalMapLayerItem(index, layerDefinition);
+            layerItem.isSystem = true;
+            mItemArray.add(layerItem);
+            index++;
+        }
+
+        final CardinalMapLayerAdapter listAdapter = new CardinalMapLayerAdapter(this, mItemArray, R.layout.column_item, R.id.item_layout, true);
+        final View header = View.inflate(getActivity(), R.layout.column_header, null);
+        ((TextView) header.findViewById(R.id.text)).setText(getString(R.string.cardinal_layers));
+        ((TextView) header.findViewById(R.id.item_count)).setText("");
+
+        mBoardView.addColumn(listAdapter, header, header, false);
+    }
 
     @NonNull
     private MapLayerItem getMapLayerItem(int index, JSONObject layerDefinition) throws JSONException {
@@ -394,6 +385,34 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
             layerItem.path = layerDefinition.getString(IGpLayer.LAYERPATH_TAG);
         layerItem.name = name;
         layerItem.type = type;
+        return layerItem;
+    }
+
+    @NonNull
+    private CardinalMapLayerItem getCardinalMapLayerItem(int index, JSONObject layerDefinition) throws JSONException {
+        String name = layerDefinition.getString(IGpLayer.LAYERNAME_TAG);
+        String type = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
+        Long id = layerDefinition.getLong("ID");
+
+        boolean isEnabled = true;
+        if (layerDefinition.has(IGpLayer.LAYERENABLED_TAG)) {
+            isEnabled = layerDefinition.getBoolean(IGpLayer.LAYERENABLED_TAG);
+        }
+        boolean isEditing = false;
+        if (layerDefinition.has(IGpLayer.LAYEREDITING_TAG)) {
+            isEditing = layerDefinition.getBoolean(IGpLayer.LAYEREDITING_TAG);
+        }
+        CardinalMapLayerItem layerItem = new CardinalMapLayerItem();
+        layerItem.position = index;
+        layerItem.enabled = isEnabled;
+        layerItem.isEditing = isEditing;
+        if (layerDefinition.has(IGpLayer.LAYERURL_TAG))
+            layerItem.url = layerDefinition.getString(IGpLayer.LAYERURL_TAG);
+        if (layerDefinition.has(IGpLayer.LAYERPATH_TAG))
+            layerItem.path = layerDefinition.getString(IGpLayer.LAYERPATH_TAG);
+        layerItem.name = name;
+        layerItem.type = type;
+        layerItem.id = id;
         return layerItem;
     }
 
@@ -457,7 +476,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                             switch (layerType) {
                                 case MAPSFORGE:
                                 case MBTILES:
-                                    int index = LayerManager.INSTANCE.addMapFile(finalFile, null);
+                                    int index = CardinalLayerManager.INSTANCE.addMapFile(finalFile, null);
 
                                     if (index >= 0) {
                                         MapLayerItem item = new MapLayerItem();
@@ -471,7 +490,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                     } else {
                                         // reload list to show changes in existing item
                                         DragItemAdapter adapter = mBoardView.getAdapter(focusedColumn);
-                                        List<JSONObject> layerDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                        List<JSONObject> layerDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                         int i = 0;
                                         List<MapLayerItem> mItemArray = new ArrayList<>();
                                         for (JSONObject layerDefinition : layerDefinitions) {
@@ -487,7 +506,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                     if (readfile.replace(" ", "").contains("type=wms")) {//NON-NLS
                                         GPDialogs.warningDialog(getActivity(), getString(R.string.wms_unsupported), null);
                                     } else {
-                                        int index1 = LayerManager.INSTANCE.addMapurlBitmapTileService(finalFile, null);
+                                        int index1 = CardinalLayerManager.INSTANCE.addMapurlBitmapTileService(finalFile, null);
                                         if (index1 >= 0) {
                                             MapLayerItem item = new MapLayerItem();
                                             item.type = layerType.getTilesType();
@@ -500,7 +519,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                         } else {
                                             // reload list to show changes in existing item
                                             DragItemAdapter adapter = mBoardView.getAdapter(focusedColumn);
-                                            List<JSONObject> layerDefinitions = LayerManager.INSTANCE.getUserLayersDefinitions();
+                                            List<JSONObject> layerDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                             int i = 0;
                                             List<MapLayerItem> mItemArray = new ArrayList<>();
                                             for (JSONObject layerDefinition : layerDefinitions) {
@@ -576,7 +595,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                     if (tableNames != null) {
                                         if (tableNames.size() == 1) {
                                             try {
-                                                int index2 = LayerManager.INSTANCE.addSpatialiteTable(finalFile.getAbsoluteFile(), tableNames.get(0), null);
+                                                int index2 = CardinalLayerManager.INSTANCE.addSpatialiteTable(finalFile.getAbsoluteFile(), tableNames.get(0), null);
                                                 int focusedColumn2 = mBoardView.getFocusedColumn();
                                                 int itemCount2 = mBoardView.getItemCount(focusedColumn2);
                                                 if (index2 >= 0) {
@@ -609,7 +628,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                                 if (selTables.size() > 0) {
                                                     for (String selTable : selTables) {
                                                         try {
-                                                            int index2 = LayerManager.INSTANCE.addSpatialiteTable(finalFile.getAbsoluteFile(), selTable, null);
+                                                            int index2 = CardinalLayerManager.INSTANCE.addSpatialiteTable(finalFile.getAbsoluteFile(), selTable, null);
                                                             int focusedColumn2 = mBoardView.getFocusedColumn();
                                                             int itemCount2 = mBoardView.getItemCount(focusedColumn2);
                                                             if (index2 >= 0) {
@@ -688,7 +707,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                                 String tableName = allTables.get(0);
                                                 String layerTypeStr = vectorTableNames.contains(tableName) ? layerType.getVectorType() : layerType.getTilesType();
 
-                                                int index2 = LayerManager.INSTANCE.addGeopackageTable(finalFile.getAbsoluteFile(), tableName, null, layerTypeStr);
+                                                int index2 = CardinalLayerManager.INSTANCE.addGeopackageTable(finalFile.getAbsoluteFile(), tableName, null, layerTypeStr);
                                                 int focusedColumn2 = mBoardView.getFocusedColumn();
                                                 int itemCount2 = mBoardView.getItemCount(focusedColumn2);
                                                 if (index2 >= 0) {
@@ -725,7 +744,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                                                             String layerTypeStr = vectorTableNames.contains(selTable) ? layerType.getVectorType() : layerType.getTilesType();
 
 
-                                                            int index2 = LayerManager.INSTANCE.addGeopackageTable(finalFile.getAbsoluteFile(), selTable, null, layerTypeStr);
+                                                            int index2 = CardinalLayerManager.INSTANCE.addGeopackageTable(finalFile.getAbsoluteFile(), selTable, null, layerTypeStr);
                                                             int focusedColumn2 = mBoardView.getFocusedColumn();
                                                             int itemCount2 = mBoardView.getItemCount(focusedColumn2);
                                                             if (index2 >= 0) {

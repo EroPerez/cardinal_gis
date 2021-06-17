@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.GPLog;
@@ -64,9 +66,11 @@ public enum CardinalLayerManager {
     public static final String LAYERS = "layers";
     public static final String GP_LOADED_USERMAPS_KEY = "GP_LOADED_USERMAPS_KEY";
     public static final String GP_LOADED_SYSTEMMAPS_KEY = "GP_LOADED_SYSTEMMAPS_KEY";
+    public static final String GP_LOADED_CARDINAL_KEY = "GP_LOADED_CARDINAL_KEY";
     public static final String SAME_NAME_EXISTS = "A layer with the same name already exists.";
     private List<JSONObject> userLayersDefinitions = new ArrayList<>();
     private List<JSONObject> systemLayersDefinitions = new ArrayList<>();
+    private List<JSONObject> cardinalLayersDefinitions = new ArrayList<>();
 
     /**
      * Initialize the layers from preferences
@@ -75,6 +79,7 @@ public enum CardinalLayerManager {
         GPApplication context = GPApplication.getInstance();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String loadedUserMapsJson = preferences.getString(GP_LOADED_USERMAPS_KEY, "{}");
+
 
         JSONObject root = new JSONObject(loadedUserMapsJson);
         if (root.has(LAYERS)) {
@@ -109,23 +114,23 @@ public enum CardinalLayerManager {
             jo.put(IGpLayer.LAYERENABLED_TAG, true);
             systemLayersDefinitions.add(jo);
 
-            jo = new JSONObject();
-            jo.put(IGpLayer.LAYERTYPE_TAG, BookmarkLayer.class.getCanonicalName());
-            jo.put(IGpLayer.LAYERNAME_TAG, BookmarkLayer.getName(context));
-            jo.put(IGpLayer.LAYERENABLED_TAG, true);
-            systemLayersDefinitions.add(jo);
-
-            jo = new JSONObject();
-            jo.put(IGpLayer.LAYERTYPE_TAG, ImagesLayer.class.getCanonicalName());
-            jo.put(IGpLayer.LAYERNAME_TAG, ImagesLayer.getName(context));
-            jo.put(IGpLayer.LAYERENABLED_TAG, true);
-            systemLayersDefinitions.add(jo);
-
-            jo = new JSONObject();
-            jo.put(IGpLayer.LAYERTYPE_TAG, NotesLayer.class.getCanonicalName());
-            jo.put(IGpLayer.LAYERNAME_TAG, NotesLayer.getName(context));
-            jo.put(IGpLayer.LAYERENABLED_TAG, true);
-            systemLayersDefinitions.add(jo);
+//            jo = new JSONObject();
+//            jo.put(IGpLayer.LAYERTYPE_TAG, BookmarkLayer.class.getCanonicalName());
+//            jo.put(IGpLayer.LAYERNAME_TAG, BookmarkLayer.getName(context));
+//            jo.put(IGpLayer.LAYERENABLED_TAG, true);
+//            systemLayersDefinitions.add(jo);
+//
+//            jo = new JSONObject();
+//            jo.put(IGpLayer.LAYERTYPE_TAG, ImagesLayer.class.getCanonicalName());
+//            jo.put(IGpLayer.LAYERNAME_TAG, ImagesLayer.getName(context));
+//            jo.put(IGpLayer.LAYERENABLED_TAG, true);
+//            systemLayersDefinitions.add(jo);
+//
+//            jo = new JSONObject();
+//            jo.put(IGpLayer.LAYERTYPE_TAG, NotesLayer.class.getCanonicalName());
+//            jo.put(IGpLayer.LAYERNAME_TAG, NotesLayer.getName(context));
+//            jo.put(IGpLayer.LAYERENABLED_TAG, true);
+//            systemLayersDefinitions.add(jo);
 
             jo = new JSONObject();
             jo.put(IGpLayer.LAYERTYPE_TAG, GpsPositionLayer.class.getCanonicalName());
@@ -144,26 +149,44 @@ public enum CardinalLayerManager {
             jo.put(IGpLayer.LAYERNAME_TAG, GPMapScaleBarLayer.getName(context));
             jo.put(IGpLayer.LAYERENABLED_TAG, true);
             systemLayersDefinitions.add(jo);
+        }
 
+
+        //Init Layer Cardinal
+        String loadedCardinalMapsJson = preferences.getString(GP_LOADED_CARDINAL_KEY, "{}");
+        root = new JSONObject(loadedCardinalMapsJson);
+        if (root.has(LAYERS)) {
+            JSONArray layersArray = root.getJSONArray(LAYERS);
+            int length = layersArray.length();
+            for (int i = 0; i < length; i++) {
+                JSONObject jsonObject = layersArray.getJSONObject(i);
+                cardinalLayersDefinitions.add(jsonObject);
+            }
+        } else {
+            List<MapObjecType> mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
+            for (MapObjecType mtoIndex : mapObjecTypeList) {
+                if (!mtoIndex.getIsAbstract()) {
+                    JSONObject jo = new JSONObject();
+                    jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
+                    jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
+                    jo.put("ID", mtoIndex.getId());
+                    jo.put(IGpLayer.LAYERENABLED_TAG, true);
+                    cardinalLayersDefinitions.add(jo);
+                }
+            }
 
         }
-        JSONObject joCardinal = new JSONObject();
-        joCardinal.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
-        joCardinal.put(IGpLayer.LAYERNAME_TAG, MapObjectLayer.getName(context));
-        joCardinal.put(IGpLayer.LAYERENABLED_TAG, true);
-        systemLayersDefinitions.add(joCardinal);
-
-        joCardinal = new JSONObject();
-        joCardinal.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
-        joCardinal.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
-        joCardinal.put(IGpLayer.LAYERENABLED_TAG, true);
-        systemLayersDefinitions.add(joCardinal);
 
     }
 
     public void createGroups(GPMapView mapView) {
         Layers layers = mapView.map().layers();
-        layers.addGroup(4);
+        layers.addGroup(CardinalLayerGroups.GROUP_MAPLAYERS.getGroupId());
+        layers.addGroup(CardinalLayerGroups.GROUP_PROJECTLAYERS.getGroupId());
+        layers.addGroup(CardinalLayerGroups.GROUP_3D.getGroupId());
+        layers.addGroup(CardinalLayerGroups.GROUP_SYSTEM_TOP.getGroupId());
+        //Add Group Cardinal Layers
+        layers.addGroup(CardinalLayerGroups.GROUP_CARDINALLAYERS.getGroupId());
     }
 
     public List<JSONObject> getUserLayersDefinitions() {
@@ -172,6 +195,10 @@ public enum CardinalLayerManager {
 
     public List<JSONObject> getSystemLayersDefinitions() {
         return systemLayersDefinitions;
+    }
+
+    public List<JSONObject> getCardinalLayersDefinitions() {
+        return cardinalLayersDefinitions;
     }
 
     /**
@@ -279,19 +306,45 @@ public enum CardinalLayerManager {
                     GPMapScaleBarLayer sysLayer = new GPMapScaleBarLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
-                }else if (layerClass.equals(EdgesLayer.class.getCanonicalName())) {
-                    EdgesLayer sysLayer = new EdgesLayer(mapView);
-                    sysLayer.load();
-                    sysLayer.setEnabled(isEnabled);
                 }
-                else if (layerClass.equals(MapObjectLayer.class.getCanonicalName())) {
-                    MapObjectLayer sysLayer = new MapObjectLayer(mapView, activitySupporter);
+            }
+        } else {
+            loadSystemLayers(mapView, activitySupporter, systemLayersDefinitions);
+        }
+
+
+        //Cardinal Load Layers
+        if (cardinalLayersDefinitions.size() > 0) {
+            for (JSONObject layerDefinition : cardinalLayersDefinitions) {
+                String layerClass = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
+                Long Id = layerDefinition.getLong("ID");
+                boolean isEnabled = true;
+                boolean hasEnabled = layerDefinition.has(IGpLayer.LAYERENABLED_TAG);
+                if (hasEnabled)
+                    isEnabled = layerDefinition.getBoolean(IGpLayer.LAYERENABLED_TAG);
+
+                if (layerClass.equals(MapObjectLayer.class.getCanonicalName()) && Id == MapObjectLayer.ID) {
+                    GpsLogsLayer sysLayer = new GpsLogsLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
                 }
             }
         } else {
-            loadSystemLayers(mapView, activitySupporter, systemLayersDefinitions);
+            loadCardinalLayers(mapView, activitySupporter, cardinalLayersDefinitions);
+        }
+    }
+
+    private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException {
+        List<MapObjecType> mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
+        for (MapObjecType mtoIndex : mapObjecTypeList) {
+            if (!mtoIndex.getIsAbstract()) {
+                JSONObject jo = new JSONObject();
+                jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
+                jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
+                jo.put("ID", mtoIndex.getId());
+                jo.put(IGpLayer.LAYERENABLED_TAG, true);
+                cardinalLayersDefinitions.add(jo);
+            }
         }
     }
 
@@ -417,17 +470,17 @@ public enum CardinalLayerManager {
         currentGpsLogLayer.load();
         systemLayersDefinitions.add(currentGpsLogLayer.toJson());
 
-        BookmarkLayer bookmarkLayer = new BookmarkLayer(mapView);
-        bookmarkLayer.load();
-        systemLayersDefinitions.add(bookmarkLayer.toJson());
-
-        ImagesLayer imagesLayer = new ImagesLayer(mapView);
-        imagesLayer.load();
-        systemLayersDefinitions.add(imagesLayer.toJson());
-
-        NotesLayer notesLayer = new NotesLayer(mapView, activitySupporter);
-        notesLayer.load();
-        systemLayersDefinitions.add(notesLayer.toJson());
+//        BookmarkLayer bookmarkLayer = new BookmarkLayer(mapView);
+//        bookmarkLayer.load();
+//        systemLayersDefinitions.add(bookmarkLayer.toJson());
+//
+//        ImagesLayer imagesLayer = new ImagesLayer(mapView);
+//        imagesLayer.load();
+//        systemLayersDefinitions.add(imagesLayer.toJson());
+//
+//        NotesLayer notesLayer = new NotesLayer(mapView, activitySupporter);
+//        notesLayer.load();
+//        systemLayersDefinitions.add(notesLayer.toJson());
 
         GpsPositionLayer gpsPositionLayer = new GpsPositionLayer(mapView);
         gpsPositionLayer.load();
@@ -436,14 +489,6 @@ public enum CardinalLayerManager {
         GpsPositionTextLayer gpsPositionTextLayer = new GpsPositionTextLayer(mapView);
         gpsPositionTextLayer.load();
         systemLayersDefinitions.add(gpsPositionTextLayer.toJson());
-
-        MapObjectLayer mapObjectLayer = new MapObjectLayer(mapView, activitySupporter);
-        mapObjectLayer.load();
-        systemLayersDefinitions.add(mapObjectLayer.toJson());
-
-        EdgesLayer edgesLayer = new EdgesLayer(mapView);
-        edgesLayer.load();
-        systemLayersDefinitions.add(edgesLayer.toJson());
     }
 
 
@@ -477,13 +522,27 @@ public enum CardinalLayerManager {
             JSONObject systemRoot = new JSONObject();
             systemRoot.put(LAYERS, systemLayersArray);
 
+            JSONArray cardinalLayersArray = new JSONArray();
+            JSONObject cardinalRoot = new JSONObject();
+            cardinalRoot.put(LAYERS, cardinalLayersArray);
+
             for (Layer layer : mapView.map().layers()) {
                 if (layer instanceof IGpLayer) {
                     if (layer instanceof ISystemLayer) {
-                        IGpLayer gpLayer = (IGpLayer) layer;
-                        JSONObject jsonObject = gpLayer.toJson();
-                        systemLayersArray.put(jsonObject);
-                        gpLayer.dispose();
+                        if (layer instanceof ICardinalLayer) {
+                            MapObjecType mtoIndex = MapObjecTypeOperations.getInstance().load(((MapObjectLayer) layer).ID);
+                            JSONObject jo = new JSONObject();
+                            jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
+                            jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
+                            jo.put("ID", mtoIndex.getId());
+                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
+                            cardinalLayersDefinitions.add(jo);
+                        } else {
+                            IGpLayer gpLayer = (IGpLayer) layer;
+                            JSONObject jsonObject = gpLayer.toJson();
+                            systemLayersArray.put(jsonObject);
+                            gpLayer.dispose();
+                        }
                     } else {
                         IGpLayer gpLayer = (IGpLayer) layer;
                         JSONObject jsonObject = gpLayer.toJson();
@@ -503,6 +562,8 @@ public enum CardinalLayerManager {
             jsonString = systemRoot.toString();
             editor.putString(GP_LOADED_SYSTEMMAPS_KEY, jsonString);
 
+            jsonString = cardinalRoot.toString();
+            editor.putString(GP_LOADED_CARDINAL_KEY, jsonString);
             editor.apply();
         }
     }
@@ -775,6 +836,16 @@ public enum CardinalLayerManager {
         return userLayersDefinitions.indexOf(jo);
     }
 
+    public void setEnabled(int position, boolean enabled) {
+        try {
+            List<JSONObject> list = cardinalLayersDefinitions;
+            JSONObject layerObj = list.get(position);
+            layerObj.put(IGpLayer.LAYERENABLED_TAG, enabled);
+        } catch (Exception e) {
+            GPLog.error(this, null, e);
+        }
+    }
+
     public void setEnabled(boolean isSystem, int position, boolean enabled) {
         try {
             List<JSONObject> list = isSystem ? systemLayersDefinitions : userLayersDefinitions;
@@ -785,8 +856,22 @@ public enum CardinalLayerManager {
         }
     }
 
-    public void changeLayerPosition(boolean isSystem, int fromRow, int toRow) {
-        List<JSONObject> list = isSystem ? systemLayersDefinitions : userLayersDefinitions;
+    public void changeLayerPosition(int layer, int fromRow, int toRow) {
+        List<JSONObject> list = null;
+        switch (layer) {
+            case 0:
+                list = userLayersDefinitions;
+                break;
+            case 1:
+                list = systemLayersDefinitions;
+                break;
+            case 2:
+                list = cardinalLayersDefinitions;
+                break;
+            default:
+                list = systemLayersDefinitions;
+                break;
+        }
         if (list.size() > fromRow && list.size() > toRow) {
             JSONObject item = list.remove(fromRow);
             list.add(toRow, item);
