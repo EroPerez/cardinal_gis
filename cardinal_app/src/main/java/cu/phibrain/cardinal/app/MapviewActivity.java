@@ -46,7 +46,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -75,14 +74,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
+import cu.phibrain.cardinal.app.helpers.StorageUtilities;
+import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
+import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
-import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.cardinal.app.ui.menu.MtoAdapter;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.model.Networks;
+import cu.phibrain.plugins.cardinal.io.model.SignalEvents;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoNotes;
@@ -129,7 +132,6 @@ import eu.geopaparazzi.map.features.tools.impl.PointMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.impl.PolygonMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.interfaces.Tool;
 import eu.geopaparazzi.map.features.tools.interfaces.ToolGroup;
-import eu.geopaparazzi.map.gui.MapLayerListActivity;
 import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
@@ -146,6 +148,7 @@ import static eu.geopaparazzi.library.util.LibraryConstants.NAME;
 import static eu.geopaparazzi.library.util.LibraryConstants.ROUTE;
 import static eu.geopaparazzi.library.util.LibraryConstants.TMPPNGIMAGENAME;
 import static eu.geopaparazzi.library.util.LibraryConstants.ZOOMLEVEL;
+
 
 /**
  * @author Andrea Antonello (www.hydrologis.com)
@@ -170,7 +173,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
     private TextView zoomLevelText;
     private TextView descriptorMto;
-    private  ImageButton buttom_sheet_background;
+    private ImageButton buttom_sheet_background;
     private ImageView selectMto;
     private FrameLayout fragmentCenter;
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
@@ -180,6 +183,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             int maxValue = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
             int chargedPct = (level * 100) / maxValue;
             updateBatteryCondition(chargedPct);
+
+            //register signal event only when battery is low
+            boolean isBatteryLow = intent.getBooleanExtra(BatteryManager.EXTRA_BATTERY_LOW, false);
+            if (isBatteryLow && appContainer.WorkSessionActive != null) {
+                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.POWER, appContainer.WorkSessionActive.getId(), chargedPct, new Date(), lastGpsPosition);
+            }
         }
 
     };
@@ -196,6 +205,19 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private ImageButton toggleLabelsButton;
     private boolean hasLabelledLayers;
     private AppContainer appContainer;
+    private BroadcastReceiver storageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long level = StorageUtilities.getAvailableExternalMemorySizeAsLong(context);
+
+            //register signal event only when battery is low
+            if (appContainer.WorkSessionActive != null) {
+                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.STORAGE, appContainer.WorkSessionActive.getId(), level, new Date(), lastGpsPosition);
+            }
+        }
+
+    };
+
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(cu.phibrain.plugins.cardinal.io.R.layout.activity_mapview);
@@ -243,7 +265,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         layerButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mapTagsIntent = new Intent(MapviewActivity.this,CardinalMapLayerListActivity.class);
+                Intent mapTagsIntent = new Intent(MapviewActivity.this, CardinalMapLayerListActivity.class);
                 startActivity(mapTagsIntent);
             }
         });
@@ -344,6 +366,10 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
 
         mapView.addMapUpdateListener(this);
+
+        //Register for storage update
+        registerReceiver(storageReceiver, new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
+
 
     }
 
@@ -451,6 +477,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     protected void onDestroy() {
         EditManager.INSTANCE.setEditingView(null, null);
         unregisterReceiver(batteryReceiver);
+        unregisterReceiver(storageReceiver);
 
         if (mapsSupportBroadcastReceiver != null) {
             unregisterReceiver(mapsSupportBroadcastReceiver);
@@ -820,9 +847,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         GpsLoggingStatus lastGpsLoggingStatus = GpsServiceUtilities.getGpsLoggingStatus(intent);
         lastGpsPosition = GpsServiceUtilities.getPosition(intent);
 
-
         if (lastGpsServiceStatus == GpsServiceStatus.GPS_OFF) {
             centerOnGps.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_center_gps_red_24dp));
+            if (lastGpsPosition != null && appContainer.WorkSessionActive != null) {
+                long currentTime = GpsServiceUtilities.getPositionTime(intent);
+                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.GPS, appContainer.WorkSessionActive.getId(), 0, currentTime > 0 ? new Date(currentTime) : new Date(), lastGpsPosition);
+            }
+
         } else {
             if (lastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
                 centerOnGps.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_center_gps_blue_24dp));
@@ -950,7 +981,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             builder.setMultiChoiceItems(items, checkedItems, dialogListener);
             AlertDialog dialog = builder.create();
             dialog.show();
-        }else if (i == R.id.frameLayout) {
+        } else if (i == R.id.frameLayout) {
             //temporal test, setando a null el map object activo en mapa
 
         }
@@ -1065,7 +1096,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 EditManager.INSTANCE.setActiveTool(panLabelsTool);
                 mapView.blockMap();
             }
-        }else if (i == R.id.buttom_sheet_background) {
+        } else if (i == R.id.buttom_sheet_background) {
 
             MtoAdapter usersAdapter;
             View bottomSheetView = LayoutInflater.from(getApplicationContext())
@@ -1081,8 +1112,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             descriptorMto = bottomSheetView.findViewById(R.id.descriptorMto);
 
             //filter Networks
-            List<Networks> networks =  appContainer.ProjectActive.getNetworks();
-            ArrayAdapter networksAdapter = new ArrayAdapter(this, R.layout.spinner,networks);
+            List<Networks> networks = appContainer.ProjectActive.getNetworks();
+            NetworkAdapter networksAdapter = new NetworkAdapter(this, R.layout.spinner, networks);
             filterNetworks = bottomSheetView.findViewById(R.id.spinnerNetworks);
             filterNetworks.setAdapter(networksAdapter);
 
@@ -1092,24 +1123,23 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             LinearLayoutManager horizontalLayoutManager
                     = new LinearLayoutManager(bottomSheetView.getContext(), LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(horizontalLayoutManager);
-            recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(),DividerItemDecoration.VERTICAL));
+            recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(), DividerItemDecoration.VERTICAL));
             //update Network Select
-            appContainer.NetworksActive = ((Networks)filterNetworks.getSelectedItem());
+            appContainer.NetworksActive = ((Networks) filterNetworks.getSelectedItem());
             List<MapObjecType> mtoList;
 
-            if(appContainer.MapObjectActive==null) {
-               //Muestro todos por capas
-               mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
-            }
-            else{
+            if (appContainer.MapObjectActive == null) {
+                //Muestro todos por capas
+                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
+            } else {
                 //Muestro solo los aptos segun reglas topologicas
                 mtoList = MapObjectOperations.getInstance().topologicalMtoFirewall(appContainer.MapObjectActive);
             }
 
-            MtoAdapter mtoAdapter = new MtoAdapter(mtoList,this);
+            MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
             recyclerView.setAdapter(mtoAdapter);
             bottomSheetDialog.setContentView(bottomSheetView);
-            if(appContainer.MapObjectActive==null) {
+            if (appContainer.MapObjectActive == null) {
                 filterNetworks.setVisibility(View.VISIBLE);
                 filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -1127,14 +1157,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     }
 
                 });
-            }
-            else{
+            } else {
                 filterNetworks.setVisibility(View.GONE);
             }
             bottomSheetDialog.show();
 
-        }
-        else if (i == R.id.selectMto) {
+        } else if (i == R.id.selectMto) {
             //Evento del Mot Selcecionado
             appContainer.MapObjectActive = null;
             appContainer.MapObjecTypeActive = null;
@@ -1161,7 +1189,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             disableEditing();
             mapView.releaseMapBlock();
         } else {
-           // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+            // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
             IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
             if (editLayer == null) {
                 // if not layer is
@@ -1183,7 +1211,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     }
 
     private void disableEditing() {
-       // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
+        // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
         Tool activeTool = EditManager.INSTANCE.getActiveTool();
         if (activeTool != null) {
             activeTool.disable();
@@ -1238,7 +1266,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         zoomInButton.setVisibility(visibility);
         //zoomLevelTextview.setVisibility(visibility);
         zoomOutButton.setVisibility(visibility);
-       // toggleEditingButton.setVisibility(visibility);
+        // toggleEditingButton.setVisibility(visibility);
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -1263,11 +1291,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     public void selectedMto(MapObjecType _mtoModel) {
         descriptorMto.setText(_mtoModel.getCaption());
         appContainer.MapObjecTypeActive = _mtoModel;
-        if(appContainer.MapObjecTypeActive!=null){
-            byte [] icon = _mtoModel.getIconAsByteArray();
-            if (icon != null){
+        if (appContainer.MapObjecTypeActive != null) {
+            byte[] icon = _mtoModel.getIconAsByteArray();
+            if (icon != null) {
                 Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-                selectMto.setImageBitmap(Bitmap.createScaledBitmap(bmp,30,
+                selectMto.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
                         30, false));
             }
         }

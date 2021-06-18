@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -35,7 +34,6 @@ import eu.geopaparazzi.map.GPMapThemes;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.layers.ELayerTypes;
-import eu.geopaparazzi.map.layers.LayerGroups;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
@@ -165,9 +163,9 @@ public enum CardinalLayerManager {
                 cardinalLayersDefinitions.add(jsonObject);
             }
         } else {
-          List<MapObjecType>  mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
-            for (MapObjecType mtoIndex: mapObjecTypeList) {
-                if(!mtoIndex.getIsAbstract()){
+            List<MapObjecType> mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
+            for (MapObjecType mtoIndex : mapObjecTypeList) {
+                if (!mtoIndex.getIsAbstract()) {
                     JSONObject jo = new JSONObject();
                     jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                     jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
@@ -331,16 +329,15 @@ public enum CardinalLayerManager {
                     sysLayer.setEnabled(isEnabled);
                 }
             }
-        }
-        else{
+        } else {
             loadCardinalLayers(mapView, activitySupporter, cardinalLayersDefinitions);
         }
     }
 
     private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException {
-        List<MapObjecType>  mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
-        for (MapObjecType mtoIndex: mapObjecTypeList) {
-            if(!mtoIndex.getIsAbstract()){
+        List<MapObjecType> mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
+        for (MapObjecType mtoIndex : mapObjecTypeList) {
+            if (!mtoIndex.getIsAbstract()) {
                 JSONObject jo = new JSONObject();
                 jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                 jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
@@ -532,16 +529,15 @@ public enum CardinalLayerManager {
             for (Layer layer : mapView.map().layers()) {
                 if (layer instanceof IGpLayer) {
                     if (layer instanceof ISystemLayer) {
-                        if(layer instanceof  ICardinalLayer){
-                            MapObjecType mtoIndex = MapObjecTypeOperations.getInstance().load(((MapObjectLayer)layer).ID);
+                        if (layer instanceof ICardinalLayer) {
+                            MapObjecType mtoIndex = MapObjecTypeOperations.getInstance().load(((MapObjectLayer) layer).ID);
                             JSONObject jo = new JSONObject();
                             jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                             jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
                             jo.put("ID", mtoIndex.getId());
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersDefinitions.add(jo);
-                        }
-                        else {
+                        } else {
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jsonObject = gpLayer.toJson();
                             systemLayersArray.put(jsonObject);
@@ -862,7 +858,7 @@ public enum CardinalLayerManager {
 
     public void changeLayerPosition(int layer, int fromRow, int toRow) {
         List<JSONObject> list = null;
-        switch (layer){
+        switch (layer) {
             case 0:
                 list = userLayersDefinitions;
                 break;

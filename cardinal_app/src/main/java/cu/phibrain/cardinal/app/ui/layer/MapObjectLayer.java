@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.R;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.ANote;
 import eu.geopaparazzi.library.database.DefaultHelperClasses;
@@ -43,11 +44,11 @@ import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.map.GPMapView;
-import cu.phibrain.plugins.cardinal.io.R;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_TEXT_VISIBLE;
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_VISIBLE;
+
 public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, ICardinalLayer {
     private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
     private static final int BG_COLOR = 0x80FF69B4; // 50 percent pink. AARRGGBB

@@ -127,7 +127,7 @@ public class GeopaparazziActivityFragment extends Fragment implements View.OnLon
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View v = inflater.inflate(R.layout.fragment_cardinal, container, false);
+        View v = inflater.inflate(R.layout.fragment_geopaparazzi, container, false);
 
         // this fragment adds to the menu
         setHasOptionsMenu(true);
