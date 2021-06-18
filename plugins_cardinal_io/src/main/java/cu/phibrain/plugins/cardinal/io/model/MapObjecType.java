@@ -123,6 +123,9 @@ public class MapObjecType implements Serializable {
     @Expose
     private boolean isAbstract;
 
+    @ToMany(referencedJoinProperty = "mapObjectTypeId")
+    private List<MapObject> mapObjects;
+
 
     private final static long serialVersionUID = -5405345251211056739L;
 
@@ -426,7 +429,39 @@ public class MapObjecType implements Serializable {
         this.isAbstract = isAbstract;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 947238317)
+    public List<MapObject> getMapObjects() {
+        if (mapObjects == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjectDao targetDao = daoSession.getMapObjectDao();
+            List<MapObject> mapObjectsNew = targetDao._queryMapObjecType_MapObjects(id);
+            synchronized (this) {
+                if (mapObjects == null) {
+                    mapObjects = mapObjectsNew;
+                }
+            }
+        }
+        return mapObjects;
+    }
+
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
+    @Generated(hash = 917535720)
+    public synchronized void resetMapObjects() {
+        mapObjects = null;
+    }
+
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

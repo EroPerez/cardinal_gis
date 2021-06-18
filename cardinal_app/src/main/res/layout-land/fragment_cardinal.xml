@@ -3,24 +3,94 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment"
-    >
+    tools:context="cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment">
 
     <TableLayout
         android:id="@+id/dashboardLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
-
+        android:paddingBottom="@dimen/activity_vertical_margin">
 
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:layout_weight="1">
+
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_column="0"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/dashboardButtonNotes"
+                    style="@style/GeopapTheme.Button.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:contentDescription="@string/dashboard_note_action_description"
+                    android:stateListAnimator="@null"
+                    app:srcCompat="@drawable/ic_dashboard_notes_24dp" />
+
+                <TextView
+                    android:id="@+id/dashboardTextNotes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
+                    android:textColor="@color/main_background"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_column="1"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/dashboardButtonGpslog"
+                    style="@style/GeopapTheme.Button.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:contentDescription="@string/dashboard_gpslog_action_description"
+                    android:stateListAnimator="@null"
+                    app:srcCompat="@drawable/ic_dashboard_gpslog_24dp" />
+
+                <TextView
+                    android:id="@+id/dashboardTextGpslog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
+                    android:textColor="@color/main_background"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/dashboardButtonMapview"
+                style="@style/GeopapTheme.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_column="2"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/dashboard_mapview_action_description"
+                app:srcCompat="@drawable/ic_dashboard_mapview_24dp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1">
 
             <FrameLayout
@@ -36,42 +106,26 @@
                     android:layout_height="match_parent"
                     android:layout_margin="10dp"
                     android:contentDescription="@string/dashboard_metadata_action_description"
-                    app:srcCompat="@drawable/ic_dashboard_metadata_24dp"
-                    android:stateListAnimator="@null" />
+                    android:stateListAnimator="@null"
+                    app:srcCompat="@drawable/ic_dashboard_metadata_24dp" />
 
                 <TextView
                     android:id="@+id/dashboardTextMetadata"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|start"
-                    android:layout_marginBottom="12dp"
                     android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
                     android:textColor="@color/main_background"
                     android:textStyle="bold" />
             </FrameLayout>
-            <ImageButton
-                android:id="@+id/dashboardButtonMapview"
-                style="@style/GeopapTheme.Button.Colored"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_column="1"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:contentDescription="@string/dashboard_mapview_action_description"
-                app:srcCompat="@drawable/ic_dashboard_mapview_24dp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
 
             <ImageButton
                 android:id="@+id/dashboardButtonImport"
                 style="@style/GeopapTheme.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_column="0"
+                android:layout_column="1"
                 android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/dashboard_import_action_description"
@@ -82,74 +136,11 @@
                 style="@style/GeopapTheme.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_column="1"
+                android:layout_column="2"
                 android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/dashboard_export_action_description"
                 app:srcCompat="@drawable/ic_dashboard_export_24dp" />
-        </TableRow>
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="visible"
-            >
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_column="0"
-                android:layout_weight="1">
-
-                <ImageButton
-                    android:id="@+id/dashboardButtonNotes"
-                    style="@style/GeopapTheme.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
-                    android:contentDescription="@string/dashboard_note_action_description"
-                    app:srcCompat="@drawable/ic_dashboard_notes_24dp"
-                    android:stateListAnimator="@null" />
-
-                <TextView
-                    android:id="@+id/dashboardTextNotes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|start"
-                    android:layout_marginBottom="12dp"
-                    android:layout_marginStart="14dp"
-                    android:textColor="@color/main_background"
-                    android:textStyle="bold" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_column="0"
-                android:layout_weight="1"
-
-                >
-
-                <ImageButton
-                    android:id="@+id/dashboardButtonGpslog"
-                    style="@style/GeopapTheme.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
-                    android:contentDescription="@string/dashboard_gpslog_action_description"
-                    app:srcCompat="@drawable/ic_dashboard_gpslog_24dp"
-                    android:stateListAnimator="@null" />
-
-                <TextView
-                    android:id="@+id/dashboardTextGpslog"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|start"
-                    android:layout_marginBottom="12dp"
-                    android:layout_marginStart="14dp"
-                    android:textColor="@color/main_background"
-                    android:textStyle="bold" />
-            </FrameLayout>
         </TableRow>
 
     </TableLayout>
@@ -160,5 +151,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/panic"
         app:srcCompat="@drawable/ic_panic_24dp" />
+
 </FrameLayout>

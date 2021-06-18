@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
@@ -16,6 +17,9 @@ import org.greenrobot.greendao.annotation.ToOne;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import cu.phibrain.plugins.cardinal.io.model.converter.GPGeoPointListConverter;
+import eu.geopaparazzi.map.GPGeoPoint;
 
 /**
  * Created by Ero on 04/05/2021.
@@ -59,9 +63,10 @@ public class MapObject implements Serializable {
     @ToOne(joinProperty = "mapObjectTypeId")
     private MapObjecType objectType;
 
+    @Convert(converter = GPGeoPointListConverter.class, columnType = String.class)
     @SerializedName("coord")
     @Expose
-    private String coord;
+    private List<GPGeoPoint> coord;
 
     @SerializedName("observation")
     @Expose
@@ -138,8 +143,8 @@ public class MapObject implements Serializable {
     private transient MapObjectDao myDao;
 
 
-    @Generated(hash = 134333716)
-    public MapObject(Long id, String code, long joinId, Long mapObjectTypeId, String coord,
+    @Generated(hash = 1526534128)
+    public MapObject(Long id, String code, long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord,
                      String observation, Date createdAt, Boolean isSync, Date SyncDate, long nodeGrade,
                      long stockCodeId, long sessionId) {
         this.id = id;
@@ -202,12 +207,11 @@ public class MapObject implements Serializable {
     }
 
 
-    public String getCoord() {
+    public List<GPGeoPoint> getCoord() {
         return this.coord;
     }
 
-
-    public void setCoord(String coord) {
+    public void setCoord(List<GPGeoPoint> coord) {
         this.coord = coord;
     }
 

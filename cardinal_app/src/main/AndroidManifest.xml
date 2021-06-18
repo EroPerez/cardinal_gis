@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/GeopapTheme"
         tools:replace="android:theme,android:label,android:name">
+        <activity android:name=".ui.activities.WorkSessionListActivity"></activity>
         <activity
             android:name=".CardinalActivity"
             android:label="@string/app_name"
