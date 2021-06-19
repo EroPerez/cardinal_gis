@@ -85,6 +85,9 @@ public class MapObjecType implements Serializable {
     @Expose
     private List<MapObjecTypeDefect> defects;
 
+    @ToMany(referencedJoinProperty = "mapObjectTypeId")
+    private List<MapObject> mapObjects;
+
     public enum GeomType {
         @SerializedName("0")
         POINT(0),
@@ -424,6 +427,34 @@ public class MapObjecType implements Serializable {
 
     public void setIsAbstract(boolean isAbstract) {
         this.isAbstract = isAbstract;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 947238317)
+    public List<MapObject> getMapObjects() {
+        if (mapObjects == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjectDao targetDao = daoSession.getMapObjectDao();
+            List<MapObject> mapObjectsNew = targetDao._queryMapObjecType_MapObjects(id);
+            synchronized (this) {
+                if (mapObjects == null) {
+                    mapObjects = mapObjectsNew;
+                }
+            }
+        }
+        return mapObjects;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 917535720)
+    public synchronized void resetMapObjects() {
+        mapObjects = null;
     }
 
     /** called by internal mechanisms, do not call yourself. */

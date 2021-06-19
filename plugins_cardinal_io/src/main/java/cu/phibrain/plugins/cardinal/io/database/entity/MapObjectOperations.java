@@ -34,19 +34,8 @@ public class MapObjectOperations extends BaseRepo<MapObject, MapObjectDao> {
         dao = daoSession.getMapObjectDao();
     }
 
-    public List<MapObjecType> topologicalMtoFirewall(MapObject mapObject){
-        List<MapObjecType> objcTypeList = new ArrayList<>();
-        for (TopologicalRule rule: mapObject.getObjectType().getTopoRule()) {
-            MapObjecType target =  rule.getTargetObj();
-            if (target.getIsAbstract()){
-                objcTypeList.addAll(MapObjecTypeOperations.getInstance().searchChildMto(objcTypeList, target));
-            }
-            else{
-                objcTypeList.add(target);
-            }
-        }
-        return objcTypeList;
-    }
+
+
 
 
 

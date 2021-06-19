@@ -24,11 +24,18 @@ import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.model.MapObject;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.ANote;
 import eu.geopaparazzi.library.database.DefaultHelperClasses;
@@ -54,31 +61,23 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
     private static final int TRANSP_WHITE = 0x80FFFFFF; // 50 percent white. AARRGGBB
     private static String NAME = null;
     public static final String NONFORMSTART = "@";
-    public static Long ID;
+    private Long ID;
     public static final int FORMUPDATE_RETURN_CODE = 669;
     private static Bitmap notesBitmap;
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
     private static int textSize;
     private static String colorStr;
-    private boolean showLabels;
-
-    public MapObjectLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
-        super(mapView.map(), getMarkerSymbol(mapView));
+    public MapObjectLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
+        super(mapView.map(), getMarkerSymbol(mapView, ID));
         this.mapView = mapView;
+        this.ID = ID;
         getName(mapView.getContext());
 
         this.activitySupporter = activitySupporter;
         setOnItemGestureListener(this);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
-        boolean notesVisible = preferences.getBoolean(PREFS_KEY_NOTES_VISIBLE, true);
-
-        showLabels = preferences.getBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, true);
-
         try {
-            if (notesVisible)
-                reloadData();
+            reloadData();
         } catch (IOException e) {
             GPLog.error(this, null, e);
         }
@@ -93,108 +92,43 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
         return NAME;
     }
 
-    private static MarkerSymbol getMarkerSymbol(GPMapView mapView) {
+
+    private static MarkerSymbol getMarkerSymbol(GPMapView mapView, Long _ID) throws IOException {
+        MapObjecType mtoMapObjecType = MapObjecTypeOperations.getInstance().load(_ID);
         SharedPreferences peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
-        // notes type
-        boolean doCustom = peferences.getBoolean(LibraryConstants.PREFS_KEY_NOTES_CHECK, true);
         String textSizeStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_TEXT_SIZE, LibraryConstants.DEFAULT_NOTES_SIZE + ""); //$NON-NLS-1$
-        textSize = Integer.parseInt(textSizeStr);
         colorStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_CUSTOMCOLOR, ColorUtilities.ALMOST_BLACK.getHex());
-        Drawable notesDrawable;
-        if (doCustom) {
-            String opacityStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_OPACITY, "255"); //$NON-NLS-1$
-            String sizeStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_SIZE, LibraryConstants.DEFAULT_NOTES_SIZE + ""); //$NON-NLS-1$
-            int noteSize = 15;//Integer.parseInt(sizeStr);
-            float opacity = Integer.parseInt(opacityStr);
+        Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), eu.geopaparazzi.library.R.drawable.ic_bookmarks_48dp);
 
-            OvalShape notesShape = new OvalShape();
-            android.graphics.Paint notesPaint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-            notesPaint.setStyle(android.graphics.Paint.Style.FILL);
-            notesPaint.setColor(-65536);
-            notesPaint.setAlpha((int) opacity);
+        //notesBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
+        byte [] icon = mtoMapObjecType.getIconAsByteArray();
+        notesBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
 
-            ShapeDrawable notesShapeDrawable = new ShapeDrawable(notesShape);
-
-            android.graphics.Paint paint = notesShapeDrawable.getPaint();
-            paint.set(notesPaint);
-            notesShapeDrawable.setIntrinsicHeight(noteSize);
-            notesShapeDrawable.setIntrinsicWidth(noteSize);
-            notesDrawable = notesShapeDrawable;
-        } else {
-            notesDrawable = Compat.getDrawable(mapView.getContext(), eu.geopaparazzi.library.R.drawable.ic_place_accent_24dp);
-        }
-
-        notesBitmap = AndroidGraphics.drawableToBitmap(notesDrawable);
-
-        return new MarkerSymbol(notesBitmap, MarkerSymbol.HotspotPlace.CENTER, false);
+        return new MarkerSymbol(notesBitmap, MarkerSymbol.HotspotPlace.UPPER_LEFT_CORNER, false);
     }
+
 
     public MapObjectLayer(Map map, MarkerSymbol defaultMarker) {
         super(map, defaultMarker);
     }
 
     public void reloadData() throws IOException {
-        SQLiteDatabase sqliteDatabase = GPApplication.getInstance().getDatabase();
-
-        String query = "SELECT " +//NON-NLS
-                TableDescriptions.NotesTableFields.COLUMN_ID.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_LON.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_LAT.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_ALTIM.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_TEXT.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_TS.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_FORM.getFieldName() +//
-                " FROM " + TableDescriptions.TABLE_NOTES;//NON-NLS
-        query = query + " WHERE " + TableDescriptions.NotesTableFields.COLUMN_ISDIRTY.getFieldName() + " = 1";//NON-NLS
-
+        MapObjecType mtoMapObjecType = MapObjecTypeOperations.getInstance().load(this.getID());
+        List<MapObject> mapObjects = mtoMapObjecType.getMapObjects();
         List<MarkerItem> pts = new ArrayList<>();
-        try (Cursor c = sqliteDatabase.rawQuery(query, null)) {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
-                int i = 0;
-                long id = c.getLong(i++);
-                double lon = c.getDouble(i++);
-                double lat = c.getDouble(i++);
-                double elev = c.getDouble(i++);
-                String text = c.getString(i++);
-                long ts = c.getLong(i++);
-                String form = c.getString(i);
-                boolean hasForm = form != null && form.length() > 0;
-
-
-                String descr;
-                if (!hasForm) {
-                    descr = NONFORMSTART + "note: " + "Meter formularios de ediccion" + "\n" +//NON-NLS
-                            "Tipo: " + "Poste de Madera" + "\n" +//NON-NLS
-                            "id: " + id + "\n" +//NON-NLS
-                            "Longitude: " + lon + "\n" +//NON-NLS
-                            "Latitude: " + lat + "\n" +//NON-NLS
-                            "Elevation: " + elev + "\n" +//NON-NLS
-                            "Dia: " + TimeUtilities.INSTANCE.TIME_FORMATTER_LOCAL.format(new Date(ts));//NON-NLS
-                } else {
-                    descr = form;
-                }
-
-                pts.add(new MarkerItem(id, text, descr, new GeoPoint(lat, lon)));
-                c.moveToNext();
-            }
-
-            for (MarkerItem mi : pts) {
-                mi.setMarker(createAdvancedSymbol(mi, notesBitmap));
-            }
-            addItems(pts);
+        for (MapObject mapObject : mapObjects) {
+            String[] coord = mapObject.getCoord().split(",");
+            double lat = Double.parseDouble(coord[0]);
+            double lon = Double.parseDouble(coord[1]);
+            String text = mapObject.getObjectType().getCaption();
+            pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), new GeoPoint(lat, lon)));
         }
-
-
+        for (MarkerItem mi : pts) {
+            mi.setMarker(createAdvancedSymbol(mi, notesBitmap));
+        }
+        addItems(pts);
         update();
     }
-
 
     public void disable() {
         setEnabled(false);
@@ -254,49 +188,24 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
      * @param poiBitmap -> poi bitmap for the center
      * @return MarkerSymbol with title, description and symbol
      */
+
+
     private MarkerSymbol createAdvancedSymbol(MarkerItem item, Bitmap poiBitmap) {
-        final Paint textPainter = CanvasAdapter.newPaint();
-        textPainter.setStyle(Paint.Style.FILL);
-        int textColor = ColorUtilities.toColor(colorStr);
-        textPainter.setColor(textColor);
-        textPainter.setTextSize(textSize);
-        textPainter.setTypeface(Paint.FontFamily.MONOSPACE, Paint.FontStyle.NORMAL);
-
-        final Paint haloTextPainter = CanvasAdapter.newPaint();
-        haloTextPainter.setStyle(Paint.Style.FILL);
-        haloTextPainter.setColor(Color.WHITE);
-        haloTextPainter.setTextSize(textSize);
-        haloTextPainter.setTypeface(Paint.FontFamily.MONOSPACE, Paint.FontStyle.BOLD);
-
         int bitmapHeight = poiBitmap.getHeight();
         int margin = 3;
-        int dist2symbol = (int) Math.round(bitmapHeight * 1.5);
-
-        int titleWidth = ((int) haloTextPainter.getTextWidth(item.title) + 2 * margin);
-        int titleHeight = (int) (haloTextPainter.getTextHeight(item.title) + textPainter.getFontDescent() + 2 * margin);
+        int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
 
         int symbolWidth = poiBitmap.getWidth();
 
-        int xSize = Math.max(titleWidth, symbolWidth);
-        int ySize = titleHeight + symbolWidth + dist2symbol;
+        int xSize = symbolWidth;
+        int ySize = symbolWidth + dist2symbol;
 
         // markerCanvas, the drawing area for all: title, description and symbol
         Bitmap markerBitmap = CanvasAdapter.newBitmap(xSize, ySize, 0);
         org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
         markerCanvas.setBitmap(markerBitmap);
 
-        // titleCanvas for the title text
-        Bitmap titleBitmap = CanvasAdapter.newBitmap(titleWidth + margin, titleHeight + margin, 0);
-        org.oscim.backend.canvas.Canvas titleCanvas = CanvasAdapter.newCanvas();
-        titleCanvas.setBitmap(titleBitmap);
-
-        titleCanvas.fillRectangle(0, 0, titleWidth, titleHeight, TRANSP_WHITE);
-        titleCanvas.drawText(item.title, margin, titleHeight - margin - textPainter.getFontDescent(), haloTextPainter);
-        titleCanvas.drawText(item.title, margin, titleHeight - margin - textPainter.getFontDescent(), textPainter);
-
-        if (showLabels)
-            markerCanvas.drawBitmap(titleBitmap, xSize * 0.5f - (titleWidth * 0.5f), 0);
-        markerCanvas.drawBitmap(poiBitmap, xSize * 0.5f - (symbolWidth * 0.5f), ySize * 0.5f - (symbolWidth * 0.5f));
+        markerCanvas.drawBitmap(poiBitmap, xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f));
 
         return (new MarkerSymbol(markerBitmap, MarkerSymbol.HotspotPlace.CENTER, true));
     }
@@ -324,7 +233,9 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
 
     @Override
     public JSONObject toJson() throws JSONException {
-        return toDefaultJson();
+        JSONObject jo = toDefaultJson();
+        jo.put("ID", this.getID());
+        return jo;
     }
 
     @Override
@@ -340,5 +251,13 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
     @Override
     public void onPause() {
 
+    }
+
+    public Long getID() {
+        return ID;
+    }
+
+    public void setID(Long ID) {
+        this.ID = ID;
     }
 }
