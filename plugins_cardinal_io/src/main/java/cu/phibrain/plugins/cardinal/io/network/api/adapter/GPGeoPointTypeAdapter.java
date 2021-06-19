@@ -25,8 +25,7 @@ public class GPGeoPointTypeAdapter extends TypeAdapter<List<GPGeoPoint>> {
         }
 
         List<CardinalPoint> cardinalPoints = new ArrayList<>();
-        Type listType = new TypeToken<List<CardinalPoint>>() {
-        }.getType();
+        Type listType = new TypeToken<List<CardinalPoint>>() {}.getType();
 
         for (GPGeoPoint geoPoint :
                 gpGeoPoints) {

@@ -25,4 +25,8 @@ public class WorkerOperations extends BaseRepo<Worker, WorkerDao> {
     protected void initEntityDao() {
         dao = daoSession.getWorkerDao();
     }
+
+    public Worker findOneBy(String username){
+        return this.queryBuilder().where(WorkerDao.Properties.Username.eq(username)).unique();
+    }
 }

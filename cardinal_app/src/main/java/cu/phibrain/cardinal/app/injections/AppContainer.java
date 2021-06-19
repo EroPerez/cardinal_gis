@@ -11,6 +11,7 @@ import cu.phibrain.plugins.cardinal.io.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.model.Networks;
 import cu.phibrain.plugins.cardinal.io.model.Project;
 import cu.phibrain.plugins.cardinal.io.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.model.Worker;
 import cu.phibrain.plugins.cardinal.io.utils.CardinalMetadataTableDefaultValues;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
@@ -23,6 +24,7 @@ public class AppContainer {
     public Networks NetworksActive;
     public Long LevelActive;
     public MapObject MapObjectActive;
+    public Worker CurrentWorker;
 
     public AppContainer() throws IOException {
         refreshProject();

@@ -85,7 +85,8 @@ public class MapObjecType implements Serializable {
     @Expose
     private List<MapObjecTypeDefect> defects;
 
-
+    @ToMany(referencedJoinProperty = "mapObjectTypeId")
+    private List<MapObject> mapObjects;
 
     public enum GeomType {
         @SerializedName("0")
@@ -459,8 +460,10 @@ public class MapObjecType implements Serializable {
         mapObjects = null;
     }
 
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
 
-    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
