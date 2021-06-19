@@ -407,4 +407,5 @@
   <string name="description_of_the_new_profile">Descripción del nuevo Perfil</string>
   <string name="browse_images">Buscar imágenes</string>
   <string name="return_to_view_after_note">Volver a la vista tras la nota</string>
+    <string name="net_project_active">You don\'t hava an active project.</string>
 </resources>

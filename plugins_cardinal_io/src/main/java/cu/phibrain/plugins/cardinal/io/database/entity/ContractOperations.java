@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.BaseRepo;
-import cu.phibrain.plugins.cardinal.io.model.ProjectsWorkers;
-import cu.phibrain.plugins.cardinal.io.model.ProjectsWorkersDao;
+import cu.phibrain.plugins.cardinal.io.model.Contract;
+import cu.phibrain.plugins.cardinal.io.model.ContractDao;
 import cu.phibrain.plugins.cardinal.io.model.Worker;
 
-public class ContractOperations extends BaseRepo {
+public class ContractOperations extends BaseRepo<Contract, ContractDao> {
 
     private static ContractOperations mInstance = null;
-    private ProjectsWorkersDao dao;
 
     private ContractOperations() {
         super();
@@ -27,46 +26,28 @@ public class ContractOperations extends BaseRepo {
 
     @Override
     protected void initEntityDao() {
-        dao = daoSession.getProjectsWorkersDao();
+        dao = daoSession.getContractDao();
     }
 
-    public void insertContractList(List<ProjectsWorkers> projectList) {
-        dao.insertOrReplaceInTx(projectList);
-    }
-
-    public void insertContractList(Long projectId, List<Worker> workers, boolean enable) {
-        List<ProjectsWorkers> contracts = new ArrayList<>();
+    public void insertAll(Long projectId, List<Worker> workers, boolean enable) {
+        List<Contract> contracts = new ArrayList<>();
         for (Worker entity : workers) {
-            ProjectsWorkers contract = new ProjectsWorkers();
+            Contract contract = new Contract();
             contract.setActive(enable);
             contract.setProjectId(projectId);
             contract.setWorkerId(entity.getId());
             contracts.add(contract);
         }
 
-        this.insertContractList(contracts);
+        this.insertAll(contracts);
 
     }
 
-    public void insertContract(ProjectsWorkers contract) {
-        dao.insertOrReplaceInTx(contract);
+    public Contract findOneBy(long projectId, long userId) {
+
+        return this.queryBuilder().where(ContractDao.Properties.ProjectId.eq(projectId), ContractDao.Properties.WorkerId.eq(userId)).unique();
+
     }
 
-    /**
-     * @return list of user entity from the table name Entity in the database
-     */
-    public List<ProjectsWorkers> getContractList() {
-        return dao.queryBuilder()
-                .list();
-    }
-
-    public void delete(Long contractId) {
-        dao.deleteByKey(contractId);
-    }
-
-
-    public void update(ProjectsWorkers contract) {
-        dao.updateInTx(contract);
-    }
 
 }

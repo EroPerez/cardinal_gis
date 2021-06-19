@@ -180,4 +180,5 @@ public class Worker implements Serializable {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+
 }

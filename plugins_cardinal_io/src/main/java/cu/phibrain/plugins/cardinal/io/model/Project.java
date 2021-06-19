@@ -8,7 +8,6 @@ import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.JoinEntity;
 import org.greenrobot.greendao.annotation.OrderBy;
 import org.greenrobot.greendao.annotation.ToMany;
 
@@ -49,15 +48,10 @@ public class Project implements Serializable {
     @Expose
     private Date createdAt;
 
-    @ToMany
-    @JoinEntity(
-            entity = ProjectsWorkers.class,
-            sourceProperty = "projectId",
-            targetProperty = "workerId"
-    )
-    @SerializedName("workers")
+    @ToMany(referencedJoinProperty = "projectId")
+    @SerializedName("contracts")
     @Expose
-    private List<Worker> workers;
+    private List<Contract> contracts;
 
     @ToMany(referencedJoinProperty = "projectId")
     @OrderBy("code ASC")
@@ -65,16 +59,22 @@ public class Project implements Serializable {
     @Expose
     private List<Stock> stocks;
 
-
     @ToMany(referencedJoinProperty = "projectId")
     @SerializedName("zone")
     @Expose
     private List<Zone> zone;
 
     @ToMany(referencedJoinProperty = "projectId")
-    @SerializedName("groupoflayers")
+    @SerializedName("networks")
     @Expose
-    private List<GroupOfLayer> groupoflayers;
+    private List<Networks> networks;
+
+
+    @ToMany(referencedJoinProperty = "projectId")
+    @OrderBy("addedDate ASC")
+    @SerializedName("label_batches")
+    @Expose
+    private List<LabelBatches> labelBatches;
 
     private final static long serialVersionUID = -7160043438657824243L;
 
@@ -140,30 +140,30 @@ public class Project implements Serializable {
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 722190173)
-    public List<Worker> getWorkers() {
-        if (workers == null) {
+    @Generated(hash = 106269716)
+    public List<Contract> getContracts() {
+        if (contracts == null) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
-            WorkerDao targetDao = daoSession.getWorkerDao();
-            List<Worker> workersNew = targetDao._queryProject_Workers(id);
+            ContractDao targetDao = daoSession.getContractDao();
+            List<Contract> contractsNew = targetDao._queryProject_Contracts(id);
             synchronized (this) {
-                if (workers == null) {
-                    workers = workersNew;
+                if (contracts == null) {
+                    contracts = contractsNew;
                 }
             }
         }
-        return workers;
+        return contracts;
     }
 
     /**
      * Resets a to-many relationship, making the next get call to query for a fresh result.
      */
-    @Generated(hash = 646726799)
-    public synchronized void resetWorkers() {
-        workers = null;
+    @Generated(hash = 1157686510)
+    public synchronized void resetContracts() {
+        contracts = null;
     }
 
     /**
@@ -230,30 +230,60 @@ public class Project implements Serializable {
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 1852042894)
-    public List<GroupOfLayer> getGroupoflayers() {
-        if (groupoflayers == null) {
+    @Generated(hash = 654843115)
+    public List<Networks> getNetworks() {
+        if (networks == null) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
-            GroupOfLayerDao targetDao = daoSession.getGroupOfLayerDao();
-            List<GroupOfLayer> groupoflayersNew = targetDao._queryProject_Groupoflayers(id);
+            NetworksDao targetDao = daoSession.getNetworksDao();
+            List<Networks> networksNew = targetDao._queryProject_Networks(id);
             synchronized (this) {
-                if (groupoflayers == null) {
-                    groupoflayers = groupoflayersNew;
+                if (networks == null) {
+                    networks = networksNew;
                 }
             }
         }
-        return groupoflayers;
+        return networks;
     }
 
     /**
      * Resets a to-many relationship, making the next get call to query for a fresh result.
      */
-    @Generated(hash = 962824708)
-    public synchronized void resetGroupoflayers() {
-        groupoflayers = null;
+    @Generated(hash = 107840085)
+    public synchronized void resetNetworks() {
+        networks = null;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 558037129)
+    public List<LabelBatches> getLabelBatches() {
+        if (labelBatches == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            LabelBatchesDao targetDao = daoSession.getLabelBatchesDao();
+            List<LabelBatches> labelBatchesNew = targetDao._queryProject_LabelBatches(id);
+            synchronized (this) {
+                if (labelBatches == null) {
+                    labelBatches = labelBatchesNew;
+                }
+            }
+        }
+        return labelBatches;
+    }
+
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
+    @Generated(hash = 337186421)
+    public synchronized void resetLabelBatches() {
+        labelBatches = null;
     }
 
     /**

@@ -3,25 +3,71 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="cu.phibrain.cardinal.app">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!--  NORMAL PERMISSIONS     -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-feature android:name="android.hardware.location.gps" />
+
     <application
         android:name=".CardinalApplication"
         android:allowBackup="true"
-        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
-        android:supportsRtl="true"
+        android:label="@string/app_name"
         android:largeHeap="true"
+        android:supportsRtl="true"
         android:theme="@style/GeopapTheme"
         tools:replace="android:theme,android:label,android:name">
+        <activity android:name=".ui.activities.WorkSessionListActivity"></activity>
         <activity
-            android:name="cu.phibrain.cardinal.app.CardinalActivity"
+            android:name=".CardinalActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:theme="@style/GeopapTheme.NoActionBar">
             <intent-filter>
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gpap" />
+                <data android:scheme="file" />
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="www.openstreetmap.org"
+                    android:scheme="http" />
+
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="www.osm.org"
+                    android:scheme="http" />
+
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar" />
+        <activity
+            android:name=".ui.map.CardinalMapLayerListActivity"
+            android:label="Layers View"
+            android:parentActivityName=".MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cu.phibrain.cardinal.app.MapviewActivity" />
         </activity>
 
         <provider
@@ -29,7 +75,6 @@
             android:authorities="eu.geopaparazzi.provider.profiles"
             android:enabled="true"
             android:exported="true" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.library.fileprovider"
@@ -40,6 +85,5 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
-
 
 </manifest>

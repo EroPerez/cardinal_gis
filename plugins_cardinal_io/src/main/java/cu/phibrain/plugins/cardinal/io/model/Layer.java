@@ -1,17 +1,19 @@
 
 package cu.phibrain.plugins.cardinal.io.model;
 
-import java.io.Serializable;
-import java.util.List;
+import android.util.Base64;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.DaoException;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Ero on 15/02/2021.
@@ -44,6 +46,11 @@ public class Layer implements Serializable {
     @SerializedName("mapobjectypes")
     @Expose
     private List<MapObjecType> mapobjectypes;
+
+    @SerializedName("icon")
+    @Expose
+    private String icon;
+
     private final static long serialVersionUID = -8834285743731834345L;
 
     /**
@@ -64,11 +71,12 @@ public class Layer implements Serializable {
     public Layer() {
     }
 
-    @Generated(hash = 2063013320)
-    public Layer(Long id, String name, long groupId) {
+    @Generated(hash = 1110300905)
+    public Layer(Long id, String name, long groupId, String icon) {
         this.id = id;
         this.name = name;
         this.groupId = groupId;
+        this.icon = icon;
     }
 
     public Long getId() {
@@ -93,6 +101,10 @@ public class Layer implements Serializable {
 
     public void setGroupId(long groupId) {
         this.groupId = groupId;
+    }
+
+    public byte[] getIconAsByteArray() {
+        return Base64.decode(icon, 0);
     }
 
     /**
@@ -159,6 +171,14 @@ public class Layer implements Serializable {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+    public String getIcon() {
+        return this.icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     /** called by internal mechanisms, do not call yourself. */

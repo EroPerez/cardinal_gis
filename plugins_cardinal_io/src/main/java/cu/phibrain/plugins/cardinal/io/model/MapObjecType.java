@@ -1,19 +1,25 @@
 
 package cu.phibrain.plugins.cardinal.io.model;
 
+import android.util.Base64;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.ToOne;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.List;
+
+import cu.phibrain.plugins.cardinal.io.model.converter.GeomTypeConverter;
 
 /**
  * Created by Ero on 15/02/2021.
@@ -59,9 +65,10 @@ public class MapObjecType implements Serializable {
     @Expose
     private Long layerId;
 
-//    @SerializedName("rules")
-//    @Expose
-//    private List<Integer> rules = new ArrayList<Integer>();
+    @ToMany(referencedJoinProperty = "originId")
+    @SerializedName("rules")
+    @Expose
+    private List<TopologicalRule> topoRule;
 
     @ToMany(referencedJoinProperty = "mapObjecTypeId")
     @SerializedName("attrs")
@@ -77,6 +84,47 @@ public class MapObjecType implements Serializable {
     @SerializedName("defects")
     @Expose
     private List<MapObjecTypeDefect> defects;
+
+    @ToMany(referencedJoinProperty = "mapObjectTypeId")
+    private List<MapObject> mapObjects;
+
+    public enum GeomType {
+        @SerializedName("0")
+        POINT(0),
+        @SerializedName("2")
+        POLYLINE(2),
+        @SerializedName("3")
+        POLYGON(3);
+
+        private final int id;
+
+        public int getId() {
+            return id;
+        }
+
+        @Nullable
+        public static GeomType fromId(int id) {
+            for (GeomType type : GeomType.values()) {
+                if (type.getId() == id) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        GeomType(int id) {
+            this.id = id;
+        }
+    }
+
+    @Convert(converter = GeomTypeConverter.class, columnType = Integer.class)
+    @SerializedName("geometry_type")
+    @Expose
+    private GeomType geomType;
+
+    @SerializedName("is_abstract")
+    @Expose
+    private boolean isAbstract;
 
     private final static long serialVersionUID = -5405345251211056739L;
 
@@ -101,15 +149,17 @@ public class MapObjecType implements Serializable {
     public MapObjecType() {
     }
 
-    @Generated(hash = 1658160018)
-    public MapObjecType(Long id, long parentId, String icon, String caption,
-                        String description, Long layerId) {
+    @Generated(hash = 150850807)
+    public MapObjecType(Long id, long parentId, String icon, String caption, String description,
+            Long layerId, GeomType geomType, boolean isAbstract) {
         this.id = id;
         this.parentId = parentId;
         this.icon = icon;
         this.caption = caption;
         this.description = description;
         this.layerId = layerId;
+        this.geomType = geomType;
+        this.isAbstract = isAbstract;
     }
 
     public Long getId() {
@@ -126,6 +176,12 @@ public class MapObjecType implements Serializable {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public byte[] getIconAsByteArray() {
+        if(!this.icon.isEmpty())
+            return Base64.decode(this.icon.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
+        return null;
     }
 
     public String getIcon() {
@@ -328,14 +384,85 @@ public class MapObjecType implements Serializable {
         }
     }
 
+    public GeomType getGeomType() {
+        return this.geomType;
+    }
+
+    public void setGeomType(GeomType geomType) {
+        this.geomType = geomType;
+    }
+
     /**
-     * called by internal mechanisms, do not call yourself.
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
      */
+    @Generated(hash = 664408944)
+    public List<TopologicalRule> getTopoRule() {
+        if (topoRule == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            TopologicalRuleDao targetDao = daoSession.getTopologicalRuleDao();
+            List<TopologicalRule> topoRuleNew = targetDao._queryMapObjecType_TopoRule(id);
+            synchronized (this) {
+                if (topoRule == null) {
+                    topoRule = topoRuleNew;
+                }
+            }
+        }
+        return topoRule;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 819251379)
+    public synchronized void resetTopoRule() {
+        topoRule = null;
+    }
+
+    public boolean getIsAbstract() {
+        return this.isAbstract;
+    }
+
+    public void setIsAbstract(boolean isAbstract) {
+        this.isAbstract = isAbstract;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 947238317)
+    public List<MapObject> getMapObjects() {
+        if (mapObjects == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjectDao targetDao = daoSession.getMapObjectDao();
+            List<MapObject> mapObjectsNew = targetDao._queryMapObjecType_MapObjects(id);
+            synchronized (this) {
+                if (mapObjects == null) {
+                    mapObjects = mapObjectsNew;
+                }
+            }
+        }
+        return mapObjects;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 917535720)
+    public synchronized void resetMapObjects() {
+        mapObjects = null;
+    }
+
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getMapObjecTypeDao() : null;
     }
+
 
 
 }

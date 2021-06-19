@@ -11,6 +11,10 @@
     <string name="title">Name</string>
     <string name="remote_layers_list">Remote Projects List</string>
     <string name="geometry_type">Created At:</string>
-    <string name="srid">ID</string>
+    <string name="srid">ID: </string>
     <string name="enter_a_name_for_downloaded_project">Set name for downloaded project database</string>
+    <string name="layername_edges">Cardinal Edges</string>
+    <string name="layername_mot">Cardinal Map Object Type</string>
+    <string name="not_project_active">You don\'t have an active project.</string>
+    <string name="route_reset">Route resetting.</string>
 </resources>

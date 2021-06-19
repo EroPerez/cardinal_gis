@@ -1,15 +1,20 @@
 package cu.phibrain.plugins.cardinal.io.database.entity;
 
+import org.greenrobot.greendao.query.Query;
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.BaseRepo;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecTypeDao;
+import cu.phibrain.plugins.cardinal.io.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.model.TopologicalRule;
 
-public class MapObjecTypeOperations extends BaseRepo {
+public class MapObjecTypeOperations extends BaseRepo<MapObjecType, MapObjecTypeDao> {
 
     private static MapObjecTypeOperations mInstance = null;
-    private MapObjecTypeDao dao;
 
     private MapObjecTypeOperations() {
         super();
@@ -28,29 +33,39 @@ public class MapObjecTypeOperations extends BaseRepo {
         dao = daoSession.getMapObjecTypeDao();
     }
 
-    public void insertMapObjecTypesList(List<MapObjecType> mapObjecTypeList) {
-        dao.insertOrReplaceInTx(mapObjecTypeList);
+    public List<MapObjecType> searchChildMto(List<MapObjecType> objcTypeList, MapObjecType mapObjecType){
+        Query<MapObjecType> MapObjectsQuery;
+        synchronized (this) {
+            QueryBuilder<MapObjecType> queryBuilder = queryBuilder();
+            queryBuilder.where(MapObjecTypeDao.Properties.ParentId.eq(null));
+            MapObjectsQuery = queryBuilder.build();
+        }
+        Query<MapObjecType> query = MapObjectsQuery.forCurrentThread();
+        query.setParameter(0, mapObjecType.getId());
+        //Load Mto by parent
+        List<MapObjecType> mtoChildList = query.list();
+        for (MapObjecType mtoIndex:mtoChildList) {
+            if (mtoIndex.getIsAbstract())
+                searchChildMto(objcTypeList,mtoIndex);
+            else
+                objcTypeList.add(mtoIndex);
+        }
+        return  objcTypeList;
+
     }
 
-
-    public void insert(MapObjecType mapObjecType) {
-        dao.insertOrReplaceInTx(mapObjecType);
+    public List<MapObjecType> topologicalMtoFirewall(MapObject mapObject){
+        List<MapObjecType> objcTypeList = new ArrayList<>();
+        for (TopologicalRule rule: mapObject.getObjectType().getTopoRule()) {
+            MapObjecType target =  rule.getTargetObj();
+            if (target.getIsAbstract()){
+                objcTypeList.addAll(MapObjecTypeOperations.getInstance().searchChildMto(objcTypeList, target));
+            }
+            else{
+                objcTypeList.add(target);
+            }
+        }
+        return objcTypeList;
     }
 
-    /**
-     * @return list of user entity from the table name UserEntity in the database
-     */
-    public List<MapObjecType> getMapObjecTypeList() {
-        return dao.queryBuilder()
-                .list();
-    }
-
-    public void delete(Long mapObjecTypeId) {
-        dao.deleteByKey(mapObjecTypeId);
-    }
-
-
-    public void update(MapObjecType mapObjecType) {
-        dao.updateInTx(mapObjecType);
-    }
 }
