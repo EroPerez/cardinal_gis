@@ -460,7 +460,6 @@ public class MapObjecType implements Serializable {
         mapObjects = null;
     }
 
-
     /**
      * called by internal mechanisms, do not call yourself.
      */

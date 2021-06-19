@@ -353,7 +353,9 @@ public class WorkSession implements Serializable {
         myDao.update(this);
     }
 
-    /** To-one relationship, resolved on first access. */
+    /**
+     * To-one relationship, resolved on first access.
+     */
     @Generated(hash = 1260959430)
     public Contract getContractObj() {
         long __key = this.contractId;
@@ -372,7 +374,9 @@ public class WorkSession implements Serializable {
         return contractObj;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 171903385)
     public void setContractObj(@NotNull Contract contractObj) {
         if (contractObj == null) {
@@ -386,7 +390,9 @@ public class WorkSession implements Serializable {
         }
     }
 
-    /** To-one relationship, resolved on first access. */
+    /**
+     * To-one relationship, resolved on first access.
+     */
     @Generated(hash = 843009192)
     public Zone getZoneObj() {
         long __key = this.zoneId;
@@ -405,7 +411,9 @@ public class WorkSession implements Serializable {
         return zoneObj;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 806374319)
     public void setZoneObj(@NotNull Zone zoneObj) {
         if (zoneObj == null) {
@@ -419,12 +427,22 @@ public class WorkSession implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        return "WorkSession{" +
+                "id=" + id +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", zone=" + this.getZoneObj().getName() +
+                ", active=" + active +
+                ", Worker=" + this.getContractObj().getTheWorker().getFirstName() +
+                '}';
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1446127786)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getWorkSessionDao() : null;
     }
-
-
 }
