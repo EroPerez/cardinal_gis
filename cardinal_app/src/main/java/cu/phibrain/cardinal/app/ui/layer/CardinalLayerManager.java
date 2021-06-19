@@ -13,6 +13,7 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -34,6 +36,7 @@ import eu.geopaparazzi.map.GPMapThemes;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.layers.ELayerTypes;
+import eu.geopaparazzi.map.layers.LayerGroups;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
@@ -114,11 +117,11 @@ public enum CardinalLayerManager {
             jo.put(IGpLayer.LAYERENABLED_TAG, true);
             systemLayersDefinitions.add(jo);
 
-//            jo = new JSONObject();
-//            jo.put(IGpLayer.LAYERTYPE_TAG, BookmarkLayer.class.getCanonicalName());
-//            jo.put(IGpLayer.LAYERNAME_TAG, BookmarkLayer.getName(context));
-//            jo.put(IGpLayer.LAYERENABLED_TAG, true);
-//            systemLayersDefinitions.add(jo);
+            jo = new JSONObject();
+            jo.put(IGpLayer.LAYERTYPE_TAG, BookmarkLayer.class.getCanonicalName());
+            jo.put(IGpLayer.LAYERNAME_TAG, BookmarkLayer.getName(context));
+            jo.put(IGpLayer.LAYERENABLED_TAG, true);
+            systemLayersDefinitions.add(jo);
 //
 //            jo = new JSONObject();
 //            jo.put(IGpLayer.LAYERTYPE_TAG, ImagesLayer.class.getCanonicalName());
@@ -163,9 +166,9 @@ public enum CardinalLayerManager {
                 cardinalLayersDefinitions.add(jsonObject);
             }
         } else {
-            List<MapObjecType> mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
-            for (MapObjecType mtoIndex : mapObjecTypeList) {
-                if (!mtoIndex.getIsAbstract()) {
+          List<MapObjecType>  mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
+            for (MapObjecType mtoIndex: mapObjecTypeList) {
+                if(!mtoIndex.getIsAbstract()){
                     JSONObject jo = new JSONObject();
                     jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                     jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
@@ -179,12 +182,12 @@ public enum CardinalLayerManager {
 
     }
 
-    public void createGroups(GPMapView mapView) {
+    public void createGroups(CardinalGPMapView mapView) {
         Layers layers = mapView.map().layers();
-        layers.addGroup(CardinalLayerGroups.GROUP_MAPLAYERS.getGroupId());
-        layers.addGroup(CardinalLayerGroups.GROUP_PROJECTLAYERS.getGroupId());
-        layers.addGroup(CardinalLayerGroups.GROUP_3D.getGroupId());
-        layers.addGroup(CardinalLayerGroups.GROUP_SYSTEM_TOP.getGroupId());
+//        layers.addGroup(CardinalLayerGroups.GROUP_MAPLAYERS.getGroupId());
+//        layers.addGroup(CardinalLayerGroups.GROUP_PROJECTLAYERS.getGroupId());
+//        layers.addGroup(CardinalLayerGroups.GROUP_3D.getGroupId());
+//        layers.addGroup(CardinalLayerGroups.GROUP_SYSTEM_TOP.getGroupId());
         //Add Group Cardinal Layers
         layers.addGroup(CardinalLayerGroups.GROUP_CARDINALLAYERS.getGroupId());
     }
@@ -323,27 +326,33 @@ public enum CardinalLayerManager {
                 if (hasEnabled)
                     isEnabled = layerDefinition.getBoolean(IGpLayer.LAYERENABLED_TAG);
 
-                if (layerClass.equals(MapObjectLayer.class.getCanonicalName()) && Id == MapObjectLayer.ID) {
-                    GpsLogsLayer sysLayer = new GpsLogsLayer(mapView);
+                if (layerClass.equals(MapObjectLayer.class.getCanonicalName())) {
+                    MapObjectLayer sysLayer = new MapObjectLayer(mapView, activitySupporter, Id);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
                 }
             }
-        } else {
+        }
+        else{
             loadCardinalLayers(mapView, activitySupporter, cardinalLayersDefinitions);
         }
     }
 
-    private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException {
-        List<MapObjecType> mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
-        for (MapObjecType mtoIndex : mapObjecTypeList) {
-            if (!mtoIndex.getIsAbstract()) {
+    private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException, IOException {
+        List<MapObjecType>  mapObjecTypeList = MapObjecTypeOperations.getInstance().getAll();
+        for (MapObjecType mtoIndex: mapObjecTypeList) {
+            if(!mtoIndex.getIsAbstract()){
                 JSONObject jo = new JSONObject();
                 jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                 jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
                 jo.put("ID", mtoIndex.getId());
                 jo.put(IGpLayer.LAYERENABLED_TAG, true);
                 cardinalLayersDefinitions.add(jo);
+                //Load layer
+                MapObjectLayer mapObjectLayer = new MapObjectLayer(mapView, activitySupporter, mtoIndex.getId());
+                mapObjectLayer.setID(mtoIndex.getId());
+                mapObjectLayer.load();
+
             }
         }
     }
@@ -529,15 +538,18 @@ public enum CardinalLayerManager {
             for (Layer layer : mapView.map().layers()) {
                 if (layer instanceof IGpLayer) {
                     if (layer instanceof ISystemLayer) {
-                        if (layer instanceof ICardinalLayer) {
-                            MapObjecType mtoIndex = MapObjecTypeOperations.getInstance().load(((MapObjectLayer) layer).ID);
+                        if(layer instanceof  ICardinalLayer){
+                            IGpLayer gpLayer = (IGpLayer) layer;
+                            MapObjecType mtoIndex = MapObjecTypeOperations.getInstance().load(((MapObjectLayer)layer).getID());
                             JSONObject jo = new JSONObject();
                             jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                             jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
                             jo.put("ID", mtoIndex.getId());
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
-                            cardinalLayersDefinitions.add(jo);
-                        } else {
+                            cardinalLayersArray.put(jo);
+                            gpLayer.dispose();
+                        }
+                        else {
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jsonObject = gpLayer.toJson();
                             systemLayersArray.put(jsonObject);
@@ -858,7 +870,7 @@ public enum CardinalLayerManager {
 
     public void changeLayerPosition(int layer, int fromRow, int toRow) {
         List<JSONObject> list = null;
-        switch (layer) {
+        switch (layer){
             case 0:
                 list = userLayersDefinitions;
                 break;
