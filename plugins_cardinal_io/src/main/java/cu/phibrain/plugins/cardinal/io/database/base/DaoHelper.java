@@ -5,7 +5,9 @@ import org.greenrobot.greendao.AbstractDao;
 import java.util.ArrayList;
 import java.util.List;
 
+//import cu.phibrain.plugins.cardinal.io.model.GroupOfLayerDao;
 import cu.phibrain.plugins.cardinal.io.model.ContractDao;
+import cu.phibrain.plugins.cardinal.io.model.LabelBatches;
 import cu.phibrain.plugins.cardinal.io.model.LabelBatchesDao;
 import cu.phibrain.plugins.cardinal.io.model.LabelMaterialDao;
 import cu.phibrain.plugins.cardinal.io.model.LabelSubLotDao;
@@ -15,6 +17,7 @@ import cu.phibrain.plugins.cardinal.io.model.MapObjecTypeDefectDao;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecTypeStateDao;
 import cu.phibrain.plugins.cardinal.io.model.MapObjectDao;
 import cu.phibrain.plugins.cardinal.io.model.MapObjectHasDefectDao;
+import cu.phibrain.plugins.cardinal.io.model.MapObjectHasDefectHasImages;
 import cu.phibrain.plugins.cardinal.io.model.MapObjectHasDefectHasImagesDao;
 import cu.phibrain.plugins.cardinal.io.model.MapObjectHasStateDao;
 import cu.phibrain.plugins.cardinal.io.model.MapObjectImagesDao;
@@ -23,6 +26,7 @@ import cu.phibrain.plugins.cardinal.io.model.MapObjectTypeAttributeDao;
 import cu.phibrain.plugins.cardinal.io.model.MaterialDao;
 import cu.phibrain.plugins.cardinal.io.model.NetworksDao;
 import cu.phibrain.plugins.cardinal.io.model.ProjectDao;
+//import cu.phibrain.plugins.cardinal.io.model.ProjectsWorkersDao;
 import cu.phibrain.plugins.cardinal.io.model.RouteSegmentDao;
 import cu.phibrain.plugins.cardinal.io.model.SignalEventsDao;
 import cu.phibrain.plugins.cardinal.io.model.StockDao;
@@ -32,7 +36,6 @@ import cu.phibrain.plugins.cardinal.io.model.WorkSessionDao;
 import cu.phibrain.plugins.cardinal.io.model.WorkerDao;
 import cu.phibrain.plugins.cardinal.io.model.WorkerRouteDao;
 import cu.phibrain.plugins.cardinal.io.model.ZoneDao;
-
 
 /**
  * Can be Auto Generated using Annotation Processing

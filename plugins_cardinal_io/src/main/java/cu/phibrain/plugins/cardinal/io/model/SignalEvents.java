@@ -91,15 +91,6 @@ public class SignalEvents implements Serializable {
     @ToOne(joinProperty = "sessionId")
     private WorkSession session;
 
-
-    @SerializedName("gps_latitude")
-    @Expose
-    private double gpsLattitude;
-
-    @SerializedName("gps_longitude")
-    @Expose
-    private double gpsLongitude;
-
     private final static long serialVersionUID = 66866789217578488L;
 
     /**
@@ -114,34 +105,20 @@ public class SignalEvents implements Serializable {
     @Generated(hash = 1709751359)
     private transient SignalEventsDao myDao;
 
-    @Generated(hash = 834067561)
+    @Generated(hash = 1761034154)
     public SignalEvents(Long id, Date startDate, Date endDate, long level, SignalTypes types,
-                        long sessionId, double gpsLattitude, double gpsLongitude) {
+                        long sessionId) {
         this.id = id;
         this.startDate = startDate;
         this.endDate = endDate;
         this.level = level;
         this.types = types;
         this.sessionId = sessionId;
-        this.gpsLattitude = gpsLattitude;
-        this.gpsLongitude = gpsLongitude;
     }
 
     @Generated(hash = 500815275)
     public SignalEvents() {
     }
-
-    public SignalEvents(SignalTypes types, Date startDate, Date endDate, long level, long sessionId,
-                        double gpsLat, double gpsLon) {
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.level = level;
-        this.types = types;
-        this.sessionId = sessionId;
-        this.gpsLattitude = gpsLat;
-        this.gpsLongitude = gpsLon;
-    }
-
 
     public Long getId() {
         return this.id;
@@ -267,25 +244,7 @@ public class SignalEvents implements Serializable {
         myDao.update(this);
     }
 
-    public double getGpsLattitude() {
-        return this.gpsLattitude;
-    }
-
-    public void setGpsLattitude(double gpsLattitude) {
-        this.gpsLattitude = gpsLattitude;
-    }
-
-    public double getGpsLongitude() {
-        return this.gpsLongitude;
-    }
-
-    public void setGpsLongitude(double gpsLongitude) {
-        this.gpsLongitude = gpsLongitude;
-    }
-
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 961848201)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

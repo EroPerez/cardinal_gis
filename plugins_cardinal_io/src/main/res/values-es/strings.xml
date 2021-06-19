@@ -13,5 +13,5 @@
     <string name="upload_and_finish">Subir y terminar</string>
     <string name="enter_a_name_for_downloaded_project">Entrar nombre para la base de datos del proyecto descargado</string>
     <string name="not_project_active">No tiene un proyecto activo.</string>
-    <string name="route_reset">Reiniciando Ruta.</string>
+    <string name="route_reset">Recetiando Ruta.</string>
 </resources>
