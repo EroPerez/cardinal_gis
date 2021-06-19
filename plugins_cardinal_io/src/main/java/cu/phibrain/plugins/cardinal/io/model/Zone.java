@@ -40,6 +40,7 @@ public class Zone implements Serializable {
     @Expose
     private String boundingBox;
 
+
     @SerializedName("project")
     @Expose
     private Long projectId;

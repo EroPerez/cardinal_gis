@@ -122,9 +122,7 @@ public class MapObject implements Serializable {
     @Expose
     public List<MapObjectMetadata> metadata;
 
-
     private final static long serialVersionUID = -4499872341492642530L;
-
     /**
      * Used to resolve relations
      */
@@ -649,7 +647,9 @@ public class MapObject implements Serializable {
     }
 
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 788755102)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
