@@ -5,7 +5,7 @@ public enum CardinalLayerGroups {
     GROUP_PROJECTLAYERS(1, "projectlayers"),//
     GROUP_3D(2, "3dlayers"),//
     GROUP_SYSTEM_TOP(3, "systemtoplayers"),
-    GROUP_CARDINALLAYERS(4, "cardinallayers");
+    GROUP_CARDINALLAYERS(4,"cardinallayers");
 
     private final int groupId;
     private final String groupName;

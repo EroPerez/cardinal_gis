@@ -16,7 +16,7 @@ import org.greenrobot.greendao.annotation.ToOne;
  * Entity mapped to table "zone".
  */
 @Entity(
-        nameInDb = "MANAGER_LABEL_SUB_LOT",
+        nameInDb = "MANAGER_LABEL_BATCHES",
         // Whether an all properties constructor should be generated.
         // A no-args constructor is always required.
         generateConstructors = true,
