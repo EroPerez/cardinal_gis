@@ -126,6 +126,9 @@ public class MapObjecType implements Serializable {
     @Expose
     private boolean isAbstract;
 
+    @ToMany(referencedJoinProperty = "mapObjectTypeId")
+    private List<MapObject> mapObjects;
+
 
     private final static long serialVersionUID = -5405345251211056739L;
 
@@ -457,7 +460,11 @@ public class MapObjecType implements Serializable {
         mapObjects = null;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
+
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

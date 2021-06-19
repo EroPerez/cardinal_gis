@@ -1,12 +1,16 @@
 package cu.phibrain.plugins.cardinal.io.network.api;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.Date;
+import java.lang.reflect.Type;
+import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.network.api.adapter.GPGeoPointTypeAdapter;
+import eu.geopaparazzi.map.GPGeoPoint;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -29,16 +33,17 @@ public class ApiClient {
         // Asociamos el interceptor a las peticiones
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         httpClient.addInterceptor(logging);
+        Type listType = new TypeToken<List<GPGeoPoint>>() {
+        }.getType();
 
-//        Gson gson = new GsonBuilder()
-//                .registerTypeAdapter(Date.class, new ISO8601DateAdapter())
-//                // .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
-//                .create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(listType, new GPGeoPointTypeAdapter())
+                .create();
 
-       if (API_SERVICE == null) {
+        if (API_SERVICE == null) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .client(httpClient.build()) // <-- usamos el log level
                     .build();
             API_SERVICE = retrofit.create(ApiEndpointInterface.class);
