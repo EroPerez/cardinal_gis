@@ -2,8 +2,12 @@ package cu.phibrain.cardinal.app;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.json.JSONException;
+
 import java.io.IOException;
+
+import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.ContractOperations;
@@ -33,7 +37,6 @@ import cu.phibrain.plugins.cardinal.io.database.entity.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.WorkerRouteOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.ZoneOperations;
-import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.model.DaoSession;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -55,7 +58,8 @@ public class CardinalApplication extends GeopaparazziApplication {
     public DaoSession getDaoSession() {
         return daoSession;
     }
-    public AppContainer appContainer ;
+
+    public AppContainer appContainer;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -97,9 +101,7 @@ public class CardinalApplication extends GeopaparazziApplication {
             appContainer = new AppContainer();
             ResourcesManager.resetManager();
             ProfilesHandler.INSTANCE.checkActiveProfile(getContentResolver());
-            appContainer.refreshProject();
-            if(appContainer.ProjectActive!=null)
-                CardinalLayerManager.INSTANCE.init();
+            CardinalLayerManager.INSTANCE.init();
 
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
         } catch (IOException | JSONException e) {

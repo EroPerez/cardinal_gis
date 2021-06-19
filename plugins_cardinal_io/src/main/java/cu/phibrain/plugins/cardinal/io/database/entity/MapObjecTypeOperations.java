@@ -10,7 +10,6 @@ import cu.phibrain.plugins.cardinal.io.database.base.BaseRepo;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecTypeDao;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.model.MapObjectDao;
 import cu.phibrain.plugins.cardinal.io.model.TopologicalRule;
 
 public class MapObjecTypeOperations extends BaseRepo<MapObjecType, MapObjecTypeDao> {
@@ -67,12 +66,6 @@ public class MapObjecTypeOperations extends BaseRepo<MapObjecType, MapObjecTypeD
             }
         }
         return objcTypeList;
-    }
-
-    public List<MapObject> loadMapObjects(Long mto_id){
-        MapObjectDao targetDao = daoSession.getMapObjectDao();
-        List<MapObject> mapObjectsNew = targetDao._queryMapObjecType_MapObjects(mto_id);
-        return  mapObjectsNew;
     }
 
 }

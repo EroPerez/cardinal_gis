@@ -4,12 +4,16 @@ package cu.phibrain.plugins.cardinal.io.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
 import java.io.Serializable;
+import java.util.List;
 
-import org.greenrobot.greendao.annotation.Generated;
+import cu.phibrain.plugins.cardinal.io.model.converter.GPGeoPointListConverter;
+import eu.geopaparazzi.map.GPGeoPoint;
 
 
 /**
@@ -36,9 +40,10 @@ public class Zone implements Serializable {
     @Expose
     private String name;
 
+    @Convert(converter = GPGeoPointListConverter.class, columnType = String.class)
     @SerializedName("boundingBox")
     @Expose
-    private String boundingBox;
+    private List<GPGeoPoint> boundingBox;
 
 
     @SerializedName("project")
@@ -54,8 +59,8 @@ public class Zone implements Serializable {
     public Zone() {
     }
 
-    @Generated(hash = 1873487731)
-    public Zone(Long id, String name, String boundingBox, Long projectId) {
+    @Generated(hash = 709990726)
+    public Zone(Long id, String name, List<GPGeoPoint> boundingBox, Long projectId) {
         this.id = id;
         this.name = name;
         this.boundingBox = boundingBox;
@@ -78,20 +83,20 @@ public class Zone implements Serializable {
         this.name = name;
     }
 
-    public String getBoundingBox() {
-        return this.boundingBox;
-    }
-
-    public void setBoundingBox(String boundingBox) {
-        this.boundingBox = boundingBox;
-    }
-
     public Long getProjectId() {
         return this.projectId;
     }
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public List<GPGeoPoint> getBoundingBox() {
+        return this.boundingBox;
+    }
+
+    public void setBoundingBox(List<GPGeoPoint> boundingBox) {
+        this.boundingBox = boundingBox;
     }
 
 }
