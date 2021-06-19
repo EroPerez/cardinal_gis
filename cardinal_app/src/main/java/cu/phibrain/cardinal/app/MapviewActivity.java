@@ -79,15 +79,10 @@ import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
-
-import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapPosition;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
-import cu.phibrain.cardinal.app.ui.layer.MapObjectLayer;
-
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
@@ -139,7 +134,6 @@ import eu.geopaparazzi.map.features.tools.impl.PointMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.impl.PolygonMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.interfaces.Tool;
 import eu.geopaparazzi.map.features.tools.interfaces.ToolGroup;
-import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ILabeledLayer;
@@ -1196,13 +1190,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             if (theTextToRunOn.length() < 1) {
                                 theTextToRunOn = proposedName;
                             }
-                            obj.setCode(theTextToRunOn);
-                            obj.setCoord(String.valueOf(centerLat)+","+String.valueOf(centerLon));
-                            obj.setObjectType(appContainer.MapObjecTypeActive);
-                            obj.setMapObjectTypeId(appContainer.MapObjecTypeActive.getId());
-                            MapObjectOperations.getInstance().insert(obj);
-                            appContainer.MapObjectActive = obj;
-                            mapView.reloadLayer(MapObjectLayer.class);
+//                            obj.setCode(theTextToRunOn);
+//                            obj.setCoord(String.valueOf(centerLat)+","+String.valueOf(centerLon));
+//                            obj.setObjectType(appContainer.MapObjecTypeActive);
+//                            obj.setMapObjectTypeId(appContainer.MapObjecTypeActive.getId());
+//                            MapObjectOperations.getInstance().insert(obj);
+//                            appContainer.MapObjectActive = obj;
+//                            mapView.reloadLayer(MapObjectLayer.class);
 
                         } catch (Exception e) {
                             GPLog.error(this, e.getLocalizedMessage(), e);
