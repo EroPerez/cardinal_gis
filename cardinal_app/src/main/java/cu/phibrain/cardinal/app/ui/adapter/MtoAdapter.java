@@ -1,4 +1,4 @@
-package cu.phibrain.cardinal.app.ui.menu;
+package cu.phibrain.cardinal.app.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,8 +18,8 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
-import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 
 public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> implements Filterable {
@@ -40,7 +40,7 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
     public MtoAdapterVh onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
 
-        return new MtoAdapter.MtoAdapterVh(LayoutInflater.from(context).inflate(R.layout.recyclerview_item,null));
+        return new MtoAdapter.MtoAdapterVh(LayoutInflater.from(context).inflate(R.layout.recyclerview_item, null));
     }
 
 
@@ -48,7 +48,7 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
     public void onBindViewHolder(@NonNull MtoAdapter.MtoAdapterVh holder, int position) {
 
         MapObjecType mapObjecType = MtoModelList.get(position);
-        byte [] icon = mapObjecType.getIconAsByteArray();
+        byte[] icon = mapObjecType.getIconAsByteArray();
         if (icon != null)
             holder.updateIcon(icon);
     }
@@ -65,12 +65,12 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 FilterResults filterResults = new FilterResults();
-                AppContainer appContainer = ((CardinalApplication)CardinalApplication.getInstance()).appContainer;
-                if(charSequence == null | charSequence.length() == 0){
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+                if (charSequence == null | charSequence.length() == 0) {
                     filterResults.count = getMtoModelListFiltered.size();
                     filterResults.values = getMtoModelListFiltered;
 
-                }else{
+                } else {
                     List<MapObjecType> resultData = new ArrayList<>();
                     resultData = NetworksOperations.getInstance().getMapObjectTypes(appContainer.NetworksActive);
                     filterResults.count = resultData.size();
@@ -96,6 +96,7 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
 
     public class MtoAdapterVh extends RecyclerView.ViewHolder {
         ImageView imIcon;
+
         public MtoAdapterVh(@NonNull View itemView) {
             super(itemView);
             imIcon = itemView.findViewById(R.id.imageView);
@@ -108,9 +109,9 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
             });
         }
 
-        public void updateIcon(byte[] icon){
+        public void updateIcon(byte[] icon) {
             Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-            imIcon.setImageBitmap(Bitmap.createScaledBitmap(bmp,30,
+            imIcon.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
                     30, false));
         }
     }

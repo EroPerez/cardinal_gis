@@ -220,6 +220,7 @@ public class GPMapView extends org.oscim.android.MapView {
      * @param layerClass teh class of the layer to reload.
      */
     public void reloadLayer(Class<? extends IGpLayer> layerClass) throws Exception {
+        Layers layers = map().layers();
         for (Layer layer : map().layers()) {
             if (layer.getClass().isAssignableFrom(layerClass)) {
                 ((IGpLayer) layer).reloadData();
