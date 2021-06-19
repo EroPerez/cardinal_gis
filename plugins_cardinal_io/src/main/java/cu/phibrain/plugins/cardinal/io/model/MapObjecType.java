@@ -85,6 +85,9 @@ public class MapObjecType implements Serializable {
     @Expose
     private List<MapObjecTypeDefect> defects;
 
+    @ToMany(referencedJoinProperty = "mapObjectTypeId")
+    private List<MapObject> mapObjects;
+
     public enum GeomType {
         @SerializedName("0")
         POINT(0),
@@ -451,17 +454,17 @@ public class MapObjecType implements Serializable {
         return mapObjects;
     }
 
-    /**
-     * Resets a to-many relationship, making the next get call to query for a fresh result.
-     */
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
     @Generated(hash = 917535720)
     public synchronized void resetMapObjects() {
         mapObjects = null;
     }
 
+
     /**
      * called by internal mechanisms, do not call yourself.
      */
+
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

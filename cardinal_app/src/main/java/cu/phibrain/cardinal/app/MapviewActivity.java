@@ -79,7 +79,14 @@ import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
+
+import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapPosition;
+import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.cardinal.app.ui.layer.MapObjectLayer;
+
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
@@ -164,7 +171,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     public static final String MAPSCALE_X = "MAPSCALE_X"; //$NON-NLS-1$
     public static final String MAPSCALE_Y = "MAPSCALE_Y"; //$NON-NLS-1$
     private DecimalFormat formatter = new DecimalFormat("00"); //$NON-NLS-1$
-    private GPMapView mapView;
+    private CardinalGPMapView mapView;
     private SharedPreferences mPeferences;
 
 
@@ -285,7 +292,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         /*
          * create main mapview
          */
-        mapView = new GPMapView(this);
+        mapView = new CardinalGPMapView(this);
         mapView.setClickable(true);
         mapView.setOnTouchListener(this);
 
@@ -421,7 +428,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     @Override
     protected void onPause() {
         if (mapView != null) {
-            LayerManager.INSTANCE.onPause(mapView);
+            CardinalLayerManager.INSTANCE.onPause(mapView);
             mapView.onPause();
         }
         super.onPause();
@@ -431,7 +438,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     protected void onResume() {
         if (mapView != null) {
             mapView.onResume();
-            LayerManager.INSTANCE.onResume(mapView, this);
+            CardinalLayerManager.INSTANCE.onResume(mapView, this);
 
             GPMapPosition mapPosition = mapView.getMapPosition();
             setNewCenter(mapPosition.getLongitude() + 0.000001, mapPosition.getLatitude() + 0.000001);
@@ -488,7 +495,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
 
         try {
-            LayerManager.INSTANCE.dispose(mapView);
+            CardinalLayerManager.INSTANCE.dispose(mapView);
         } catch (JSONException e) {
             GPLog.error(this, null, e);
         }
@@ -1054,7 +1061,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 toggleMeasuremodeButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_measuremode_on_24dp));
                 toggleLoginfoButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_loginfo_off_24dp));
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_labels_off_24dp));
-                TapMeasureTool measureTool = new TapMeasureTool(mapView);
+                TapMeasureTool measureTool = new TapMeasureTool(((GPMapView) mapView));
                 EditManager.INSTANCE.setActiveTool(measureTool);
             } else {
                 toggleMeasuremodeButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_measuremode_off_24dp));
@@ -1133,7 +1140,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
             } else {
                 //Muestro solo los aptos segun reglas topologicas
-                mtoList = MapObjectOperations.getInstance().topologicalMtoFirewall(appContainer.MapObjectActive);
+                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.MapObjectActive);
             }
 
             MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
@@ -1171,10 +1178,42 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         } else if (i == R.id.frameLayout) {
             //Test
-            MapObject obj = new MapObject();
-            obj.setCode("12133");
-            obj.setObjectType(appContainer.MapObjecTypeActive);
-            appContainer.MapObjectActive = obj;
+            try {
+                GPMapPosition mapPosition = mapView.getMapPosition();
+                final double centerLat = mapPosition.getLatitude();
+                final double centerLon = mapPosition.getLongitude();
+
+
+                MapObject obj = new MapObject();
+                final String proposedName = "0000";//NON-NLS
+
+                String message = "Code de etiqueta papa";
+                GPDialogs.inputMessageDialog(this, message, proposedName, new TextRunnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (theTextToRunOn.length() < 1) {
+                                theTextToRunOn = proposedName;
+                            }
+                            obj.setCode(theTextToRunOn);
+                            obj.setCoord(String.valueOf(centerLat)+","+String.valueOf(centerLon));
+                            obj.setObjectType(appContainer.MapObjecTypeActive);
+                            obj.setMapObjectTypeId(appContainer.MapObjecTypeActive.getId());
+                            MapObjectOperations.getInstance().insert(obj);
+                            appContainer.MapObjectActive = obj;
+                            mapView.reloadLayer(MapObjectLayer.class);
+
+                        } catch (Exception e) {
+                            GPLog.error(this, e.getLocalizedMessage(), e);
+                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+                Toast.makeText(this, "NEW MAPOBJ", Toast.LENGTH_SHORT).show();
+                //addBookmark();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
     }
