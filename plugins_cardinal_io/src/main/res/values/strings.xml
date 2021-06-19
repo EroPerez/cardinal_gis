@@ -16,5 +16,5 @@
     <string name="layername_edges">Cardinal Edges</string>
     <string name="layername_mot">Cardinal Map Object Type</string>
     <string name="not_project_active">You don\'t have an active project.</string>
-    <string name="route_reset">Route resetting.</string>
+    <string name="route_reset">Recetiando Ruta.</string>
 </resources>

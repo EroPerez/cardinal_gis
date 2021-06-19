@@ -70,7 +70,7 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
         });
 
 
-        holder.sessionText.setText((String)workSession.toString());
+        holder.sessionText.setText(workSession.toString());
 
         holder.goButton.setOnClickListener(v -> {
             if (mOclickCallback != null)
