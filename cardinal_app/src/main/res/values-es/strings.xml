@@ -3,4 +3,6 @@
     <string name="reset_route">Nueva Ruta</string>
     <string name="seleccione_un_objeto_de_mapa">Seleccione un Objeto de Mapa</string>
     <string name="panic">panic button</string>
+    <string name="work_session_not_active">Por favor, usted debe activar una sesión de trabajo.</string>
+    <string name="worker_have_not_active">El operario %s parece que esta inactivo en el servidor remoto</string>
 </resources>

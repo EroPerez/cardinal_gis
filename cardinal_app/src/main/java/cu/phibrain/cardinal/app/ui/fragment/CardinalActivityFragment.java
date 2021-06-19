@@ -43,8 +43,10 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.plugins.cardinal.io.R;
+import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
+import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -97,22 +99,18 @@ import static eu.geopaparazzi.library.util.LibraryConstants.MAPSFORGE_EXTRACTED_
  */
 public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
+    private static boolean sCheckedGps = false;
     private final int RETURNCODE_BROWSE_FOR_NEW_PREOJECT = 665;
     private final int RETURNCODE_PROFILES = 666;
-
     private ImageButton mNotesButton;
     private ImageButton mMetadataButton;
     private ImageButton mMapviewButton;
     private ImageButton mGpslogButton;
     private ImageButton mExportButton;
-
     private ImageButton mImportButton;
-
     private OrientationSensor mOrientationSensor;
     private IApplicationChangeListener appChangeListener;
-
     private BroadcastReceiver mGpsServiceBroadcastReceiver;
-    private static boolean sCheckedGps = false;
     private GpsServiceStatus mLastGpsServiceStatus;
     private GpsLoggingStatus mLastGpsLoggingStatus = GpsLoggingStatus.GPS_DATABASELOGGING_OFF;
     private double[] mLastGpsPosition;
@@ -516,8 +514,10 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
                 appContainer.refreshProject();
 
-                if (appContainer.ProjectActive == null /*|| appContainer.WorkSessionActive == null*/) {
+                if (appContainer.ProjectActive == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+                } else if (appContainer.WorkSessionActive == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
                 } else {
                     Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
                     startActivity(importIntent);
@@ -530,13 +530,23 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             Intent importIntent = new Intent(getActivity(), ImportActivity.class);
             startActivity(importIntent);
         } else if (v == mNotesButton) {
-//            try {
-//                Intent mapTagsIntent = new Intent(getActivity(), AddNotesActivity.class);
-//                startActivity(mapTagsIntent);
-//            } catch (Exception e) {
-//                GPLog.error(this, null, e);
-//                GPDialogs.errorDialog(getActivity(), e, null);
-//            }
+            //Load the curent worker
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
+
+            appContainer.CurrentWorker = WorkerOperations.getInstance().findOneBy(user);
+
+            if (appContainer.ProjectActive == null) {
+                GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+            } else if (appContainer.CurrentWorker == null) {
+                GPDialogs.infoDialog(getContext(), String.format(getResources().getString(cu.phibrain.cardinal.app.R.string.worker_have_not_active), user), null);
+            } else {
+                Intent importIntent = new Intent(getActivity(), WorkSessionListActivity.class);
+                startActivity(importIntent);
+            }
+
         } else if (v == mExportButton) {
             Intent exportIntent = new Intent(getActivity(), ExportActivity.class);
             startActivity(exportIntent);

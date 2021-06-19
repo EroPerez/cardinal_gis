@@ -24,4 +24,5 @@ public class WorkSessionOperations extends BaseRepo<WorkSession, WorkSessionDao>
     protected void initEntityDao() {
         dao = daoSession.getWorkSessionDao();
     }
+
 }

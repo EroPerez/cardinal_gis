@@ -25,8 +25,7 @@ public class GPGeoPointTypeAdapter extends TypeAdapter<List<GPGeoPoint>> {
         }
 
         List<CardinalPoint> cardinalPoints = new ArrayList<>();
-        Type listType = new TypeToken<List<CardinalPoint>>() {
-        }.getType();
+        Type listType = new TypeToken<List<CardinalPoint>>() {}.getType();
 
         for (GPGeoPoint geoPoint :
                 gpGeoPoints) {
@@ -45,9 +44,11 @@ public class GPGeoPointTypeAdapter extends TypeAdapter<List<GPGeoPoint>> {
             return null;
         }
 
-        Type listType = new TypeToken<List<CardinalPoint>>() {
-        }.getType();
-        List<CardinalPoint> cardinalPoints = gson.fromJson(in, listType);
+        Type listType = new TypeToken<List<CardinalPoint>>() {}.getType();
+
+        in.peek();
+        String record = in.nextString();
+        List<CardinalPoint> cardinalPoints = gson.fromJson(record , listType);
 
         List<GPGeoPoint> gpGeoPoints = new ArrayList<>();
 

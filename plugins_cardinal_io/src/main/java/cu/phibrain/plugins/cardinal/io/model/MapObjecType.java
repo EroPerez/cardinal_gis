@@ -459,9 +459,7 @@ public class MapObjecType implements Serializable {
         mapObjects = null;
     }
 
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

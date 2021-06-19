@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -17,6 +17,7 @@ import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.gps.GpsServiceUtilities;
 import eu.geopaparazzi.library.permissions.AChainedPermissionHelper;
 import eu.geopaparazzi.library.permissions.PermissionFineLocation;
 import eu.geopaparazzi.library.permissions.PermissionForegroundService;
@@ -33,13 +34,14 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
     private AChainedPermissionHelper permissionHelper = new PermissionWriteStorage();
     private CardinalActivityFragment cardinalActivityFragment;
     public static final int DOWNLOADDATA_RETURN_CODE = 667;
+
     // configure the GeopaparazziCoreActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        permissionHelper = new PermissionWriteStorage();
-        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService());
+//        permissionHelper = new PermissionWriteStorage();
+        permissionHelper.add(new PermissionWriteStorage()).add(new PermissionFineLocation()).add(new PermissionForegroundService());
 
         // PERMISSIONS START
         if (permissionHelper.hasPermission(this) && permissionHelper.getNextWithoutPermission(this) == null) {
@@ -57,7 +59,6 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         setSupportActionBar(toolbar);
 
     }
-
 
 
     private void init() {
@@ -118,7 +119,6 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
     }
 
 
-
     private void completeInit() {
         try {
             ResourcesManager.getInstance(this);
@@ -130,8 +130,47 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         checkIncomingUrl();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        if (permissionHelper.hasGainedPermission(requestCode, grantResults)) {
+            AChainedPermissionHelper nextWithoutPermission = permissionHelper.getNextWithoutPermission(this);
+            permissionHelper = nextWithoutPermission;
+            if (permissionHelper == null) {
+                completeInit();
+            } else {
+                permissionHelper.requestPermission(this);
+            }
 
+        } else {
+            GPDialogs.infoDialog(this, getString(eu.geopaparazzi.core.R.string.premissions_cant_start) + permissionHelper.getDescription(), new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            });
+        }
+    }
 
+    @Override
+    public void onApplicationNeedsRestart() {
+
+        if (cardinalActivityFragment != null && cardinalActivityFragment.getGpsServiceBroadcastReceiver() != null) {
+            GpsServiceUtilities.stopDatabaseLogging(this);
+            GpsServiceUtilities.stopGpsService(this);
+            GpsServiceUtilities.unregisterFromBroadcasts(this, cardinalActivityFragment.getGpsServiceBroadcastReceiver());
+            CardinalApplication.getInstance().closeDatabase();
+            ResourcesManager.resetManager();
+        }
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                recreate();
+            }
+        }, 10);
+    }
 
 
 }
