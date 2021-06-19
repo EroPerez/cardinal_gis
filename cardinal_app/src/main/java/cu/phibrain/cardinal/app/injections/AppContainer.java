@@ -26,32 +26,31 @@ public class AppContainer {
 
     public AppContainer() throws IOException {
         refreshProject();
-        WorkSessionActive = null;
     }
 
     public void refreshProject() throws IOException {
 
         //Load Project Active
-        if (ProjectActive == null || ProjectActive.getId() != getProjectId()) {
+        if(ProjectActive == null || ProjectActive.getId() != getProjectId()) {
             Long project_id = getProjectId();
             if (project_id != null) {
                 ProjectActive = ProjectOperations.getInstance().load(project_id);
             }
         }
     }
-
     @Nullable
     private Long getProjectId() throws IOException {
-        List<Metadata> projectMetadata = DaoMetadata.getProjectMetadata();
-        if (!projectMetadata.isEmpty()) {
-            for (final Metadata metaData : projectMetadata) {
-                if (metaData.key.toLowerCase().equals(CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName().toLowerCase())) {
-                    return Long.parseLong(metaData.value);
+            List<Metadata> projectMetadata = DaoMetadata.getProjectMetadata();
+            if (!projectMetadata.isEmpty()) {
+                for (final Metadata metaData : projectMetadata) {
+                    if (metaData.key.toLowerCase().equals(CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName().toLowerCase())) {
+                        return Long.parseLong(metaData.value);
+                    }
                 }
             }
-        }
-        return null;
+            return null;
     }
+
 
 
 }

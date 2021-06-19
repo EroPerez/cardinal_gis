@@ -283,9 +283,7 @@ public class SignalEvents implements Serializable {
         this.gpsLongitude = gpsLongitude;
     }
 
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 961848201)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

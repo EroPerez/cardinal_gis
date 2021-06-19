@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment"
-    >
+    tools:context="cu.phibrain.cardinal.app.ui.fragments.CardinalActivityFragment"
+    tools:showIn="@layout/activity_geopaparazzi">
 
     <TableLayout
         android:id="@+id/dashboardLayout"
@@ -92,7 +92,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:visibility="visible"
+            android:visibility="gone"
             >
 
             <FrameLayout

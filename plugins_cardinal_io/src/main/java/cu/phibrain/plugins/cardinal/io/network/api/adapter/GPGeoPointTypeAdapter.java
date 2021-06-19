@@ -44,11 +44,18 @@ public class GPGeoPointTypeAdapter extends TypeAdapter<List<GPGeoPoint>> {
             in.nextNull();
             return null;
         }
-
+        String jsonCardinalPoints ="";
+        while (in.hasNext()){
+            JsonToken nextToken = in.peek();
+            if(JsonToken.STRING.equals(nextToken)) {
+                jsonCardinalPoints = in.nextString();
+                break;
+            }
+        }
         Type listType = new TypeToken<List<CardinalPoint>>() {
         }.getType();
-        List<CardinalPoint> cardinalPoints = gson.fromJson(in, listType);
 
+        List<CardinalPoint> cardinalPoints = gson.fromJson( jsonCardinalPoints, listType);
         List<GPGeoPoint> gpGeoPoints = new ArrayList<>();
 
         for (CardinalPoint point :
