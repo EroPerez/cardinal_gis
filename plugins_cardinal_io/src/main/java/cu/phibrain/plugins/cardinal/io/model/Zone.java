@@ -45,6 +45,7 @@ public class Zone implements Serializable {
     @Expose
     private List<GPGeoPoint> boundingBox;
 
+
     @SerializedName("project")
     @Expose
     private Long projectId;
