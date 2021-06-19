@@ -135,9 +135,10 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            if (item instanceof ICardinalItem) {
+            if(item instanceof ICardinalItem){
                 CardinalLayerManager.INSTANCE.setEnabled(item.position, item.enabled);
-            } else {
+            }
+            else{
                 CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
             }
 

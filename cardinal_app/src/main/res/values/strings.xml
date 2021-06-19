@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">Cardinal</string>
     <string name="reset_route">Route Reset</string>
-    <string name="seleccione_un_objeto_de_mapa">Select a Map Object</string>
-    <string name="panic">panic button</string>
 </resources>
