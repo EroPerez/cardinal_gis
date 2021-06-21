@@ -512,11 +512,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             try {
                 AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-                appContainer.refreshProject();
-
-                if (appContainer.ProjectActive == null) {
+                if (appContainer.getProjectActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
-                } else if (appContainer.WorkSessionActive == null) {
+                } else if (appContainer.getWorkSessionActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
                 } else {
                     Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
@@ -536,15 +534,19 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
 
-            appContainer.CurrentWorker = WorkerOperations.getInstance().findOneBy(user);
+            appContainer.setCurrentWorker(WorkerOperations.getInstance().findOneBy(user));
 
-            if (appContainer.ProjectActive == null) {
-                GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
-            } else if (appContainer.CurrentWorker == null) {
-                GPDialogs.infoDialog(getContext(), String.format(getResources().getString(cu.phibrain.cardinal.app.R.string.worker_have_not_active), user), null);
-            } else {
-                Intent importIntent = new Intent(getActivity(), WorkSessionListActivity.class);
-                startActivity(importIntent);
+            try {
+                if (appContainer.getProjectActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+                } else if (appContainer.getCurrentWorker() == null) {
+                    GPDialogs.infoDialog(getContext(), String.format(getResources().getString(R.string.worker_have_not_active), user), null);
+                } else {
+                    Intent importIntent = new Intent(getActivity(), WorkSessionListActivity.class);
+                    startActivity(importIntent);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
         } else if (v == mExportButton) {
