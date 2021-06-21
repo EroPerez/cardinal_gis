@@ -18,26 +18,26 @@ import eu.geopaparazzi.core.database.objects.Metadata;
 
 public class AppContainer {
 
-    public Project ProjectActive;
-    public WorkSession WorkSessionActive;
-    public MapObjecType MapObjecTypeActive;
-    public Networks NetworksActive;
-    public Long LevelActive;
-    public MapObject MapObjectActive;
-    public Worker CurrentWorker;
+    protected Project projectActive;
+    protected WorkSession workSessionActive;
+    protected MapObjecType mapObjecTypeActive;
+    protected Networks networksActive;
+    protected Long levelActive;
+    protected MapObject mapObjectActive;
+    protected Worker currentWorker;
 
     public AppContainer() throws IOException {
         refreshProject();
-        WorkSessionActive = null;
+        setWorkSessionActive(null);
     }
 
     public void refreshProject() throws IOException {
-
+        Long projectId = getProjectId();
         //Load Project Active
-        if (ProjectActive == null || ProjectActive.getId() != getProjectId()) {
-            Long project_id = getProjectId();
-            if (project_id != null) {
-                ProjectActive = ProjectOperations.getInstance().load(project_id);
+        if (getProjectActive() == null || projectActive.getId() != projectId) {
+
+            if (projectId != null) {
+                projectActive = ProjectOperations.getInstance().load(projectId);
             }
         }
     }
@@ -56,4 +56,56 @@ public class AppContainer {
     }
 
 
+    public Project getProjectActive() throws IOException {
+        refreshProject();
+        return projectActive;
+    }
+
+    public WorkSession getWorkSessionActive() {
+        return workSessionActive;
+    }
+
+    public void setWorkSessionActive(WorkSession workSessionActive) {
+        this.workSessionActive = workSessionActive;
+    }
+
+    public Worker getCurrentWorker() {
+        return currentWorker;
+    }
+
+    public void setCurrentWorker(Worker currentWorker) {
+        this.currentWorker = currentWorker;
+    }
+
+    public MapObjecType getMapObjecTypeActive() {
+        return mapObjecTypeActive;
+    }
+
+    public void setMapObjecTypeActive(MapObjecType mapObjecTypeActive) {
+        this.mapObjecTypeActive = mapObjecTypeActive;
+    }
+
+    public Networks getNetworksActive() {
+        return networksActive;
+    }
+
+    public void setNetworksActive(Networks networksActive) {
+        this.networksActive = networksActive;
+    }
+
+    public MapObject getMapObjectActive() {
+        return mapObjectActive;
+    }
+
+    public void setMapObjectActive(MapObject mapObjectActive) {
+        this.mapObjectActive = mapObjectActive;
+    }
+
+    public Long getLevelActive() {
+        return levelActive;
+    }
+
+    public void setLevelActive(Long levelActive) {
+        this.levelActive = levelActive;
+    }
 }
