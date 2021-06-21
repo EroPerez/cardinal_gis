@@ -68,6 +68,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.json.JSONException;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -187,8 +188,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
             //register signal event only when battery is low
             boolean isBatteryLow = intent.getBooleanExtra(BatteryManager.EXTRA_BATTERY_LOW, false);
-            if (isBatteryLow && appContainer.WorkSessionActive != null) {
-                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.POWER, appContainer.WorkSessionActive.getId(), chargedPct, new Date(), lastGpsPosition);
+            if (isBatteryLow && appContainer.getWorkSessionActive() != null) {
+                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.POWER, appContainer.getWorkSessionActive().getId(), chargedPct, new Date(), lastGpsPosition);
             }
         }
 
@@ -212,8 +213,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             long level = StorageUtilities.getAvailableExternalMemorySizeAsLong(context);
 
             //register signal event only when battery is low
-            if (appContainer.WorkSessionActive != null) {
-                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.STORAGE, appContainer.WorkSessionActive.getId(), level, new Date(), lastGpsPosition);
+            if (appContainer.getWorkSessionActive() != null) {
+                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.STORAGE, appContainer.getWorkSessionActive().getId(), level, new Date(), lastGpsPosition);
             }
         }
 
@@ -850,9 +851,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         if (lastGpsServiceStatus == GpsServiceStatus.GPS_OFF) {
             centerOnGps.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_center_gps_red_24dp));
-            if (lastGpsPosition != null && appContainer.WorkSessionActive != null) {
+            if (lastGpsPosition != null && appContainer.getWorkSessionActive() != null) {
                 long currentTime = GpsServiceUtilities.getPositionTime(intent);
-                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.GPS, appContainer.WorkSessionActive.getId(), 0, currentTime > 0 ? new Date(currentTime) : new Date(), lastGpsPosition);
+                SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.GPS, appContainer.getWorkSessionActive().getId(), 0, currentTime > 0 ? new Date(currentTime) : new Date(), lastGpsPosition);
             }
 
         } else {
@@ -1100,7 +1101,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
 
-            MtoAdapter usersAdapter;
             View bottomSheetView = LayoutInflater.from(getApplicationContext())
                     .inflate(
                             cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
@@ -1114,60 +1114,65 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             descriptorMto = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.descriptorMto);
 
             //filter Networks
-            List<Networks> networks = appContainer.ProjectActive.getNetworks();
-            NetworkAdapter networksAdapter = new NetworkAdapter(this, cu.phibrain.cardinal.app.R.layout.spinner, networks);
-            filterNetworks = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.spinnerNetworks);
-            filterNetworks.setAdapter(networksAdapter);
+            try {
+                List<Networks> networks = appContainer.getProjectActive().getNetworks();
 
-            //Recivler View Menu Mto
-            RecyclerView recyclerView = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.rvMto);
+                NetworkAdapter networksAdapter = new NetworkAdapter(this, cu.phibrain.cardinal.app.R.layout.spinner, networks);
+                filterNetworks = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.spinnerNetworks);
+                filterNetworks.setAdapter(networksAdapter);
 
-            LinearLayoutManager horizontalLayoutManager
-                    = new LinearLayoutManager(bottomSheetView.getContext(), LinearLayoutManager.HORIZONTAL, false);
-            recyclerView.setLayoutManager(horizontalLayoutManager);
-            recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(), DividerItemDecoration.VERTICAL));
-            //update Network Select
-            appContainer.NetworksActive = ((Networks) filterNetworks.getSelectedItem());
-            List<MapObjecType> mtoList;
+                //Recivler View Menu Mto
+                RecyclerView recyclerView = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.rvMto);
 
-            if (appContainer.MapObjectActive == null) {
-                //Muestro todos por capas
-                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
-            } else {
-                //Muestro solo los aptos segun reglas topologicas
-                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.MapObjectActive);
+                LinearLayoutManager horizontalLayoutManager
+                        = new LinearLayoutManager(bottomSheetView.getContext(), LinearLayoutManager.HORIZONTAL, false);
+                recyclerView.setLayoutManager(horizontalLayoutManager);
+                recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(), DividerItemDecoration.VERTICAL));
+                //update Network Select
+                appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
+                List<MapObjecType> mtoList;
+
+                if (appContainer.getMapObjectActive() == null) {
+                    //Muestro todos por capas
+                    mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
+                } else {
+                    //Muestro solo los aptos segun reglas topologicas
+                    mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getMapObjectActive());
+                }
+
+                MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
+                recyclerView.setAdapter(mtoAdapter);
+                bottomSheetDialog.setContentView(bottomSheetView);
+                if (appContainer.getMapObjectActive() == null) {
+                    filterNetworks.setVisibility(View.VISIBLE);
+                    filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                            //update Network Select
+                            appContainer.setNetworksActive(networks.get(position));
+                            descriptorMto.setText("");
+                            mtoAdapter.getFilter().filter(appContainer.getNetworksActive().getId().toString());
+
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+
+                    });
+                } else {
+                    filterNetworks.setVisibility(View.GONE);
+                }
+                bottomSheetDialog.show();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
-            recyclerView.setAdapter(mtoAdapter);
-            bottomSheetDialog.setContentView(bottomSheetView);
-            if (appContainer.MapObjectActive == null) {
-                filterNetworks.setVisibility(View.VISIBLE);
-                filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                        //update Network Select
-                        appContainer.NetworksActive = networks.get(position);
-                        descriptorMto.setText("");
-                        mtoAdapter.getFilter().filter(appContainer.NetworksActive.getId().toString());
-
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parentView) {
-                        // your code here
-                    }
-
-                });
-            } else {
-                filterNetworks.setVisibility(View.GONE);
-            }
-            bottomSheetDialog.show();
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
             //Evento del Mot Selcecionado
-            appContainer.MapObjectActive = null;
-            appContainer.MapObjecTypeActive = null;
+            appContainer.setMapObjectActive(null);
+            appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
             Toast.makeText(this, getString(R.string.reset_route), Toast.LENGTH_SHORT).show();
 
@@ -1324,8 +1329,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     @Override
     public void selectedMto(MapObjecType _mtoModel) {
         descriptorMto.setText(_mtoModel.getCaption());
-        appContainer.MapObjecTypeActive = _mtoModel;
-        if (appContainer.MapObjecTypeActive != null) {
+        appContainer.setMapObjecTypeActive(_mtoModel);
+        if (appContainer.getMapObjecTypeActive() != null) {
             byte[] icon = _mtoModel.getIconAsByteArray();
             if (icon != null) {
                 Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);

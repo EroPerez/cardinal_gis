@@ -72,7 +72,7 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
 
                 } else {
                     List<MapObjecType> resultData = new ArrayList<>();
-                    resultData = NetworksOperations.getInstance().getMapObjectTypes(appContainer.NetworksActive);
+                    resultData = NetworksOperations.getInstance().getMapObjectTypes(appContainer.getNetworksActive());
                     filterResults.count = resultData.size();
                     filterResults.values = resultData;
                 }

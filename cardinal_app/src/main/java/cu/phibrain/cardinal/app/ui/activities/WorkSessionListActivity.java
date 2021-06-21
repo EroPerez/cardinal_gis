@@ -12,6 +12,7 @@ import android.widget.ListView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +59,11 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
         filterText.addTextChangedListener(filterTextWatcher);
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mContract = ContractOperations.getInstance().findOneBy(appContainer.ProjectActive.getId(), appContainer.CurrentWorker.getId());
+        try {
+            mContract = ContractOperations.getInstance().findOneBy(appContainer.getProjectActive().getId(), appContainer.getCurrentWorker().getId());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -148,7 +153,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
 
     @Override
     public void OnClickListener(WorkSession aSession) {
-        appContainer.WorkSessionActive = aSession;
+        appContainer.setWorkSessionActive(aSession);
         finish();
     }
 }
