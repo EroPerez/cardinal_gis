@@ -13,11 +13,7 @@
         android:theme="@style/GeopapTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:theme,android:label,android:name">
-        <activity
-            android:name=".ui.activities.DrawerActivity"
-            android:label="@string/title_activity_drawer"
-            android:theme="@style/GeopapTheme.NoActionBar"></activity>
-        <activity android:name=".ui.activities.WorkSessionListActivity" />
+        <activity android:name=".ui.activities.WorkSessionListActivity"  android:label="@string/work_session_view_label"/>
         <activity
             android:name=".CardinalActivity"
             android:label="@string/app_name"
@@ -81,7 +77,8 @@
         </provider>
     </application>
     <uses-feature android:name="android.hardware.location.gps" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- NORMAL PERMISSIONS -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- NORMAL PERMISSIONS -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

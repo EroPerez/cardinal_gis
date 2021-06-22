@@ -2,8 +2,8 @@ package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,18 +21,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.style.ColorUtilities;
-import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapView;
-import cu.phibrain.plugins.cardinal.io.R;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
 public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, ICardinalLayer {
@@ -48,11 +46,15 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
     private IActivitySupporter activitySupporter;
     private static int textSize;
     private static String colorStr;
+    private MapObjecType currentObjectype;
+
     public MapObjectLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
         super(mapView.map(), getMarkerSymbol(mapView, ID));
         this.mapView = mapView;
         this.ID = ID;
-        getName(mapView.getContext());
+        currentObjectype = MapObjecTypeOperations.getInstance().load(this.ID);
+        NAME = currentObjectype.getCaption();
+        NAME = getName(mapView.getContext());
 
         this.activitySupporter = activitySupporter;
         setOnItemGestureListener(this);
@@ -73,16 +75,12 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
     }
 
 
-
     private static MarkerSymbol getMarkerSymbol(GPMapView mapView, Long _ID) throws IOException {
         MapObjecType mtoMapObjecType = MapObjecTypeOperations.getInstance().load(_ID);
-        SharedPreferences peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
-        //String textSizeStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_TEXT_SIZE, LibraryConstants.DEFAULT_NOTES_SIZE + ""); //$NON-NLS-1$
-        colorStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_CUSTOMCOLOR, ColorUtilities.ALMOST_BLACK.getHex());
-        //Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), eu.geopaparazzi.library.R.drawable.ic_bookmarks_48dp);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
+        colorStr = preferences.getString(LibraryConstants.PREFS_KEY_NOTES_CUSTOMCOLOR, ColorUtilities.ALMOST_BLACK.getHex());
 
-        //notesBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
-        byte [] icon = mtoMapObjecType.getIconAsByteArray();
+        byte[] icon = mtoMapObjecType.getIconAsByteArray();
         mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
 
         return new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.UPPER_LEFT_CORNER, false);
@@ -99,7 +97,7 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
         maoMapObjcType.refresh();
         List<MapObject> mapObjects = maoMapObjcType.getMapObjects();
 
-        byte [] icon = maoMapObjcType.getIconAsByteArray();
+        byte[] icon = maoMapObjcType.getIconAsByteArray();
         Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
 
         List<MarkerItem> pts = new ArrayList<>();
@@ -114,15 +112,17 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
         addItems(pts);
         update();
     }
+
     public void reloadData() throws IOException {
-        MapObjecType mtoMapObjecType = MapObjecTypeOperations.getInstance().load(ID);
-        List<MapObject> mapObjects = mtoMapObjecType.getMapObjects();
+        //MapObjecType mtoMapObjecType = MapObjecTypeOperations.getInstance().load(ID);
+        currentObjectype.resetMapObjects();
+        List<MapObject> mapObjects = currentObjectype.getMapObjects();
         List<MarkerItem> pts = new ArrayList<>();
         for (MapObject mapObject : mapObjects) {
 
             GPGeoPoint coord = mapObject.getCoord().get(0);
-            String text = mapObject.getObjectType().getCaption();
-            pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), coord));
+            String text = mapObject.getCode();
+            pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObservation(), coord));
         }
         for (MarkerItem mi : pts) {
             mi.setMarker(createAdvancedSymbol(mi, mtoBitmap));
@@ -142,6 +142,8 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
 
     @Override
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
+        if (item != null)
+            Toast.makeText(this.activitySupporter.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
 //        if (item != null) {
 //            String description = item.getSnippet();
 //            if (description.startsWith(NONFORMSTART)) {
@@ -235,7 +237,7 @@ public class MapObjectLayer extends ItemizedLayer<MarkerItem> implements Itemize
     @Override
     public JSONObject toJson() throws JSONException {
         JSONObject jo = toDefaultJson();
-        jo.put("ID", this.getID());
+        jo.put(LAYERID_TAG, this.getID());
         return jo;
     }
 

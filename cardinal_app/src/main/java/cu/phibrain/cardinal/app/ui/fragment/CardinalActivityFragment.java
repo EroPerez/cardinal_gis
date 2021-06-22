@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalActivity;
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
@@ -48,7 +49,6 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
 import eu.geopaparazzi.core.GeopaparazziApplication;
-import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
@@ -330,7 +330,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
         if (i == eu.geopaparazzi.core.R.id.action_new) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getParentFragmentManager();
             if (fragmentManager != null) {
                 NewProjectDialogFragment newProjectDialogFragment = new NewProjectDialogFragment();
                 newProjectDialogFragment.show(fragmentManager, "new project dialog");//NON-NLS
@@ -345,7 +345,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             }
             return true;
         } else if (i == eu.geopaparazzi.core.R.id.action_gps) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getParentFragmentManager();
             if (fragmentManager != null) {
                 GpsInfoDialogFragment gpsInfoDialogFragment = new GpsInfoDialogFragment();
                 gpsInfoDialogFragment.show(fragmentManager, "gpsinfo dialog");//NON-NLS
@@ -421,8 +421,8 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                     try {
                         boolean restart = data.getBooleanExtra(LibraryConstants.PREFS_KEY_RESTART_APPLICATION, false);
                         if (restart) {
-                            if (activity instanceof GeopaparazziCoreActivity) {
-                                GeopaparazziCoreActivity geopaparazziCoreActivity = (GeopaparazziCoreActivity) activity;
+                            if (activity instanceof CardinalActivity) {
+                                CardinalActivity geopaparazziCoreActivity = (CardinalActivity) activity;
                                 geopaparazziCoreActivity.onApplicationNeedsRestart();
                             }
                         }
@@ -534,9 +534,10 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
 
-            appContainer.setCurrentWorker(WorkerOperations.getInstance().findOneBy(user));
-
             try {
+                if (appContainer.getProjectActive() != null)
+                    appContainer.setCurrentWorker(WorkerOperations.getInstance().findOneBy(user));
+
                 if (appContainer.getProjectActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
                 } else if (appContainer.getCurrentWorker() == null) {

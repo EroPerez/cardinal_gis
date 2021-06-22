@@ -129,16 +129,16 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 
             @Override
             public void onFocusedColumnChanged(int oldColumn, int newColumn) {
-                if (newColumn == 1) {
-                    addSourceButton.hide();
-                    addSourceFolderButton.hide();
-                    addDefaultTileSourcesButton.hide();
-                    toggleButton.hide();
-                } else {
+                if (newColumn == 2) {
                     addSourceButton.show();
                     addSourceFolderButton.show();
                     addDefaultTileSourcesButton.show();
                     toggleButton.show();
+                } else {
+                    addSourceButton.hide();
+                    addSourceFolderButton.hide();
+                    addDefaultTileSourcesButton.hide();
+                    toggleButton.hide();
                 }
                 //Toast.makeText(getContext(), "Focused column changed from " + oldColumn + " to " + newColumn, Toast.LENGTH_SHORT).show();
             }
@@ -175,6 +175,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 
         toggleButton = view.findViewById(R.id.mapToggleButton);
         toggleButton.setOnClickListener(this);
+        toggleButton.hide();
         addSourceButton = view.findViewById(R.id.addMapSourceButton);
         addSourceButton.setOnClickListener(this);
         addSourceFolderButton = view.findViewById(R.id.addMapSourceFolderButton);
