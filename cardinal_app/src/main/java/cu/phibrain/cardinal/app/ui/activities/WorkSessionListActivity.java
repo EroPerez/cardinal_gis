@@ -60,7 +60,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         try {
-            mContract = ContractOperations.getInstance().findOneBy(appContainer.getProjectActive().getId(), appContainer.getCurrentWorker().getId());
+            mContract = ContractOperations.getInstance().findOneBy(appContainer.getProjectActive().getId(), appContainer.getCurrentWorker().getId(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,13 +98,13 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
             e.printStackTrace();
         }
 
-         redoAdapter();
+        redoAdapter();
     }
 
     private void collectAllSession() {
         allWorkSessionList.clear();
-        List<WorkSession> tmpNotesList = mContract.getWorkSessions();
-        allWorkSessionList.addAll(tmpNotesList);
+        if (mContract != null)
+            allWorkSessionList.addAll(mContract.getWorkSessions());
     }
 
 

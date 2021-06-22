@@ -145,7 +145,16 @@
                     android:text="01"
                     android:textColor="@color/main_text_color_neutral"
                     android:textStyle="bold"
-                    tools:ignore="HardcodedText" />
+                    tools:ignore="HardcodedText"/>
+
+                <ImageButton
+                    android:id="@+id/zoomout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="@dimen/mapview_bottom_space"
+                    android:background="@null"
+                    app:srcCompat="@drawable/ic_mapview_zoomout_24dp" />
 
                 <ImageButton
                     android:id="@+id/zoomout"

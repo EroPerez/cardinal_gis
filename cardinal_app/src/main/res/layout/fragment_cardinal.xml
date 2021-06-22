@@ -108,7 +108,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="10dp"
                     android:contentDescription="@string/dashboard_note_action_description"
-                    app:srcCompat="@drawable/ic_dashboard_notes_24dp"
+                    app:srcCompat="@drawable/ic_work_session_24"
                     android:stateListAnimator="@null" />
 
                 <TextView

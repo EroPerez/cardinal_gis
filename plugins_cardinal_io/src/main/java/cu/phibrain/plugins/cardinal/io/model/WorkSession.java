@@ -435,7 +435,7 @@ public class WorkSession implements Serializable {
                 ", endDate=" + endDate +
                 ", zone=" + this.getZoneObj().getName() +
                 ", active=" + active +
-                ", Worker=" + this.getContractObj().getTheWorker().getFirstName() +
+                ", Worker=" + this.getContractObj().getTheWorker().getFullName() +
                 '}';
     }
 

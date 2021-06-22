@@ -27,14 +27,14 @@ public class AppContainer {
     protected Worker currentWorker;
 
     public AppContainer() throws IOException {
-        refreshProject();
+//        refreshProject();
         setWorkSessionActive(null);
     }
 
     public void refreshProject() throws IOException {
         Long projectId = getProjectId();
         //Load Project Active
-        if ( projectActive == null || projectActive.getId() != projectId) {
+        if (projectActive == null || projectActive.getId() != projectId) {
 
             if (projectId != null) {
                 projectActive = ProjectOperations.getInstance().load(projectId);

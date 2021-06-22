@@ -43,9 +43,13 @@ public class ContractOperations extends BaseRepo<Contract, ContractDao> {
 
     }
 
-    public Contract findOneBy(long projectId, long userId) {
+    public Contract findOneBy(long projectId, long userId, boolean active) {
 
-        return this.queryBuilder().where(ContractDao.Properties.ProjectId.eq(projectId), ContractDao.Properties.WorkerId.eq(userId)).unique();
+        return this.queryBuilder().where(
+                ContractDao.Properties.ProjectId.eq(projectId),
+                ContractDao.Properties.WorkerId.eq(userId),
+                ContractDao.Properties.Active.eq(active)
+        ).unique();
 
     }
 

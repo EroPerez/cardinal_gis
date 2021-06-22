@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
@@ -71,8 +70,7 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
                     filterResults.values = getMtoModelListFiltered;
 
                 } else {
-                    List<MapObjecType> resultData = new ArrayList<>();
-                    resultData = NetworksOperations.getInstance().getMapObjectTypes(appContainer.getNetworksActive());
+                    List<MapObjecType> resultData = NetworksOperations.getInstance().getMapObjectTypes(appContainer.getNetworksActive());
                     filterResults.count = resultData.size();
                     filterResults.values = resultData;
                 }

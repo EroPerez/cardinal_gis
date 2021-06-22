@@ -4,10 +4,8 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -35,7 +33,6 @@ import cu.phibrain.plugins.cardinal.io.WebDataProjectManager;
 import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
 import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
 import eu.geopaparazzi.core.GeopaparazziApplication;
-import eu.geopaparazzi.core.utilities.Constants;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.DatabaseUtilities;
 import eu.geopaparazzi.library.database.GPLog;
@@ -44,6 +41,10 @@ import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.StringAsyncTask;
 import eu.geopaparazzi.library.util.TextRunnable;
 import eu.geopaparazzi.library.util.TimeUtilities;
+
+import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_PWD;
+import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_URL;
+import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_USER;
 
 /**
  * Web projects listing activity.
@@ -78,10 +79,10 @@ public class CardinalProjectImporterActivity extends ListActivity {
         // joda-time-android will not work.
         JodaTimeAndroid.init(this);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
-        pwd = preferences.getString(Constants.PREF_KEY_PWD, "geopaparazzipwd"); //$NON-NLS-1$
-        url = preferences.getString(Constants.PREF_KEY_SERVER, ""); //$NON-NLS-1$
+        Bundle extras = getIntent().getExtras();
+        user = extras.getString(PREFS_KEY_USER);
+        pwd = extras.getString(PREFS_KEY_PWD);
+        url = extras.getString(PREFS_KEY_URL);
 
         filterText = (EditText) findViewById(R.id.search_box);
         filterText.addTextChangedListener(filterTextWatcher);
@@ -326,7 +327,6 @@ public class CardinalProjectImporterActivity extends ListActivity {
 
         setListAdapter(arrayAdapter);
     }
-
 
 
     private TextWatcher filterTextWatcher = new TextWatcher() {

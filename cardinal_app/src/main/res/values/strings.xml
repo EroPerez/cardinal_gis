@@ -5,4 +5,16 @@
     <string name="panic">panic button</string>
     <string name="work_session_not_active">Please, you must activate a work session</string>
     <string name="worker_have_not_active">The worker %s seem to be inactive in cardinal cloud</string>
+    <string name="title_activity_drawer">DrawerActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="work_session_view_label">Work session list</string>
 </resources>

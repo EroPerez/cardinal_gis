@@ -98,7 +98,7 @@ public class Worker implements Serializable {
     }
 
     public byte[] getAvatarAsByteArray() {
-        return Base64.decode(avatar, 0);
+        return Base64.decode(avatar.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
     }
 
     public Long getId() {
@@ -179,6 +179,11 @@ public class Worker implements Serializable {
 
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public String getFullName() {
+
+        return String.format("%s %s", this.firstName, this.lastName);
     }
 
 }

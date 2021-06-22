@@ -4,15 +4,16 @@
     android:id="@+id/worksessionrowlayout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="10dip">
+    android:padding="5dip">
 
-    <CheckBox
-        android:id="@+id/selectedCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/imgvavatar"
+        android:layout_width="@dimen/dashboard_button_width"
+        android:layout_height="@dimen/dashboard_button_height"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:text="" />
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/ic_user_male" />
 
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView2"
@@ -21,17 +22,37 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:layout_toStartOf="@+id/activatebutton"
-        android:layout_toEndOf="@+id/selectedCheckBox">
+        android:layout_toEndOf="@+id/imgvavatar">
 
-        <TextView
-            android:id="@+id/worksessionrowtext"
-            style="@style/GPTitleTextViewStyle"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:orientation="vertical"
             android:layout_gravity="start"
             android:gravity="center_vertical"
-            android:padding="5dip"
-            android:text="" />
+            >
+
+            <TextView
+                android:id="@+id/worksession_nametext"
+                style="@style/GPTitleTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Worker:  John Doe" />
+
+            <TextView
+                android:id="@+id/worksessionrowtext"
+                style="@style/GPTitleTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Zone: Bayamo" />
+
+            <TextView
+                android:id="@+id/worksessionstartdatetext"
+                style="@style/GPTitleTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Date: 23/06/2021" />
+        </LinearLayout>
     </HorizontalScrollView>
 
     <ImageButton
@@ -42,5 +63,7 @@
         android:layout_alignParentRight="true"
         android:background="@null"
         android:padding="5dip"
-        app:srcCompat="@drawable/ic_goto_primary_24dp" />
+        app:srcCompat="@drawable/ic_start_work_session_24" />
+
+
 </RelativeLayout>

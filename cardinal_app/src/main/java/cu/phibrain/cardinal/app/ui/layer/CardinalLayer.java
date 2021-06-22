@@ -2,8 +2,8 @@ package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -158,6 +158,8 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     @Override
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
+        if (item != null)
+            Toast.makeText(this.activitySupporter.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
 //        if (item != null) {
 //            String description = item.getSnippet();
 //            if (description.startsWith(NONFORMSTART)) {
@@ -251,7 +253,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     @Override
     public JSONObject toJson() throws JSONException {
         JSONObject jo = toDefaultJson();
-        jo.put("ID", this.getID());
+        jo.put(LAYERID_TAG, this.getID());
         return jo;
     }
 
