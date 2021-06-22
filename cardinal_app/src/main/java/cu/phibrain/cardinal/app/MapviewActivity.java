@@ -82,8 +82,10 @@ import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
@@ -120,6 +122,7 @@ import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.library.util.TextRunnable;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.map.GPBBox;
+import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.MapsSupportService;
@@ -177,6 +180,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private TextView descriptorMto;
     private ImageButton buttom_sheet_background;
     private ImageView selectMto;
+    private ImageView selectMo;
     private FrameLayout fragmentCenter;
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override
@@ -320,6 +324,10 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
         selectMto.setOnClickListener(this);
         selectMto.setOnLongClickListener(this);
+
+        selectMo = findViewById(cu.phibrain.cardinal.app.R.id.selectMo);
+        selectMo.setOnClickListener(this);
+        selectMo.setOnLongClickListener(this);
 
         fragmentCenter = findViewById(cu.phibrain.cardinal.app.R.id.frameLayout);
         fragmentCenter.setOnClickListener(this);
@@ -1101,79 +1109,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
 
-            View bottomSheetView = LayoutInflater.from(getApplicationContext())
-                    .inflate(
-                            cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
-                            (LinearLayout) findViewById(cu.phibrain.cardinal.app.R.id.bottomSheetContainer)
-                    );
-
-            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
-                    MapviewActivity.this,
-                    cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme
-            );
-            descriptorMto = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.descriptorMto);
-
-            //filter Networks
-            try {
-                List<Networks> networks = appContainer.getProjectActive().getNetworks();
-
-                NetworkAdapter networksAdapter = new NetworkAdapter(this, cu.phibrain.cardinal.app.R.layout.spinner, networks);
-                filterNetworks = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.spinnerNetworks);
-                filterNetworks.setAdapter(networksAdapter);
-
-                //Recivler View Menu Mto
-                RecyclerView recyclerView = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.rvMto);
-
-                LinearLayoutManager horizontalLayoutManager
-                        = new LinearLayoutManager(bottomSheetView.getContext(), LinearLayoutManager.HORIZONTAL, false);
-                recyclerView.setLayoutManager(horizontalLayoutManager);
-                recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(), DividerItemDecoration.VERTICAL));
-                //update Network Select
-                appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
-                List<MapObjecType> mtoList;
-
-                if (appContainer.getMapObjectActive() == null) {
-                    //Muestro todos por capas
-                    mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
-                } else {
-                    //Muestro solo los aptos segun reglas topologicas
-                    mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getMapObjectActive());
-                }
-
-                MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
-                recyclerView.setAdapter(mtoAdapter);
-                bottomSheetDialog.setContentView(bottomSheetView);
-                if (appContainer.getMapObjectActive() == null) {
-                    filterNetworks.setVisibility(View.VISIBLE);
-                    filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                            //update Network Select
-                            appContainer.setNetworksActive(networks.get(position));
-                            descriptorMto.setText("");
-                            mtoAdapter.getFilter().filter(appContainer.getNetworksActive().getId().toString());
-
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parentView) {
-                            // your code here
-                        }
-
-                    });
-                } else {
-                    filterNetworks.setVisibility(View.GONE);
-                }
-                bottomSheetDialog.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            onMenuMTO();
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
             //Evento del Mot Selcecionado
             appContainer.setMapObjectActive(null);
             appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
+            toggleEditing();
             Toast.makeText(this, getString(R.string.reset_route), Toast.LENGTH_SHORT).show();
 
         } else if (i == R.id.frameLayout) {
@@ -1183,6 +1126,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 final double centerLat = mapPosition.getLatitude();
                 final double centerLon = mapPosition.getLongitude();
 
+                List<GPGeoPoint> poins = new ArrayList<>();
+                poins.add(new GPGeoPoint(centerLat, centerLon));
 
                 MapObject obj = new MapObject();
                 final String proposedName = "0000";//NON-NLS
@@ -1195,26 +1140,105 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             if (theTextToRunOn.length() < 1) {
                                 theTextToRunOn = proposedName;
                             }
-//                            obj.setCode(theTextToRunOn);
-//                            obj.setCoord(String.valueOf(centerLat)+","+String.valueOf(centerLon));
-//                            obj.setObjectType(appContainer.MapObjecTypeActive);
-//                            obj.setMapObjectTypeId(appContainer.MapObjecTypeActive.getId());
-//                            MapObjectOperations.getInstance().insert(obj);
-//                            appContainer.MapObjectActive = obj;
-//                            mapView.reloadLayer(MapObjectLayer.class);
+                            obj.setCode(theTextToRunOn);
+                            obj.setCoord(poins);
+                            obj.setObjectType(appContainer.getMapObjecTypeActive());
+                            obj.setMapObjectTypeId(appContainer.getMapObjecTypeActive().getId());
+                            MapObjectOperations.getInstance().insert(obj);
+
+                            appContainer.setMapObjectActive(obj);
+                            mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
+                            updateSelectMapObj(appContainer.getMapObjecTypeActive());
 
                         } catch (Exception e) {
                             GPLog.error(this, e.getLocalizedMessage(), e);
-                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
-                Toast.makeText(this, "NEW MAPOBJ", Toast.LENGTH_SHORT).show();
-                //addBookmark();
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+        }
+    }
+
+    private void onMenuMTO(){
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(
+                        cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
+                        (LinearLayout) findViewById(cu.phibrain.cardinal.app.R.id.bottomSheetContainer)
+                );
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+                MapviewActivity.this,
+                cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme
+        );
+        descriptorMto = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.descriptorMto);
+
+        //filter Networks
+        try {
+            List<Networks> networks = appContainer.getProjectActive().getNetworks();
+
+            NetworkAdapter networksAdapter = new NetworkAdapter(this, cu.phibrain.cardinal.app.R.layout.spinner, networks);
+            filterNetworks = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.spinnerNetworks);
+            filterNetworks.setAdapter(networksAdapter);
+
+            //Recivler View Menu Mto
+            RecyclerView recyclerView = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.rvMto);
+
+            LinearLayoutManager horizontalLayoutManager
+                    = new LinearLayoutManager(bottomSheetView.getContext(), LinearLayoutManager.HORIZONTAL, false);
+            recyclerView.setLayoutManager(horizontalLayoutManager);
+            recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(), DividerItemDecoration.VERTICAL));
+            //update Network Select
+            appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
+            List<MapObjecType> mtoList;
+
+            if (appContainer.getMapObjectActive() == null) {
+                //Muestro todos por capas
+                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
+            } else {
+                //Muestro solo los aptos segun reglas topologicas
+                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getMapObjectActive().getObjectType(),null);
+            }
+
+            MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
+            recyclerView.setAdapter(mtoAdapter);
+            bottomSheetDialog.setContentView(bottomSheetView);
+            if (appContainer.getMapObjectActive() == null) {
+                filterNetworks.setVisibility(View.VISIBLE);
+                filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                        //update Network Select
+                        appContainer.setNetworksActive(networks.get(position));
+                        descriptorMto.setText("");
+                        mtoAdapter.getFilter().filter(appContainer.getNetworksActive().getId().toString());
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parentView) {
+                        // your code here
+                    }
+
+                });
+            } else {
+                filterNetworks.setVisibility(View.GONE);
+            }
+            bottomSheetDialog.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateSelectMapObj(MapObjecType mto){
+        byte[] icon = mto.getIconAsByteArray();
+        if (icon != null) {
+            Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
+            selectMo.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
+                    30, false));
         }
     }
 
@@ -1302,9 +1326,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 //        toggleMeasuremodeButton.setVisibility(visibility);
         batteryButton.setVisibility(visibility);
         centerOnGps.setVisibility(visibility);
-        zoomInButton.setVisibility(visibility);
+        zoomInButton.setVisibility(View.INVISIBLE);
         //zoomLevelTextview.setVisibility(visibility);
-        zoomOutButton.setVisibility(visibility);
+        zoomOutButton.setVisibility(View.INVISIBLE);
         // toggleEditingButton.setVisibility(visibility);
     }
 

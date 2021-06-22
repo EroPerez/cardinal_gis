@@ -28,7 +28,8 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
@@ -54,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.style.ColorUtilities;
@@ -145,6 +147,13 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         });
         if (item.isSystem) {
             holder.moreButton.setVisibility(View.INVISIBLE);
+            if(item instanceof ICardinalItem){
+            Long idLayer = ((CardinalMapLayerItem)item).id;
+            cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(idLayer);
+            byte [] icon = cardinalLayer.getIconAsByteArray();
+            if(icon != null)
+                holder.updateIcon(icon);
+            }
         } else {
             holder.moreButton.setVisibility(View.VISIBLE);
             holder.moreButton.setOnClickListener(e -> {
@@ -555,6 +564,12 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
             moreButton = itemView.findViewById(R.id.morebutton);
         }
 
+        public void updateIcon(byte[] icon) {
+            Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
+            moreButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
+                    30, false));
+        }
+
         @Override
         public void onItemClicked(View view) {
 //            Toast.makeText(view.getContext(), "Item clicked" + nameView.getText(), Toast.LENGTH_SHORT).show();
@@ -567,4 +582,3 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         }
     }
 }
-

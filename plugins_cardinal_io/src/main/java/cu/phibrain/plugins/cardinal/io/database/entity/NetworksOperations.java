@@ -46,7 +46,6 @@ public class NetworksOperations extends BaseRepo<Networks, NetworksDao> {
             for (MapObjecType mto : layer.getMapobjectypes()) {
                 if (!mto.getIsAbstract())
                     mapObjceTypeList.add(mto);
-
             }
         }
         return mapObjceTypeList;

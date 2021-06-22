@@ -179,7 +179,7 @@ public class MapObjecType implements Serializable {
     }
 
     public byte[] getIconAsByteArray() {
-        if(!this.icon.isEmpty())
+        if(this.icon!=null && !this.icon.isEmpty())
             return Base64.decode(this.icon.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
         return null;
     }

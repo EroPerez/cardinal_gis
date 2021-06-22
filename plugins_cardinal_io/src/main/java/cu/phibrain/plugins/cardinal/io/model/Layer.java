@@ -104,7 +104,9 @@ public class Layer implements Serializable {
     }
 
     public byte[] getIconAsByteArray() {
-        return Base64.decode(icon, 0);
+        if(this.icon!=null && !this.icon.isEmpty())
+            return Base64.decode(this.icon.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
+        return null;
     }
 
     /**
