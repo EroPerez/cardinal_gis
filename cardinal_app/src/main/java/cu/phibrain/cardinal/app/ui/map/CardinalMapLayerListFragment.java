@@ -295,9 +295,8 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 //        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
 
         try {
-
-            addSystemLayersColumn();
             addCardinalLayersColumn();
+            addSystemLayersColumn();
             addUserLayersColumn();
         } catch (Exception e) {
             e.printStackTrace();

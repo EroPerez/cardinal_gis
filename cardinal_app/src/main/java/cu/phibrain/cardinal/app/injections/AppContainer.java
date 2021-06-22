@@ -34,7 +34,7 @@ public class AppContainer {
     public void refreshProject() throws IOException {
         Long projectId = getProjectId();
         //Load Project Active
-        if (getProjectActive() == null || projectActive.getId() != projectId) {
+        if ( projectActive == null || projectActive.getId() != projectId) {
 
             if (projectId != null) {
                 projectActive = ProjectOperations.getInstance().load(projectId);

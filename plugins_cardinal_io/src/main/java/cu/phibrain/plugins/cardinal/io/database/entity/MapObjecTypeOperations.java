@@ -33,38 +33,23 @@ public class MapObjecTypeOperations extends BaseRepo<MapObjecType, MapObjecTypeD
         dao = daoSession.getMapObjecTypeDao();
     }
 
-    public List<MapObjecType> searchChildMto(List<MapObjecType> objcTypeList, MapObjecType mapObjecType){
-        Query<MapObjecType> MapObjectsQuery;
-        synchronized (this) {
-            QueryBuilder<MapObjecType> queryBuilder = queryBuilder();
-            queryBuilder.where(MapObjecTypeDao.Properties.ParentId.eq(null));
-            MapObjectsQuery = queryBuilder.build();
-        }
-        Query<MapObjecType> query = MapObjectsQuery.forCurrentThread();
-        query.setParameter(0, mapObjecType.getId());
-        //Load Mto by parent
-        List<MapObjecType> mtoChildList = query.list();
-        for (MapObjecType mtoIndex:mtoChildList) {
-            if (mtoIndex.getIsAbstract())
-                searchChildMto(objcTypeList,mtoIndex);
-            else
-                objcTypeList.add(mtoIndex);
-        }
-        return  objcTypeList;
 
-    }
+    public List<MapObjecType> topologicalMtoFirewall(MapObjecType mto, List<MapObjecType> objcTypeList) {
+        if (objcTypeList == null)
+            objcTypeList = new ArrayList<>();
 
-    public List<MapObjecType> topologicalMtoFirewall(MapObject mapObject){
-        List<MapObjecType> objcTypeList = new ArrayList<>();
-        for (TopologicalRule rule: mapObject.getObjectType().getTopoRule()) {
-            MapObjecType target =  rule.getTargetObj();
-            if (target.getIsAbstract()){
-                objcTypeList.addAll(MapObjecTypeOperations.getInstance().searchChildMto(objcTypeList, target));
-            }
-            else{
-                objcTypeList.add(target);
-            }
+        //Yo tambien me incluyo
+        if (!mto.getIsAbstract())
+            objcTypeList.add(mto);
+
+        List<TopologicalRule> rulers = mto.getTopoRule();
+        for (TopologicalRule rule : rulers) {
+            if (!rule.getTargetObj().getIsAbstract())
+                objcTypeList.add(rule.getTargetObj());
         }
+        if (mto.getParentObj() != null)
+            topologicalMtoFirewall(mto.getParentObj(), objcTypeList);
+
         return objcTypeList;
     }
 
