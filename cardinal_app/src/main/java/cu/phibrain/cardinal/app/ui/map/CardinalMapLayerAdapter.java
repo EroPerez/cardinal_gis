@@ -224,18 +224,20 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
                             String actionName = selectedItem.getTitle().toString();
                             try {
                                 if (actionName.equals(remove_layer)) {
-                                    mapLayerListFragment.removeItemAtIndex(0, finalSelIndex);
+                                    mapLayerListFragment.removeItemAtIndex(2, finalSelIndex);
                                     List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     userLayersDefinitions.remove(finalSelIndex);
 
                                     // if db layers we can release the db if no one uses it
-                                    JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
-                                    String tableName = jsonObject.getString(IGpLayer.LAYERNAME_TAG);
-                                    String dbPath = jsonObject.getString(IGpLayer.LAYERPATH_TAG);
-                                    if (layerType == ELayerTypes.SPATIALITE) {
-                                        SpatialiteConnectionsHandler.INSTANCE.disposeTable(dbPath, tableName);
-                                    } else if (layerType == ELayerTypes.GEOPACKAGE) {
-                                        GeopackageConnectionsHandler.INSTANCE.disposeTable(dbPath, tableName);
+                                    if(!userLayersDefinitions.isEmpty()) {
+                                        JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
+                                        String tableName = jsonObject.getString(IGpLayer.LAYERNAME_TAG);
+                                        String dbPath = jsonObject.getString(IGpLayer.LAYERPATH_TAG);
+                                        if (layerType == ELayerTypes.SPATIALITE) {
+                                            SpatialiteConnectionsHandler.INSTANCE.disposeTable(dbPath, tableName);
+                                        } else if (layerType == ELayerTypes.GEOPACKAGE) {
+                                            GeopackageConnectionsHandler.INSTANCE.disposeTable(dbPath, tableName);
+                                        }
                                     }
                                     notifyDataSetChanged();
                                 } else if (actionName.equals(toggle3d)) {

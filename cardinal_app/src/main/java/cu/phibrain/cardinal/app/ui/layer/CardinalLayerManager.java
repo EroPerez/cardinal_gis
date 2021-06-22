@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -36,6 +35,7 @@ import eu.geopaparazzi.map.GPMapThemes;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.layers.ELayerTypes;
+import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
@@ -65,11 +65,7 @@ import eu.geopaparazzi.map.utils.MapUtilities;
 public enum CardinalLayerManager {
     INSTANCE;
 
-    public static final String LAYERS = "layers";
-    public static final String GP_LOADED_USERMAPS_KEY = "GP_LOADED_USERMAPS_KEY";
-    public static final String GP_LOADED_SYSTEMMAPS_KEY = "GP_LOADED_SYSTEMMAPS_KEY";
     public static final String GP_LOADED_CARDINAL_KEY = "GP_LOADED_CARDINAL_KEY";
-    public static final String SAME_NAME_EXISTS = "A layer with the same name already exists.";
     private List<JSONObject> userLayersDefinitions = new ArrayList<>();
     private List<JSONObject> systemLayersDefinitions = new ArrayList<>();
     private List<JSONObject> cardinalLayersDefinitions = new ArrayList<>();
@@ -80,12 +76,12 @@ public enum CardinalLayerManager {
     public void init() throws Exception {
         GPApplication context = GPApplication.getInstance();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String loadedUserMapsJson = preferences.getString(GP_LOADED_USERMAPS_KEY, "{}");
+        String loadedUserMapsJson = preferences.getString(LayerManager.GP_LOADED_USERMAPS_KEY, "{}");
 
 
         JSONObject root = new JSONObject(loadedUserMapsJson);
-        if (root.has(LAYERS)) {
-            JSONArray layersArray = root.getJSONArray(LAYERS);
+        if (root.has(LayerManager.LAYERS)) {
+            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
             int length = layersArray.length();
             for (int i = 0; i < length; i++) {
                 JSONObject jsonObject = layersArray.getJSONObject(i);
@@ -93,10 +89,10 @@ public enum CardinalLayerManager {
             }
         }
 
-        String loadedSystemMapsJson = preferences.getString(GP_LOADED_SYSTEMMAPS_KEY, "{}");
+        String loadedSystemMapsJson = preferences.getString(LayerManager.GP_LOADED_SYSTEMMAPS_KEY, "{}");
         root = new JSONObject(loadedSystemMapsJson);
-        if (root.has(LAYERS)) {
-            JSONArray layersArray = root.getJSONArray(LAYERS);
+        if (root.has(LayerManager.LAYERS)) {
+            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
             int length = layersArray.length();
             for (int i = 0; i < length; i++) {
                 JSONObject jsonObject = layersArray.getJSONObject(i);
@@ -157,8 +153,8 @@ public enum CardinalLayerManager {
         //Init Layer Cardinal
         String loadedCardinalMapsJson = preferences.getString(GP_LOADED_CARDINAL_KEY, "{}");
         root = new JSONObject(loadedCardinalMapsJson);
-        if (root.has(LAYERS)) {
-            JSONArray layersArray = root.getJSONArray(LAYERS);
+        if (root.has(LayerManager.LAYERS)) {
+            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
             int length = layersArray.length();
             for (int i = 0; i < length; i++) {
                 JSONObject jsonObject = layersArray.getJSONObject(i);
@@ -183,10 +179,6 @@ public enum CardinalLayerManager {
 
     public void createGroups(CardinalGPMapView mapView) {
         Layers layers = mapView.map().layers();
-//        layers.addGroup(CardinalLayerGroups.GROUP_MAPLAYERS.getGroupId());
-//        layers.addGroup(CardinalLayerGroups.GROUP_PROJECTLAYERS.getGroupId());
-//        layers.addGroup(CardinalLayerGroups.GROUP_3D.getGroupId());
-//        layers.addGroup(CardinalLayerGroups.GROUP_SYSTEM_TOP.getGroupId());
         //Add Group Cardinal Layers
         layers.addGroup(CardinalLayerGroups.GROUP_CARDINALLAYERS.getGroupId());
     }
@@ -344,12 +336,11 @@ public enum CardinalLayerManager {
                 JSONObject jo = new JSONObject();
                 jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                 jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
-                jo.put("ID", mtoIndex.getId());
+                jo.put(ICardinalLayer.LAYERID_TAG, mtoIndex.getId());
                 jo.put(IGpLayer.LAYERENABLED_TAG, true);
                 cardinalLayersDefinitions.add(jo);
                 //Load layer
                 MapObjectLayer mapObjectLayer = new MapObjectLayer(mapView, activitySupporter, mtoIndex.getId());
-                mapObjectLayer.setID(mtoIndex.getId());
                 mapObjectLayer.load();
 
             }
@@ -524,15 +515,15 @@ public enum CardinalLayerManager {
         if (mapView != null) {
             JSONArray usersLayersArray = new JSONArray();
             JSONObject usersRoot = new JSONObject();
-            usersRoot.put(LAYERS, usersLayersArray);
+            usersRoot.put(LayerManager.LAYERS, usersLayersArray);
 
             JSONArray systemLayersArray = new JSONArray();
             JSONObject systemRoot = new JSONObject();
-            systemRoot.put(LAYERS, systemLayersArray);
+            systemRoot.put(LayerManager.LAYERS, systemLayersArray);
 
             JSONArray cardinalLayersArray = new JSONArray();
             JSONObject cardinalRoot = new JSONObject();
-            cardinalRoot.put(LAYERS, cardinalLayersArray);
+            cardinalRoot.put(LayerManager.LAYERS, cardinalLayersArray);
 
             for (Layer layer : mapView.map().layers()) {
                 if (layer instanceof IGpLayer) {
@@ -543,8 +534,9 @@ public enum CardinalLayerManager {
                             JSONObject jo = new JSONObject();
                             jo.put(IGpLayer.LAYERTYPE_TAG, MapObjectLayer.class.getCanonicalName());
                             jo.put(IGpLayer.LAYERNAME_TAG, mtoIndex.getCaption());
-                            jo.put("ID", mtoIndex.getId());
+                            jo.put(ICardinalLayer.LAYERID_TAG, mtoIndex.getId());
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
+//                            JSONObject jo = gpLayer.toJson();
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
                         }
@@ -568,10 +560,10 @@ public enum CardinalLayerManager {
             SharedPreferences.Editor editor = preferences.edit();
 
             String jsonString = usersRoot.toString();
-            editor.putString(GP_LOADED_USERMAPS_KEY, jsonString);
+            editor.putString(LayerManager.GP_LOADED_USERMAPS_KEY, jsonString);
 
             jsonString = systemRoot.toString();
-            editor.putString(GP_LOADED_SYSTEMMAPS_KEY, jsonString);
+            editor.putString(LayerManager.GP_LOADED_SYSTEMMAPS_KEY, jsonString);
 
             jsonString = cardinalRoot.toString();
             editor.putString(GP_LOADED_CARDINAL_KEY, jsonString);
@@ -741,13 +733,13 @@ public enum CardinalLayerManager {
         for (JSONObject definition : userLayersDefinitions) {
             String existingName = definition.getString(IGpLayer.LAYERNAME_TAG);
             if (existingName.equals(name)) {
-                throw new Exception(SAME_NAME_EXISTS);
+                throw new Exception(LayerManager.SAME_NAME_EXISTS);
             }
         }
         for (JSONObject definition : systemLayersDefinitions) {
             String existingName = definition.getString(IGpLayer.LAYERNAME_TAG);
             if (existingName.equals(name)) {
-                throw new Exception(SAME_NAME_EXISTS);
+                throw new Exception(LayerManager.SAME_NAME_EXISTS);
             }
         }
 
