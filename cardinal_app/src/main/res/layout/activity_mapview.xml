@@ -156,14 +156,6 @@
                     android:background="@null"
                     app:srcCompat="@drawable/ic_mapview_zoomout_24dp" />
 
-                <ImageButton
-                    android:id="@+id/zoomout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|top"
-                    android:layout_marginRight="5dp"
-                    android:background="@null"
-                    app:srcCompat="@drawable/ic_mapview_zoomout_24dp" />
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/layers_map_button"

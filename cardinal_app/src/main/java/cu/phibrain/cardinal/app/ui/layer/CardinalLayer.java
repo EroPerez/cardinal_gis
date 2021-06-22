@@ -2,6 +2,7 @@ package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 

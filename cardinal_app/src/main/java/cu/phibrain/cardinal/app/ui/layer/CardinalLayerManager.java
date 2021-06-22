@@ -173,8 +173,6 @@ public enum CardinalLayerManager {
 
         }
 
-    }
-
     public void createGroups(CardinalGPMapView mapView) {
         Layers layers = mapView.map().layers();
         //Add Group Cardinal Layers
@@ -511,15 +509,15 @@ public enum CardinalLayerManager {
         if (mapView != null) {
             JSONArray usersLayersArray = new JSONArray();
             JSONObject usersRoot = new JSONObject();
-            usersRoot.put(LAYERS, usersLayersArray);
+            usersRoot.put(LayerManager.LAYERS, usersLayersArray);
 
             JSONArray systemLayersArray = new JSONArray();
             JSONObject systemRoot = new JSONObject();
-            systemRoot.put(LAYERS, systemLayersArray);
+            systemRoot.put(LayerManager.LAYERS, systemLayersArray);
 
             JSONArray cardinalLayersArray = new JSONArray();
             JSONObject cardinalRoot = new JSONObject();
-            cardinalRoot.put(LAYERS, cardinalLayersArray);
+            cardinalRoot.put(LayerManager.LAYERS, cardinalLayersArray);
 
             for (Layer layer : mapView.map().layers()) {
                 if (layer instanceof IGpLayer) {
