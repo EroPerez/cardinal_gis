@@ -10,9 +10,6 @@ import java.io.IOException;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
-import cu.phibrain.plugins.cardinal.io.database.entity.events.MapObjectEntityEventListener;
-import cu.phibrain.plugins.cardinal.io.database.entity.events.MapObjectHasDefectEventListener;
-import cu.phibrain.plugins.cardinal.io.database.entity.events.RouteSegmentEntityEventListener;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
@@ -113,9 +110,9 @@ public class CardinalApplication extends GeopaparazziApplication {
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
 
             // Register entity event listener to handling cascade delete and order related task
-            MapObjectOperations.getInstance().registerEventDispatcher(new MapObjectEntityEventListener());
-            RouteSegmentOperations.getInstance().registerEventDispatcher(new RouteSegmentEntityEventListener());
-            MapObjectHasDefectOperations.getInstance().registerEventDispatcher(new MapObjectHasDefectEventListener());
+//            MapObjectOperations.getInstance().registerEventDispatcher(new MapObjectEntityEventListener());
+//            RouteSegmentOperations.getInstance().registerEventDispatcher(new RouteSegmentEntityEventListener());
+//            MapObjectHasDefectOperations.getInstance().registerEventDispatcher(new MapObjectHasDefectEventListener());
 
         } catch (IOException | JSONException e) {
             e.printStackTrace();
