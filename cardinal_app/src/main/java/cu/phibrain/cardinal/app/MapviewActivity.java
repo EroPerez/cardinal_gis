@@ -83,13 +83,16 @@ import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.model.Networks;
+import cu.phibrain.plugins.cardinal.io.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.model.SignalEvents;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -1116,6 +1119,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             appContainer.setMapObjectActive(null);
             appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
+            EdgesLayer edgesLayer  = new EdgesLayer(mapView);
+            EditManager.INSTANCE.setEditLayer(edgesLayer);
             toggleEditing();
             Toast.makeText(this, getString(R.string.reset_route), Toast.LENGTH_SHORT).show();
 
@@ -1146,8 +1151,19 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             obj.setMapObjectTypeId(appContainer.getMapObjecTypeActive().getId());
                             MapObjectOperations.getInstance().insert(obj);
 
+                            if(appContainer.getMapObjectActive()!=null){
+                                RouteSegment edge = new RouteSegment();
+                                edge.setOriginObj(appContainer.getMapObjectActive());
+                                edge.setDestinyObj(obj);
+                                edge.setOriginId(appContainer.getMapObjectActive().getId());
+                                edge.setDestinyId(obj.getId());
+                                RouteSegmentOperations.getInstance().insert(edge);
+                            }
+
                             appContainer.setMapObjectActive(obj);
-                            mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
+                            //mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
+                            mapView.reloadLayer(CardinalLayer.class);
+                            mapView.reloadLayer(EdgesLayer.class);
                             updateSelectMapObj(appContainer.getMapObjecTypeActive());
 
                         } catch (Exception e) {

@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.model.MapObject;
@@ -31,6 +33,7 @@ import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.map.GPGeoPoint;
+import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import cu.phibrain.plugins.cardinal.io.R;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
@@ -48,6 +51,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     private IActivitySupporter activitySupporter;
     private static int textSize;
     private static String colorStr;
+    List<MapObject> mapObjectsList;
     public CardinalLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
         super(mapView.map(), getMarkerSymbol(mapView, ID));
         this.mapView = mapView;
@@ -93,28 +97,28 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     }
 
 
-    public void reloadData(Long id) throws IOException {
-        cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(id);
-        for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
-            mtoMapObjcType.resetMapObjects();
-            List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
-
-            byte [] icon = mtoMapObjcType.getIconAsByteArray();
-            Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
-
-            List<MarkerItem> pts = new ArrayList<>();
-            for (MapObject mapObject : mapObjects) {
-                String text = mapObject.getObjectType().getCaption();
-                pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), centerPoint(mapObject)));
-            }
-            for (MarkerItem mi : pts) {
-                mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
-            }
-            addItems(pts);
-            update();
-        }
-
-    }
+//    public void reloadData(Long id) throws IOException {
+//        cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(id);
+//        for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
+//            mtoMapObjcType.resetMapObjects();
+//            List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
+//
+//            byte [] icon = mtoMapObjcType.getIconAsByteArray();
+//            Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
+//
+//            List<MarkerItem> pts = new ArrayList<>();
+//            for (MapObject mapObject : mapObjects) {
+//                String text = mapObject.getObjectType().getCaption();
+//                pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), centerPoint(mapObject)));
+//            }
+//            for (MarkerItem mi : pts) {
+//                mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
+//            }
+//            addItems(pts);
+//            update();
+//        }
+//
+//    }
     private GPGeoPoint centerPoint(MapObject mapObject){
             switch (mapObject.getObjectType().getGeomType()){
                 case POINT:
@@ -130,6 +134,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     public void reloadData() throws IOException {
         cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(ID);
+        mapObjectsList =new ArrayList<>();
         for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
             mtoMapObjcType.resetMapObjects();
             List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
@@ -137,6 +142,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
             byte [] icon = mtoMapObjcType.getIconAsByteArray();
             Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
             for (MapObject mapObject : mapObjects) {
+                mapObjectsList.add(mapObject);
                 String text = mapObject.getObjectType().getCaption();
                 pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), centerPoint(mapObject)));
             }
@@ -161,6 +167,16 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
         if (item != null)
             Toast.makeText(this.activitySupporter.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+            AppContainer appContainer = ((CardinalApplication)CardinalApplication.getInstance()).appContainer;
+             MapObject mapObject = mapObjectsList.get(index);
+             appContainer.setMapObjectActive(mapObject);
+             appContainer.setMapObjecTypeActive(mapObject.getObjectType());
+
+        GPMapPosition mapPosition = mapView.getMapPosition();
+        mapPosition.setZoomLevel(18);
+        mapPosition.setPosition(mapObject.getCoord().get(0).getLatitude(), mapObject.getCoord().get(0).getLongitude());
+        mapView.setMapPosition(mapPosition);
+
 //        if (item != null) {
 //            String description = item.getSnippet();
 //            if (description.startsWith(NONFORMSTART)) {
