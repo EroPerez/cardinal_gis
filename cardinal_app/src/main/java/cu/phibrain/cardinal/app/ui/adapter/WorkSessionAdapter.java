@@ -17,8 +17,8 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.R;
-import cu.phibrain.plugins.cardinal.io.model.WorkSession;
-import cu.phibrain.plugins.cardinal.io.model.Worker;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
 
 public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {

@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
-import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.style.ColorUtilities;
@@ -149,7 +149,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
             holder.moreButton.setVisibility(View.INVISIBLE);
             if(item instanceof ICardinalItem){
             Long idLayer = ((CardinalMapLayerItem)item).id;
-            cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(idLayer);
+            cu.phibrain.plugins.cardinal.io.database.entity.model.Layer cardinalLayer = LayerOperations.getInstance().load(idLayer);
             byte [] icon = cardinalLayer.getIconAsByteArray();
             if(icon != null)
                 holder.updateIcon(icon);

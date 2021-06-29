@@ -2,8 +2,8 @@ package cu.phibrain.cardinal.app.helpers;
 
 import java.util.Date;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.SignalEventsOperations;
-import cu.phibrain.plugins.cardinal.io.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 
 public class SignalEventLogger {
 

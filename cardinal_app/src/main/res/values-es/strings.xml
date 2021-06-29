@@ -6,4 +6,10 @@
     <string name="work_session_not_active">Por favor, usted debe activar una sesión de trabajo.</string>
     <string name="worker_have_not_active">El operario %s parece que esta inactivo en el servidor remoto</string>
     <string name="work_session_view_label">Sesiones de trabajo</string>
+    <string name="dashboard_worksession_action_description">Abrir el listado de sesiones de trabajo</string>
+    <string name="map_object_props_inspector_basic">Básicos</string>
+    <string name="map_object_props_inspector_defects">Defectos</string>
+    <string name="observation">Observación</string>
+    <string name="map_object_props_inspector_states">Estados</string>
+    <string name="map_object_props_inspector_attribute">Atributos heredados</string>
 </resources>

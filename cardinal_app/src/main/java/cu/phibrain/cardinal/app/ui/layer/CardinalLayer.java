@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
-import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
-import cu.phibrain.plugins.cardinal.io.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.util.Compat;
@@ -94,7 +94,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
 
     public void reloadData(Long id) throws IOException {
-        cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(id);
+        cu.phibrain.plugins.cardinal.io.database.entity.model.Layer cardinalLayer = LayerOperations.getInstance().load(id);
         for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
             mtoMapObjcType.resetMapObjects();
             List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
@@ -129,7 +129,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     }
 
     public void reloadData() throws IOException {
-        cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(ID);
+        cu.phibrain.plugins.cardinal.io.database.entity.model.Layer cardinalLayer = LayerOperations.getInstance().load(ID);
         for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
             mtoMapObjcType.resetMapObjects();
             List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();

@@ -4,10 +4,10 @@ import android.content.Context;
 import android.view.ViewGroup;
 
 /*import cu.phibrain.plugins.cardinal.io.R;
-import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
-import cu.phibrain.plugins.cardinal.io.model.GroupOfLayer;
-import cu.phibrain.plugins.cardinal.io.model.Layer;
-import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.GroupOfLayer;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
 import eu.geopaparazzi.library.database.TableDescriptions;*/

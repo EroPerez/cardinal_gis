@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.R;
-import cu.phibrain.plugins.cardinal.io.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 
 public class NetworkAdapter extends ArrayAdapter<Networks> {
     public NetworkAdapter(@NonNull Context context, int resource, List<Networks> networksList) {
