@@ -47,7 +47,7 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperations;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;

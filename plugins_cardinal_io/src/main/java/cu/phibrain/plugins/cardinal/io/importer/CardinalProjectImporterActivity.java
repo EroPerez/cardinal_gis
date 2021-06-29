@@ -30,7 +30,7 @@ import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.WebDataProjectManager;
-import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
 import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;

@@ -6,7 +6,7 @@ import android.util.Log;
 
 import org.greenrobot.greendao.database.Database;
 
-import cu.phibrain.plugins.cardinal.io.model.DaoMaster;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoMaster;
 
 public class MySQLiteOpenHelper extends DaoMaster.OpenHelper {
 

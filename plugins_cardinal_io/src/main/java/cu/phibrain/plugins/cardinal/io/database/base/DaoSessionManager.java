@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.model.DaoMaster;
-import cu.phibrain.plugins.cardinal.io.model.DaoSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoMaster;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoSession;
 import cu.phibrain.plugins.cardinal.io.utils.Observer;
 import cu.phibrain.plugins.cardinal.io.utils.Subject;
 

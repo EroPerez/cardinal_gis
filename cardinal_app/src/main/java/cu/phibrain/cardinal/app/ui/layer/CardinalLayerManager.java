@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.GPLog;
@@ -160,8 +160,8 @@ public enum CardinalLayerManager {
                 cardinalLayersDefinitions.add(jsonObject);
             }
         } else {
-          List<cu.phibrain.plugins.cardinal.io.model.Layer> cardinalLayers = LayerOperations.getInstance().getAll();
-            for (cu.phibrain.plugins.cardinal.io.model.Layer layerIndex: cardinalLayers) {
+          List<cu.phibrain.plugins.cardinal.io.database.entity.model.Layer> cardinalLayers = LayerOperations.getInstance().getAll();
+            for (cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex: cardinalLayers) {
                     JSONObject jo = new JSONObject();
                     jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                     jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
@@ -341,8 +341,8 @@ public enum CardinalLayerManager {
     }
 
     private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException, IOException {
-        List<cu.phibrain.plugins.cardinal.io.model.Layer> cardinalLayers = LayerOperations.getInstance().getAll();
-        for (cu.phibrain.plugins.cardinal.io.model.Layer layerIndex: cardinalLayers) {
+        List<cu.phibrain.plugins.cardinal.io.database.entity.model.Layer> cardinalLayers = LayerOperations.getInstance().getAll();
+        for (cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex: cardinalLayers) {
                 JSONObject jo = new JSONObject();
                 jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                 jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
@@ -548,7 +548,7 @@ public enum CardinalLayerManager {
 
                         if(layer instanceof  ICardinalLayer){
                             IGpLayer gpLayer = (IGpLayer) layer;
-                            cu.phibrain.plugins.cardinal.io.model.Layer layerIndex = LayerOperations.getInstance().load(((CardinalLayer)layer).getID());
+                            cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex = LayerOperations.getInstance().load(((CardinalLayer)layer).getID());
                             JSONObject jo = new JSONObject();
                             jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                             jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());

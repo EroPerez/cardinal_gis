@@ -10,49 +10,51 @@ import java.util.HashMap;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
-import cu.phibrain.plugins.cardinal.io.database.entity.ContractOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LabelBatchesOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LabelMaterialOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LabelSubLotOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeDefectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeStateOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasDefectHasImagesOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasDefectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasStateOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectImagesOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectMetadataOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MaterialOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.ProjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.RouteSegmentOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.SignalEventsOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.StockOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.SupplierOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.TopologicalRuleOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkSessionOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkerRouteOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.ZoneOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelMaterialOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeDefectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasDefectHasImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasDefectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectMetadataOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectTypeAttributeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MaterialOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.SupplierOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.TopologicalRuleOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ZoneOperations;
 import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
-import cu.phibrain.plugins.cardinal.io.model.Contract;
-import cu.phibrain.plugins.cardinal.io.model.LabelBatches;
-import cu.phibrain.plugins.cardinal.io.model.LabelMaterial;
-import cu.phibrain.plugins.cardinal.io.model.Layer;
-import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
-import cu.phibrain.plugins.cardinal.io.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.model.MapObjectHasDefect;
-import cu.phibrain.plugins.cardinal.io.model.Networks;
-import cu.phibrain.plugins.cardinal.io.model.Project;
-import cu.phibrain.plugins.cardinal.io.model.Stock;
-import cu.phibrain.plugins.cardinal.io.model.Supplier;
-import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
-import cu.phibrain.plugins.cardinal.io.model.WorkSession;
-import cu.phibrain.plugins.cardinal.io.model.Worker;
-import cu.phibrain.plugins.cardinal.io.model.Zone;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Label;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelBatches;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import cu.phibrain.plugins.cardinal.io.utils.CardinalMetadataTableDefaultValues;
@@ -84,7 +86,6 @@ public enum WebDataProjectManager {
             return server + "/" + path;
         }
     }
-
 
 
     /**
@@ -138,6 +139,12 @@ public enum WebDataProjectManager {
             List<Zone> zoneList = project.getZone();
             List<Networks> networksList = project.getNetworks();
             List<LabelBatches> labelBatchesList = project.getLabelBatches();
+            List<Label> labelList = new ArrayList<>();
+
+            for (LabelBatches lot :
+                    labelBatchesList) {
+                labelList.addAll(lot.getLabels());
+            }
 
             DaoSessionManager.getInstance().setContext(context);
             DaoSessionManager.getInstance().setDatabaseName(newDbFileName);
@@ -164,6 +171,7 @@ public enum WebDataProjectManager {
             ZoneOperations.getInstance().insertAll(zoneList);
             NetworksOperations.getInstance().insertAll(networksList);
             LabelBatchesOperations.getInstance().insertAll(labelBatchesList);
+            LabelOperations.getInstance().insertAll(labelList);
 
             // Save all layers in networks
             List<Layer> layerList = new ArrayList<>();

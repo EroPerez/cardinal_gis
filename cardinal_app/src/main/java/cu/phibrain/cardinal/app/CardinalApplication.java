@@ -2,39 +2,43 @@ package cu.phibrain.cardinal.app;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.json.JSONException;
+
 import java.io.IOException;
+
+import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
-import cu.phibrain.plugins.cardinal.io.database.entity.ContractOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LabelBatchesOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LabelMaterialOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LabelSubLotOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.LayerOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeDefectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeStateOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasDefectHasImagesOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasDefectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectHasStateOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectImagesOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectMetadataOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectTypeAttributeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MaterialOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.ProjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.RouteSegmentOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.SignalEventsOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.StockOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.SupplierOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.TopologicalRuleOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkSessionOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkerOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.WorkerRouteOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.ZoneOperations;
-import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.plugins.cardinal.io.model.DaoSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelMaterialOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeDefectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasDefectHasImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasDefectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasStateOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectMetadataOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectTypeAttributeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MaterialOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.SupplierOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.TopologicalRuleOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ZoneOperations;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.profiles.ProfilesHandler;
@@ -55,7 +59,9 @@ public class CardinalApplication extends GeopaparazziApplication {
     public DaoSession getDaoSession() {
         return daoSession;
     }
-    public AppContainer appContainer ;
+
+    public AppContainer appContainer;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -93,14 +99,21 @@ public class CardinalApplication extends GeopaparazziApplication {
             TopologicalRuleOperations.getInstance().attachTo(DaoSessionManager.getInstance());
             WorkerRouteOperations.getInstance().attachTo(DaoSessionManager.getInstance());
             WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+            LabelOperations.getInstance().attachTo(DaoSessionManager.getInstance());
 
             appContainer = new AppContainer();
             ResourcesManager.resetManager();
             ProfilesHandler.INSTANCE.checkActiveProfile(getContentResolver());
-            if(appContainer.getProjectActive() !=null)
+            if (appContainer.getProjectActive() != null)
                 CardinalLayerManager.INSTANCE.init();
 
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
+
+            // Register entity event listener to handling cascade delete and order related task
+//            MapObjectOperations.getInstance().registerEventDispatcher(new MapObjectEntityEventListener());
+//            RouteSegmentOperations.getInstance().registerEventDispatcher(new RouteSegmentEntityEventListener());
+//            MapObjectHasDefectOperations.getInstance().registerEventDispatcher(new MapObjectHasDefectEventListener());
+
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         } catch (Exception e) {
