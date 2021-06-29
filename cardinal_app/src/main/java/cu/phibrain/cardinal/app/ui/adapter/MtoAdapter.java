@@ -18,8 +18,8 @@ import java.util.List;
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 
 public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> implements Filterable {
 

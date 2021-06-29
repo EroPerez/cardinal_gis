@@ -3,12 +3,12 @@ package cu.phibrain.plugins.cardinal.io.network.api;
 import java.util.List;
 import java.util.Map;
 
-import cu.phibrain.plugins.cardinal.io.model.LabelMaterial;
-import cu.phibrain.plugins.cardinal.io.model.LoginModel;
-import cu.phibrain.plugins.cardinal.io.model.Project;
-import cu.phibrain.plugins.cardinal.io.model.Supplier;
-import cu.phibrain.plugins.cardinal.io.model.WebDataProjectModel;
-import cu.phibrain.plugins.cardinal.io.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LoginModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;

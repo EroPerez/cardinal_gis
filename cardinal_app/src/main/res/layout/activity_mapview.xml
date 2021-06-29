@@ -7,6 +7,22 @@
     android:fitsSystemWindows="true">
 
     <RelativeLayout
+        android:id="@+id/inspectorlayout"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end|right"
+        android:background="@drawable/inspector_background"
+        android:orientation="vertical"
+        android:translationZ="1dp">
+
+        <include
+            layout="@layout/content_object_inspector_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/innerlayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
@@ -336,8 +352,7 @@
         android:orientation="vertical"
         android:paddingLeft="@dimen/mapview_sides_space"
         android:paddingBottom="@dimen/mapview_sides_space"
-        android:visibility="invisible"
-        />
+        android:visibility="invisible" />
 
     <eu.geopaparazzi.map.features.editing.EditingView
         android:id="@+id/editingview"

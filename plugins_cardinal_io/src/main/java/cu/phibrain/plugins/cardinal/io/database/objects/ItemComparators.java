@@ -2,7 +2,7 @@ package cu.phibrain.plugins.cardinal.io.database.objects;
 
 import java.util.Comparator;
 
-import cu.phibrain.plugins.cardinal.io.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 
 
 public class ItemComparators {
