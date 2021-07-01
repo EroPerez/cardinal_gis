@@ -21,7 +21,7 @@ public class CardinalProjectImporterMenuProvider extends PluginService {
     public IBinder onBind (Intent intent) {
         if (list==null) {
             list = new MenuEntryList();
-            list.addEntry(new CardinalProjectImportMenuEntry(this));
+            list.addEntry(new CardinalProjectImportMenuEntry(getApplicationContext()));
         }
         return list;
     }

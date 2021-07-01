@@ -19,6 +19,8 @@ package cu.phibrain.cardinal.app.ui.map;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -28,8 +30,7 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
@@ -137,22 +138,24 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            if(item instanceof ICardinalItem){
+            if (item instanceof ICardinalItem) {
                 CardinalLayerManager.INSTANCE.setEnabled(item.position, item.enabled);
-            }
-            else{
+            } else {
                 CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
             }
 
         });
         if (item.isSystem) {
             holder.moreButton.setVisibility(View.INVISIBLE);
-            if(item instanceof ICardinalItem){
-            Long idLayer = ((CardinalMapLayerItem)item).id;
-            cu.phibrain.plugins.cardinal.io.database.entity.model.Layer cardinalLayer = LayerOperations.getInstance().load(idLayer);
-            byte [] icon = cardinalLayer.getIconAsByteArray();
-            if(icon != null)
-                holder.updateIcon(icon);
+            if (item instanceof ICardinalItem) {
+                Long idLayer = ((CardinalMapLayerItem) item).id;
+                cu.phibrain.plugins.cardinal.io.database.entity.model.Layer cardinalLayer = LayerOperations.getInstance().load(idLayer);
+                if (cardinalLayer != null) {
+                    byte[] icon = cardinalLayer.getIconAsByteArray();
+                    if (icon != null)
+                        holder.updateIcon(icon);
+                    holder.moreButton.setVisibility(View.VISIBLE);
+                }
             }
         } else {
             holder.moreButton.setVisibility(View.VISIBLE);
@@ -238,7 +241,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
                                     userLayersDefinitions.remove(finalSelIndex);
 
                                     // if db layers we can release the db if no one uses it
-                                    if(!userLayersDefinitions.isEmpty()) {
+                                    if (!userLayersDefinitions.isEmpty()) {
                                         JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
                                         String tableName = jsonObject.getString(IGpLayer.LAYERNAME_TAG);
                                         String dbPath = jsonObject.getString(IGpLayer.LAYERPATH_TAG);

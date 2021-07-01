@@ -179,11 +179,15 @@ public class LabelSubLot {
         myDao.update(this);
     }
 
+    @Override
+    public String toString() {
+        return labelObj.getCode();
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 596595756)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getLabelSubLotDao() : null;
     }
-
 }

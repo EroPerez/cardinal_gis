@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name">Cardinal Import Project</string>
     <string name="available_only_with_network">This option is only available when a network connection is available</string>
     <string name="error_set_cloud_settings_cardinal">User and password must be set on cloud settings to connect to Cardinal Online</string>
     <string name="cardinal_online" translatable="false">Cardinal Online</string>

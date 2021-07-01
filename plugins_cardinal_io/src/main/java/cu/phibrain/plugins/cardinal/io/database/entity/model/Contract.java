@@ -40,6 +40,9 @@ public class Contract implements Serializable {
     @Expose
     private long projectId;
 
+    @ToOne(joinProperty = "projectId")
+    private Project projectObj;
+
     @SerializedName("active")
     @Expose
     private boolean active;
@@ -65,6 +68,9 @@ public class Contract implements Serializable {
 
     @Generated(hash = 195394159)
     private transient Long theWorker__resolvedKey;
+
+    @Generated(hash = 1851238472)
+    private transient Long projectObj__resolvedKey;
 
 
     public Contract() {
@@ -229,6 +235,41 @@ public class Contract implements Serializable {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+
+    /** To-one relationship, resolved on first access. */
+    @Generated(hash = 1011425722)
+    public Project getProjectObj() {
+        long __key = this.projectId;
+        if (projectObj__resolvedKey == null || !projectObj__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            ProjectDao targetDao = daoSession.getProjectDao();
+            Project projectObjNew = targetDao.load(__key);
+            synchronized (this) {
+                projectObj = projectObjNew;
+                projectObj__resolvedKey = __key;
+            }
+        }
+        return projectObj;
+    }
+
+
+    /** called by internal mechanisms, do not call yourself. */
+    @Generated(hash = 210318481)
+    public void setProjectObj(@NotNull Project projectObj) {
+        if (projectObj == null) {
+            throw new DaoException(
+                    "To-one property 'projectId' has not-null constraint; cannot set to-one to null");
+        }
+        synchronized (this) {
+            this.projectObj = projectObj;
+            projectId = projectObj.getId();
+            projectObj__resolvedKey = projectId;
+        }
     }
 
 

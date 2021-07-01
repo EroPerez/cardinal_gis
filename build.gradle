@@ -31,8 +31,8 @@ allprojects {
         }
     }
     ext {
-        myApplicationId = "eu.hydrologis.geopaparazzi"
-        myVersionCode = 99
+        myApplicationId = "cu.phibrain.cardinalpaparazzi"
+        myVersionCode = 100
         myVersionName = "6.0.3"
 
         mycompileSdkVersion = 28

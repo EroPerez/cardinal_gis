@@ -1,26 +1,24 @@
 package cu.phibrain.cardinal.app.ui.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.R;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 
-public class NetworkAdapter extends ArrayAdapter<Networks> {
-    public NetworkAdapter(@NonNull Context context, int resource, List<Networks> networksList) {
+public class LabelSubLotAdapter extends ArrayAdapter<LabelSubLot> {
+    public LabelSubLotAdapter(@NonNull Context context, int resource, List<LabelSubLot> networksList) {
         super(context, resource, networksList);
     }
 
@@ -37,28 +35,38 @@ public class NetworkAdapter extends ArrayAdapter<Networks> {
         return initView(position, convertView, parent);
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        return  !getItem(position).getGeolocated();
+    }
+
     private View initView(int position, View convertView,
                           ViewGroup parent) {
         // It is used to set our custom view.
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner_inv, parent, false);
         }
 
-        TextView textViewName = convertView.findViewById(R.id.tvNetworkLabel);
-        ImageView imageViewNetwork = convertView.findViewById(R.id.netIcon);
-        Networks currentItem = getItem(position);
+        TextView textViewName = convertView.findViewById(R.id.tvSpinnerValue);
+
+        LabelSubLot currentItem = getItem(position);
 
         // It is used the name to the TextView when the
         // current item is not null.
         if (currentItem != null) {
-            textViewName.setText(currentItem.getName());
-            if (!currentItem.getIcon().isEmpty()) {
-                byte [] avatarByteCodes = currentItem.getIconAsByteArray();
-                Bitmap icon = BitmapFactory.decodeStream(new ByteArrayInputStream(avatarByteCodes));
-                imageViewNetwork.setImageBitmap(icon);
-
+            textViewName.setText(currentItem.getLabelObj().getCode());
+            if (isEnabled(position)) {
+                textViewName.setTextColor(Color.BLACK);
+            } else {
+                textViewName.setTextColor(Color.GRAY);
             }
+
         }
         return convertView;
+    }
+
+    public int select(String code, Long workSession){
+        LabelSubLot item = LabelSubLotOperations.getInstance().load(workSession, code);
+        return getPosition(item);
     }
 }

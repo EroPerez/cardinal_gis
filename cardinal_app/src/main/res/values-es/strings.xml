@@ -12,4 +12,12 @@
     <string name="observation">Observación</string>
     <string name="map_object_props_inspector_states">Estados</string>
     <string name="map_object_props_inspector_attribute">Atributos heredados</string>
+    <string name="inspector_object_label_code">Código</string>
+    <string name="inspector_object_grade">Grado</string>
+    <string name="inspector_object_inventory">Inventario</string>
+    <string name="inspector_object_type">Tipo</string>
+    <string name="inspector_object_geometry">Geometría</string>
+    <string name="inspector_object_observation">Observaciones</string>
+    <string name="dashboard_msg_session">Sesiones:  %d</string>
+    <string name="select_one">Pick one</string>
 </resources>

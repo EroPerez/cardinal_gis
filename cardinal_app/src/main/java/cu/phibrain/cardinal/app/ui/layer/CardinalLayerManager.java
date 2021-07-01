@@ -64,7 +64,7 @@ import eu.geopaparazzi.map.utils.MapUtilities;
 public enum CardinalLayerManager {
     INSTANCE;
 
-    public static final String GP_LOADED_CARDINAL_KEY = "GP_LOADED_CARDINAL_KEY";
+    public static final String GP_LOADED_CARDINAL_KEY = "GP_LOADED_CARDINAL_KEY_2";
     private List<JSONObject> userLayersDefinitions = new ArrayList<>();
     private List<JSONObject> systemLayersDefinitions = new ArrayList<>();
     private List<JSONObject> cardinalLayersDefinitions = new ArrayList<>();
@@ -150,26 +150,26 @@ public enum CardinalLayerManager {
 
 
         //Init Layer Cardinal
-        String loadedCardinalMapsJson = preferences.getString(GP_LOADED_CARDINAL_KEY, "{}");
-        root = new JSONObject(loadedCardinalMapsJson);
-        if (root.has(LayerManager.LAYERS)) {
-            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
-            int length = layersArray.length();
-            for (int i = 0; i < length; i++) {
-                JSONObject jsonObject = layersArray.getJSONObject(i);
-                cardinalLayersDefinitions.add(jsonObject);
-            }
-        } else {
+//        String loadedCardinalMapsJson = preferences.getString(GP_LOADED_CARDINAL_KEY, "{}");
+//        root = new JSONObject(loadedCardinalMapsJson);
+//        if (root.has(LayerManager.LAYERS)) {
+//            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
+//            int length = layersArray.length();
+//            for (int i = 0; i < length; i++) {
+//                JSONObject jsonObject = layersArray.getJSONObject(i);
+//                cardinalLayersDefinitions.add(jsonObject);
+//            }
+//        } else {
           List<cu.phibrain.plugins.cardinal.io.database.entity.model.Layer> cardinalLayers = LayerOperations.getInstance().getAll();
             for (cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex: cardinalLayers) {
                     JSONObject jo = new JSONObject();
                     jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                     jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
-                    jo.put("ID", layerIndex.getId());
-                    jo.put(IGpLayer.LAYERENABLED_TAG, true);
+                    jo.put("ID", layerIndex.getId()); // Daniel no harcodee texto en el codigo man
+                    jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getEnabled());
                     cardinalLayersDefinitions.add(jo);
                 }
-            }
+//            }
 
         }
 
@@ -331,8 +331,7 @@ public enum CardinalLayerManager {
                 JSONObject jo = new JSONObject();
                 jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                 jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
-                jo.put(IGpLayer.LAYERENABLED_TAG, true);
-                jo.put(IGpLayer.LAYERENABLED_TAG, true);
+                jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getEnabled());
                 cardinalLayersDefinitions.add(jo);
                 //Load layer
                 CardinalLayer cardinalLayer = new CardinalLayer(mapView, activitySupporter, layerIndex.getId());
