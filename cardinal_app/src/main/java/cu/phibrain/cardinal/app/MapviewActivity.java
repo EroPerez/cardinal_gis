@@ -83,13 +83,16 @@ import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -158,7 +161,7 @@ import static eu.geopaparazzi.library.util.LibraryConstants.ZOOMLEVEL;
 /**
  * @author Andrea Antonello (www.hydrologis.com)
  */
-public class MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
+public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
     private final int INSERTCOORD_RETURN_CODE = 666;
     private final int ZOOM_RETURN_CODE = 667;
     private final int MENU_GO_TO = 1;
@@ -1116,6 +1119,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             appContainer.setMapObjectActive(null);
             appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
+            EdgesLayer edgesLayer  = new EdgesLayer(mapView);
+            EditManager.INSTANCE.setEditLayer(edgesLayer);
             toggleEditing();
             Toast.makeText(this, getString(R.string.reset_route), Toast.LENGTH_SHORT).show();
 
@@ -1146,9 +1151,20 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             obj.setMapObjectTypeId(appContainer.getMapObjecTypeActive().getId());
                             MapObjectOperations.getInstance().insert(obj);
 
+                            if(appContainer.getMapObjectActive()!=null){
+                                RouteSegment edge = new RouteSegment();
+                                edge.setOriginObj(appContainer.getMapObjectActive());
+                                edge.setDestinyObj(obj);
+                                edge.setOriginId(appContainer.getMapObjectActive().getId());
+                                edge.setDestinyId(obj.getId());
+                                RouteSegmentOperations.getInstance().insert(edge);
+                            }
+
                             appContainer.setMapObjectActive(obj);
-                            mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
-                            updateSelectMapObj(appContainer.getMapObjecTypeActive());
+                            //mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
+                            mapView.reloadLayer(CardinalLayer.class);
+                            mapView.reloadLayer(EdgesLayer.class);
+                            //updateSelectMapObj(appContainer.getMapObjecTypeActive());
 
                         } catch (Exception e) {
                             GPLog.error(this, e.getLocalizedMessage(), e);

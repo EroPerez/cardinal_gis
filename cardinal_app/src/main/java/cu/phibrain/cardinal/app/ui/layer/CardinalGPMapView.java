@@ -13,13 +13,13 @@ public class CardinalGPMapView extends GPMapView {
         CardinalLayerManager.INSTANCE.createGroups(this);
     }
 
-    public void reloadLayer(Class<? extends IGpLayer> layerClass, Long id) throws Exception {
-        for (Layer layer : map().layers()) {
-            if (layer.getClass().isAssignableFrom(layerClass) && ((CardinalLayer) layer).getID().equals(id)) {
-                ((CardinalLayer) layer).reloadData(id);
-                break;
-            }
-        }
-    }
+//    public void reloadLayer(Class<? extends IGpLayer> layerClass, Long id) throws Exception {
+//        for (Layer layer : map().layers()) {
+//            if (layer.getClass().isAssignableFrom(layerClass) && ((CardinalLayer) layer).getID().equals(id)) {
+//                ((CardinalLayer) layer).reloadData(id);
+//                break;
+//            }
+//        }
+//    }
 
 }

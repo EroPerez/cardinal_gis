@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
 import eu.geopaparazzi.library.util.FileUtilities;
@@ -349,7 +350,14 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         List<JSONObject> layerDefinitions = CardinalLayerManager.INSTANCE.getCardinalLayersDefinitions();
         int index = 0;
         for (JSONObject layerDefinition : layerDefinitions) {
-            CardinalMapLayerItem layerItem = getCardinalMapLayerItem(index, layerDefinition);
+            MapLayerItem layerItem = null;
+            String layerClass = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
+            String tmp = EdgesLayer.class.getCanonicalName();
+            if(layerClass.equals(EdgesLayer.class.getCanonicalName()))
+                layerItem = getCardinalEdgeItem(index, layerDefinition);
+            else
+                layerItem = getCardinalLayerItem(index, layerDefinition);
+
             layerItem.isSystem = true;
             mItemArray.add(layerItem);
             index++;
@@ -361,6 +369,31 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         ((TextView) header.findViewById(R.id.item_count)).setText("");
 
         mBoardView.addColumn(listAdapter, header, header, false);
+    }
+
+    private MapLayerItem getCardinalEdgeItem(int index, JSONObject layerDefinition) throws JSONException {
+        String name = layerDefinition.getString(IGpLayer.LAYERNAME_TAG);
+        String type = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
+
+        boolean isEnabled = true;
+        if (layerDefinition.has(IGpLayer.LAYERENABLED_TAG)) {
+            isEnabled = layerDefinition.getBoolean(IGpLayer.LAYERENABLED_TAG);
+        }
+        boolean isEditing = false;
+        if (layerDefinition.has(IGpLayer.LAYEREDITING_TAG)) {
+            isEditing = layerDefinition.getBoolean(IGpLayer.LAYEREDITING_TAG);
+        }
+        CardinalMapEdgeItem layerItem = new CardinalMapEdgeItem();
+        layerItem.position = index;
+        layerItem.enabled = isEnabled;
+        layerItem.isEditing = isEditing;
+        if (layerDefinition.has(IGpLayer.LAYERURL_TAG))
+            layerItem.url = layerDefinition.getString(IGpLayer.LAYERURL_TAG);
+        if (layerDefinition.has(IGpLayer.LAYERPATH_TAG))
+            layerItem.path = layerDefinition.getString(IGpLayer.LAYERPATH_TAG);
+        layerItem.name = name;
+        layerItem.type = type;
+        return layerItem;
     }
 
     @NonNull
@@ -389,7 +422,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
     }
 
     @NonNull
-    private CardinalMapLayerItem getCardinalMapLayerItem(int index, JSONObject layerDefinition) throws JSONException {
+    private CardinalMapLayerItem getCardinalLayerItem(int index, JSONObject layerDefinition) throws JSONException {
         String name = layerDefinition.getString(IGpLayer.LAYERNAME_TAG);
         String type = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
         Long id = layerDefinition.getLong("ID");

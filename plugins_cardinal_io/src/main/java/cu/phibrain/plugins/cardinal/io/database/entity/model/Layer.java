@@ -63,6 +63,10 @@ public class Layer implements Serializable {
     @Expose
     private Integer editZoomLevel;
 
+    @SerializedName("active")
+    @Expose
+    private Boolean isActive;
+
     private final static long serialVersionUID = -8834285743731834345L;
 
     /**
@@ -83,9 +87,9 @@ public class Layer implements Serializable {
     public Layer() {
     }
 
-    @Generated(hash = 673414084)
+    @Generated(hash = 1902701250)
     public Layer(Long id, String name, long groupId, String icon, Boolean isTopology,
-            Integer viewZoomLevel, Integer editZoomLevel) {
+            Integer viewZoomLevel, Integer editZoomLevel, Boolean isActive) {
         this.id = id;
         this.name = name;
         this.groupId = groupId;
@@ -93,6 +97,7 @@ public class Layer implements Serializable {
         this.isTopology = isTopology;
         this.viewZoomLevel = viewZoomLevel;
         this.editZoomLevel = editZoomLevel;
+        this.isActive = isActive;
     }
 
     public Long getId() {
@@ -203,6 +208,10 @@ public class Layer implements Serializable {
         return this.isTopology;
     }
 
+    public Boolean getIsActive() {
+        return this.isActive;
+    }
+
     public void setIsTopology(Boolean isTopology) {
         this.isTopology = isTopology;
     }
@@ -221,6 +230,10 @@ public class Layer implements Serializable {
 
     public void setEditZoomLevel(Integer editZoomLevel) {
         this.editZoomLevel = editZoomLevel;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     /** called by internal mechanisms, do not call yourself. */

@@ -13,7 +13,9 @@
         android:layout_gravity="end|right"
         android:background="@drawable/inspector_background"
         android:orientation="vertical"
-        android:translationZ="1dp">
+        android:translationZ="1dp"
+        android:visibility="gone"
+        >
 
         <include
             layout="@layout/content_object_inspector_layout"

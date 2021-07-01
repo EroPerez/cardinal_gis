@@ -149,29 +149,35 @@ public enum CardinalLayerManager {
         }
 
 
-        //Init Layer Cardinal
-        String loadedCardinalMapsJson = preferences.getString(GP_LOADED_CARDINAL_KEY, "{}");
-        root = new JSONObject(loadedCardinalMapsJson);
-        if (root.has(LayerManager.LAYERS)) {
-            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
-            int length = layersArray.length();
-            for (int i = 0; i < length; i++) {
-                JSONObject jsonObject = layersArray.getJSONObject(i);
-                cardinalLayersDefinitions.add(jsonObject);
-            }
-        } else {
+//        //Init Layer Cardinal
+//        String loadedCardinalMapsJson = preferences.getString(GP_LOADED_CARDINAL_KEY, "{}");
+//        root = new JSONObject(loadedCardinalMapsJson);
+//        if (root.has(LayerManager.LAYERS)) {
+//            JSONArray layersArray = root.getJSONArray(LayerManager.LAYERS);
+//            int length = layersArray.length();
+//            for (int i = 0; i < length; i++) {
+//                JSONObject jsonObject = layersArray.getJSONObject(i);
+//                cardinalLayersDefinitions.add(jsonObject);
+//            }
+//        } else {
           List<cu.phibrain.plugins.cardinal.io.database.entity.model.Layer> cardinalLayers = LayerOperations.getInstance().getAll();
-            for (cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex: cardinalLayers) {
+          for (cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex: cardinalLayers) {
                     JSONObject jo = new JSONObject();
                     jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                     jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
                     jo.put("ID", layerIndex.getId());
-                    jo.put(IGpLayer.LAYERENABLED_TAG, true);
+                    jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getIsActive());
                     cardinalLayersDefinitions.add(jo);
                 }
+            JSONObject jo = new JSONObject();
+            jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
+            jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+            jo.put(IGpLayer.LAYERENABLED_TAG, true);
+            cardinalLayersDefinitions.add(jo);
+
             }
 
-        }
+       // }
 
     public void createGroups(CardinalGPMapView mapView) {
         Layers layers = mapView.map().layers();
@@ -307,16 +313,27 @@ public enum CardinalLayerManager {
         if (cardinalLayersDefinitions.size() > 0) {
             for (JSONObject layerDefinition : cardinalLayersDefinitions) {
                 String layerClass = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
-                Long Id = layerDefinition.getLong("ID");
+
                 boolean isEnabled = true;
                 boolean hasEnabled = layerDefinition.has(IGpLayer.LAYERENABLED_TAG);
                 if (hasEnabled)
                     isEnabled = layerDefinition.getBoolean(IGpLayer.LAYERENABLED_TAG);
 
                 if (layerClass.equals(CardinalLayer.class.getCanonicalName())) {
+
+                    Long Id = layerDefinition.getLong("ID");
+                    cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(Id);
                     CardinalLayer sysLayer = new CardinalLayer(mapView, activitySupporter, Id);
                     sysLayer.load();
-                    sysLayer.setEnabled(isEnabled);
+                    sysLayer.setEnabled(layer.getIsActive());
+                }
+                else{
+                    if (layerClass.equals(EdgesLayer.class.getCanonicalName())) {
+                        EdgesLayer sysLayer = new EdgesLayer(mapView);
+                        sysLayer.load();
+                        sysLayer.setEnabled(isEnabled);
+                    }
+
                 }
             }
         }
@@ -331,14 +348,22 @@ public enum CardinalLayerManager {
                 JSONObject jo = new JSONObject();
                 jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                 jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
-                jo.put(IGpLayer.LAYERENABLED_TAG, true);
-                jo.put(IGpLayer.LAYERENABLED_TAG, true);
+                jo.put("ID", layerIndex.getId());
+                jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getIsActive());
                 cardinalLayersDefinitions.add(jo);
                 //Load layer
                 CardinalLayer cardinalLayer = new CardinalLayer(mapView, activitySupporter, layerIndex.getId());
                 cardinalLayer.setID(layerIndex.getId());
                 cardinalLayer.load();
         }
+
+        EdgesLayer edgeLayer = new EdgesLayer(mapView);
+        GPApplication context = GPApplication.getInstance();
+        JSONObject jo = new JSONObject();
+        jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+        cardinalLayersDefinitions.add(edgeLayer.toJson());
+        edgeLayer.load();
     }
 
     public void loadMapLayers(GPMapView mapView, List<JSONObject> mapLayersDefinitions) throws Exception {
@@ -522,6 +547,7 @@ public enum CardinalLayerManager {
             for (Layer layer : mapView.map().layers()) {
                 if (layer instanceof IGpLayer) {
                     if (layer instanceof ISystemLayer) {
+
                         if(layer instanceof  ICardinalLayer){
                             IGpLayer gpLayer = (IGpLayer) layer;
                             cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex = LayerOperations.getInstance().load(((CardinalLayer)layer).getID());
@@ -533,7 +559,18 @@ public enum CardinalLayerManager {
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
                         }
-                        else {
+
+                        else if(layer instanceof  ICardinalEdge){
+                            GPApplication context = GPApplication.getInstance();
+                            IGpLayer gpLayer = (IGpLayer) layer;
+                            JSONObject jo = new JSONObject();
+                            jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
+                            jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
+                            cardinalLayersArray.put(jo);
+                            gpLayer.dispose();
+                        }
+                        else{
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jsonObject = gpLayer.toJson();
                             systemLayersArray.put(jsonObject);
@@ -837,6 +874,13 @@ public enum CardinalLayerManager {
             List<JSONObject> list = cardinalLayersDefinitions;
             JSONObject layerObj = list.get(position);
             layerObj.put(IGpLayer.LAYERENABLED_TAG, enabled);
+            if(!layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(EdgesLayer.class.getCanonicalName())) {
+                Long layerId = layerObj.getLong("ID");
+                cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(layerId);
+                layer.setIsActive(enabled);
+                LayerOperations.getInstance().update(layer);
+            }
+
         } catch (Exception e) {
             GPLog.error(this, null, e);
         }

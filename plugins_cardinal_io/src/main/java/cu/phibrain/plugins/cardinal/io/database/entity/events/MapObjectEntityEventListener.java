@@ -91,7 +91,7 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         } else {
             mapObject.setIsCompleted(false);
         }
-        entityManager.update(mapObject);
+        mapObject.update();
 
     }
 
