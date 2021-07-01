@@ -85,15 +85,15 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.RouteSegmentOperations;
-import cu.phibrain.plugins.cardinal.io.model.MapObjecType;
-import cu.phibrain.plugins.cardinal.io.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.model.Networks;
-import cu.phibrain.plugins.cardinal.io.model.RouteSegment;
-import cu.phibrain.plugins.cardinal.io.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoNotes;
@@ -161,7 +161,7 @@ import static eu.geopaparazzi.library.util.LibraryConstants.ZOOMLEVEL;
 /**
  * @author Andrea Antonello (www.hydrologis.com)
  */
-public class MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
+public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
     private final int INSERTCOORD_RETURN_CODE = 666;
     private final int ZOOM_RETURN_CODE = 667;
     private final int MENU_GO_TO = 1;
@@ -1164,7 +1164,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             //mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
                             mapView.reloadLayer(CardinalLayer.class);
                             mapView.reloadLayer(EdgesLayer.class);
-                            updateSelectMapObj(appContainer.getMapObjecTypeActive());
+                            //updateSelectMapObj(appContainer.getMapObjecTypeActive());
 
                         } catch (Exception e) {
                             GPLog.error(this, e.getLocalizedMessage(), e);

@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.RouteSegmentOperations;
-import cu.phibrain.plugins.cardinal.io.model.RouteSegment;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.database.TableDescriptions;
@@ -78,10 +78,12 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
         List<RouteSegment> routeSegments = RouteSegmentOperations.getInstance().getAll();
         for (RouteSegment route:routeSegments) {
             List<GeoPoint> list_GeoPoin = new ArrayList<>();
-            list_GeoPoin.add(route.getOriginObj().getCoord().get(0));
-            list_GeoPoin.add(route.getDestinyObj().getCoord().get(0));
-            GPLineDrawable drawable = new GPLineDrawable(list_GeoPoin, lineStyle, route.getId());
-            add(drawable);
+            if(route.getOriginObj()!=null && route.getDestinyObj()!=null) {
+                list_GeoPoin.add(route.getOriginObj().getCoord().get(0));
+                list_GeoPoin.add(route.getDestinyObj().getCoord().get(0));
+                GPLineDrawable drawable = new GPLineDrawable(list_GeoPoin, lineStyle, route.getId());
+                add(drawable);
+            }
         }
         update();
     }

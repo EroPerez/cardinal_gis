@@ -26,9 +26,4 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
         setDao(daoSession.getMapObjectDao());
     }
 
-
-
-
-
-
 }

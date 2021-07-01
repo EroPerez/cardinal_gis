@@ -25,6 +25,7 @@ public class AppContainer {
     protected Long levelActive;
     protected MapObject mapObjectActive;
     protected Worker currentWorker;
+    private MapObject edgeAddInMapObjSelect;
 
     public AppContainer() throws IOException {
 //        refreshProject();
@@ -107,5 +108,13 @@ public class AppContainer {
 
     public void setLevelActive(Long levelActive) {
         this.levelActive = levelActive;
+    }
+
+    public MapObject getEdgeAddInMapObjSelect() {
+        return edgeAddInMapObjSelect;
+    }
+
+    public void setEdgeAddInMapObjSelect(MapObject edgeAddInMapObjSelect) {
+        this.edgeAddInMapObjSelect = edgeAddInMapObjSelect;
     }
 }
