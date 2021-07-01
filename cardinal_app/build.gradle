@@ -23,7 +23,7 @@ android {
     signingConfigs {
         config {
             Properties props = new Properties()
-            def propFile = new File('geopaparazzi.app/ant.properties')
+            def propFile = new File('cardinalpaparazzi.app/ant.properties')
             if (propFile.canRead()) {
                 props.load(new FileInputStream(propFile))
                 if (props != null && props.containsKey('key.store') && props.containsKey('key.store.password') &&
@@ -33,11 +33,11 @@ android {
                     keyAlias = props['key.alias']
                     keyPassword = props['key.alias.password']
                 } else {
-                    println 'geopaparazzi.app/ant.properties found but some entries are missing'
+                    println 'cardinalpaparazzi.app/ant.properties found but some entries are missing'
                     android.buildTypes.release.signingConfig = null
                 }
             } else {
-                println 'geopaparazzi.app/ant.properties not found'
+                println 'cardinalpaparazzi.app/ant.properties not found'
                 android.buildTypes.release.signingConfig = null
             }
         }
@@ -98,5 +98,9 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.2.2'
     implementation 'androidx.navigation:navigation-ui:2.2.2'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'// add library
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'// add library
+    implementation "androidx.slidingpanelayout:slidingpanelayout:1.2.0-alpha02"
+
 }

@@ -9,7 +9,7 @@
         android:color="@color/main_decorations" />
     <corners
         android:topLeftRadius="@dimen/button_round_radius"
-        android:bottomLeftRadius="@dimen/button_round_radius"
+        android:topRightRadius="@dimen/button_round_radius"
         />
     <padding
         android:bottom="1dp"

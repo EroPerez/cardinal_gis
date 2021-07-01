@@ -7,29 +7,9 @@
     android:fitsSystemWindows="true">
 
     <RelativeLayout
-        android:id="@+id/inspectorlayout"
-        android:layout_width="300dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end|right"
-        android:background="@drawable/inspector_background"
-        android:orientation="vertical"
-        android:translationZ="1dp"
-        android:visibility="gone"
-        >
-
-        <include
-            layout="@layout/content_object_inspector_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
         android:id="@+id/innerlayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-
-
     </RelativeLayout>
 
     <FrameLayout

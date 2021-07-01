@@ -6,6 +6,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectMetadata;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectTypeAttribute;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasDefectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasStateOperations;
@@ -13,6 +14,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImage
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectMetadataOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
 
 
 public class MapObjectEntityEventListener implements EntityEventListener<MapObject, MapObjectOperations> {
@@ -34,7 +36,12 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
             labelSubLot.setGeolocated(true);
             LabelSubLotOperations.getInstance().update(labelSubLot);
         }
-
+        // update stock state
+        Stock stock = StockOperations.getInstance().load(mapObject.getStockCodeId());
+        if (stock != null) {
+            stock.setLocated(true);
+            StockOperations.getInstance().update(stock);
+        }
 
         //Create all extra attribute
         MapObjecType mapObjectObjectType = mapObject.getObjectType();
@@ -81,6 +88,21 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
                 LabelSubLotOperations.getInstance().update(labelSubLot);
             }
         }
+        if (oldMapObject.getStockCodeId() != mapObject.getStockCodeId()) {
+
+            //update the state of old stock assigned
+            Stock oldStock = StockOperations.getInstance().load(oldMapObject.getStockCodeId());
+            if (oldStock != null) {
+                oldStock.setLocated(false);
+                StockOperations.getInstance().update(oldStock);
+            }
+            //update the state of new stock assigned
+            Stock stock = StockOperations.getInstance().load(mapObject.getStockCodeId());
+            if (stock != null) {
+                stock.setLocated(true);
+                StockOperations.getInstance().update(stock);
+            }
+        }
     }
 
     @Override
@@ -112,7 +134,16 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
 
         if (labelSubLot != null) {
             labelSubLot.setGeolocated(false);
-            LabelSubLotOperations.getInstance().update(labelSubLot);
+            LabelSubLotOperations.getInstance().update();
+        }
+
+        //Release stock code to be relocated again
+        Stock stock = StockOperations.getInstance().load(mapObject.getStockCodeId());
+        // Stock stock = mapObject.getStockCode();
+        if (stock != null)
+        {
+            stock.setLocated(false);
+            StockOperations.getInstance().update(stock);
         }
 
         //Delete all related metadata

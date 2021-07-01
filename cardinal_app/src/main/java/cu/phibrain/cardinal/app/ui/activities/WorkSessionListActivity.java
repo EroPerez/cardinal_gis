@@ -47,7 +47,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
         setContentView(R.layout.activity_work_session_list);
         appContainer = ((CardinalApplication) getApplication()).appContainer;
 
-        Toolbar toolbar = findViewById(eu.geopaparazzi.core.R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

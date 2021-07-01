@@ -38,6 +38,10 @@ public class Stock implements Serializable {
     @Expose
     private Long projectId;
 
+    @SerializedName("localed")
+    @Expose
+    private boolean located;
+
     private final static long serialVersionUID = -5375448097124347032L;
 
     /**
@@ -46,11 +50,12 @@ public class Stock implements Serializable {
     public Stock() {
     }
 
-    @Generated(hash = 1958804235)
-    public Stock(Long id, String code, Long projectId) {
+    @Generated(hash = 1163655185)
+    public Stock(Long id, String code, Long projectId, boolean located) {
         this.id = id;
         this.code = code;
         this.projectId = projectId;
+        this.located = located;
     }
 
     public Long getId() {
@@ -75,5 +80,13 @@ public class Stock implements Serializable {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public boolean getLocated() {
+        return this.located;
+    }
+
+    public void setLocated(boolean located) {
+        this.located = located;
     }
 }

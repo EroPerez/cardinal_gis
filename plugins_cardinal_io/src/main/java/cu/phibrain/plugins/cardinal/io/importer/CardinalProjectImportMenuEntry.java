@@ -4,11 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import cu.phibrain.plugins.cardinal.io.R;
 import eu.geopaparazzi.core.utilities.Constants;
+import eu.geopaparazzi.core.utilities.IApplicationChangeListener;
 import eu.geopaparazzi.library.network.NetworkUtilities;
-import eu.geopaparazzi.library.plugin.PluginService;
 import eu.geopaparazzi.library.plugin.types.MenuEntry;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
@@ -18,15 +19,15 @@ import eu.geopaparazzi.library.util.LibraryConstants;
  * @author Erodis Pérez Michel  (eperezm1986@gmail.com)
  */
 public class CardinalProjectImportMenuEntry extends MenuEntry {
-    PluginService service = null;
+    private final Context serviceContext;
     private IActivitySupporter clickActivityStarter;
-    public CardinalProjectImportMenuEntry(PluginService service) {
-        this.service = service;
+    public CardinalProjectImportMenuEntry(Context context) {
+        this.serviceContext = context;
     }
 
     @Override
     public String getLabel() {
-        return this.service.getResources().getString(R.string.cardinal_online);
+        return this.serviceContext.getResources().getString(R.string.cardinal_online);
 
     }
     @Override
@@ -48,7 +49,7 @@ public class CardinalProjectImportMenuEntry extends MenuEntry {
             webImportIntent.putExtra(LibraryConstants.PREFS_KEY_URL, server);
             webImportIntent.putExtra(LibraryConstants.PREFS_KEY_USER, user);
             webImportIntent.putExtra(LibraryConstants.PREFS_KEY_PWD, passwd);
-            clickActivityStarter.startActivity(webImportIntent);
+            clickActivityStarter.startActivityForResult(webImportIntent, requestCode);
         }
     }
 
@@ -66,5 +67,15 @@ public class CardinalProjectImportMenuEntry extends MenuEntry {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onActivityResultExecute(int requestCode, int resultCode, Intent data) {
+        Context context = clickActivityStarter.getContext();
+        Log.e("GEOPAPARAZZIAPPLICATION", "Was not able to restart application, mStartActivity null");
+        if (context instanceof IApplicationChangeListener) {
+            ((IApplicationChangeListener) context).onApplicationNeedsRestart();
+            Log.e("GEOPAPARAZZIAPPLICATION", "Was not able to restart application, mStartActivity null");
+        }
     }
 }

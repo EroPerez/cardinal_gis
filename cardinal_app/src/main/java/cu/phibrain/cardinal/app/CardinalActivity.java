@@ -40,7 +40,6 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        permissionHelper = new PermissionWriteStorage();
         permissionHelper.add(new PermissionWriteStorage()).add(new PermissionFineLocation()).add(new PermissionForegroundService());
 
         // PERMISSIONS START

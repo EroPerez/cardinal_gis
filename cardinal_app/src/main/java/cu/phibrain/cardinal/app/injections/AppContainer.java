@@ -5,13 +5,15 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.utils.CardinalMetadataTableDefaultValues;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
@@ -63,6 +65,9 @@ public class AppContainer {
     }
 
     public WorkSession getWorkSessionActive() {
+        if (workSessionActive != null)
+            workSessionActive = WorkSessionOperations.getInstance().load(workSessionActive.getId());
+
         return workSessionActive;
     }
 
@@ -95,6 +100,9 @@ public class AppContainer {
     }
 
     public MapObject getMapObjectActive() {
+        if (mapObjectActive != null)
+            mapObjectActive = MapObjectOperations.getInstance().load(mapObjectActive.getId());
+
         return mapObjectActive;
     }
 

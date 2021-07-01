@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Importador de Proyectos Cardinal</string>
     <string name="available_only_with_network">Esta opción sólo está disponible cuando una conexión de red está disponible</string>
     <string name="error_set_cloud_settings_cardinal">Los parámetros de conexión a Cardinal Online no se han establecido correctamente. Verifique la configuración</string>
     <string name="error_uploading_the_data">Error subiendo los datos</string>
