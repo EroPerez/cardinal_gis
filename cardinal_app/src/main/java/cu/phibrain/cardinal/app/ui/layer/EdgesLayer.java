@@ -7,8 +7,11 @@ import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
@@ -18,6 +21,9 @@ import org.oscim.map.Layers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.database.TableDescriptions;
@@ -25,11 +31,13 @@ import org.oscim.core.GeoPoint;
 
 import eu.geopaparazzi.map.GPMapView;
 import cu.phibrain.plugins.cardinal.io.R;
+import eu.geopaparazzi.map.features.Feature;
 import eu.geopaparazzi.map.layers.LayerGroups;
+import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPLineDrawable;
 
-public class EdgesLayer extends VectorLayer implements ISystemLayer {
+public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLayer, ICardinalEdge {
 
     public static String NAME = null;
     private final SharedPreferences peferences;
@@ -58,63 +66,27 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer {
     }
 
     public void reloadData() throws IOException {
-
-        SQLiteDatabase sqliteDatabase = GPApplication.getInstance().getDatabase();
-
-        String query = "SELECT " +//NON-NLS
-                TableDescriptions.NotesTableFields.COLUMN_ID.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_LON.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_LAT.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_ALTIM.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_TEXT.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_TS.getFieldName() +
-                ", " +//
-                TableDescriptions.NotesTableFields.COLUMN_FORM.getFieldName() +//
-                " FROM " + TableDescriptions.TABLE_NOTES;//NON-NLS
-        query = query + " WHERE " + TableDescriptions.NotesTableFields.COLUMN_ISDIRTY.getFieldName() + " = 1";//NON-NLS
         tmpDrawables.clear();
         mDrawables.clear();
         if (lineStyle == null) {
             lineStyle = Style.builder()
                     .strokeColor(Color.BLACK)
-                    .strokeWidth(2)
+                    .strokeWidth(1f)
                     .cap(Paint.Cap.ROUND)
                     .build();
         }
-        GeoPoint last_point = null;
-        List<GeoPoint> list_GeoPoin = null;
-        try (Cursor c = sqliteDatabase.rawQuery(query, null)) {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
-                int i = 0;
-                long id = c.getLong(i++);
-                double lon = c.getDouble(i++);
-                double lat = c.getDouble(i++);
-                double elev = c.getDouble(i++);
-                GeoPoint current_point = new GeoPoint(lat, lon);
-                if(last_point == null){
-                    last_point = current_point;
-                }
-                else {
-                    list_GeoPoin = new ArrayList<>();
-                    list_GeoPoin.add(last_point);
-                    list_GeoPoin.add(current_point);
-                    GPLineDrawable drawable = new GPLineDrawable(list_GeoPoin, lineStyle, id);
-                    add(drawable);
-                    last_point = current_point;
-                }
-                c.moveToNext();
+        List<RouteSegment> routeSegments = RouteSegmentOperations.getInstance().getAll();
+        for (RouteSegment route:routeSegments) {
+            List<GeoPoint> list_GeoPoin = new ArrayList<>();
+            if(route.getOriginObj()!=null && route.getDestinyObj()!=null) {
+                list_GeoPoin.add(route.getOriginObj().getCoord().get(0));
+                list_GeoPoin.add(route.getDestinyObj().getCoord().get(0));
+                GPLineDrawable drawable = new GPLineDrawable(list_GeoPoin, lineStyle, route.getId());
+                add(drawable);
             }
-
         }
         update();
     }
-
 
     public void disable() {
         setEnabled(false);
@@ -143,7 +115,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer {
     @Override
     public void load() {
         Layers layers = map().layers();
-        layers.add(this, LayerGroups.GROUP_PROJECTLAYERS.getGroupId());
+        layers.add(this, CardinalLayerGroups.GROUP_CARDINALLAYERS.getGroupId());
     }
 
     @Override
@@ -174,12 +146,46 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer {
             if(tmpDrawables.size()>0) {
                 GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size()-1);
 
-                Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
                 tmpDrawables.clear();
             }
         }
         return false;
     }
 
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
+
+    @Override
+    public boolean isInEditingMode() {
+        return false;
+    }
+
+    @Override
+    public List<Feature> getFeatures(Envelope env) throws Exception {
+        return null;
+    }
+
+    @Override
+    public void deleteFeatures(List<Feature> features) throws Exception {
+
+    }
+
+    @Override
+    public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
+
+    }
+
+    @Override
+    public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
+
+    }
+
+    @Override
+    public EGeometryType getGeometryType() {
+        return EGeometryType.LINESTRING;
+    }
 }
 

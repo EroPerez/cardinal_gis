@@ -70,6 +70,7 @@ import eu.geopaparazzi.map.MapsSupportService;
 import eu.geopaparazzi.map.R;
 import eu.geopaparazzi.map.gui.MapLayerItem;
 import eu.geopaparazzi.map.layers.ELayerTypes;
+import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.userlayers.GeopackageTableLayer;
 import eu.geopaparazzi.map.layers.utils.ColorStrokeObject;
@@ -138,7 +139,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            if (item instanceof ICardinalItem) {
+            if(item instanceof ICardinalItem || item instanceof ICardinalEdgeItem){
                 CardinalLayerManager.INSTANCE.setEnabled(item.position, item.enabled);
             } else {
                 CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);

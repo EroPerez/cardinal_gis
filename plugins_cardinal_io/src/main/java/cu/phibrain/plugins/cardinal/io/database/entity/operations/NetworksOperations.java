@@ -42,9 +42,11 @@ public class NetworksOperations extends BaseOperations<Networks, NetworksDao> {
     public List<MapObjecType> getMapObjectTypes(Networks network) {
         List<MapObjecType> mapObjceTypeList = new ArrayList<>();
         for (Layer layer : network.getLayers()) {
-            for (MapObjecType mto : layer.getMapobjectypes()) {
-                if (!mto.getIsAbstract())
-                    mapObjceTypeList.add(mto);
+            if(layer.getIsActive()) {
+                for (MapObjecType mto : layer.getMapobjectypes()) {
+                    if (!mto.getIsAbstract())
+                        mapObjceTypeList.add(mto);
+                }
             }
         }
         return mapObjceTypeList;
