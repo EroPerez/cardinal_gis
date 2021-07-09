@@ -1,8 +1,6 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.model;
 
 
-import android.util.Base64;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -34,30 +32,55 @@ public class MapObjectImages implements Serializable {
 
     @SerializedName("filename")
     @Expose
-    private String image;
+    private byte[] image;
 
     @SerializedName("created_at")
     @Expose
     private Date createdAt;
 
+    @SerializedName("longitude")
+    @Expose
+    double lon;
+    @SerializedName("latitude")
+    @Expose
+    double lat;
+    @SerializedName("elevation")
+    @Expose
+    double elevation;
+
+    @SerializedName("azimuth")
+    @Expose
+    double azimuth;
+
+
     private final static long serialVersionUID = -4499234149200958L;
 
-    @Generated(hash = 42442288)
-    public MapObjectImages(Long id, long mapObjectId, String image, Date createdAt) {
+    public MapObjectImages(long mapObjectId, byte[] image, Date createdAt, double lon,
+                           double lat, double elevation, double azimuth) {
+        this.mapObjectId = mapObjectId;
+        this.image = image;
+        this.createdAt = createdAt;
+        this.lon = lon;
+        this.lat = lat;
+        this.elevation = elevation;
+        this.azimuth = azimuth;
+    }
+
+    @Generated(hash = 1387825441)
+    public MapObjectImages(Long id, long mapObjectId, byte[] image, Date createdAt, double lon,
+                           double lat, double elevation, double azimuth) {
         this.id = id;
         this.mapObjectId = mapObjectId;
         this.image = image;
         this.createdAt = createdAt;
+        this.lon = lon;
+        this.lat = lat;
+        this.elevation = elevation;
+        this.azimuth = azimuth;
     }
 
     @Generated(hash = 212149383)
     public MapObjectImages() {
-    }
-
-    public byte[] getImageAsByteArray() {
-        if (this.image != null && !this.image.isEmpty())
-            return Base64.decode(this.image.replaceFirst("^data:image/[^;]*;base64,?", ""), 0);
-        return null;
     }
 
     public Long getId() {
@@ -76,11 +99,11 @@ public class MapObjectImages implements Serializable {
         this.mapObjectId = mapObjectId;
     }
 
-    public String getImage() {
+    public byte[] getImage() {
         return this.image;
     }
 
-    public void setImage(String image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 
@@ -90,5 +113,37 @@ public class MapObjectImages implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public double getLon() {
+        return this.lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
+    public double getLat() {
+        return this.lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getElevation() {
+        return this.elevation;
+    }
+
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
+    }
+
+    public double getAzimuth() {
+        return this.azimuth;
+    }
+
+    public void setAzimuth(double azimuth) {
+        this.azimuth = azimuth;
     }
 }

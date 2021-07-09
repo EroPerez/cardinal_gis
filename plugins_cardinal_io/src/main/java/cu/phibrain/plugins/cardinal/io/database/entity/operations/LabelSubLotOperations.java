@@ -1,6 +1,9 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.operations;
 
+import org.greenrobot.greendao.query.Query;
 import org.greenrobot.greendao.query.QueryBuilder;
+
+import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Label;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelDao;
@@ -39,6 +42,20 @@ public class LabelSubLotOperations extends BaseOperations<LabelSubLot, LabelSubL
         );
 
        return queryBuilder.unique();
+    }
+
+    public List<LabelSubLot> loadAll(long workerSessionId) {
+        Query<LabelSubLot> workSession_LabelsQuery = null;
+        synchronized (this) {
+            if (workSession_LabelsQuery == null) {
+                QueryBuilder<LabelSubLot> queryBuilder = queryBuilder();
+                queryBuilder.where(LabelSubLotDao.Properties.WorkerSessionId.eq(null));
+                workSession_LabelsQuery = queryBuilder.build();
+            }
+        }
+        Query<LabelSubLot> query = workSession_LabelsQuery.forCurrentThread();
+        query.setParameter(0, workerSessionId);
+        return query.list();
     }
 
 }

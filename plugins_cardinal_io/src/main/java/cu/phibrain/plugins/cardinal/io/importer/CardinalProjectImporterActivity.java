@@ -32,9 +32,7 @@ import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.WebDataProjectManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
 import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
-import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.library.core.ResourcesManager;
-import eu.geopaparazzi.library.database.DatabaseUtilities;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
@@ -138,8 +136,6 @@ public class CardinalProjectImporterActivity extends ListActivity {
                     }
 
                     private void downloadProject(final WebDataProjectModel projectModel) {
-//                        cloudProgressDialog = ProgressDialog.show(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, getString(eu.geopaparazzi.library.R.string.downloading),
-//                                getString(eu.geopaparazzi.library.R.string.downloading_project), true, false);
 
                         stringAsyncTask = new StringAsyncTask(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this) {
                             protected String dbFile;
@@ -149,7 +145,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
                                 cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity context = cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this;
                                 try {
                                     dbFile = WebDataProjectManager.INSTANCE.downloadProject(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, url, user, pwd, projectModel, theTextToRunOn);
-                                    DatabaseUtilities.setNewDatabase(context, GeopaparazziApplication.getInstance(), dbFile);
+                                   // DatabaseUtilities.setNewDatabase(context, GeopaparazziApplication.getInstance(), dbFile);
 
                                     return ASYNC_OK; //$NON-NLS-1$
                                 } catch (Exception e) {
@@ -169,7 +165,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
                                         @Override
                                         public void run() {
                                             Intent intent = getIntent();
-                                            intent.putExtra(LibraryConstants.DATABASE_ID, theTextToRunOn);
+                                            intent.putExtra(LibraryConstants.PREFS_KEY_PATH, dbFile);
                                             cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this.setResult(DOWNLOADDATA_RETURN_CODE, intent);
                                             finish();
                                         }

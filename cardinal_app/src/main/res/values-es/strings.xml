@@ -19,5 +19,7 @@
     <string name="inspector_object_geometry">Geometría</string>
     <string name="inspector_object_observation">Observaciones</string>
     <string name="dashboard_msg_session">Sesiones:  %d</string>
-    <string name="select_one">Pick one</string>
+    <string name="select_one">Seleccione uno</string>
+    <string name="do_you_want_to_delete_this_map_object">¿Esta seguro que desea eliminar este objecto?</string>
+    <string name="done">Hecho</string>
 </resources>

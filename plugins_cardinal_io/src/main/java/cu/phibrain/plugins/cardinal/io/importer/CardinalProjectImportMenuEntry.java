@@ -1,5 +1,6 @@
 package cu.phibrain.plugins.cardinal.io.importer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,8 +8,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import cu.phibrain.plugins.cardinal.io.R;
+import eu.geopaparazzi.core.ui.activities.ImportActivity;
 import eu.geopaparazzi.core.utilities.Constants;
-import eu.geopaparazzi.core.utilities.IApplicationChangeListener;
 import eu.geopaparazzi.library.network.NetworkUtilities;
 import eu.geopaparazzi.library.plugin.types.MenuEntry;
 import eu.geopaparazzi.library.util.GPDialogs;
@@ -21,6 +22,7 @@ import eu.geopaparazzi.library.util.LibraryConstants;
 public class CardinalProjectImportMenuEntry extends MenuEntry {
     private final Context serviceContext;
     private IActivitySupporter clickActivityStarter;
+
     public CardinalProjectImportMenuEntry(Context context) {
         this.serviceContext = context;
     }
@@ -30,10 +32,12 @@ public class CardinalProjectImportMenuEntry extends MenuEntry {
         return this.serviceContext.getResources().getString(R.string.cardinal_online);
 
     }
+
     @Override
     public int getOrder() {
         return 10000;
     }
+
     @Override
     public void onClick(IActivitySupporter clickActivityStarter) {
         this.clickActivityStarter = clickActivityStarter;
@@ -61,7 +65,6 @@ public class CardinalProjectImportMenuEntry extends MenuEntry {
         }
 
 
-
         if (server.length() == 0 || user.length() == 0 || passwd.length() == 0) {
             GPDialogs.infoDialog(context, context.getString(R.string.error_set_cloud_settings_cardinal), null);
             return false;
@@ -71,11 +74,10 @@ public class CardinalProjectImportMenuEntry extends MenuEntry {
 
     @Override
     public void onActivityResultExecute(int requestCode, int resultCode, Intent data) {
-        Context context = clickActivityStarter.getContext();
-        Log.e("GEOPAPARAZZIAPPLICATION", "Was not able to restart application, mStartActivity null");
-        if (context instanceof IApplicationChangeListener) {
-            ((IApplicationChangeListener) context).onApplicationNeedsRestart();
-            Log.e("GEOPAPARAZZIAPPLICATION", "Was not able to restart application, mStartActivity null");
-        }
+
+        Log.e("ProjectImportMenuEntry", "Restarting app to use new downloaded database");
+
+        ((ImportActivity) this.clickActivityStarter).setResult(Activity.RESULT_OK, data);
+        ((ImportActivity) this.clickActivityStarter).finish();
     }
 }

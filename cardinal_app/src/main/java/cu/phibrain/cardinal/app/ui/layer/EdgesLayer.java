@@ -1,11 +1,8 @@
 package cu.phibrain.cardinal.app.ui.layer;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
@@ -13,26 +10,23 @@ import org.json.JSONObject;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.oscim.backend.canvas.Paint;
+import org.oscim.core.GeoPoint;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.vector.VectorLayer;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
-import eu.geopaparazzi.library.GPApplication;
-import eu.geopaparazzi.library.database.GPLog;
-import eu.geopaparazzi.library.database.TableDescriptions;
-import org.oscim.core.GeoPoint;
-
-import eu.geopaparazzi.map.GPMapView;
 import cu.phibrain.plugins.cardinal.io.R;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
-import eu.geopaparazzi.map.layers.LayerGroups;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPLineDrawable;
@@ -71,17 +65,17 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
         if (lineStyle == null) {
             lineStyle = Style.builder()
                     .strokeColor(Color.BLACK)
-                    .strokeWidth(1f)
+                    .strokeWidth(2.5f)
                     .cap(Paint.Cap.ROUND)
                     .build();
         }
         List<RouteSegment> routeSegments = RouteSegmentOperations.getInstance().getAll();
         for (RouteSegment route:routeSegments) {
-            List<GeoPoint> list_GeoPoin = new ArrayList<>();
+            List<GeoPoint> list_GeoPoints = new ArrayList<>();
             if(route.getOriginObj()!=null && route.getDestinyObj()!=null) {
-                list_GeoPoin.add(route.getOriginObj().getCoord().get(0));
-                list_GeoPoin.add(route.getDestinyObj().getCoord().get(0));
-                GPLineDrawable drawable = new GPLineDrawable(list_GeoPoin, lineStyle, route.getId());
+                list_GeoPoints.add(route.getOriginObj().getCoord().get(0));
+                list_GeoPoints.add(route.getDestinyObj().getCoord().get(0));
+                GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, route.getId());
                 add(drawable);
             }
         }

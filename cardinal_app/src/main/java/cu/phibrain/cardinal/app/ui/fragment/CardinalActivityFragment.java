@@ -58,6 +58,7 @@ import eu.geopaparazzi.core.ui.activities.AboutActivity;
 import eu.geopaparazzi.core.ui.activities.AdvancedSettingsActivity;
 import eu.geopaparazzi.core.ui.activities.ExportActivity;
 import eu.geopaparazzi.core.ui.activities.ImportActivity;
+import eu.geopaparazzi.core.ui.activities.NotesListActivity;
 import eu.geopaparazzi.core.ui.activities.PanicActivity;
 import eu.geopaparazzi.core.ui.activities.ProjectMetadataActivity;
 import eu.geopaparazzi.core.ui.activities.SettingsActivity;
@@ -466,7 +467,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             String tooltip = imageButton.getContentDescription().toString();
             if (imageButton == mNotesButton) {
-//                Intent intent = new Intent(getActivity(), NotesListActivity.class);
+                Intent intent = new Intent(getActivity(), NotesListActivity.class);
 //                intent.putExtra(LibraryConstants.PREFS_KEY_MAP_ZOOM, false);
 //                startActivity(intent);
             } else if (imageButton == mMetadataButton) {
@@ -531,7 +532,8 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
         } else if (v == mImportButton) {
             Intent importIntent = new Intent(getActivity(), ImportActivity.class);
-            startActivity(importIntent);
+            //startActivity(importIntent);
+            startActivityForResult(importIntent, RETURNCODE_BROWSE_FOR_NEW_PREOJECT);
         } else if (v == mNotesButton) {
             //Load the curent worker
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;

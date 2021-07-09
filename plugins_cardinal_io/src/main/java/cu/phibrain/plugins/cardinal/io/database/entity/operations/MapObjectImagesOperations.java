@@ -1,5 +1,10 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.operations;
 
+import org.greenrobot.greendao.query.Query;
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import java.util.List;
+
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImagesDao;
 
@@ -22,5 +27,19 @@ public class MapObjectImagesOperations extends BaseOperations<MapObjectImages, M
     @Override
     protected void initEntityDao() {
         setDao(daoSession.getMapObjectImagesDao());
+    }
+
+    public List<MapObjectImages> loadAll(long mapObjectId) {
+        Query<MapObjectImages> mapObject_ImagesQuery = null;
+        synchronized (this) {
+            if (mapObject_ImagesQuery == null) {
+                QueryBuilder<MapObjectImages> queryBuilder = queryBuilder();
+                queryBuilder.where(MapObjectImagesDao.Properties.MapObjectId.eq(null));
+                mapObject_ImagesQuery = queryBuilder.build();
+            }
+        }
+        Query<MapObjectImages> query = mapObject_ImagesQuery.forCurrentThread();
+        query.setParameter(0, mapObjectId);
+        return query.list();
     }
 }
