@@ -27,7 +27,7 @@
         android:layout_height="48dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="false"
-        android:background="@drawable/ic_mapview_mot_children_24dp"
+        android:background="@drawable/button_background_states"
         android:layout_weight="1"
         app:srcCompat="@drawable/ic_add_a_photo_24dp" />
 

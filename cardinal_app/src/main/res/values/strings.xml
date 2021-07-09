@@ -20,4 +20,6 @@
     <string name="inspector_object_observation">Observation</string>
     <string name="dashboard_msg_session">Sessions:  %d</string>
     <string name="select_one">Pick one</string>
+    <string name="do_you_want_to_delete_this_map_object">Do you want to delete this map object?</string>
+    <string name="done">Done</string>
 </resources>

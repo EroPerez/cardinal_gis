@@ -3,9 +3,9 @@
     android:id="@+id/imgvObjectPhoto"
     android:layout_width="64dp"
     android:layout_height="64dp"
-    android:layout_marginEnd="2dp"
-    android:background="@drawable/item_backgroud_outline"
+    android:background="@drawable/border_black_1px"
+    android:elevation="1dp"
     android:orientation="vertical"
-    android:padding="3dp"
+    android:padding="1dp"
     android:scaleType="fitXY"
     tools:srcCompat="@tools:sample/backgrounds/scenic" />

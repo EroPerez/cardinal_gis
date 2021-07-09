@@ -65,6 +65,9 @@ public class MapObjecType implements Serializable {
     @Expose
     private Long layerId;
 
+    @ToOne(joinProperty = "layerId")
+    private Layer layerObj;
+
     @ToMany(referencedJoinProperty = "originId")
     @SerializedName("rules")
     @Expose
@@ -150,6 +153,9 @@ public class MapObjecType implements Serializable {
 
     @Generated(hash = 22875058)
     private transient Long parentObj__resolvedKey;
+
+    @Generated(hash = 150520378)
+    private transient Long layerObj__resolvedKey;
 
     /**
      * No args constructor for use in serialization
@@ -481,6 +487,35 @@ public class MapObjecType implements Serializable {
 
     public void setIsTerminal(Boolean isTerminal) {
         this.isTerminal = isTerminal;
+    }
+
+    /** To-one relationship, resolved on first access. */
+    @Generated(hash = 148150740)
+    public Layer getLayerObj() {
+        Long __key = this.layerId;
+        if (layerObj__resolvedKey == null || !layerObj__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            LayerDao targetDao = daoSession.getLayerDao();
+            Layer layerObjNew = targetDao.load(__key);
+            synchronized (this) {
+                layerObj = layerObjNew;
+                layerObj__resolvedKey = __key;
+            }
+        }
+        return layerObj;
+    }
+
+    /** called by internal mechanisms, do not call yourself. */
+    @Generated(hash = 870792775)
+    public void setLayerObj(Layer layerObj) {
+        synchronized (this) {
+            this.layerObj = layerObj;
+            layerId = layerObj == null ? null : layerObj.getId();
+            layerObj__resolvedKey = layerId;
+        }
     }
 
     /** called by internal mechanisms, do not call yourself. */

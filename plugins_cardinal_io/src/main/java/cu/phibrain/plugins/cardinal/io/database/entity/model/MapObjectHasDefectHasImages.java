@@ -40,15 +40,34 @@ public class MapObjectHasDefectHasImages implements Serializable {
     @Expose
     private Date createdAt;
 
+    @SerializedName("longitude")
+    @Expose
+    double lon ;
+    @SerializedName("latitude")
+    @Expose
+    double lat ;
+    @SerializedName("elevation")
+    @Expose
+    double elevation ;
+
+    @SerializedName("azimuth")
+    @Expose
+    double azimuth;
+
     private final static long serialVersionUID = -4499872341492642958L;
 
 
-    @Generated(hash = 916321420)
-    public MapObjectHasDefectHasImages(Long id, long defectId, String image, Date createdAt) {
+    @Generated(hash = 1419328156)
+    public MapObjectHasDefectHasImages(Long id, long defectId, String image, Date createdAt, double lon,
+            double lat, double elevation, double azimuth) {
         this.id = id;
         this.defectId = defectId;
         this.image = image;
         this.createdAt = createdAt;
+        this.lon = lon;
+        this.lat = lat;
+        this.elevation = elevation;
+        this.azimuth = azimuth;
     }
 
 
@@ -101,5 +120,45 @@ public class MapObjectHasDefectHasImages implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+
+    public double getLon() {
+        return this.lon;
+    }
+
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
+
+    public double getLat() {
+        return this.lat;
+    }
+
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+
+    public double getElevation() {
+        return this.elevation;
+    }
+
+
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
+    }
+
+
+    public double getAzimuth() {
+        return this.azimuth;
+    }
+
+
+    public void setAzimuth(double azimuth) {
+        this.azimuth = azimuth;
     }
 }

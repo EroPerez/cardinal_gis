@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import cu.phibrain.plugins.cardinal.io.network.api.adapter.Base64ImageTypeAdapter;
 import cu.phibrain.plugins.cardinal.io.network.api.adapter.GPGeoPointTypeAdapter;
 import eu.geopaparazzi.map.GPGeoPoint;
 import okhttp3.OkHttpClient;
@@ -33,11 +34,16 @@ public class ApiClient {
         // Asociamos el interceptor a las peticiones
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         httpClient.addInterceptor(logging);
+
         Type listType = new TypeToken<List<GPGeoPoint>>() {
+        }.getType();
+
+        Type byteArrayType = new TypeToken<byte[]>() {
         }.getType();
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(listType, new GPGeoPointTypeAdapter())
+                .registerTypeAdapter(byteArrayType, new Base64ImageTypeAdapter())
                 .create();
 
         if (API_SERVICE == null) {

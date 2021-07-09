@@ -25,18 +25,18 @@ public class StockAdapter extends ArrayAdapter<Stock> {
     @Override
     public View getView(int position, @Nullable
             View convertView, @NonNull ViewGroup parent) {
-        if (position == 0) {
-            return initialSelection(false);
-        }
+//        if (position == 0) {
+//            return initialSelection(false);
+//        }
         return initView(position, convertView, parent);
     }
 
     @Override
     public View getDropDownView(int position, @Nullable
             View convertView, @NonNull ViewGroup parent) {
-        if (position == 0) {
-            return initialSelection(true);
-        }
+//        if (position == 0) {
+//            return initialSelection(true);
+//        }
 
         return initView(position, convertView, parent);
     }
@@ -55,7 +55,7 @@ public class StockAdapter extends ArrayAdapter<Stock> {
 
         TextView textViewName = convertView.findViewById(R.id.tvSpinnerValue);
 
-        position = position - 1; // Adjust for initial selection item
+//        position = position - 1; // Adjust for initial selection item
 
         Stock currentItem = getItem(position);
 
@@ -73,10 +73,10 @@ public class StockAdapter extends ArrayAdapter<Stock> {
         return convertView;
     }
 
-    @Override
-    public int getCount() {
-        return super.getCount() + 1; // Adjust for initial selection item
-    }
+//    @Override
+//    public int getCount() {
+//        return super.getCount() + 1; // Adjust for initial selection item
+//    }
 
 
     public int select(Stock item) {

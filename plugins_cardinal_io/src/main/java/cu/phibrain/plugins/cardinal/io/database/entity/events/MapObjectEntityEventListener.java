@@ -153,7 +153,7 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         //Delete all related images
         MapObjectImagesOperations.getInstance().deleteAll(mapObject.getImages());
         // Delete all related route segments
-        RouteSegmentOperations.getInstance().deleteAll(mapObject.getRouteSegments());
+        RouteSegmentOperations.getInstance().deleteAll(entityManager.getRouteSegments(mapObject.getId()));
 
         //Delete all related defects and images of defects
         for (MapObjectHasDefect defect :

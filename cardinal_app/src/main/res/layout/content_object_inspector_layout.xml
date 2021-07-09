@@ -43,8 +43,9 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_marginBottom="5dp"
-                android:background="@drawable/ic_mapview_mot_children_24dp"
-                app:srcCompat="@drawable/ic_delete_24dp" />
+                android:background="@drawable/button_background_states"
+                app:srcCompat="@drawable/ic_delete_24dp"
+               />
         </FrameLayout>
 
     </TableRow>
@@ -74,6 +75,20 @@
             tools:listitem="@layout/spinner_inv"
             />
 
+        <EditText
+            android:id="@+id/edtCodeFake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:ems="10"
+            android:enabled="false"
+            android:inputType="text"
+            android:text="@string/inspector_object_label_code"
+            android:textAlignment="viewEnd"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:autofillHints="" />
+
     </TableRow>
 
     <TableRow
@@ -100,7 +115,8 @@
             android:text="1"
             android:textAlignment="viewEnd"
             android:textSize="14sp"
-            android:imeOptions="actionDone" />
+            android:imeOptions="actionDone"
+            android:autofillHints="" />
     </TableRow>
 
     <TableRow
@@ -118,15 +134,32 @@
             android:text="@string/inspector_object_inventory"
             android:textSize="14sp" />
 
-        <Spinner
-            android:id="@+id/spnInv"
+<!--        <Spinner-->
+<!--            android:id="@+id/spnInv"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/spinner_material"-->
+<!--            android:spinnerMode="dropdown"-->
+<!--            android:textSize="14sp"-->
+<!--            tools:listitem="@layout/spinner_inv"-->
+<!--            />-->
+
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteTextViewInv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/spinner_material"
-            android:spinnerMode="dropdown"
+            android:completionThreshold="1"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/select_one"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:text=""
             android:textSize="14sp"
-            tools:listitem="@layout/spinner_inv"
-            />
+            android:ems="10"
+            android:imeOptions="actionDone"
+            android:textAlignment="viewEnd"/>
 
     </TableRow>
 
@@ -155,7 +188,8 @@
             android:inputType="text"
             android:text="Wood"
             android:textAlignment="viewEnd"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:autofillHints="" />
 
 
     </TableRow>
@@ -185,7 +219,8 @@
             android:inputType="text"
             android:text="POINT"
             android:textAlignment="viewEnd"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:importantForAutofill="no" />
 
 
     </TableRow>
@@ -256,7 +291,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_marginBottom="5dp"
-                android:background="@drawable/ic_mapview_mot_children_24dp"
+                android:background="@drawable/button_background_states"
                 app:srcCompat="@drawable/ic_add_a_photo_24dp" />
         </FrameLayout>
     </TableRow>

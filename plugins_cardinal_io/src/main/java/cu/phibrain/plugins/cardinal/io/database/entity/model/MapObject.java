@@ -68,6 +68,10 @@ public class MapObject implements Serializable {
     @Expose
     private List<GPGeoPoint> coord;
 
+    @SerializedName("elevation")
+    @Expose
+    double elevation ;
+
     @SerializedName("observation")
     @Expose
     private String observation;
@@ -145,15 +149,16 @@ public class MapObject implements Serializable {
     private transient MapObjectDao myDao;
 
 
-    @Generated(hash = 374635255)
+    @Generated(hash = 987521458)
     public MapObject(Long id, String code, long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord,
-            String observation, Date createdAt, Boolean isSync, Date SyncDate, long nodeGrade,
-            long stockCodeId, long sessionId, Boolean isCompleted) {
+            double elevation, String observation, Date createdAt, Boolean isSync, Date SyncDate,
+            long nodeGrade, long stockCodeId, long sessionId, Boolean isCompleted) {
         this.id = id;
         this.code = code;
         this.joinId = joinId;
         this.mapObjectTypeId = mapObjectTypeId;
         this.coord = coord;
+        this.elevation = elevation;
         this.observation = observation;
         this.createdAt = createdAt;
         this.isSync = isSync;
@@ -666,12 +671,26 @@ public class MapObject implements Serializable {
     }
 
 
+    /** Get a map object type layer */
+    public Layer getLayer(){
+        return this.objectType.getLayerObj();
+    }
+
+
+    public double getElevation() {
+        return this.elevation;
+    }
+
+
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
+    }
+
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 788755102)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getMapObjectDao() : null;
     }
-
-
 }

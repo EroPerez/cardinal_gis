@@ -2,6 +2,7 @@ package cu.phibrain.cardinal.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 import cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment;
 import eu.geopaparazzi.core.GeopaparazziCoreActivity;
@@ -56,6 +58,15 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         setContentView(eu.geopaparazzi.core.R.layout.activity_geopaparazzi);
         Toolbar toolbar = findViewById(eu.geopaparazzi.core.R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        try {
+            Field field = CursorWindow.class.getDeclaredField("sCursorWindowSize");
+            field.setAccessible(true);
+            field.set(null, 100 * 1024 * 1024); //the 100MB is the new size
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -157,7 +168,11 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         if (cardinalActivityFragment != null && cardinalActivityFragment.getGpsServiceBroadcastReceiver() != null) {
             GpsServiceUtilities.stopDatabaseLogging(this);
             GpsServiceUtilities.stopGpsService(this);
-            GpsServiceUtilities.unregisterFromBroadcasts(this, cardinalActivityFragment.getGpsServiceBroadcastReceiver());
+            try {
+                GpsServiceUtilities.unregisterFromBroadcasts(this, cardinalActivityFragment.getGpsServiceBroadcastReceiver());
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
             CardinalApplication.getInstance().closeDatabase();
             ResourcesManager.resetManager();
         }

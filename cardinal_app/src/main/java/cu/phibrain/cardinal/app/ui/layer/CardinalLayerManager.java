@@ -47,8 +47,6 @@ import eu.geopaparazzi.map.layers.systemlayers.GPMapScaleBarLayer;
 import eu.geopaparazzi.map.layers.systemlayers.GpsLogsLayer;
 import eu.geopaparazzi.map.layers.systemlayers.GpsPositionLayer;
 import eu.geopaparazzi.map.layers.systemlayers.GpsPositionTextLayer;
-import eu.geopaparazzi.map.layers.systemlayers.ImagesLayer;
-import eu.geopaparazzi.map.layers.systemlayers.NotesLayer;
 import eu.geopaparazzi.map.layers.userlayers.BitmapTileServiceLayer;
 import eu.geopaparazzi.map.layers.userlayers.GeopackageTableLayer;
 import eu.geopaparazzi.map.layers.userlayers.GeopackageTilesLayer;
@@ -160,8 +158,8 @@ public enum CardinalLayerManager {
                     jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getEnabled());
                     cardinalLayersDefinitions.add(jo);
                 }
-                   
-            //Capa de segmento de rutas     
+
+            //Capa de segmento de rutas
             JSONObject jo = new JSONObject();
             jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
             jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
@@ -273,7 +271,7 @@ public enum CardinalLayerManager {
                     BookmarkLayer sysLayer = new BookmarkLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
-                } else if (layerClass.equals(ImagesLayer.class.getCanonicalName())) {
+                } /*else if (layerClass.equals(ImagesLayer.class.getCanonicalName())) {
                     ImagesLayer sysLayer = new ImagesLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
@@ -281,7 +279,7 @@ public enum CardinalLayerManager {
                     NotesLayer sysLayer = new NotesLayer(mapView, activitySupporter);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
-                } else if (layerClass.equals(GpsPositionLayer.class.getCanonicalName())) {
+                }*/ else if (layerClass.equals(GpsPositionLayer.class.getCanonicalName())) {
                     GpsPositionLayer sysLayer = new GpsPositionLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
@@ -481,9 +479,9 @@ public enum CardinalLayerManager {
         currentGpsLogLayer.load();
         systemLayersDefinitions.add(currentGpsLogLayer.toJson());
 
-//        BookmarkLayer bookmarkLayer = new BookmarkLayer(mapView);
-//        bookmarkLayer.load();
-//        systemLayersDefinitions.add(bookmarkLayer.toJson());
+        BookmarkLayer bookmarkLayer = new BookmarkLayer(mapView);
+        bookmarkLayer.load();
+        systemLayersDefinitions.add(bookmarkLayer.toJson());
 //
 //        ImagesLayer imagesLayer = new ImagesLayer(mapView);
 //        imagesLayer.load();
@@ -544,12 +542,15 @@ public enum CardinalLayerManager {
                         if(layer instanceof  ICardinalLayer){
                             IGpLayer gpLayer = (IGpLayer) layer;
                             cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex = LayerOperations.getInstance().load(((CardinalLayer)layer).getID());
-                            JSONObject jo = new JSONObject();
-                            jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
-                            jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
-                            jo.put("ID", layerIndex.getId());
-                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
-                            cardinalLayersArray.put(jo);
+                            //Danil creo que aquihay un problema, no deberias salvar el estado hacia la bd porque si recargas se pierde el estado de la capa
+                            layerIndex.setEnabled(layer.isEnabled());
+                            LayerOperations.getInstance().update(layerIndex);
+//                            JSONObject jo = new JSONObject();
+//                            jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
+//                            jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
+//                            jo.put("ID", layerIndex.getId());
+//                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
+//                            cardinalLayersArray.put(jo);
                             gpLayer.dispose();
                         }
 
