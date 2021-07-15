@@ -7,6 +7,7 @@ import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity(
@@ -18,7 +19,7 @@ import java.util.Date;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Material {
+public class Material implements Serializable, IEntity{
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

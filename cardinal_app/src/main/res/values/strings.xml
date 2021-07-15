@@ -1,17 +1,17 @@
 <resources>
     <string name="app_name">Cardinal</string>
-    <string name="reset_route">Route Reset</string>
+    <string name="reset_route">Restart route</string>
     <string name="seleccione_un_objeto_de_mapa">Select a Map Object</string>
     <string name="panic">panic button</string>
     <string name="work_session_not_active">Please, you must activate a work session</string>
     <string name="worker_have_not_active">The worker %s seem to be inactive in cardinal cloud</string>
-    <string name="work_session_view_label">Work session list</string>
+    <string name="work_session_view_label">Work sessions available </string>
     <string name="dashboard_worksession_action_description">Open work session list view</string>
     <string name="map_object_props_inspector_basic">Basic</string>
     <string name="map_object_props_inspector_defects">Defects</string>
     <string name="observation">Observation</string>
     <string name="map_object_props_inspector_states">States</string>
-    <string name="map_object_props_inspector_attribute">Inherite attributte</string>
+    <string name="map_object_props_inspector_attribute">Inherited attributes</string>
     <string name="inspector_object_label_code">Code</string>
     <string name="inspector_object_grade">Grade</string>
     <string name="inspector_object_inventory">Inventory</string>
@@ -22,4 +22,10 @@
     <string name="select_one">Pick one</string>
     <string name="do_you_want_to_delete_this_map_object">Do you want to delete this map object?</string>
     <string name="done">Done</string>
+    <string name="do_you_want_to_delete_this_image">Do you what to delete this image?</string>
+    <string name="active_work_session">Active:  </string>
+    <string name="taake_picture">Take Picture button</string>
+    <string name="defect_icon_text">defect icon descriptor</string>
+    <string name="activity_defect_images_label">Photos to defect: %s</string>
+
 </resources>

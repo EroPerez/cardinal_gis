@@ -25,7 +25,7 @@ import java.io.Serializable;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class TopologicalRule implements Serializable {
+public class TopologicalRule implements Serializable, IEntity {
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

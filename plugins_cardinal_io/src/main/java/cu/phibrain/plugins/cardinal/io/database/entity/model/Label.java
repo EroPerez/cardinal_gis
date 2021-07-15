@@ -10,6 +10,8 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToOne;
 
+import java.io.Serializable;
+
 @Entity(
         nameInDb = "MANAGER_LABEL",
         // Whether an all properties constructor should be generated.
@@ -19,7 +21,7 @@ import org.greenrobot.greendao.annotation.ToOne;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Label {
+public class Label implements Serializable, IEntity{
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose
@@ -35,6 +37,8 @@ public class Label {
 
     @ToOne(joinProperty = "lotId")
     LabelBatches lotObj;
+
+    private final static long serialVersionUID = 6686924243L;
 
     /**
      * Used to resolve relations

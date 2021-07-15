@@ -28,7 +28,7 @@ import java.util.List;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Layer implements Serializable {
+public class Layer implements Serializable, IEntity {
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

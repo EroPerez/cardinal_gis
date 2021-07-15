@@ -61,7 +61,7 @@
         android:layout_height="@dimen/min_touch_size"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
-        android:background="@null"
+        android:background="@drawable/button_background_drawable"
         android:padding="5dip"
         app:srcCompat="@drawable/ic_start_work_session_24" />
 

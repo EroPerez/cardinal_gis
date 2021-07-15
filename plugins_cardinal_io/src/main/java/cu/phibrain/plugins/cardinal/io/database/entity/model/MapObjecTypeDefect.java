@@ -1,8 +1,6 @@
 
 package cu.phibrain.plugins.cardinal.io.database.entity.model;
 
-import android.util.Base64;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -26,7 +24,7 @@ import java.io.Serializable;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class MapObjecTypeDefect implements Serializable {
+public class MapObjecTypeDefect implements Serializable, IEntity{
 
     @Id(autoincrement = true)
     @SerializedName("id")
@@ -39,7 +37,7 @@ public class MapObjecTypeDefect implements Serializable {
 
     @SerializedName("icon")
     @Expose
-    private String icon;
+    private byte[] icon;
 
     @SerializedName("map_object_type")
     @Expose
@@ -53,57 +51,41 @@ public class MapObjecTypeDefect implements Serializable {
     public MapObjecTypeDefect() {
     }
 
-
-    @Generated(hash = 1052823626)
-    public MapObjecTypeDefect(Long id, String description, String icon, Long mapObjecTypeId) {
+    @Generated(hash = 2008552689)
+    public MapObjecTypeDefect(Long id, String description, byte[] icon, Long mapObjecTypeId) {
         this.id = id;
         this.description = description;
         this.icon = icon;
         this.mapObjecTypeId = mapObjecTypeId;
     }
 
-
-    public byte[] getIconAsByteArray() {
-        if(this.icon!=null && !this.icon.isEmpty())
-            return Base64.decode(this.icon.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
-        return null;
-    }
-
-
     public Long getId() {
         return this.id;
     }
-
 
     public void setId(Long id) {
         this.id = id;
     }
 
-
     public String getDescription() {
         return this.description;
     }
-
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-
-    public String getIcon() {
+    public byte[] getIcon() {
         return this.icon;
     }
 
-
-    public void setIcon(String icon) {
+    public void setIcon(byte[] icon) {
         this.icon = icon;
     }
-
 
     public Long getMapObjecTypeId() {
         return this.mapObjecTypeId;
     }
-
 
     public void setMapObjecTypeId(Long mapObjecTypeId) {
         this.mapObjecTypeId = mapObjecTypeId;

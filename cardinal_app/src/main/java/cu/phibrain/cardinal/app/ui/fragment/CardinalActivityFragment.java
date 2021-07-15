@@ -47,6 +47,7 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperations;
 import eu.geopaparazzi.core.GeopaparazziApplication;
@@ -58,7 +59,6 @@ import eu.geopaparazzi.core.ui.activities.AboutActivity;
 import eu.geopaparazzi.core.ui.activities.AdvancedSettingsActivity;
 import eu.geopaparazzi.core.ui.activities.ExportActivity;
 import eu.geopaparazzi.core.ui.activities.ImportActivity;
-import eu.geopaparazzi.core.ui.activities.NotesListActivity;
 import eu.geopaparazzi.core.ui.activities.PanicActivity;
 import eu.geopaparazzi.core.ui.activities.ProjectMetadataActivity;
 import eu.geopaparazzi.core.ui.activities.SettingsActivity;
@@ -202,24 +202,31 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         View view = getView();
         try {
             int notesCount = 0;
+            String username = "Select";
 
-            if(((CardinalApplication) CardinalApplication.getInstance()).appContainer.getProjectActive() != null)
+            if (((CardinalApplication) CardinalApplication.getInstance()).appContainer.getProjectActive() != null) {
                 notesCount = (int) WorkSessionOperations.getInstance().getDao().count();
+            }
 
-//            int dirtyNotesCount = DaoNotes.getNotesCount(true);
+            Worker currentWorker = ((CardinalApplication) CardinalApplication.getInstance()).appContainer.getCurrentWorker();
+
+            if (currentWorker != null) {
+                username = currentWorker.getUsername();
+            }
+
             int logsCount = DaoGpsLog.getGpslogsCount();
 
             TextView notesTextView = view.findViewById(R.id.dashboardTextNotes);
             TextView logsTextView = view.findViewById(R.id.dashboardTextGpslog);
             TextView metadataTextView = view.findViewById(R.id.dashboardTextMetadata);
+            TextView workSessionTextView = view.findViewById(R.id.dashboardTextWorkSession);
 
-//            String notesText = "Notes: " + String.valueOf(notesCount);
+
             String notesText = String.format(getResources().getString(R.string.dashboard_msg_session), notesCount);
-//
-//            if (dirtyNotesCount > 0 && dirtyNotesCount != notesCount) {
-//                notesText += "(" + dirtyNotesCount + ")";
-//            }
+
             notesTextView.setText(notesText);
+
+            workSessionTextView.setText(getResources().getString(R.string.active_work_session) + username);
 
             String gpsText = String.format(getResources().getString(eu.geopaparazzi.core.R.string.dashboard_msg_gps), logsCount);
             logsTextView.setText(gpsText);
@@ -466,11 +473,12 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             ImageButton imageButton = (ImageButton) v;
 
             String tooltip = imageButton.getContentDescription().toString();
-            if (imageButton == mNotesButton) {
-                Intent intent = new Intent(getActivity(), NotesListActivity.class);
+//            if (imageButton == mNotesButton) {
+//                Intent intent = new Intent(getActivity(), NotesListActivity.class);
 //                intent.putExtra(LibraryConstants.PREFS_KEY_MAP_ZOOM, false);
 //                startActivity(intent);
-            } else if (imageButton == mMetadataButton) {
+//            } else
+            if (imageButton == mMetadataButton) {
                 try {
                     String databaseName = ResourcesManager.getInstance(getContext()).getDatabaseFile().getName();
                     tooltip += " (" + databaseName + ")";
@@ -485,7 +493,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
 
 
-        if (v == mNotesButton) {
+//        if (v == mNotesButton) {
 //            StringBuilder tooltip = new StringBuilder("Available providers:");//NON-NLS
 //            FragmentActivity activity = getActivity();
 //            if (activity != null) {
@@ -499,7 +507,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 //                }
 //                Snackbar.make(v, tooltip.toString(), Snackbar.LENGTH_SHORT).show();
 //            }
-        }
+//        }
 
 
         return true;

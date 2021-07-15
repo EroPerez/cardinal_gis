@@ -6,6 +6,8 @@ import java.util.List;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDao;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeState;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.TopologicalRule;
 
 public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObjecTypeDao> {
@@ -36,7 +38,7 @@ public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObje
 
         //Yo tambien me incluyo dice jorge que no
         //if(!mto.getIsAbstract())
-            //objcTypeList.add(mto);
+        //objcTypeList.add(mto);
 
         List<TopologicalRule> rulers = mto.getTopoRule();
         for (TopologicalRule rule : rulers) {
@@ -49,6 +51,33 @@ public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObje
             topologicalMtoFirewall(mto.getParentObj(), objcTypeList);
 
         return objcTypeList;
+    }
+
+
+    public List<MapObjecTypeDefect> getDefects(Long mapObjecTypeId) {
+        List<MapObjecTypeDefect> defects = new ArrayList<>();
+        MapObjecType mapObjectObjectType = load(mapObjecTypeId);
+
+        while (mapObjectObjectType != null) {
+
+            defects.addAll(mapObjectObjectType.getDefects());
+
+            mapObjectObjectType = mapObjectObjectType.getParentObj();
+        }
+        return defects;
+    }
+
+    public List<MapObjecTypeState> getStates(Long mapObjecTypeId) {
+        List<MapObjecTypeState> states = new ArrayList<>();
+        MapObjecType mapObjectObjectType = load(mapObjecTypeId);
+
+        while (mapObjectObjectType != null) {
+
+            states.addAll(mapObjectObjectType.getStates());
+
+            mapObjectObjectType = mapObjectObjectType.getParentObj();
+        }
+        return states;
     }
 
 }

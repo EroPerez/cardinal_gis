@@ -81,19 +81,19 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoNotes;
@@ -346,17 +346,17 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
 //        addnotebytagButton.setOnClickListener(this);
 //        addnotebytagButton.setOnLongClickListener(this);
 //
-//        ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
-//        addBookmarkButton.setOnClickListener(this);
-//        addBookmarkButton.setOnLongClickListener(this);
+        ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
+        addBookmarkButton.setOnClickListener(this);
+        addBookmarkButton.setOnLongClickListener(this);
 //
-//        final ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
-//        toggleMeasuremodeButton.setOnClickListener(this);
-//        toggleMeasuremodeButton.setOnLongClickListener(this);
+        final ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
+        toggleMeasuremodeButton.setOnClickListener(this);
+        toggleMeasuremodeButton.setOnLongClickListener(this);
 //
-//        final ImageButton toggleLogInfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
-//        toggleLogInfoButton.setOnClickListener(this);
-//        toggleLogInfoButton.setOnLongClickListener(this);
+        final ImageButton toggleLogInfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
+        toggleLogInfoButton.setOnClickListener(this);
+        toggleLogInfoButton.setOnLongClickListener(this);
 
 //        toggleEditingButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleEditingButton);
 //        toggleEditingButton.setOnClickListener(this);
@@ -1328,9 +1328,9 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
 //        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
 //        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
         ImageButton zoomInButton = findViewById(cu.phibrain.cardinal.app.R.id.zoomin);
-        //TextView zoomLevelTextview = findViewById(R.id.zoomlevel);
+        TextView zoomLevelTextview = findViewById(cu.phibrain.cardinal.app.R.id.zoomlevel);
         ImageButton zoomOutButton = findViewById(cu.phibrain.cardinal.app.R.id.zoomout);
-        //ImageButton toggleEditingButton = findViewById(R.id.toggleEditingButton);
+//        ImageButton toggleEditingButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleEditingButton);
 
         int visibility = View.VISIBLE;
         if (!enable) {
@@ -1342,11 +1342,12 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
 //        toggleMeasuremodeButton.setVisibility(visibility);
         batteryButton.setVisibility(visibility);
         centerOnGps.setVisibility(visibility);
-        zoomInButton.setVisibility(View.INVISIBLE);
-        //zoomLevelTextview.setVisibility(visibility);
-        zoomOutButton.setVisibility(View.INVISIBLE);
-        // toggleEditingButton.setVisibility(visibility);
+        zoomInButton.setVisibility(visibility);
+        zoomLevelTextview.setVisibility(visibility);
+        zoomOutButton.setVisibility(visibility);
+//        toggleEditingButton.setVisibility(visibility);
     }
+
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && EditManager.INSTANCE.getActiveToolGroup() != null) {

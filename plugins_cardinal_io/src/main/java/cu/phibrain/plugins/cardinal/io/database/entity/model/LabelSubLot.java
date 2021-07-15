@@ -11,6 +11,8 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToOne;
 
+import java.io.Serializable;
+
 /**
  * Created by Ero on 04/05/2021.
  * Entity mapped to table "zone".
@@ -24,7 +26,7 @@ import org.greenrobot.greendao.annotation.ToOne;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class LabelSubLot {
+public class LabelSubLot implements Serializable, IEntity{
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

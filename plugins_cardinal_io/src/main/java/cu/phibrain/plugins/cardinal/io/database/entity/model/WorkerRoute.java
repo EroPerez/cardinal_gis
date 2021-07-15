@@ -20,7 +20,7 @@ import java.util.Date;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class WorkerRoute implements Serializable {
+public class WorkerRoute implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

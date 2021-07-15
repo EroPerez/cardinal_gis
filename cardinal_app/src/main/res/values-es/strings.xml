@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Cardinal</string>
-    <string name="reset_route">Nueva Ruta</string>
+    <string name="reset_route">Reiniciar ruta</string>
     <string name="seleccione_un_objeto_de_mapa">Seleccione un Objeto de Mapa</string>
     <string name="panic">panic button</string>
     <string name="work_session_not_active">Por favor, usted debe activar una sesión de trabajo.</string>
     <string name="worker_have_not_active">El operario %s parece que esta inactivo en el servidor remoto</string>
-    <string name="work_session_view_label">Sesiones de trabajo</string>
+    <string name="work_session_view_label">Sesiones de trabajo disponibles</string>
     <string name="dashboard_worksession_action_description">Abrir el listado de sesiones de trabajo</string>
     <string name="map_object_props_inspector_basic">Básicos</string>
     <string name="map_object_props_inspector_defects">Defectos</string>
@@ -22,4 +22,7 @@
     <string name="select_one">Seleccione uno</string>
     <string name="do_you_want_to_delete_this_map_object">¿Esta seguro que desea eliminar este objecto?</string>
     <string name="done">Hecho</string>
+    <string name="do_you_want_to_delete_this_image">¿Esta seguro que desea eliminar esta foto?</string>
+    <string name="active_work_session">Activo:</string>
+    <string name="activity_defect_images_label">Fotos al defecto: %s</string>
 </resources>

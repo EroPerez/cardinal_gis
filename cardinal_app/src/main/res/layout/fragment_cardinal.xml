@@ -31,10 +31,7 @@
 
                 <ImageButton
                     android:id="@+id/dashboardButtonMetadata"
-                    style="@style/GeopapTheme.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
+                    style="@style/GPDashboardButton"
                     android:contentDescription="@string/dashboard_metadata_action_description"
                     app:srcCompat="@drawable/ic_dashboard_metadata_24dp"
                     android:stateListAnimator="@null" />
@@ -49,16 +46,28 @@
                     android:textColor="@color/main_background"
                     android:textStyle="bold" />
             </FrameLayout>
-            <ImageButton
-                android:id="@+id/dashboardButtonMapview"
-                style="@style/GeopapTheme.Button.Colored"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_column="1"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:contentDescription="@string/dashboard_mapview_action_description"
-                app:srcCompat="@drawable/ic_dashboard_mapview_24dp" />
+                android:layout_column="0"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/dashboardButtonMapview"
+                    style="@style/GPDashboardButton"
+                    android:contentDescription="@string/dashboard_mapview_action_description"
+                    app:srcCompat="@drawable/ic_dashboard_mapview_24dp" />
+
+                <TextView
+                    android:id="@+id/dashboardTextWorkSession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
+                    android:textColor="@color/main_background"
+                    android:textStyle="bold" />
+            </FrameLayout>
         </TableRow>
 
         <TableRow
@@ -68,22 +77,16 @@
 
             <ImageButton
                 android:id="@+id/dashboardButtonImport"
-                style="@style/GeopapTheme.Button.Colored"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                style="@style/GPDashboardButton"
                 android:layout_column="0"
-                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/dashboard_import_action_description"
                 app:srcCompat="@drawable/ic_dashboard_import_24dp" />
 
             <ImageButton
                 android:id="@+id/dashboardButtonExport"
-                style="@style/GeopapTheme.Button.Colored"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                style="@style/GPDashboardButton"
                 android:layout_column="1"
-                android:layout_margin="10dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/dashboard_export_action_description"
                 app:srcCompat="@drawable/ic_dashboard_export_24dp" />
@@ -102,10 +105,7 @@
 
                 <ImageButton
                     android:id="@+id/dashboardButtonNotes"
-                    style="@style/GeopapTheme.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
+                    style="@style/GPDashboardButton"
                     android:contentDescription="@string/dashboard_worksession_action_description"
                     app:srcCompat="@drawable/ic_work_session_24"
                     android:stateListAnimator="@null" />
@@ -131,10 +131,7 @@
 
                 <ImageButton
                     android:id="@+id/dashboardButtonGpslog"
-                    style="@style/GeopapTheme.Button.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
+                    style="@style/GPDashboardButton"
                     android:contentDescription="@string/dashboard_gpslog_action_description"
                     app:srcCompat="@drawable/ic_dashboard_gpslog_24dp"
                     android:stateListAnimator="@null" />

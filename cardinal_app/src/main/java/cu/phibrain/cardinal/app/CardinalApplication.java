@@ -113,11 +113,6 @@ public class CardinalApplication extends GeopaparazziApplication {
 
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
 
-            // Register entity event listener to handling cascade delete and order related task
-//            MapObjectOperations.getInstance().registerEventDispatcher(new MapObjectEntityEventListener());
-//            RouteSegmentOperations.getInstance().registerEventDispatcher(new RouteSegmentEntityEventListener());
-//            MapObjectHasDefectOperations.getInstance().registerEventDispatcher(new MapObjectHasDefectEventListener());
-
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         } catch (Exception e) {

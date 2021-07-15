@@ -26,7 +26,7 @@ import java.io.Serializable;
 
 )
 
-public class MapObjecTypeState implements Serializable {
+public class MapObjecTypeState implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

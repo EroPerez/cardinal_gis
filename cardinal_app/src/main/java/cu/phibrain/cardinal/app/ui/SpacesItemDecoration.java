@@ -25,5 +25,15 @@ public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
         outRect.bottom = halfSpace;
         outRect.left = halfSpace;
         outRect.right = halfSpace;
+        // Add top margin only for the first item to avoid double space between items
+        if (parent.getChildLayoutPosition(view) == 0) {
+            outRect.top = 0;
+        }
+    }
+
+    private boolean isLastRow(int visualPos, int spanCount, int sectionItemCount) {
+        int lastRowCount = sectionItemCount % spanCount;
+        lastRowCount = lastRowCount == 0 ? spanCount : lastRowCount;
+        return visualPos > sectionItemCount - lastRowCount;
     }
 }
