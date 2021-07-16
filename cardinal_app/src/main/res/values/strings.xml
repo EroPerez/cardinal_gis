@@ -27,5 +27,6 @@
     <string name="taake_picture">Take Picture button</string>
     <string name="defect_icon_text">defect icon descriptor</string>
     <string name="activity_defect_images_label">Photos to defect: %s</string>
+    <string name="system_layers">System Layers</string>
 
 </resources>

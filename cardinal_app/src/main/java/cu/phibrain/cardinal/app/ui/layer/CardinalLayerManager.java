@@ -154,7 +154,7 @@ public enum CardinalLayerManager {
                     JSONObject jo = new JSONObject();
                     jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
                     jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
-                    jo.put("ID", layerIndex.getId()); // Daniel no harcodee texto en el codigo man
+                    jo.put(ICardinalLayer.LAYERID_TAG, layerIndex.getId()); // Daniel no harcodee texto en el codigo man
                     jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getEnabled());
                     cardinalLayersDefinitions.add(jo);
                 }
@@ -310,7 +310,7 @@ public enum CardinalLayerManager {
 
                 if (layerClass.equals(CardinalLayer.class.getCanonicalName())) {
 
-                    Long Id = layerDefinition.getLong("ID");
+                    Long Id = layerDefinition.getLong(ICardinalLayer.LAYERID_TAG);
                     cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(Id);
                     CardinalLayer sysLayer = new CardinalLayer(mapView, activitySupporter, Id);
                     sysLayer.load();
@@ -340,7 +340,7 @@ public enum CardinalLayerManager {
 
                 jo.put(IGpLayer.LAYERENABLED_TAG, layerIndex.getEnabled());
 
-                jo.put("ID", layerIndex.getId());
+                jo.put(ICardinalLayer.LAYERID_TAG, layerIndex.getId());
                 cardinalLayersDefinitions.add(jo);
                 //Load layer
                 CardinalLayer cardinalLayer = new CardinalLayer(mapView, activitySupporter, layerIndex.getId());
@@ -544,7 +544,7 @@ public enum CardinalLayerManager {
                             cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layerIndex = LayerOperations.getInstance().load(((CardinalLayer)layer).getID());
                             //Danil creo que aquihay un problema, no deberias salvar el estado hacia la bd porque si recargas se pierde el estado de la capa
                             layerIndex.setEnabled(layer.isEnabled());
-                            LayerOperations.getInstance().update(layerIndex);
+                            LayerOperations.getInstance().save(layerIndex);
 //                            JSONObject jo = new JSONObject();
 //                            jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
 //                            jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());

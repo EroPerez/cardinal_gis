@@ -221,7 +221,6 @@
     <string name="wms_unsupported">WMS mapurl is not yet supported in this version.</string>
     <string name="unable_to_find_tables_in_db">Unable to find compatible tables in the selected database.</string>
     <string name="layername_bookmarks">Project Bookmarks</string>
-    <string name="cardinal_layers">Cardinal Layers</string>
     <string name="layername_current_log">Current Log</string>
     <string name="layername_scalebar">Map Scale Bar</string>
     <string name="layername_gpslogs">Gps Log</string>

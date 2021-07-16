@@ -41,8 +41,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|start"
-                    android:layout_marginBottom="12dp"
                     android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
                     android:textColor="@color/main_background"
                     android:textStyle="bold" />
             </FrameLayout>
@@ -56,7 +56,8 @@
                     android:id="@+id/dashboardButtonMapview"
                     style="@style/GPDashboardButton"
                     android:contentDescription="@string/dashboard_mapview_action_description"
-                    app:srcCompat="@drawable/ic_dashboard_mapview_24dp" />
+                    app:srcCompat="@drawable/ic_dashboard_mapview_24dp"
+                    android:stateListAnimator="@null" />
 
                 <TextView
                     android:id="@+id/dashboardTextWorkSession"
@@ -115,8 +116,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|start"
-                    android:layout_marginBottom="12dp"
                     android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="session"
                     android:textColor="@color/main_background"
                     android:textStyle="bold" />
             </FrameLayout>
@@ -141,8 +143,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|start"
-                    android:layout_marginBottom="12dp"
                     android:layout_marginStart="14dp"
+                    android:layout_marginBottom="12dp"
                     android:textColor="@color/main_background"
                     android:textStyle="bold" />
             </FrameLayout>

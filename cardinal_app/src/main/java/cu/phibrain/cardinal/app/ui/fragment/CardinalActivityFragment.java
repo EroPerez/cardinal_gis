@@ -104,7 +104,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private static boolean sCheckedGps = false;
     private final int RETURNCODE_BROWSE_FOR_NEW_PREOJECT = 665;
     private final int RETURNCODE_PROFILES = 666;
-    private ImageButton mNotesButton;
+    private ImageButton mSessionButton;
     private ImageButton mMetadataButton;
     private ImageButton mMapviewButton;
     private ImageButton mGpslogButton;
@@ -159,9 +159,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mNotesButton = view.findViewById(eu.geopaparazzi.core.R.id.dashboardButtonNotes);
-        mNotesButton.setOnClickListener(this);
-        mNotesButton.setOnLongClickListener(this);
+        mSessionButton = view.findViewById(eu.geopaparazzi.core.R.id.dashboardButtonNotes);
+        mSessionButton.setOnClickListener(this);
+        mSessionButton.setOnLongClickListener(this);
 
         mMetadataButton = view.findViewById(R.id.dashboardButtonMetadata);
         mMetadataButton.setOnClickListener(this);
@@ -542,7 +542,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             Intent importIntent = new Intent(getActivity(), ImportActivity.class);
             //startActivity(importIntent);
             startActivityForResult(importIntent, RETURNCODE_BROWSE_FOR_NEW_PREOJECT);
-        } else if (v == mNotesButton) {
+        } else if (v == mSessionButton) {
             //Load the curent worker
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
 

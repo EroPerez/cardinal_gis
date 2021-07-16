@@ -23,6 +23,6 @@
     <string name="do_you_want_to_delete_this_map_object">¿Esta seguro que desea eliminar este objecto?</string>
     <string name="done">Hecho</string>
     <string name="do_you_want_to_delete_this_image">¿Esta seguro que desea eliminar esta foto?</string>
-    <string name="active_work_session">Activo:</string>
+    <string name="active_work_session">Activo: </string>
     <string name="activity_defect_images_label">Fotos al defecto: %s</string>
 </resources>
