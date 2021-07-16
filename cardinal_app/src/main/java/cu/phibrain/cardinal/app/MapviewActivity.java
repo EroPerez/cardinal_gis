@@ -67,7 +67,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -81,35 +80,31 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
-import eu.geopaparazzi.core.database.DaoNotes;
 import eu.geopaparazzi.core.mapview.GpsLogInfoTool;
 import eu.geopaparazzi.core.mapview.PanLabelsTool;
 import eu.geopaparazzi.core.mapview.TapMeasureTool;
-import eu.geopaparazzi.core.ui.activities.AddNotesActivity;
 import eu.geopaparazzi.core.ui.activities.BookmarksListActivity;
 import eu.geopaparazzi.core.ui.activities.GpsDataListActivity;
-import eu.geopaparazzi.core.ui.activities.NotesListActivity;
 import eu.geopaparazzi.core.utilities.Constants;
-import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.core.activities.GeocodeActivity;
 import eu.geopaparazzi.library.core.dialogs.InsertCoordinatesDialogFragment;
 import eu.geopaparazzi.library.database.GPLog;
-import eu.geopaparazzi.library.forms.FormInfoHolder;
 import eu.geopaparazzi.library.gps.GpsLoggingStatus;
 import eu.geopaparazzi.library.gps.GpsServiceStatus;
 import eu.geopaparazzi.library.gps.GpsServiceUtilities;
@@ -145,7 +140,6 @@ import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ILabeledLayer;
 import eu.geopaparazzi.map.layers.systemlayers.BookmarkLayer;
-import eu.geopaparazzi.map.layers.systemlayers.NotesLayer;
 import eu.geopaparazzi.map.utils.MapUtilities;
 
 import static eu.geopaparazzi.library.util.LibraryConstants.COORDINATE_FORMATTER;
@@ -154,14 +148,13 @@ import static eu.geopaparazzi.library.util.LibraryConstants.LATITUDE;
 import static eu.geopaparazzi.library.util.LibraryConstants.LONGITUDE;
 import static eu.geopaparazzi.library.util.LibraryConstants.NAME;
 import static eu.geopaparazzi.library.util.LibraryConstants.ROUTE;
-import static eu.geopaparazzi.library.util.LibraryConstants.TMPPNGIMAGENAME;
 import static eu.geopaparazzi.library.util.LibraryConstants.ZOOMLEVEL;
 
 
 /**
  * @author Andrea Antonello (www.hydrologis.com)
  */
-public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
+public class MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
     private final int INSERTCOORD_RETURN_CODE = 666;
     private final int ZOOM_RETURN_CODE = 667;
     private final int MENU_GO_TO = 1;
@@ -210,7 +203,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
     private String lonString;
     private TextView batteryText;
     private Spinner filterNetworks;
-    //private ImageButton toggleEditingButton;
+    private ImageButton toggleEditingButton;
     private ImageButton toggleLabelsButton;
     private boolean hasLabelledLayers;
     private AppContainer appContainer;
@@ -346,20 +339,28 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
 //        addnotebytagButton.setOnClickListener(this);
 //        addnotebytagButton.setOnLongClickListener(this);
 //
-//        ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
-//        addBookmarkButton.setOnClickListener(this);
-//        addBookmarkButton.setOnLongClickListener(this);
+        ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
+        addBookmarkButton.setOnClickListener(this);
+        addBookmarkButton.setOnLongClickListener(this);
 //
-//        final ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
-//        toggleMeasuremodeButton.setOnClickListener(this);
-//        toggleMeasuremodeButton.setOnLongClickListener(this);
+        final ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
+        toggleMeasuremodeButton.setOnClickListener(this);
+        toggleMeasuremodeButton.setOnLongClickListener(this);
 //
-//        final ImageButton toggleLogInfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
-//        toggleLogInfoButton.setOnClickListener(this);
-//        toggleLogInfoButton.setOnLongClickListener(this);
+        final ImageButton toggleLogInfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
+        toggleLogInfoButton.setOnClickListener(this);
+        toggleLogInfoButton.setOnLongClickListener(this);
 
-//        toggleEditingButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleEditingButton);
-//        toggleEditingButton.setOnClickListener(this);
+        final ImageButton addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+        addRouteSegmentbutton.setOnClickListener(this);
+        addRouteSegmentbutton.setOnLongClickListener(this);
+
+        final ImageButton jointoButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
+        jointoButton.setOnClickListener(this);
+        jointoButton.setOnLongClickListener(this);
+
+        toggleEditingButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleEditingButton);
+        toggleEditingButton.setOnClickListener(this);
 
         toggleLabelsButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleLabels);
         toggleLabelsButton.setOnClickListener(this);
@@ -711,24 +712,24 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
                 }
                 break;
             }
-            case (NotesLayer.FORMUPDATE_RETURN_CODE): {
-                if (resultCode == Activity.RESULT_OK) {
-                    FormInfoHolder formInfoHolder = (FormInfoHolder) data.getSerializableExtra(FormInfoHolder.BUNDLE_KEY_INFOHOLDER);
-                    if (formInfoHolder != null) {
-                        try {
-                            long noteId = formInfoHolder.noteId;
-                            String nameStr = formInfoHolder.renderingLabel;
-                            String jsonStr = formInfoHolder.sectionObjectString;
-
-                            DaoNotes.updateForm(noteId, nameStr, jsonStr);
-                        } catch (Exception e) {
-                            GPLog.error(this, null, e);
-                            GPDialogs.warningDialog(this, getString(eu.geopaparazzi.library.R.string.notenonsaved), null);
-                        }
-                    }
-                }
-                break;
-            }
+//            case (NotesLayer.FORMUPDATE_RETURN_CODE): {
+//                if (resultCode == Activity.RESULT_OK) {
+//                    FormInfoHolder formInfoHolder = (FormInfoHolder) data.getSerializableExtra(FormInfoHolder.BUNDLE_KEY_INFOHOLDER);
+//                    if (formInfoHolder != null) {
+//                        try {
+//                            long noteId = formInfoHolder.noteId;
+//                            String nameStr = formInfoHolder.renderingLabel;
+//                            String jsonStr = formInfoHolder.sectionObjectString;
+//
+//                            DaoNotes.updateForm(noteId, nameStr, jsonStr);
+//                        } catch (Exception e) {
+//                            GPLog.error(this, null, e);
+//                            GPDialogs.warningDialog(this, getString(eu.geopaparazzi.library.R.string.notenonsaved), null);
+//                        }
+//                    }
+//                }
+//                break;
+//            }
             case (MapUtilities.SELECTED_FEATURES_UPDATED_RETURN_CODE):
                 if (resultCode == Activity.RESULT_OK) {
                     ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
@@ -906,11 +907,13 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
 
     public boolean onLongClick(View v) {
         int i = v.getId();
-        if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {
-            Intent intent = new Intent(MapviewActivity.this, NotesListActivity.class);
-            intent.putExtra(LibraryConstants.PREFS_KEY_MAP_ZOOM, true);
-            startActivityForResult(intent, ZOOM_RETURN_CODE);
-        } else if (i == cu.phibrain.cardinal.app.R.id.toggleloginfobutton) {
+//        if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {
+//            Intent intent = new Intent(MapviewActivity.this, NotesListActivity.class);
+//            intent.putExtra(LibraryConstants.PREFS_KEY_MAP_ZOOM, true);
+//            startActivityForResult(intent, ZOOM_RETURN_CODE);
+//        } else
+
+        if (i == cu.phibrain.cardinal.app.R.id.toggleloginfobutton) {
             Intent gpsDatalistIntent = new Intent(this, GpsDataListActivity.class);
             startActivity(gpsDatalistIntent);
         } else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
@@ -1040,7 +1043,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
                 setNewCenter(lastGpsPosition[0], lastGpsPosition[1]);
             }
 
-        } else if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {// generate screenshot in background in order to not freeze
+        }/* else if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {// generate screenshot in background in order to not freeze
             try {
                 File tempDir = ResourcesManager.getInstance(MapviewActivity.this).getTempDir();
                 final File tmpImageFile = new File(tempDir, TMPPNGIMAGENAME);
@@ -1060,7 +1063,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
                 GPDialogs.errorDialog(this, e, null);
             }
 
-        } else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
+        }*/ else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
             addBookmark();
         } else if (i == cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton) {
             if (!isInNonClickableMode) {
@@ -1091,11 +1094,9 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
                 EditManager.INSTANCE.setActiveTool(null);
                 mapView.releaseMapBlock();
             }
-        }
-//        else if (i == R.id.toggleEditingButton) {
-//            toggleEditing();
-//        }
-        else if (i == cu.phibrain.cardinal.app.R.id.toggleLabels) {
+        } else if (i == R.id.toggleEditingButton) {
+            toggleEditing();
+        } else if (i == cu.phibrain.cardinal.app.R.id.toggleLabels) {
             Tool activeTool = EditManager.INSTANCE.getActiveTool();
             if (activeTool instanceof PanLabelsTool) {
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_toggle_labels_off_24dp));
@@ -1119,10 +1120,9 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
             appContainer.setMapObjectActive(null);
             appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
-            EdgesLayer edgesLayer  = new EdgesLayer(mapView);
+            EdgesLayer edgesLayer = new EdgesLayer(mapView);
             EditManager.INSTANCE.setEditLayer(edgesLayer);
-            toggleEditing();
-            Toast.makeText(this, getString(R.string.reset_route), Toast.LENGTH_SHORT).show();
+            GPDialogs.toast(this, getString(R.string.reset_route), Toast.LENGTH_SHORT);
 
         } else if (i == R.id.frameLayout) {
             //Test
@@ -1147,21 +1147,17 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
                             }
                             obj.setCode(theTextToRunOn);
                             obj.setCoord(poins);
-                            obj.setObjectType(appContainer.getMapObjecTypeActive());
                             obj.setMapObjectTypeId(appContainer.getMapObjecTypeActive().getId());
-                            MapObjectOperations.getInstance().insert(obj);
+                            obj.setNodeGrade(1);
+                            obj.setSessionId(appContainer.getWorkSessionActive().getId());
+                            MapObjectOperations.getInstance().save(obj);
 
-                            if(appContainer.getMapObjectActive()!=null){
-                                RouteSegment edge = new RouteSegment();
-                                edge.setOriginObj(appContainer.getMapObjectActive());
-                                edge.setDestinyObj(obj);
-                                edge.setOriginId(appContainer.getMapObjectActive().getId());
-                                edge.setDestinyId(obj.getId());
-                                RouteSegmentOperations.getInstance().insert(edge);
+                            if (appContainer.getMapObjectActive() != null) { // Daniel verificar si el Mapobject no es completo
+                                RouteSegment edge = new RouteSegment(null, appContainer.getMapObjectActive().getId(), obj.getId(), new Date());
+                                RouteSegmentOperations.getInstance().save(edge);
                             }
 
                             appContainer.setMapObjectActive(obj);
-                            //mapView.reloadLayer(CardinalLayer.class, obj.getObjectType().getLayerId());
                             mapView.reloadLayer(CardinalLayer.class);
                             mapView.reloadLayer(EdgesLayer.class);
                             //updateSelectMapObj(appContainer.getMapObjecTypeActive());
@@ -1179,7 +1175,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
         }
     }
 
-    private void onMenuMTO(){
+    private void onMenuMTO() {
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(
                         cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
@@ -1216,7 +1212,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
                 mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
             } else {
                 //Muestro solo los aptos segun reglas topologicas
-                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getMapObjectActive().getObjectType(),null);
+                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getMapObjectActive().getObjectType(), null);
             }
 
             MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
@@ -1249,7 +1245,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
         }
     }
 
-    private void updateSelectMapObj(MapObjecType mto){
+    private void updateSelectMapObj(MapObjecType mto) {
         byte[] icon = mto.getIconAsByteArray();
         if (icon != null) {
             Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
@@ -1268,7 +1264,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
             disableEditing();
             mapView.releaseMapBlock();
         } else {
-            // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
             IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
             if (editLayer == null) {
                 // if not layer is
@@ -1290,7 +1286,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
     }
 
     private void disableEditing() {
-        // toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
+        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
         Tool activeTool = EditManager.INSTANCE.getActiveTool();
         if (activeTool != null) {
             activeTool.disable();
@@ -1305,48 +1301,64 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
     }
 
     private void setLeftButtoonsEnablement(boolean enable) {
-//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-//        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
-//        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+//        ImageButton addnotebytagButton = findViewById(cu.phibrain.cardinal.app.R.id.addnotebytagbutton);
+        ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
+        ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+
+        ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
+        ImageButton toggleLoginfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
+        ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
         if (enable) {
 //            addnotebytagButton.setVisibility(View.VISIBLE);
-//            addBookmarkButton.setVisibility(View.VISIBLE);
-//            toggleLoginfoButton.setVisibility(View.VISIBLE);
-//            toggleMeasuremodeButton.setVisibility(View.VISIBLE);
+            jointobuttonButton.setVisibility(View.VISIBLE);
+            addroutesegmentButton.setVisibility(View.VISIBLE);
+
+            addBookmarkButton.setVisibility(View.VISIBLE);
+            toggleLoginfoButton.setVisibility(View.VISIBLE);
+            toggleMeasuremodeButton.setVisibility(View.VISIBLE);
         } else {
 //            addnotebytagButton.setVisibility(View.GONE);
-//            addBookmarkButton.setVisibility(View.GONE);
-//            toggleLoginfoButton.setVisibility(View.GONE);
-//            toggleMeasuremodeButton.setVisibility(View.GONE);
+            jointobuttonButton.setVisibility(View.GONE);
+            addroutesegmentButton.setVisibility(View.GONE);
+
+            addBookmarkButton.setVisibility(View.GONE);
+            toggleLoginfoButton.setVisibility(View.GONE);
+            toggleMeasuremodeButton.setVisibility(View.GONE);
         }
     }
 
     private void setAllButtoonsEnablement(boolean enable) {
 //        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-//        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
-//        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+        ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
+        ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+
+        ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
+        ImageButton toggleLoginfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
+        ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
         ImageButton zoomInButton = findViewById(cu.phibrain.cardinal.app.R.id.zoomin);
-        //TextView zoomLevelTextview = findViewById(R.id.zoomlevel);
+        TextView zoomLevelTextview = findViewById(cu.phibrain.cardinal.app.R.id.zoomlevel);
         ImageButton zoomOutButton = findViewById(cu.phibrain.cardinal.app.R.id.zoomout);
-        //ImageButton toggleEditingButton = findViewById(R.id.toggleEditingButton);
+        ImageButton toggleEditingButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleEditingButton);
 
         int visibility = View.VISIBLE;
         if (!enable) {
             visibility = View.GONE;
         }
 //        addnotebytagButton.setVisibility(visibility);
-//        addBookmarkButton.setVisibility(visibility);
-//        toggleLoginfoButton.setVisibility(visibility);
-//        toggleMeasuremodeButton.setVisibility(visibility);
+        jointobuttonButton.setVisibility(visibility);
+        addroutesegmentButton.setVisibility(visibility);
+
+        addBookmarkButton.setVisibility(visibility);
+        toggleLoginfoButton.setVisibility(visibility);
+        toggleMeasuremodeButton.setVisibility(visibility);
         batteryButton.setVisibility(visibility);
         centerOnGps.setVisibility(visibility);
-        zoomInButton.setVisibility(View.INVISIBLE);
-        //zoomLevelTextview.setVisibility(visibility);
-        zoomOutButton.setVisibility(View.INVISIBLE);
-        // toggleEditingButton.setVisibility(visibility);
+        zoomInButton.setVisibility(visibility);
+        zoomLevelTextview.setVisibility(visibility);
+        zoomOutButton.setVisibility(visibility);
+        toggleEditingButton.setVisibility(visibility);
     }
+
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && EditManager.INSTANCE.getActiveToolGroup() != null) {
@@ -1374,7 +1386,7 @@ public class  MapviewActivity extends AppCompatActivity implements MtoAdapter.Se
             byte[] icon = _mtoModel.getIconAsByteArray();
             if (icon != null) {
                 Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-                selectMto.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
+                selectMto.setImageBitmap(ImageUtil.getScaledBitmap(bmp, 30,
                         30, false));
             }
         }

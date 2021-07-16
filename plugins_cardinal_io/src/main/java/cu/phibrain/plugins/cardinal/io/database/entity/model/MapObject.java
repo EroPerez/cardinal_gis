@@ -38,7 +38,7 @@ import eu.geopaparazzi.map.GPGeoPoint;
                 @Index(value = "sessionId,code", unique = true)
         }
 )
-public class MapObject implements Serializable {
+public class MapObject implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

@@ -32,7 +32,7 @@ import java.util.Date;
                 @Index(value = "originId,destinyId", unique = true)
         }
 )
-public class RouteSegment implements Serializable {
+public class RouteSegment implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

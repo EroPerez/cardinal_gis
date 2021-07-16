@@ -29,7 +29,7 @@ import eu.geopaparazzi.map.GPGeoPoint;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Zone implements Serializable {
+public class Zone implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

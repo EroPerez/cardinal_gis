@@ -1,8 +1,6 @@
 
 package cu.phibrain.plugins.cardinal.io.database.entity.model;
 
-import android.util.Base64;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -12,6 +10,8 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Unique;
 
 import java.io.Serializable;
+
+import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 
 /**
  * Created by Ero on 17/09/2020.
@@ -26,7 +26,7 @@ import java.io.Serializable;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Worker implements Serializable {
+public class Worker implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")
@@ -98,7 +98,8 @@ public class Worker implements Serializable {
     }
 
     public byte[] getAvatarAsByteArray() {
-        return Base64.decode(avatar.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
+        return ImageUtil.convertToBytesFromBase64(this.avatar);
+//        return Base64.decode(avatar.replaceFirst("^data:image/[^;]*;base64,?",""), 0);
     }
 
     public Long getId() {

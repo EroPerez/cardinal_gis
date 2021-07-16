@@ -338,7 +338,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 
         final CardinalMapLayerAdapter listAdapter = new CardinalMapLayerAdapter(this, mItemArray, R.layout.column_item, R.id.item_layout, true);
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
-        ((TextView) header.findViewById(R.id.text)).setText(getString(R.string.project_layers));
+        ((TextView) header.findViewById(R.id.text)).setText(getString(cu.phibrain.cardinal.app.R.string.system_layers));
         ((TextView) header.findViewById(R.id.item_count)).setText("");
 
         mBoardView.addColumn(listAdapter, header, header, false);
@@ -365,7 +365,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
 
         final CardinalMapLayerAdapter listAdapter = new CardinalMapLayerAdapter(this, mItemArray, R.layout.column_item, R.id.item_layout, true);
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
-        ((TextView) header.findViewById(R.id.text)).setText(getString(R.string.cardinal_layers));
+        ((TextView) header.findViewById(R.id.text)).setText(getString(R.string.project_layers));
         ((TextView) header.findViewById(R.id.item_count)).setText("");
 
         mBoardView.addColumn(listAdapter, header, header, false);

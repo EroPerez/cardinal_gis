@@ -25,7 +25,7 @@ import java.util.List;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class WorkSession implements Serializable {
+public class WorkSession implements Serializable, IEntity{
 
     @Id(autoincrement = true)
     @SerializedName("id")

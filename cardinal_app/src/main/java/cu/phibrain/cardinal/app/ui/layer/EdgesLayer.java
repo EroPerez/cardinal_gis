@@ -25,6 +25,7 @@ import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
@@ -169,7 +170,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-
+        GPDialogs.toast(mapView.getContext(),  "NumPoints: " + geometry.getNumPoints(), 1);
     }
 
     @Override

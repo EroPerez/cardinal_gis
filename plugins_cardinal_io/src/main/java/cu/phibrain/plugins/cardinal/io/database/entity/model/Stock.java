@@ -23,7 +23,7 @@ import java.io.Serializable;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Stock implements Serializable {
+public class Stock implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

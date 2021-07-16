@@ -13,6 +13,7 @@ import org.greenrobot.greendao.annotation.ToOne;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Created by Ero on 15/02/2021.
@@ -31,7 +32,7 @@ import java.util.Date;
                 @Index(value = "mapObjectId,mapObjectStateId", unique = true)
         }
 )
-public class MapObjectHasState implements Serializable {
+public class MapObjectHasState implements Serializable, IEntity {
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose
@@ -83,6 +84,13 @@ public class MapObjectHasState implements Serializable {
 
     @Generated(hash = 1884819685)
     public MapObjectHasState() {
+    }
+
+    public MapObjectHasState(long mapObjectId, long mapObjectStateId) {
+        this.id = null;
+        this.mapObjectId = mapObjectId;
+        this.mapObjectStateId = mapObjectStateId;
+        this.createdAt = new Date();
     }
 
 
@@ -249,6 +257,21 @@ public class MapObjectHasState implements Serializable {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapObjectHasState that = (MapObjectHasState) o;
+        return mapObjectId == that.mapObjectId &&
+                mapObjectStateId == that.mapObjectStateId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mapObjectId, mapObjectStateId);
     }
 
 

@@ -28,7 +28,7 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
     }
 
     ;
-    private OnClickCallback mOclickCallback;
+    private OnClickCallback onClickCallback;
 
     class ViewHolder {
         ImageView ivAvatar;
@@ -50,52 +50,58 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
 
     @Override
     public View getView(int position, View rowView, ViewGroup parent) {
+        try {
+            ViewHolder holder;
+            // Recycle existing view if passed as parameter
+            if (rowView == null) {
+                rowView = LayoutInflater.from(getContext()).inflate(R.layout.activity_work_session_list_row, parent, false);
+                holder = new ViewHolder();
+                holder.ivAvatar = rowView.findViewById(R.id.imgvavatar);
+                holder.sessionWorkerText = rowView.findViewById(R.id.worksession_nametext);
+                holder.sessionZoneText = rowView.findViewById(R.id.worksessionrowtext);
+                holder.sessionStartDateText = rowView.findViewById(R.id.worksessionstartdatetext);
+                holder.goButton = rowView.findViewById(R.id.activatebutton);
+                holder.goButton.setVisibility(View.VISIBLE);
 
-        ViewHolder holder;
-        // Recycle existing view if passed as parameter
-        if (rowView == null) {
-            rowView = LayoutInflater.from(getContext()).inflate(R.layout.activity_work_session_list_row, parent, false);
-            holder = new ViewHolder();
-            holder.ivAvatar = rowView.findViewById(R.id.imgvavatar);
-            holder.sessionWorkerText = rowView.findViewById(R.id.worksession_nametext);
-            holder.sessionZoneText = rowView.findViewById(R.id.worksessionrowtext);
-            holder.sessionStartDateText = rowView.findViewById(R.id.worksessionstartdatetext);
-            holder.goButton = rowView.findViewById(R.id.activatebutton);
-            holder.goButton.setVisibility(View.VISIBLE);
+                rowView.setTag(holder);
+            } else {
+                holder = (ViewHolder) rowView.getTag();
+                holder.goButton.setVisibility(View.VISIBLE);
+            }
 
-            rowView.setTag(holder);
-        } else {
-            holder = (ViewHolder) rowView.getTag();
-            holder.goButton.setVisibility(View.VISIBLE);
+            final WorkSession workSession = getItem(position);
+            final Worker worker = workSession.getContractObj().getTheWorker();
+
+            if (!worker.getAvatar().isEmpty()) {
+                byte[] avatarByteCodes = worker.getAvatarAsByteArray();
+                Bitmap avatar = BitmapFactory.decodeStream(new ByteArrayInputStream(avatarByteCodes));
+                holder.ivAvatar.setImageBitmap(avatar);
+
+            }
+
+            holder.sessionWorkerText.setText("Worker: " + worker.getFullName());
+            holder.sessionZoneText.setText("Zone: " + workSession.getZoneObj().getName());
+
+            holder.sessionStartDateText.setText("Start Date: " + JodaTimeHelper.formatDate("yyyy-MM-dd", workSession.getStartDate()));
+
+            if (!workSession.getActive())
+                holder.goButton.setVisibility(View.GONE);
+
+            holder.goButton.setOnClickListener(v -> {
+                if (onClickCallback != null)
+                    onClickCallback.OnClickListener(workSession);
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        final WorkSession workSession = getItem(position);
-        final Worker worker = workSession.getContractObj().getTheWorker();
-
-        if (!worker.getAvatar().isEmpty()) {
-            byte [] avatarByteCodes = worker.getAvatarAsByteArray();
-            Bitmap avatar = BitmapFactory.decodeStream(new ByteArrayInputStream(avatarByteCodes));
-            holder.ivAvatar.setImageBitmap(avatar);
-
-        }
-
-        holder.sessionWorkerText.setText("Worker: " + worker.getFullName());
-        holder.sessionZoneText.setText("Zone: " + workSession.getZoneObj().getName());
-        holder.sessionStartDateText.setText("Start Date: " + JodaTimeHelper.formatDate("yyyy-MM-dd", workSession.getStartDate()));
-        if (!workSession.getActive())
-            holder.goButton.setVisibility(View.GONE);
-
-        holder.goButton.setOnClickListener(v -> {
-            if (mOclickCallback != null)
-                mOclickCallback.OnClickListener(workSession);
-        });
 
         return rowView;
     }
 
     public void setOnClickListener(OnClickCallback listener) {
 
-        mOclickCallback = listener;
+        onClickCallback = listener;
 
     }
 }

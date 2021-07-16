@@ -11,7 +11,13 @@
         android:theme="@style/GeopapTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
-        <activity android:name=".ui.activities.CameraMapObjectActivity"></activity>
+        <activity
+            android:name=".ui.activities.MapObjectDefectImageGalleryActivity"
+            android:label="@string/activity_defect_images_label"
+            android:parentActivityName=".MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar" />
+        <activity android:name=".ui.activities.CameraMapObjectActivity" />
+        <activity android:name=".ui.activities.CameraMapObjectDefectActivity" />
         <activity
             android:name=".ui.activities.WorkSessionListActivity"
             android:label="@string/work_session_view_label"
@@ -34,12 +40,12 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:pathPattern=".*\\.gpap" />
                 <data android:scheme="file" />
-
                 <data android:mimeType="*/*" />
-
                 <data android:host="*" />
             </intent-filter>
             <intent-filter tools:ignore="AppLinkUrlError">
@@ -88,18 +94,18 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-    </application>
+    </application> <!-- NORMAL PERMISSIONS -->
     <uses-feature android:name="android.hardware.location.gps" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- NORMAL PERMISSIONS -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.NFC" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" /> <!-- <uses-permission -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- <uses-permission -->
     <!-- android:name="android.permission.ACCESS_MOCK_LOCATION" -->
     <!-- tools:ignore="MockLocation" /> -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />

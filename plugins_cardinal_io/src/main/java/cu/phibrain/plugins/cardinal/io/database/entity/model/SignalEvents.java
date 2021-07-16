@@ -30,7 +30,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.SignalTyp
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class SignalEvents implements Serializable {
+public class SignalEvents implements Serializable, IEntity {
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

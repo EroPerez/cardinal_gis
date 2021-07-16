@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/defect_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_centerVertical="true"
-    android:layout_marginTop="2dp"
-    android:layout_marginBottom="2dp"
-    android:layout_weight="3"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginBottom="@dimen/grid_layout_margin"
     android:background="@drawable/item_backgroud_outline"
     android:padding="4dp">
 
     <CheckBox
         android:id="@+id/CheckBoxDefects"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_weight="2"
+        android:layout_marginEnd="50dp"
+        android:layout_toEndOf="@id/defect_icon"
         android:text="@string/map_object_props_inspector_defects"
         android:textColor="@color/colorPrimaryText"
         android:textSize="14sp" />
@@ -26,10 +25,22 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="false"
+        android:layout_centerVertical="true"
         android:background="@drawable/button_background_states"
-        android:layout_weight="1"
+        android:contentDescription="@string/taake_picture"
         app:srcCompat="@drawable/ic_add_a_photo_24dp" />
+
+    <ImageView
+        android:id="@+id/defect_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/border_main_decorations_1px"
+        android:contentDescription="@string/defect_icon_text"
+        android:elevation="1dp"
+        android:scaleType="fitXY"
+        android:src="@android:drawable/ic_menu_report_image" />
 
 
 </RelativeLayout>
