@@ -11,6 +11,7 @@ import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.ToOne;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +28,7 @@ import java.util.List;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class LabelBatches {
+public class LabelBatches implements Serializable, IEntity{
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

@@ -6,22 +6,9 @@
     android:background="@color/transparent_mot"
     android:elevation="4dp"
     android:orientation="vertical">
-
-    <LinearLayout
-        android:id="@+id/root"
+    <include
+        layout="@layout/content_object_inspector_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/inspector_background"
-        android:orientation="vertical">
+        android:layout_height="match_parent" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <include
-                layout="@layout/content_object_inspector_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </ScrollView>
-    </LinearLayout>
 </LinearLayout>

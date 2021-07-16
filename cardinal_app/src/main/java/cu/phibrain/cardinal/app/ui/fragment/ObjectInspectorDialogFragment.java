@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -20,12 +21,12 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,16 +43,23 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.SpacesItemDecoration;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelSubLotAdapter;
+import cu.phibrain.cardinal.app.ui.adapter.MapObjectAttrAdapter;
+import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
+import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeState;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectMetadata;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
@@ -73,12 +81,15 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     // TODO: Customize parameter argument names
     private static final String ARG_MAP_OBJECT_ID = "MAP_OBJECT_ID";
     private final int RETURNCODE_FOR_TAKE_PICTURE = 666;
+    private final int RETURNCODE_FOR_TAKE_DEFECT_PICTURE = 667;
 
     private BottomSheetBehavior mBehavior;
 
     private AppContainer appContainer;
 
     private GPMapView mapView;
+
+    protected MapObjectImagesAdapter imagesAdapter;
 
     // TODO: Customize parameters
     public static ObjectInspectorDialogFragment newInstance(GPMapView mapView, long objectId) {
@@ -128,11 +139,6 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
         View view = View.inflate(getContext(), R.layout.fragment_object_inspector_dialog_list_dialog, null);
 
-        LinearLayout linearLayout = view.findViewById(R.id.root);
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) linearLayout.getLayoutParams();
-        params.height = getScreenHeight();
-        linearLayout.setLayoutParams(params);
-
         Long objectId = getArguments().getLong(ARG_MAP_OBJECT_ID);
 
         MapObject objectSelected = MapObjectOperations.getInstance().load(objectId);
@@ -146,8 +152,16 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             initBasicAttribute(view, objectSelected);
             // MapObject images section
             initMapObjectImages(view, objectSelected);
+            // MapObject defects section
+            initMapObjectDefects(view, objectSelected);
+            //MapObject states section
+            initMapObjectStates(view, objectSelected);
+            //MapObject attr section
+            initMapObjectMeta(view, objectSelected);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (SQLiteConstraintException e) {
+            GPDialogs.errorDialog(this.getContext(), e, null);
         }
 
         dialog.setContentView(view);
@@ -175,6 +189,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         super.dismiss();
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -183,8 +198,14 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         switch (requestCode) {
             case (RETURNCODE_FOR_TAKE_PICTURE):
                 if (resultCode == Activity.RESULT_OK) {
-
+                    MapObject object = appContainer.getMapObjectActive();
+                    List<MapObjectImages> images = MapObjectImagesOperations.getInstance().loadAll(object.getId());
+                    imagesAdapter.setMapObjectImages(images);
+                    Log.d("TAKE_PICTURE size:", " " + images.size());
                 }
+                break;
+            case RETURNCODE_FOR_TAKE_DEFECT_PICTURE:
+
                 break;
         }
     }
@@ -235,6 +256,8 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                         if (data != null && data.getLabelObj().getCode() != object.getCode()) {
                             object.setCode(data.getLabelObj().getCode());
                             MapObjectOperations.getInstance().update(object);
+                            //Notify dataSet Changed
+                            lotAdapter.reload(session.getId());
                         }
                     } catch (android.database.SQLException ex) {
                         ex.printStackTrace();
@@ -297,10 +320,11 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 //        });
 
         AutoCompleteTextView autoCompleteTextViewInv = view.findViewById(R.id.autoCompleteTextViewInv);
-        autoCompleteTextViewInv.setAdapter(new StockAutoCompleteAdapter(
+        StockAutoCompleteAdapter stockAdapter = new StockAutoCompleteAdapter(
                 this.getContext(), R.layout.spinner_inv, R.id.tvSpinnerValue,
-                StockOperations.getInstance().loadAll(appContainer.getProjectActive().getId()))
+                StockOperations.getInstance().loadAll(appContainer.getProjectActive().getId())
         );
+        autoCompleteTextViewInv.setAdapter(stockAdapter);
         if (object.getStockCode() != null)
             autoCompleteTextViewInv.setText(object.getStockCode().getCode());
 
@@ -310,6 +334,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             if (data != null) {
                 Log.d("MapObjectInv", data.getCode());
                 object.setStockCodeId(data.getId());
+                data.setLocated(true);
             }
 
         });
@@ -318,6 +343,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
                 MapObjectOperations.getInstance().update(object);
+                stockAdapter.notifyDataSetChanged();
                 handled = true;
 
                 //close keyboard
@@ -405,42 +431,118 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     }
 
 
-    private void initMapObjectImages(View view, MapObject object){
+    private void initMapObjectImages(View view, MapObject object) {
 
         FragmentActivity activity = getActivity();
 
         ImageButton imgBtnAddPhoto = view.findViewById(R.id.imgBtnAddPhoto);
-          imgBtnAddPhoto.setOnClickListener(v -> {
+        imgBtnAddPhoto.setOnClickListener(v -> {
 
-              SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-              double[] gpsLocation = PositionUtilities.getGpsLocationFromPreferences(preferences);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+            double[] gpsLocation = PositionUtilities.getGpsLocationFromPreferences(preferences);
 
-              String imageName = ImageUtilities.getCameraImageName(null);
-              Intent cameraIntent = new Intent(activity, CameraMapObjectActivity.class);
-              cameraIntent.putExtra(LibraryConstants.PREFS_KEY_CAMERA_IMAGENAME, imageName);
-              cameraIntent.putExtra(LibraryConstants.DATABASE_ID, object.getId());
+            String imageName = ImageUtilities.getCameraImageName(null);
+            Intent cameraIntent = new Intent(activity, CameraMapObjectActivity.class);
+            cameraIntent.putExtra(LibraryConstants.PREFS_KEY_CAMERA_IMAGENAME, imageName);
+            cameraIntent.putExtra(LibraryConstants.DATABASE_ID, object.getId());
 
-              if (gpsLocation != null) {
-                  cameraIntent.putExtra(LibraryConstants.LATITUDE, gpsLocation[1]);
-                  cameraIntent.putExtra(LibraryConstants.LONGITUDE, gpsLocation[0]);
-                  cameraIntent.putExtra(LibraryConstants.ELEVATION, gpsLocation[2]);
-              }
+            if (gpsLocation != null) {
+                cameraIntent.putExtra(LibraryConstants.LATITUDE, gpsLocation[1]);
+                cameraIntent.putExtra(LibraryConstants.LONGITUDE, gpsLocation[0]);
+                cameraIntent.putExtra(LibraryConstants.ELEVATION, gpsLocation[2]);
+            }
 
-              startActivityForResult(cameraIntent, RETURNCODE_FOR_TAKE_PICTURE);
-          });
+            startActivityForResult(cameraIntent, RETURNCODE_FOR_TAKE_PICTURE);
+        });
 
         RecyclerView recyclerView = view.findViewById(R.id.rvObjectPhotos);
 
         LinearLayoutManager horizontalLayoutManager
                 = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(horizontalLayoutManager);
-        //recyclerView.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.HORIZONTAL));
-        recyclerView.addItemDecoration(new SpacesItemDecoration(5));
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_layout_margin);
+        recyclerView.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
 
-       List<MapObjectImages> images = MapObjectImagesOperations.getInstance().loadAll(object.getId());
+        List<MapObjectImages> images = MapObjectImagesOperations.getInstance().loadAll(object.getId());
 
-        MapObjectImagesAdapter imagesAdapter = new MapObjectImagesAdapter(images);
+        imagesAdapter = new MapObjectImagesAdapter(activity, images);
         recyclerView.setAdapter(imagesAdapter);
 
+    }
+
+    private void initMapObjectDefects(View view, MapObject object) {
+
+        FragmentActivity activity = getActivity();
+
+        List<MapObjecTypeDefect> defects = MapObjecTypeOperations.getInstance().getDefects(object.getMapObjectTypeId());
+
+        if (defects.size() > 0) {
+            RecyclerView recyclerView = view.findViewById(R.id.rvObjectDefects);
+            LinearLayoutManager llm = new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(llm);
+
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                    ((LinearLayoutManager) recyclerView.getLayoutManager()).getOrientation());
+            recyclerView.addItemDecoration(dividerItemDecoration);
+
+            MapObjectDefectsAdapter defectsAdapter = new MapObjectDefectsAdapter(activity, defects, object);
+            recyclerView.setAdapter(defectsAdapter);
+            recyclerView.setHasFixedSize(true);
+
+        } else {
+            view.findViewById(R.id.defects_header_container).setVisibility(View.GONE);
+            view.findViewById(R.id.defects_body_container).setVisibility(View.GONE);
+        }
+    }
+
+
+    private void initMapObjectStates(View view, MapObject object) {
+
+        FragmentActivity activity = getActivity();
+
+        List<MapObjecTypeState> states = MapObjecTypeOperations.getInstance().getStates(object.getMapObjectTypeId());
+
+        if (states.size() > 0) {
+            RecyclerView recyclerView = view.findViewById(R.id.rvObjectSates);
+            LinearLayoutManager llm = new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(llm);
+
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                    ((LinearLayoutManager) recyclerView.getLayoutManager()).getOrientation());
+            recyclerView.addItemDecoration(dividerItemDecoration);
+
+            MapObjectStatesAdapter statesAdapter = new MapObjectStatesAdapter(states, object);
+            recyclerView.setAdapter(statesAdapter);
+            recyclerView.setHasFixedSize(true);
+
+        } else {
+            view.findViewById(R.id.states_header_container).setVisibility(View.GONE);
+            view.findViewById(R.id.states_body_container).setVisibility(View.GONE);
+        }
+    }
+
+    private void initMapObjectMeta(View view, MapObject object) {
+
+        FragmentActivity activity = getActivity();
+
+        List<MapObjectMetadata> metadata = object.getMetadata();
+
+        if (metadata.size() > 0) {
+            RecyclerView recyclerView = view.findViewById(R.id.rvObjectAttributes);
+            LinearLayoutManager llm = new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(llm);
+
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                    ((LinearLayoutManager) recyclerView.getLayoutManager()).getOrientation());
+            recyclerView.addItemDecoration(dividerItemDecoration);
+
+            MapObjectAttrAdapter statesAdapter = new MapObjectAttrAdapter(activity, metadata);
+            recyclerView.setAdapter(statesAdapter);
+            recyclerView.setHasFixedSize(true);
+
+        } else {
+            view.findViewById(R.id.attr_header_container).setVisibility(View.GONE);
+            view.findViewById(R.id.attr_body_container).setVisibility(View.GONE);
+        }
     }
 }

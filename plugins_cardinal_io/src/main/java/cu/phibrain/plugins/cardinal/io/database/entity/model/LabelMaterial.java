@@ -5,8 +5,10 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
+
+import java.io.Serializable;
 
 /**
  * Created by Ero on 04/05/2021.
@@ -21,7 +23,7 @@ import org.greenrobot.greendao.annotation.Generated;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class LabelMaterial {
+public class LabelMaterial implements Serializable, IEntity{
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose

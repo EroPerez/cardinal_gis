@@ -35,7 +35,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.GeomTypeC
         generateGettersSetters = true
 )
 
-public class MapObjecType implements Serializable {
+public class MapObjecType implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

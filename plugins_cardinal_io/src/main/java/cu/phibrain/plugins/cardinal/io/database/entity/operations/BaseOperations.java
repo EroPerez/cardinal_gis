@@ -9,10 +9,11 @@ import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.events.EntityEventListener;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoMaster;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.IEntity;
 import cu.phibrain.plugins.cardinal.io.utils.Observer;
 import cu.phibrain.plugins.cardinal.io.utils.Subject;
 
-public class BaseOperations<Entity, Dao extends AbstractDao<Entity, Long>> implements Observer {
+public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Entity, Long>> implements Observer {
 
     private static BaseOperations instance = null;
     protected DaoSession daoSession;
@@ -86,6 +87,7 @@ public class BaseOperations<Entity, Dao extends AbstractDao<Entity, Long>> imple
 
     /**
      * Insert a batch of Entity, this method do no t dispatch any event
+     *
      * @param entityList
      */
     public void insertAll(List<Entity> entityList) {
@@ -144,6 +146,7 @@ public class BaseOperations<Entity, Dao extends AbstractDao<Entity, Long>> imple
 
     /**
      * Delete a batch of Entity, this method do no t dispatch any event
+     *
      * @param entityList
      */
     public void deleteAll(List<Entity> entityList) {
@@ -164,6 +167,19 @@ public class BaseOperations<Entity, Dao extends AbstractDao<Entity, Long>> imple
             if (this.dispatcher != null)
                 this.dispatcher.onAfterEntityUpdate(entity, this);
         }
+    }
+
+
+    public void save(Entity entity) {
+        if (hasKey(entity)) {
+            update(entity);
+        } else {
+            insert(entity);
+        }
+    }
+
+    private boolean hasKey(Entity entity) {
+        return entity.getId() != null;
     }
 
     /**

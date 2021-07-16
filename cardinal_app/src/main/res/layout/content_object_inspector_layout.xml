@@ -1,483 +1,468 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ <androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/nav_header_vertical_spacing"
-    android:paddingTop="@dimen/nav_header_vertical_spacing"
-    android:paddingRight="@dimen/nav_header_vertical_spacing"
-    android:paddingBottom="@dimen/nav_header_vertical_spacing">
-    <!--Basic-->
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_gravity="top"
-        android:background="@drawable/background">
-        <FrameLayout
+    android:background="@drawable/inspector_background"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".ui.fragment.ObjectInspectorDialogFragment"
+    tools:showIn="@layout/fragment_object_inspector_dialog_list_dialog"
+    >
+
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_column="0"
-            android:layout_weight="1">
-            <TextView
-                style="@style/Widget.MaterialComponents.TextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="5dp"
-                android:gravity="start|center_horizontal|center_vertical"
-                android:text="@string/map_object_props_inspector_basic"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-        </FrameLayout>
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageButton
-                android:id="@+id/imgBtnDelete"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="end"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/button_background_states"
-                app:srcCompat="@drawable/ic_delete_24dp"
-               />
-        </FrameLayout>
-
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-
-        <TextView
-            style="@style/Widget.MaterialComponents.TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/inspector_object_label_code"
-            android:textSize="14sp" />
-        <Spinner
-            android:id="@+id/edtCode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/spinner_material"
-            android:spinnerMode="dropdown"
-            android:textSize="14sp"
-            tools:listitem="@layout/spinner_inv"
-            />
-
-        <EditText
-            android:id="@+id/edtCodeFake"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:ems="10"
-            android:enabled="false"
-            android:inputType="text"
-            android:text="@string/inspector_object_label_code"
-            android:textAlignment="viewEnd"
-            android:textSize="14sp"
-            android:visibility="gone"
-            android:autofillHints="" />
-
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-
-        <TextView
-            style="@style/Widget.MaterialComponents.TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/inspector_object_grade"
-            android:textSize="14sp" />
-        <EditText
-            android:id="@+id/edtGrade"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="number"
-            android:text="1"
-            android:textAlignment="viewEnd"
-            android:textSize="14sp"
-            android:imeOptions="actionDone"
-            android:autofillHints="" />
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-        <TextView
-            style="@style/Widget.MaterialComponents.TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/inspector_object_inventory"
-            android:textSize="14sp" />
-
-<!--        <Spinner-->
-<!--            android:id="@+id/spnInv"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:background="@drawable/spinner_material"-->
-<!--            android:spinnerMode="dropdown"-->
-<!--            android:textSize="14sp"-->
-<!--            tools:listitem="@layout/spinner_inv"-->
-<!--            />-->
-
-        <AutoCompleteTextView
-            android:id="@+id/autoCompleteTextViewInv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/spinner_material"
-            android:completionThreshold="1"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:hint="@string/select_one"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:text=""
-            android:textSize="14sp"
-            android:ems="10"
-            android:imeOptions="actionDone"
-            android:textAlignment="viewEnd"/>
-
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-        <TextView
-            style="@style/Widget.MaterialComponents.TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/inspector_object_type"
-            android:textSize="14sp" />
-
-        <EditText
-            android:id="@+id/edtType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:ems="10"
-            android:enabled="false"
-            android:inputType="text"
-            android:text="Wood"
-            android:textAlignment="viewEnd"
-            android:textSize="14sp"
-            android:autofillHints="" />
-
-
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-
-       <TextView
-            style="@style/Widget.MaterialComponents.TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/inspector_object_geometry"
-            android:textSize="14sp" />
-        <EditText
-            android:id="@+id/edtGeometry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:ems="10"
-            android:enabled="false"
-            android:inputType="text"
-            android:text="POINT"
-            android:textAlignment="viewEnd"
-            android:textSize="14sp"
-            android:importantForAutofill="no" />
-
-
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-        <TextView
-            style="@style/Widget.MaterialComponents.TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/inspector_object_observation"
-            android:textSize="14sp" />
-
-        <EditText
-            android:id="@+id/edtObservation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textMultiLine"
-            android:text="@string/observation"
-            android:textAlignment="viewEnd"
-            android:textSize="14sp"
-            android:imeOptions="actionDone"/>
-
-    </TableRow>
-
-    <!--Photos-->
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@drawable/background">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_column="0"
-            android:layout_weight="1">
-
-            <TextView
-                style="@style/Widget.MaterialComponents.TextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="5dp"
-                android:gravity="start|center_horizontal|center_vertical"
-                android:inputType="none"
-                android:text="@string/Images"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageButton
-                android:id="@+id/imgBtnAddPhoto"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="end"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/button_background_states"
-                app:srcCompat="@drawable/ic_add_a_photo_24dp" />
-        </FrameLayout>
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/photo_container"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_column="0"
-            android:layout_weight="1"
             android:orientation="vertical"
-            android:theme="@style/GeopapTheme">
+            android:paddingLeft="@dimen/nav_header_vertical_spacing"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:paddingRight="@dimen/nav_header_vertical_spacing"
+            android:paddingBottom="@dimen/nav_header_vertical_spacing">
+            <!--Basic-->
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_gravity="top"
+                android:background="@drawable/background"
+                >
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_column="0"
+                    android:layout_weight="1">
+                    <TextView
+                        style="@style/Widget.MaterialComponents.TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="5dp"
+                        android:gravity="start|center_horizontal|center_vertical"
+                        android:text="@string/map_object_props_inspector_basic"
+                        android:textColor="@color/white"
+                        android:textSize="18sp" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvObjectPhotos"
+                    <ImageButton
+                        android:id="@+id/imgBtnDelete"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@drawable/button_background_states"
+                        app:srcCompat="@drawable/ic_delete_24dp"
+                        android:contentDescription="TODO" />
+                </FrameLayout>
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1">
+
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_label_code"
+                    android:textSize="14sp" />
+                <Spinner
+                    android:id="@+id/edtCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/spinner_material"
+                    android:spinnerMode="dropdown"
+                    android:textSize="14sp"
+                    tools:listitem="@layout/spinner_inv"
+                    />
+
+                <EditText
+                    android:id="@+id/edtCodeFake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:ems="10"
+                    android:enabled="false"
+                    android:inputType="text"
+                    android:text="@string/inspector_object_label_code"
+                    android:textAlignment="viewEnd"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:autofillHints="" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1">
+
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_grade"
+                    android:textSize="14sp" />
+                <EditText
+                    android:id="@+id/edtGrade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textAlignment="viewEnd"
+                    android:textSize="14sp"
+                    android:imeOptions="actionDone"
+                    android:autofillHints="" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1">
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_inventory"
+                    android:textSize="14sp" />
+
+        <!--        <Spinner-->
+        <!--            android:id="@+id/spnInv"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:background="@drawable/spinner_material"-->
+        <!--            android:spinnerMode="dropdown"-->
+        <!--            android:textSize="14sp"-->
+        <!--            tools:listitem="@layout/spinner_inv"-->
+        <!--            />-->
+
+                <AutoCompleteTextView
+                    android:id="@+id/autoCompleteTextViewInv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/spinner_material"
+                    android:completionThreshold="1"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:hint="@string/select_one"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:text=""
+                    android:textSize="14sp"
+                    android:ems="10"
+                    android:imeOptions="actionDone"
+                    android:textAlignment="viewEnd"/>
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1">
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_type"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/edtType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:ems="10"
+                    android:enabled="false"
+                    android:inputType="text"
+                    android:text="Wood"
+                    android:textAlignment="viewEnd"
+                    android:textSize="14sp"
+                    android:autofillHints="" />
+
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1">
+
+               <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_geometry"
+                    android:textSize="14sp" />
+                <EditText
+                    android:id="@+id/edtGeometry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:ems="10"
+                    android:enabled="false"
+                    android:inputType="text"
+                    android:text="POINT"
+                    android:textAlignment="viewEnd"
+                    android:textSize="14sp"
+                    android:importantForAutofill="no" />
+
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1">
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_observation"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/edtObservation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textMultiLine"
+                    android:text="@string/observation"
+                    android:textAlignment="viewEnd"
+                    android:textSize="14sp"
+                    android:imeOptions="actionDone"
+                    android:autofillHints="" />
+
+            </TableRow>
+
+            <!--Photos-->
+            <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:orientation="vertical"
-                tools:itemCount="4"
-                tools:listitem="@layout/recyclerview_object_photo_item" />
-
-
-        </LinearLayout>
-    </TableRow>
-    <!--Defects-->
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_weight="1"
-        android:background="@drawable/background">
-
-            <TextView
-                style="@style/Widget.MaterialComponents.TextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_column="0"
                 android:layout_weight="1"
-                android:layout_marginStart="5dp"
-                android:gravity="start|center_horizontal|center_vertical"
-                android:inputType="none"
-                android:text="@string/map_object_props_inspector_defects"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-    </TableRow>
+                android:background="@drawable/background">
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_column="0"
+                    android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/defects_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:theme="@style/GeopapTheme">
+                    <TextView
+                        style="@style/Widget.MaterialComponents.TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="5dp"
+                        android:gravity="start|center_horizontal|center_vertical"
+                        android:inputType="none"
+                        android:text="@string/Images"
+                        android:textColor="@color/white"
+                        android:textSize="18sp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvObjectDefects"
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageButton
+                        android:id="@+id/imgBtnAddPhoto"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@drawable/button_background_states"
+                        app:srcCompat="@drawable/ic_add_a_photo_24dp" />
+                </FrameLayout>
+            </TableRow>
+
+            <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:itemCount="2"
-                tools:listitem="@layout/recyclerview_object_defects_item" />
+                android:layout_height="wrap_content"
+                >
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_column="0"
+                    android:layout_weight="1">
 
-
-        </LinearLayout>
-    </TableRow>
-    <!--States-->
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_weight="1"
-        android:background="@drawable/background">
-             <TextView
-                style="@style/Widget.MaterialComponents.TextView"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvObjectPhotos"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:orientation="vertical"
+                        tools:itemCount="1"
+                        tools:listitem="@layout/recyclerview_object_photo_item" />
+                </FrameLayout>
+            </TableRow>
+            <!--Defects-->
+            <TableRow
+                android:id="@+id/defects_header_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_column="0"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background">
+
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="5dp"
+                    android:gravity="center|start"
+                    android:inputType="none"
+                    android:text="@string/map_object_props_inspector_defects"
+                    android:textColor="@color/white"
+                    android:textSize="18sp" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/defects_body_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+               >
+                <LinearLayout
+                    android:id="@+id/defects_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:theme="@style/GeopapTheme">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvObjectDefects"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        tools:itemCount="1"
+                        tools:listitem="@layout/recyclerview_object_defects_item" />
+                </LinearLayout>
+
+            </TableRow>
+            <!--States-->
+            <TableRow
+                android:id="@+id/states_header_container"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
                 android:layout_weight="1"
-                android:layout_marginStart="5dp"
-                android:gravity="start|center_horizontal|center_vertical"
-                android:inputType="none"
-                android:text="@string/map_object_props_inspector_states"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-    </TableRow>
+                android:background="@drawable/background">
+                     <TextView
+                        style="@style/Widget.MaterialComponents.TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="5dp"
+                        android:gravity="start|center"
+                        android:inputType="none"
+                        android:text="@string/map_object_props_inspector_states"
+                        android:textColor="@color/white"
+                        android:textSize="18sp" />
+            </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:id="@+id/states_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:theme="@style/GeopapTheme">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvObjectSates"
+            <TableRow
+                android:id="@+id/states_body_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:itemCount="2"
-                tools:listitem="@layout/recyclerview_object_states_item" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/states_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:theme="@style/GeopapTheme">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvObjectSates"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        tools:itemCount="1"
+                        tools:listitem="@layout/recyclerview_object_states_item" />
 
 
-        </LinearLayout>
-    </TableRow>
-    <!--Attribute extra-->
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_weight="1"
-        android:background="@drawable/background">
-            <TextView
-                style="@style/Widget.MaterialComponents.TextView"
+                </LinearLayout>
+            </TableRow>
+            <!--Attribute extra-->
+            <TableRow
+                android:id="@+id/attr_header_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_column="0"
+                android:layout_height="48dp"
                 android:layout_weight="1"
-                android:layout_marginStart="5dp"
-                android:gravity="start|center_horizontal|center_vertical"
-                android:inputType="none"
-                android:text="@string/map_object_props_inspector_attribute"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
-    </TableRow>
+                android:background="@drawable/background">
+                    <TextView
+                        style="@style/Widget.MaterialComponents.TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="5dp"
+                        android:gravity="start|center"
+                        android:inputType="none"
+                        android:text="@string/map_object_props_inspector_attribute"
+                        android:textColor="@color/white"
+                        android:textSize="18sp" />
+            </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:id="@+id/attr_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_column="0"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:theme="@style/GeopapTheme">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvObjectAttributes"
+            <TableRow
+                android:id="@+id/attr_body_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:itemCount="2"
-                tools:listitem="@layout/recyclerview_object_attribute_item" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/attr_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:theme="@style/GeopapTheme">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvObjectAttributes"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        tools:itemCount="1"
+                        tools:listitem="@layout/recyclerview_object_attribute_item" />
 
 
-        </LinearLayout>
-    </TableRow>
-
-
-    <!--  Footer-->
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@drawable/background"
-        android:layout_gravity="bottom"
-        >
-            <TextView
-                style="@style/Widget.MaterialComponents.TextView"
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_column="0"
-                android:layout_weight="1"
-                android:textColor="@color/white" />
-    </TableRow>
-</TableLayout>
+                </LinearLayout>
+            </TableRow>
+        </TableLayout>
+</androidx.core.widget.NestedScrollView>

@@ -24,7 +24,7 @@ import java.io.Serializable;
         generateGettersSetters = true
 )
 
-public class MapObjectTypeAttribute implements Serializable {
+public class MapObjectTypeAttribute implements Serializable, IEntity {
 
     @Id(autoincrement = true)
     @SerializedName("id")

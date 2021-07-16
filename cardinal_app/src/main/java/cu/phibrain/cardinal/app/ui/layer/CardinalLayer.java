@@ -23,6 +23,7 @@ import org.oscim.map.Map;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
@@ -34,10 +35,14 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.util.Compat;
+import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.map.GPGeoPoint;
@@ -132,12 +137,12 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 //    }
     private GPGeoPoint centerPoint(MapObject mapObject) {
         switch (mapObject.getObjectType().getGeomType()) {
-            case POINT:
-                return mapObject.getCoord().get(0);
+//            case POINT:
+//                return mapObject.getCoord().get(0);
             case POLYGON:
-                return mapObject.getCoord().get(0);
+                return mapObject.getCoord().get(2);
             case POLYLINE:
-                return mapObject.getCoord().get(0);
+                return mapObject.getCoord().get(1);
             default:
                 return mapObject.getCoord().get(0);
         }
@@ -151,18 +156,25 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
         for (MapObjecType mtoMapObjcType : cardinalLayer.getMapobjectypes()) {
             mtoMapObjcType.resetMapObjects();
             List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
-            List<MarkerItem> pts = new ArrayList<>();
-            byte[] icon = mtoMapObjcType.getIconAsByteArray();
+            List<MarkerItem> markerItems = new ArrayList<>();
+
+            byte[] icon = ImageUtil.getScaledBitmapAsByteArray(
+                    ImageUtilities.getImageFromImageData(
+                            mtoMapObjcType.getIconAsByteArray()
+                    ),
+                    48, 48, false);
+
             Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
+
             for (MapObject mapObject : mapObjects) {
                 mapObjectsList.add(mapObject);
                 String text = mapObject.getObjectType().getCaption();
-                pts.add(new MarkerItem(mapObject.getId(), mapObject.getCode(), text, centerPoint(mapObject)));
+                markerItems.add(new MarkerItem(mapObject.getId(), mapObject.getCode(), text, centerPoint(mapObject)));
             }
-            for (MarkerItem mi : pts) {
+            for (MarkerItem mi : markerItems) {
                 mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
             }
-            addItems(pts);
+            addItems(markerItems);
             update();
         }
     }
@@ -179,10 +191,10 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     @Override
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
 
-        if (item != null) {
+        if (item != null && Long.parseLong("" + item.getUid()) != -1) {
             Toast.makeText(this.activitySupporter.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-            MapObject mapObject = mapObjectsList.get(index);
+            MapObject mapObject = MapObjectOperations.getInstance().load((Long) item.getUid());
             appContainer.setMapObjectActive(mapObject);
             appContainer.setMapObjecTypeActive(mapObject.getObjectType());
 
@@ -192,13 +204,11 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
                 mapPosition.setPosition(mapObject.getCoord().get(0).getLatitude(), mapObject.getCoord().get(0).getLongitude());
                 mapView.setMapPosition(mapPosition);
             } else {
-                RouteSegment edge = new RouteSegment();
-                edge.setOriginObj(appContainer.getEdgeAddInMapObjSelect());
-                edge.setDestinyObj(mapObject);
-                edge.setOriginId(appContainer.getEdgeAddInMapObjSelect().getId());
-                edge.setDestinyId(mapObject.getId());
-                RouteSegmentOperations.getInstance().insert(edge);
+                RouteSegment edge = new RouteSegment(null, appContainer.getEdgeAddInMapObjSelect().getId(), mapObject.getId(), new Date());
+                RouteSegmentOperations.getInstance().save(edge);
+
                 appContainer.setEdgeAddInMapObjSelect(null);
+
                 removeItem(mItemList.size() - 1);
                 update();
                 try {
@@ -247,27 +257,29 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
 
-        if (item != null) {
-            ObjectInspectorDialogFragment.newInstance(mapView, (Long) item.getUid()).show(
+        if (item != null && Long.parseLong("" + item.getUid()) != -1) {
+            MapObject mapObject = MapObjectOperations.getInstance().load((Long) item.getUid());
+
+            ObjectInspectorDialogFragment.newInstance(mapView, mapObject.getId()).show(
                     ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
                     "dialog"
             );
+
+
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+            appContainer.setMapObjectActive(mapObject);
+            appContainer.setMapObjecTypeActive(mapObject.getObjectType());
+            appContainer.setEdgeAddInMapObjSelect(mapObject);
+
+            MarkerItem markerItem = new MarkerItem(-1, "", "", item.getPoint());
+            Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), cu.phibrain.cardinal.app.R.drawable.long_select_mto);
+            mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
+            markerItem.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
+            addItem(markerItem);
+            update();
+            EditManager.INSTANCE.setEditLayer(this);
+            mapView.blockMap();
         }
-
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        MapObject mapObject = mapObjectsList.get(index);
-        appContainer.setMapObjectActive(mapObject);
-        appContainer.setMapObjecTypeActive(mapObject.getObjectType());
-        appContainer.setEdgeAddInMapObjSelect(mapObject);
-
-        MarkerItem markerItem = new MarkerItem(-1, "", "", item.getPoint());
-        Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), cu.phibrain.cardinal.app.R.drawable.long_select_mto);
-        mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
-        markerItem.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
-        addItem(markerItem);
-        update();
-        EditManager.INSTANCE.setEditLayer(this);
-        mapView.blockMap();
         return true;
 
     }
@@ -285,11 +297,11 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
 
     private MarkerSymbol createAdvancedSymbol(MarkerItem item, Bitmap poiBitmap) {
-        int bitmapHeight = 48;//poiBitmap.getHeight();
+        int bitmapHeight = poiBitmap.getHeight();
         int margin = 3;
         int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
 
-        int symbolWidth = 48;//poiBitmap.getWidth();
+        int symbolWidth = poiBitmap.getWidth();
 
         int xSize = symbolWidth;
         int ySize = symbolWidth + dist2symbol;
@@ -357,7 +369,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     @Override
     public boolean isEditable() {
-        return false;
+        return true;
     }
 
     @Override
@@ -382,7 +394,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
-
+        GPDialogs.toast(mapView.getContext(),  "NumPoints: " + geometry.getNumPoints(), 1);
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.greenrobot.greendao.annotation.ToOne;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(
         nameInDb = "CARDINAL_MAP_OBJECT_HAS_DEFECT",
@@ -30,7 +31,7 @@ import java.util.List;
                 @Index(value = "mapObjectId,mapObjectDefectId", unique = true)
         }
 )
-public class MapObjectHasDefect implements Serializable {
+public class MapObjectHasDefect implements Serializable, IEntity {
     @Id(autoincrement = true)
     @SerializedName("id")
     @Expose
@@ -84,6 +85,13 @@ public class MapObjectHasDefect implements Serializable {
 
     @Generated(hash = 1575504526)
     public MapObjectHasDefect() {
+    }
+
+    public MapObjectHasDefect(long mapObjectId, long mapObjectDefectId) {
+        this.id = null;
+        this.mapObjectId = mapObjectId;
+        this.mapObjectDefectId = mapObjectDefectId;
+        this.createdAt = new Date();
     }
 
     public Long getId() {
@@ -265,6 +273,20 @@ public class MapObjectHasDefect implements Serializable {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapObjectHasDefect that = (MapObjectHasDefect) o;
+        return mapObjectId == that.mapObjectId &&
+                mapObjectDefectId == that.mapObjectDefectId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mapObjectId, mapObjectDefectId);
     }
 
     /** called by internal mechanisms, do not call yourself. */

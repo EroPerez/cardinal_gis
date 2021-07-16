@@ -37,7 +37,7 @@ public class LabelSubLotAdapter extends ArrayAdapter<LabelSubLot> {
 
     @Override
     public boolean isEnabled(int position) {
-        return  !getItem(position).getGeolocated();
+        return !getItem(position).getGeolocated();
     }
 
     private View initView(int position, View convertView,
@@ -65,8 +65,13 @@ public class LabelSubLotAdapter extends ArrayAdapter<LabelSubLot> {
         return convertView;
     }
 
-    public int select(String code, Long workSession){
+    public int select(String code, Long workSession) {
         LabelSubLot item = LabelSubLotOperations.getInstance().load(workSession, code);
         return getPosition(item);
+    }
+
+    public void reload(Long sessionId) {
+        clear();
+        addAll(LabelSubLotOperations.getInstance().loadAll(sessionId));
     }
 }

@@ -34,7 +34,7 @@ public class ImageUtil {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
 
-        String header =  String.format("data:image/%s;base64,", ext);
+        String header = String.format("data:image/%s;base64,", ext);
 
         return header + Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
     }
@@ -79,4 +79,11 @@ public class ImageUtil {
         return Bitmap.createScaledBitmap(b, nWidth, nHeight, filter);
     }
 
+    public static byte[] getScaledBitmapAsByteArray(Bitmap b, int reqWidth, int reqHeight, boolean filter) {
+
+        Bitmap scaled = getScaledBitmap(b, reqWidth, reqHeight, filter);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        scaled.compress(Bitmap.CompressFormat.WEBP, 90, stream);
+        return stream.toByteArray();
+    }
 }

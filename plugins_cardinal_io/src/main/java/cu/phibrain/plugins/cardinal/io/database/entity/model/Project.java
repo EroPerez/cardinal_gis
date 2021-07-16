@@ -29,7 +29,7 @@ import java.util.List;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class Project implements Serializable {
+public class Project implements Serializable, IEntity{
 
     @Id(autoincrement = true)
     @SerializedName("id")
