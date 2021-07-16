@@ -372,21 +372,19 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     @Override
     public void deleteFeatures(List<Feature> features) throws Exception {
-
     }
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-
     }
 
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
-
     }
 
     @Override
     public EGeometryType getGeometryType() {
         return EGeometryType.POINT;
     }
+
 }

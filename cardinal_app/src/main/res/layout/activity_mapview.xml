@@ -330,11 +330,11 @@
         android:id="@+id/editingToolsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
+        android:layout_gravity="start|center_vertical"
         android:orientation="vertical"
         android:paddingLeft="@dimen/mapview_sides_space"
         android:paddingBottom="@dimen/mapview_sides_space"
-        android:visibility="invisible" />
+         />
 
     <eu.geopaparazzi.map.features.editing.EditingView
         android:id="@+id/editingview"
