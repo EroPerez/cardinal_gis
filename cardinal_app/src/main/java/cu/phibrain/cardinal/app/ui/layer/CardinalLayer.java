@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
@@ -19,6 +20,8 @@ import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,6 +41,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperation
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
+import eu.geopaparazzi.core.mapview.PanLabelsTool;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
@@ -66,7 +70,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     private IActivitySupporter activitySupporter;
     private static int textSize;
     private static String colorStr;
-
+    EGeometryType geometryMto;
     List<MapObject> mapObjectsList;
 
     public CardinalLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
@@ -74,7 +78,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
         this.mapView = mapView;
         this.ID = ID;
         getName(mapView.getContext());
-
+        geometryMto = EGeometryType.POINT;
         this.activitySupporter = activitySupporter;
         setOnItemGestureListener(this);
         try {
@@ -151,30 +155,37 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     public void reloadData() throws IOException {
         cu.phibrain.plugins.cardinal.io.database.entity.model.Layer cardinalLayer = LayerOperations.getInstance().load(ID);
+        GPMapPosition mapPosition = mapView.getMapPosition();
+        int zoom = mapPosition.getZoomLevel();
 
         mapObjectsList = new ArrayList<>();
         for (MapObjecType mtoMapObjcType : cardinalLayer.getMapobjectypes()) {
             mtoMapObjcType.resetMapObjects();
             List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
-            List<MarkerItem> markerItems = new ArrayList<>();
+            if(zoom <= 18) {
+                List<MarkerItem> markerItems = new ArrayList<>();
 
-            byte[] icon = ImageUtil.getScaledBitmapAsByteArray(
-                    ImageUtilities.getImageFromImageData(
-                            mtoMapObjcType.getIconAsByteArray()
-                    ),
-                    48, 48, false);
+                byte[] icon = ImageUtil.getScaledBitmapAsByteArray(
+                        ImageUtilities.getImageFromImageData(
+                                mtoMapObjcType.getIconAsByteArray()
+                        ),
+                        48, 48, false);
 
-            Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
+                Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
 
-            for (MapObject mapObject : mapObjects) {
-                mapObjectsList.add(mapObject);
-                String text = mapObject.getObjectType().getCaption();
-                markerItems.add(new MarkerItem(mapObject.getId(), mapObject.getCode(), text, centerPoint(mapObject)));
+                for (MapObject mapObject : mapObjects) {
+                    mapObjectsList.add(mapObject);
+                    String text = mapObject.getObjectType().getCaption();
+                    markerItems.add(new MarkerItem(mapObject.getId(), mapObject.getCode(), text, mapObject.getCoord().get(0)));
+                }
+                for (MarkerItem mi : markerItems) {
+                    mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
+                }
+                addItems(markerItems);
             }
-            for (MarkerItem mi : markerItems) {
-                mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
+            else{
+                removeAllItems();
             }
-            addItems(markerItems);
             update();
         }
     }
@@ -253,7 +264,18 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
         return true;
 
     }
-
+    private EGeometryType convertMtoGeometryToEGeometryType(MapObjecType.GeomType type){
+        switch (type) {
+            case POINT:
+                return EGeometryType.POINT;
+            case POLYGON:
+                return EGeometryType.POLYGON;
+            case POLYLINE:
+                return EGeometryType.LINESTRING;
+            default:
+                return EGeometryType.POINT;
+        }
+    }
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
 
@@ -277,12 +299,11 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
             markerItem.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
             addItem(markerItem);
             update();
-            EditManager.INSTANCE.setEditLayer(this);
-            mapView.blockMap();
         }
         return true;
 
     }
+
 
 
     /**
@@ -399,6 +420,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     @Override
     public EGeometryType getGeometryType() {
-        return EGeometryType.POINT;
+        return geometryMto ;
     }
+
 }

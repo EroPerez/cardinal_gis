@@ -53,6 +53,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
@@ -352,9 +354,10 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         for (JSONObject layerDefinition : layerDefinitions) {
             MapLayerItem layerItem = null;
             String layerClass = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
-            String tmp = EdgesLayer.class.getCanonicalName();
-            if(layerClass.equals(EdgesLayer.class.getCanonicalName()))
-                layerItem = getCardinalEdgeItem(index, layerDefinition);
+            if(layerClass.equals(EdgesLayer.class.getCanonicalName())
+                    || layerClass.equals(CardinalLineLayer.class.getCanonicalName())
+                    || layerClass.equals(CardinalPolygonLayer.class.getCanonicalName()))
+                layerItem = getCardinalSimpleItem(index, layerDefinition);
             else
                 layerItem = getCardinalLayerItem(index, layerDefinition);
 
@@ -371,7 +374,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         mBoardView.addColumn(listAdapter, header, header, false);
     }
 
-    private MapLayerItem getCardinalEdgeItem(int index, JSONObject layerDefinition) throws JSONException {
+    private MapLayerItem getCardinalSimpleItem(int index, JSONObject layerDefinition) throws JSONException {
         String name = layerDefinition.getString(IGpLayer.LAYERNAME_TAG);
         String type = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
 
@@ -383,7 +386,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         if (layerDefinition.has(IGpLayer.LAYEREDITING_TAG)) {
             isEditing = layerDefinition.getBoolean(IGpLayer.LAYEREDITING_TAG);
         }
-        CardinalMapEdgeItem layerItem = new CardinalMapEdgeItem();
+        CardinalMapSingleItem layerItem = new CardinalMapSingleItem();
         layerItem.position = index;
         layerItem.enabled = isEnabled;
         layerItem.isEditing = isEditing;

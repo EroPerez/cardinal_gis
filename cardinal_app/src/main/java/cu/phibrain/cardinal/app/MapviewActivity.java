@@ -32,6 +32,7 @@ import android.graphics.BitmapFactory;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -65,7 +66,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
+import org.oscim.layers.Layer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -82,6 +85,8 @@ import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -167,7 +172,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private DecimalFormat formatter = new DecimalFormat("00"); //$NON-NLS-1$
     private CardinalGPMapView mapView;
     private SharedPreferences mPeferences;
-
+    private int currentZoomLevel;
 
     private BroadcastReceiver gpsServiceBroadcastReceiver;
     private double[] lastGpsPosition;
@@ -390,6 +395,15 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     @Override
     public void onUpdate(GPMapPosition mapPosition) {
         setGuiZoomText(mapPosition.getZoomLevel(), (int) mapView.getScaleX());
+        if(mapPosition.getZoomLevel() == 19 || mapPosition.getZoomLevel() == 18 && currentZoomLevel != mapPosition.getZoomLevel()){
+            try {
+                mapView.reloadLayer(CardinalLayer.class);
+                mapView.reloadLayer(EdgesLayer.class);
+                currentZoomLevel = mapPosition.getZoomLevel();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -570,6 +584,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             scalePart = "*" + newScale;
         String text = formatter.format(newZoom) + scalePart;
         zoomLevelText.setText(text);
+
     }
 
     public void setNewCenterAtZoom(double lon, double lat, int zoom) {
@@ -1120,8 +1135,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             appContainer.setMapObjectActive(null);
             appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
-            EdgesLayer edgesLayer = new EdgesLayer(mapView);
-            EditManager.INSTANCE.setEditLayer(edgesLayer);
+            //EdgesLayer edgesLayer = new EdgesLayer(mapView);
+            //EditManager.INSTANCE.setEditLayer(edgesLayer);
             GPDialogs.toast(this, getString(R.string.reset_route), Toast.LENGTH_SHORT);
 
         } else if (i == R.id.frameLayout) {
@@ -1153,26 +1168,72 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             MapObjectOperations.getInstance().save(obj);
 
                             if (appContainer.getMapObjectActive() != null) { // Daniel verificar si el Mapobject no es completo
+                                                                             //No es completo?????
                                 RouteSegment edge = new RouteSegment(null, appContainer.getMapObjectActive().getId(), obj.getId(), new Date());
                                 RouteSegmentOperations.getInstance().save(edge);
                             }
 
                             appContainer.setMapObjectActive(obj);
+
                             mapView.reloadLayer(CardinalLayer.class);
                             mapView.reloadLayer(EdgesLayer.class);
                             //updateSelectMapObj(appContainer.getMapObjecTypeActive());
+
+
 
                         } catch (Exception e) {
                             GPLog.error(this, e.getLocalizedMessage(), e);
                         }
                     }
                 });
+                if(appContainer.getMapObjecTypeActive()!=null && appContainer.getMapObjecTypeActive().getGeomType() != MapObjecType.GeomType.POINT){
+
+                    if(appContainer.getMapObjecTypeActive().getGeomType() == MapObjecType.GeomType.POLYLINE)
+                        EditManager.INSTANCE.setEditLayer(((CardinalLineLayer)mapView.getLayer(CardinalLineLayer.class)));
+                    else if(appContainer.getMapObjecTypeActive().getGeomType() == MapObjecType.GeomType.POLYGON)
+                        EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer)mapView.getLayer(CardinalPolygonLayer.class)));
+
+                    setZoom(19);
+                    editByGeometry(appContainer.getMapObjecTypeActive().getGeomType());
+                }
+
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
+    }
+
+    private void editByGeometry(MapObjecType.GeomType geomType) {
+        ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
+        boolean isEditing = activeToolGroup != null;
+
+        checkLabelButton();
+
+        if (isEditing) {
+            disableEditing();
+            mapView.releaseMapBlock();
+        } else {
+            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+            IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
+            if (editLayer == null) {
+                // if not layer is
+                activeToolGroup = new NoEditableLayerToolGroup(mapView);
+//                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
+//                return;
+            } else if (editLayer.getGeometryType().isPolygon())
+                activeToolGroup = new PolygonMainEditingToolGroup(mapView);
+            else if (editLayer.getGeometryType().isLine())
+                activeToolGroup = new LineMainEditingToolGroup(mapView);
+            else if (editLayer.getGeometryType().isPoint())
+                activeToolGroup = new PointMainEditingToolGroup(mapView);
+            EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
+            setLeftButtoonsEnablement(false);
+
+            mapView.blockMap();
+        }
+
     }
 
     private void onMenuMTO() {
@@ -1328,7 +1389,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     }
 
     private void setAllButtoonsEnablement(boolean enable) {
-//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+//      ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
         ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
         ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
 
@@ -1344,7 +1405,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         if (!enable) {
             visibility = View.GONE;
         }
-//        addnotebytagButton.setVisibility(visibility);
+//      addnotebytagButton.setVisibility(visibility);
         jointobuttonButton.setVisibility(visibility);
         addroutesegmentButton.setVisibility(visibility);
 
@@ -1391,4 +1452,20 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
         }
     }
+
+
+    private EGeometryType convertMtoGeometryToEGeometryType(MapObjecType.GeomType type){
+        switch (type) {
+            case POINT:
+                return EGeometryType.POINT;
+            case POLYGON:
+                return EGeometryType.POLYGON;
+            case POLYLINE:
+                return EGeometryType.LINESTRING;
+            default:
+                return EGeometryType.POINT;
+        }
+    }
 }
+
+

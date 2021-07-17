@@ -82,7 +82,7 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
             holder.sessionWorkerText.setText("Worker: " + worker.getFullName());
             holder.sessionZoneText.setText("Zone: " + workSession.getZoneObj().getName());
 
-            holder.sessionStartDateText.setText("Start Date: " + JodaTimeHelper.formatDate("yyyy-MM-dd", workSession.getStartDate()));
+          //  holder.sessionStartDateText.setText("Start Date: " + JodaTimeHelper.formatDate("yyyy-MM-dd", workSession.getStartDate()));
 
             if (!workSession.getActive())
                 holder.goButton.setVisibility(View.GONE);

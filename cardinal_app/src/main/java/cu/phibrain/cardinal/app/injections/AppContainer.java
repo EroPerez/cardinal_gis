@@ -1,5 +1,6 @@
 package cu.phibrain.cardinal.app.injections;
 
+import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -125,4 +126,6 @@ public class AppContainer {
     public void setEdgeAddInMapObjSelect(MapObject edgeAddInMapObjSelect) {
         this.edgeAddInMapObjSelect = edgeAddInMapObjSelect;
     }
+
+
 }

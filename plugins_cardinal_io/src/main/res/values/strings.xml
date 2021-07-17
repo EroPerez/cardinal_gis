@@ -18,4 +18,6 @@
     <string name="layername_mot">Map object layer</string>
     <string name="not_project_active">You don\'t have an active project.</string>
     <string name="route_reset">Route resetting.</string>
+    <string name="cardinal_line">Cardinal Line</string>
+    <string name="cardinal_polygon">Cardinal Poligon</string>
 </resources>
