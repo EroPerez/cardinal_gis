@@ -399,6 +399,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             try {
                 mapView.reloadLayer(CardinalLayer.class);
                 mapView.reloadLayer(EdgesLayer.class);
+                mapView.reloadLayer(CardinalLineLayer.class);
+                mapView.reloadLayer(CardinalPolygonLayer.class);
                 currentZoomLevel = mapPosition.getZoomLevel();
             } catch (Exception e) {
                 e.printStackTrace();
