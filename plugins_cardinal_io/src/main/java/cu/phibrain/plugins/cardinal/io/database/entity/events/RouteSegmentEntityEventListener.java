@@ -15,7 +15,7 @@ public class RouteSegmentEntityEventListener implements EntityEventListener<Rout
     @Override
     public void onAfterEntityInsert(RouteSegment routeSegment, RouteSegmentOperations entityManager) {
 
-        MapObject origin = routeSegment.getOriginObj();
+        MapObject origin = MapObjectOperations.getInstance().load(routeSegment.getOriginId());
 
         if(origin.getNodeGrade() == origin.getRouteSegments().size()) {
             origin.setIsCompleted(true);

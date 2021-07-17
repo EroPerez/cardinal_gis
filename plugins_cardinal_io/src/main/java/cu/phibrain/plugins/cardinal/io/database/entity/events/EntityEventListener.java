@@ -1,8 +1,9 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.events;
 
+import cu.phibrain.plugins.cardinal.io.database.entity.model.IEntity;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.BaseOperations;
 
-public interface EntityEventListener<Entity, Operation extends BaseOperations> {
+public interface EntityEventListener<Entity extends IEntity, Operation extends BaseOperations> {
     /**
      * Event dispatched before entity it is inserted into database. Take care that entity it not yet
      * in database when this event being dispatch.

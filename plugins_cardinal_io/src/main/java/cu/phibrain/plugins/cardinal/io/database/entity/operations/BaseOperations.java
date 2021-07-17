@@ -196,4 +196,10 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
     public void setDao(Dao dao) {
         this.dao = dao;
     }
+
+    public boolean detach(Entity entity) {
+
+        return getDao().detach(entity);
+
+    }
 }
