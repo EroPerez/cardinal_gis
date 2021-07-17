@@ -12,15 +12,16 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 
-public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
+public class LabelAutoCompleteAdapter extends ArrayAdapter<LabelSubLot> {
 
     Context context;
     int resource, textViewResourceId;
-    List<Stock> items, tempItems, suggestions;
+    List<LabelSubLot> items, tempItems, suggestions;
 
-    public StockAutoCompleteAdapter(Context context, int resource, int textViewResourceId, List<Stock> items) {
+    public LabelAutoCompleteAdapter(Context context, int resource, int textViewResourceId, List<LabelSubLot> items) {
         super(context, resource, textViewResourceId, items);
         this.context = context;
         this.resource = resource;
@@ -37,15 +38,15 @@ public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(resource, parent, false);
         }
-        Stock stock = items.get(position);
-        if (stock != null) {
+        LabelSubLot subLot = items.get(position);
+        if (subLot != null) {
             TextView lblName =  view.findViewById(textViewResourceId);
             if (lblName != null) {
-                lblName.setText(stock.getCode());
+                lblName.setText(subLot.getLabelObj().getCode());
                 if (isEnabled(position)) {
-                    lblName.setTextColor(Color.BLACK);
-                } else {
                     lblName.setTextColor(Color.GRAY);
+                } else {
+                    lblName.setTextColor(Color.BLACK);
                 }
             }
         }
@@ -53,7 +54,7 @@ public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
     }
     @Override
     public boolean isEnabled(int position) {
-        return !getItem(position).getLocated();
+        return !getItem(position).getGeolocated();
     }
 
     @Override
@@ -67,7 +68,7 @@ public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
     Filter nameFilter = new Filter() {
         @Override
         public CharSequence convertResultToString(Object resultValue) {
-            String str = ((Stock) resultValue).getCode();
+            String str = ((LabelSubLot) resultValue).toString();
             return str;
         }
 
@@ -75,9 +76,9 @@ public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
         protected FilterResults performFiltering(CharSequence constraint) {
             if (constraint != null) {
                 suggestions.clear();
-                for (Stock Stock : tempItems) {
-                    if (Stock.getCode().toLowerCase().contains(constraint.toString().toLowerCase())) {
-                        suggestions.add(Stock);
+                for (LabelSubLot subLot : tempItems) {
+                    if (subLot.toString().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                        suggestions.add(subLot);
                     }
                 }
                 FilterResults filterResults = new FilterResults();
@@ -92,11 +93,11 @@ public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            List<Stock> filterList = (ArrayList<Stock>) results.values;
+            List<LabelSubLot> filterList = (ArrayList<LabelSubLot>) results.values;
             if (results != null && results.count > 0) {
                 clear();
-                for (Stock Stock : filterList) {
-                    add(Stock);
+                for (LabelSubLot subLot : filterList) {
+                    add(subLot);
                     notifyDataSetChanged();
                 }
             } else {
@@ -104,4 +105,9 @@ public class StockAutoCompleteAdapter extends ArrayAdapter<Stock> {
             }
         }
     };
+
+    public int select(String code, Long workSession) {
+        LabelSubLot item = LabelSubLotOperations.getInstance().load(workSession, code);
+        return getPosition(item);
+    }
 }

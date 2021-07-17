@@ -79,20 +79,16 @@ import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
+import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -1131,42 +1127,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 final double centerLat = mapPosition.getLatitude();
                 final double centerLon = mapPosition.getLongitude();
 
-                List<GPGeoPoint> poins = new ArrayList<>();
-                poins.add(new GPGeoPoint(centerLat, centerLon));
-
-                MapObject obj = new MapObject();
-                final String proposedName = "0000";//NON-NLS
-
-                String message = "Code de etiqueta papa";
-                GPDialogs.inputMessageDialog(this, message, proposedName, new TextRunnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (theTextToRunOn.length() < 1) {
-                                theTextToRunOn = proposedName;
-                            }
-                            obj.setCode(theTextToRunOn);
-                            obj.setCoord(poins);
-                            obj.setMapObjectTypeId(appContainer.getMapObjecTypeActive().getId());
-                            obj.setNodeGrade(1);
-                            obj.setSessionId(appContainer.getWorkSessionActive().getId());
-                            MapObjectOperations.getInstance().save(obj);
-
-                            if (appContainer.getMapObjectActive() != null) { // Daniel verificar si el Mapobject no es completo
-                                RouteSegment edge = new RouteSegment(null, appContainer.getMapObjectActive().getId(), obj.getId(), new Date());
-                                RouteSegmentOperations.getInstance().save(edge);
-                            }
-
-                            appContainer.setMapObjectActive(obj);
-                            mapView.reloadLayer(CardinalLayer.class);
-                            mapView.reloadLayer(EdgesLayer.class);
-                            //updateSelectMapObj(appContainer.getMapObjecTypeActive());
-
-                        } catch (Exception e) {
-                            GPLog.error(this, e.getLocalizedMessage(), e);
-                        }
-                    }
-                });
+                List<GPGeoPoint> points = new ArrayList<>();
+                points.add(new GPGeoPoint(centerLat, centerLon));
+                BarcodeReaderDialogFragment.newInstance(mapView, points).show(getSupportFragmentManager(), "dialog");
 
             } catch (Exception e) {
                 e.printStackTrace();

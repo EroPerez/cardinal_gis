@@ -687,6 +687,24 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
+    @Override
+    public String toString() {
+        return "MapObject{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", joinId=" + joinId +
+                ", mapObjectTypeId=" + mapObjectTypeId +
+                ", elevation=" + elevation +
+                ", observation='" + observation + '\'' +
+                ", createdAt=" + createdAt +
+                ", nodeGrade=" + nodeGrade +
+                ", stockCodeId=" + stockCodeId +
+                ", sessionId=" + sessionId +
+                ", isCompleted=" + isCompleted +
+                '}';
+    }
+
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 788755102)
     public void __setDaoSession(DaoSession daoSession) {

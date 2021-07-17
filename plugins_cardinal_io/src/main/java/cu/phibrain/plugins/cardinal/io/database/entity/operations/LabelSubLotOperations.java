@@ -58,4 +58,19 @@ public class LabelSubLotOperations extends BaseOperations<LabelSubLot, LabelSubL
         return query.list();
     }
 
+    public List<LabelSubLot> loadAll(long workerSessionId, boolean geolocated) {
+        Query<LabelSubLot> workSession_LabelsQuery = null;
+        synchronized (this) {
+            if (workSession_LabelsQuery == null) {
+                QueryBuilder<LabelSubLot> queryBuilder = queryBuilder();
+                queryBuilder.where(LabelSubLotDao.Properties.WorkerSessionId.eq(null), LabelSubLotDao.Properties.Geolocated.eq(null));
+                workSession_LabelsQuery = queryBuilder.build();
+            }
+        }
+        Query<LabelSubLot> query = workSession_LabelsQuery.forCurrentThread();
+        query.setParameter(0, workerSessionId);
+        query.setParameter(1, geolocated);
+        return query.list();
+    }
+
 }

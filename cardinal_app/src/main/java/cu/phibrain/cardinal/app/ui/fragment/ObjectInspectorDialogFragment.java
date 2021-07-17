@@ -224,8 +224,8 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         EditText edtCodeFake = view.findViewById(R.id.edtCodeFake);
 
         WorkSession session = appContainer.getWorkSessionActive();
-//        WorkSession objectSession = object.getSession();
 
+        // Codigo del nodo
         if (session.getId() != object.getSessionId()) {
             edtCode.setVisibility(View.GONE);
             edtCodeFake.setVisibility(View.VISIBLE);
@@ -251,15 +251,16 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
                     // Get the selected value
                     Spinner spinner = (Spinner) parent;
+                    LabelSubLot data = (LabelSubLot) spinner.getItemAtPosition(position);
                     try {
-                        LabelSubLot data = (LabelSubLot) spinner.getItemAtPosition(position);
                         if (data != null && data.getLabelObj().getCode() != object.getCode()) {
                             object.setCode(data.getLabelObj().getCode());
-                            MapObjectOperations.getInstance().update(object);
+                            MapObjectOperations.getInstance().save(object);
                             //Notify dataSet Changed
                             lotAdapter.reload(session.getId());
                         }
-                    } catch (android.database.SQLException ex) {
+                    } catch (SQLiteConstraintException ex) {
+                        GPDialogs.quickInfo(mapView, String.format(getString(R.string.map_object_duplicate_code_messsage), data.getLabelObj().getCode()));
                         ex.printStackTrace();
                     }
                 }
@@ -271,22 +272,33 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             });
         }
 
-        EditText edtGrade = view.findViewById(R.id.edtGrade);
-        edtGrade.setText(String.valueOf(object.getNodeGrade()));
-        edtGrade.setOnEditorActionListener((v, actionId, event) -> {
-            boolean handled = false;
-            if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
-                Long value = Long.parseLong(String.valueOf(v.getText()));
-                object.setNodeGrade(value);
-                MapObjectOperations.getInstance().update(object);
-                handled = true;
-                //close keyboard
-                edtGrade.clearFocus();
-                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
-            }
-            return handled;
-        });
+        // Grado del nodo
+        Boolean isTopological = object.getLayer().getIsTopology();
+
+        if (!isTopological) {
+            view.findViewById(R.id.tvGrade).setVisibility(View.GONE);
+            view.findViewById(R.id.edtGrade).setVisibility(View.GONE);
+            view.findViewById(R.id.row_node_grade).setVisibility(View.GONE);
+            object.setNodeGrade(0);
+            MapObjectOperations.getInstance().save(object);
+        } else {
+            EditText edtGrade = view.findViewById(R.id.edtGrade);
+            edtGrade.setText(String.valueOf(object.getNodeGrade()));
+            edtGrade.setOnEditorActionListener((v, actionId, event) -> {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
+                    Long value = Long.parseLong(String.valueOf(v.getText()));
+                    object.setNodeGrade(value > 0 ? value : value * -1);
+                    MapObjectOperations.getInstance().save(object);
+                    handled = true;
+                    //close keyboard
+                    edtGrade.clearFocus();
+                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+                }
+                return handled;
+            });
+        }
 
 
 //        Spinner spnInv = view.findViewById(R.id.spnInv);
@@ -319,6 +331,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 //            }
 //        });
 
+        // Nro de inv
         AutoCompleteTextView autoCompleteTextViewInv = view.findViewById(R.id.autoCompleteTextViewInv);
         StockAutoCompleteAdapter stockAdapter = new StockAutoCompleteAdapter(
                 this.getContext(), R.layout.spinner_inv, R.id.tvSpinnerValue,
@@ -335,6 +348,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                 Log.d("MapObjectInv", data.getCode());
                 object.setStockCodeId(data.getId());
                 data.setLocated(true);
+
             }
 
         });
@@ -342,7 +356,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         autoCompleteTextViewInv.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
-                MapObjectOperations.getInstance().update(object);
+                MapObjectOperations.getInstance().save(object);
                 stockAdapter.notifyDataSetChanged();
                 handled = true;
 
@@ -354,13 +368,13 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             return handled;
         });
 
-
+//Type
         EditText edtType = view.findViewById(R.id.edtType);
         edtType.setText(object.getObjectType().getCaption());
-
+//Geometry
         EditText edtGeometry = view.findViewById(R.id.edtGeometry);
         edtGeometry.setText(object.getObjectType().getGeomType().name());
-
+// Observaciones
         EditText edtObservation = view.findViewById(R.id.edtObservation);
         String obsv = object.getObservation();
         if (obsv != null && !obsv.isEmpty())
@@ -380,7 +394,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
                     String value = String.valueOf(v.getText());
                     object.setObservation(value);
-                    MapObjectOperations.getInstance().update(object);
+                    MapObjectOperations.getInstance().save(object);
 
                 } else if (actionId == EditorInfo.IME_ACTION_NEXT) {
                     // Capture soft enters in other singleLine EditTexts
@@ -407,7 +421,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             return true;
         });
 
-        // Delete
+        // Delete node button
         ImageButton deleteObject = view.findViewById(R.id.imgBtnDelete);
         deleteObject.setVisibility(View.VISIBLE);
         if (session.getId() == object.getSessionId()) {

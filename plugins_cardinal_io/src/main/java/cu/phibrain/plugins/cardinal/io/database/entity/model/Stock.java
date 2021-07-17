@@ -89,4 +89,14 @@ public class Stock implements Serializable, IEntity {
     public void setLocated(boolean located) {
         this.located = located;
     }
+
+    @Override
+    public String toString() {
+        return "Stock{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", projectId=" + projectId +
+                ", located=" + located +
+                '}';
+    }
 }
