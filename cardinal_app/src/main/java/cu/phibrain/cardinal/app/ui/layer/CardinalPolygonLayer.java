@@ -88,6 +88,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                 if(layer.getEnabled()){
                     for (MapObjecType mto:layer.getMapobjectypes()) {
                         if(mto.getGeomType() == MapObjecType.GeomType.POLYGON) {
+                            mto.resetMapObjects();
                             for (MapObject mo : mto.getMapObjects()) {
                                 List<GeoPoint> points = new ArrayList<>();
                                 for (GPGeoPoint point :mo.getCoord()) {

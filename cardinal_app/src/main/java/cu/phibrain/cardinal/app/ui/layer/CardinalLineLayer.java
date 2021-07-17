@@ -89,6 +89,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                 if(layer.getEnabled()){
                     for (MapObjecType mto:layer.getMapobjectypes()) {
                         if(mto.getGeomType() == MapObjecType.GeomType.POLYLINE) {
+                            mto.resetMapObjects();
                             for (MapObject mo : mto.getMapObjects()) {
                                 List<GeoPoint> points = new ArrayList<>();
                                 for (GPGeoPoint point :mo.getCoord()) {
