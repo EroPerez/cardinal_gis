@@ -248,6 +248,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
+                                GPLog.addLogEntry(String.format(getString(R.string.max_distance_threshold_broken_message),
+                                        LatLongUtils.MAX_DISTANCE));
 
                                 if (currentSelectedObjectTypeLayer.getIsTopology() &&
                                         previousObj != null &&

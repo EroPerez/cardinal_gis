@@ -25,6 +25,8 @@ public class ApiClient {
 
     private static ApiEndpointInterface API_SERVICE;
 
+    private static  Retrofit retrofit;
+
     public static ApiEndpointInterface getApiService(String baseUrl) {
 
         // Creamos un interceptor y le indicamos el log level a usar
@@ -47,7 +49,7 @@ public class ApiClient {
                 .create();
 
         if (API_SERVICE == null) {
-            Retrofit retrofit = new Retrofit.Builder()
+            retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .client(httpClient.build()) // <-- usamos el log level
@@ -56,6 +58,10 @@ public class ApiClient {
         }
 
         return API_SERVICE;
+    }
+
+    public static Retrofit retrofit(){
+        return retrofit;
     }
 
 }
