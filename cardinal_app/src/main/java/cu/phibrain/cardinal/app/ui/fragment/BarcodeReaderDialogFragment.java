@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -258,6 +259,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     RouteSegmentOperations.getInstance().save(edge);
                                 }
                                 appContainer.setMapObjectActive(currentObj);
+                                //Update ui
+                                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                                intent.putExtra("update_map_object_active", true);
+                                getActivity().sendBroadcast(intent);
 
 
                                 GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
@@ -282,6 +287,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         RouteSegmentOperations.getInstance().save(edge);
                     }
                     appContainer.setMapObjectActive(currentObj);
+                    //Update ui
+                    Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                    intent.putExtra("update_map_object_active", true);
+                    getActivity().sendBroadcast(intent);
 
 
                     GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));

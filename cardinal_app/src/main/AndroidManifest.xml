@@ -5,18 +5,17 @@
 
     <application
         android:name=".CardinalApplication"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/GeopapTheme"
         android:usesCleartextTraffic="true"
-        android:hardwareAccelerated="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
-
 
         <activity
             android:name=".ui.activities.MapObjectDefectImageGalleryActivity"
@@ -86,12 +85,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cu.phibrain.cardinal.app.MapviewActivity" />
         </activity>
-
         <provider
             android:name="eu.geopaparazzi.core.providers.ProfilesContentProvider"
             android:authorities="eu.geopaparazzi.provider.profiles"
             android:enabled="true"
             android:exported="true" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.library.fileprovider"
@@ -101,8 +100,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-    </application> <!-- NORMAL PERMISSIONS -->
+    </application>
+
+    <!-- NORMAL PERMISSIONS -->
     <uses-feature android:name="android.hardware.location.gps" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -114,7 +116,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
