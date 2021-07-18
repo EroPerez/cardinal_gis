@@ -85,6 +85,7 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
@@ -211,6 +212,21 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //register signal event only when battery is low
             if (appContainer.getWorkSessionActive() != null) {
                 SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.STORAGE, appContainer.getWorkSessionActive().getId(), level, new Date(), lastGpsPosition);
+            }
+        }
+
+    };
+
+    //Update MOA
+    public static final String ACTION_UPDATE_UI = "cu.phibrain.cardinal.app.UI_REFRESH";
+    private BroadcastReceiver mMessageUiUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean update_map_object_active = intent.getBooleanExtra("update_map_object_active", false);
+            if (update_map_object_active) {
+                MapObject moa = appContainer.getMapObjectActive();
+                if (moa != null)
+                    updateSelectMapObj(moa.getObjectType());
             }
         }
 
@@ -379,6 +395,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         //Register for storage update
         registerReceiver(storageReceiver, new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
+        registerReceiver(mMessageUiUpdateReceiver, new IntentFilter(MapviewActivity.ACTION_UPDATE_UI));
 
 
     }
@@ -488,6 +505,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         EditManager.INSTANCE.setEditingView(null, null);
         unregisterReceiver(batteryReceiver);
         unregisterReceiver(storageReceiver);
+        unregisterReceiver(mMessageUiUpdateReceiver);
 
         if (mapsSupportBroadcastReceiver != null) {
             unregisterReceiver(mapsSupportBroadcastReceiver);
