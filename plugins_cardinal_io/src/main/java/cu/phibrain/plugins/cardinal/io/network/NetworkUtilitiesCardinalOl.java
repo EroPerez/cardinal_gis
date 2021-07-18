@@ -1,6 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.network;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -27,18 +28,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
-import cu.phibrain.plugins.cardinal.io.exceptions.ServerError;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LoginModel;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
+import cu.phibrain.plugins.cardinal.io.exceptions.ServerError;
+import cu.phibrain.plugins.cardinal.io.network.api.APIError;
 import cu.phibrain.plugins.cardinal.io.network.api.ApiClient;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import cu.phibrain.plugins.cardinal.io.network.api.Envolve;
+import cu.phibrain.plugins.cardinal.io.network.api.ErrorUtils;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.network.NetworkUtilities;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -421,12 +426,62 @@ public class NetworkUtilitiesCardinalOl {
      * @throws Exception if something goes wrong.
      */
     public static AuthToken sendGetAuthToken(String server, String user, String password) throws Exception {
-        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).execute();
-        if (response.isSuccessful()) {
-            return response.body();
-        }
-        throw new ServerError(response.message(), response.code());
+//        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).execute();
+//        if (response.isSuccessful()) {
+//            return response.body();
+//        }
+//        throw new ServerError(response.message(), response.code());
+        final AuthToken[] token = {null};
+        final APIError[] error = {null};
+        final boolean[] processed = {false};
+
+        ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).enqueue(new Callback<AuthToken>() {
+            /**
+             * Invoked for a received HTTP response.
+             *
+             * <p>Note: An HTTP response may still indicate an application-level failure such as a 404 or 500.
+             * Call {@link Response#isSuccessful()} to determine if the response indicates success.
+             *
+             * @param call
+             * @param response
+             */
+            @Override
+            public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
+                if (response.isSuccessful()) {
+                    // use response data and do some fancy stuff :)
+                    token[0] = response.body();
+                } else {
+                    // parse the response body …
+                    error[0] = ErrorUtils.parseError(response);
+
+                    // … or just log the issue like we’re doing :)
+                    Log.d("APIError", error[0].message());
+
+                }
+                processed[0] = true;
+            }
+
+            /**
+             * Invoked when a network exception occurred talking to the server or when an unexpected exception
+             * occurred creating the request or processing the response.
+             *
+             * @param call
+             * @param t
+             */
+            @Override
+            public void onFailure(Call<AuthToken> call, Throwable t) {
+                processed[0] = true;
+            }
+        });
+
+        while (!processed[0]) ;
+
+        if (error[0] != null)
+            throw new ServerError(error[0].message(), error[0].status());
+
+        return token[0];
     }
+
 
     /**
      * Send via HTTP GET a request to obtain project data list
@@ -481,8 +536,8 @@ public class NetworkUtilitiesCardinalOl {
      *
      * @param server the base url to which to send to.
      * @param token  the auth token login credential
-     * @param id     the selected project ID
-     * @return Project   A current remote selected projects to import
+     * @param filters     the filters to apply
+     * @return List<Supplier>    A current remote selected suppliers to import
      * @throws Exception if something goes wrong.
      */
 
@@ -502,8 +557,8 @@ public class NetworkUtilitiesCardinalOl {
      *
      * @param server the base url to which to send to.
      * @param token  the auth token login credential
-     * @param id     the selected project ID
-     * @return Project   A current remote selected projects to import
+     * @param filters     the filters to apply
+     * @return List<LabelMaterial>  A current remote selected LabelMaterials to import
      * @throws Exception if something goes wrong.
      */
 
