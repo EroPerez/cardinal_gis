@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Cardinal</string>
-    <string name="reset_route">Reiniciar ruta</string>
+    <string name="reset_route">Comenzado un nuevo ramal.</string>
     <string name="seleccione_un_objeto_de_mapa">Seleccione un Objeto de Mapa</string>
     <string name="panic">panic button</string>
     <string name="work_session_not_active">Por favor, usted debe activar una sesión de trabajo.</string>
@@ -19,10 +19,17 @@
     <string name="inspector_object_geometry">Geometría</string>
     <string name="inspector_object_observation">Observaciones</string>
     <string name="dashboard_msg_session">Sesiones:  %d</string>
-    <string name="select_one">Seleccione uno</string>
+    <string name="select_one">Seleccione</string>
     <string name="do_you_want_to_delete_this_map_object">¿Esta seguro que desea eliminar este objecto?</string>
     <string name="done">Hecho</string>
     <string name="do_you_want_to_delete_this_image">¿Esta seguro que desea eliminar esta foto?</string>
-    <string name="active_work_session">Activo: </string>
+    <string name="active_work_session">Sesión: %s</string>
     <string name="activity_defect_images_label">Fotos al defecto: %s</string>
+    <string name="map_object_duplicate_code_messsage">El código %s ya fue asignado en esta sesión de trabajo.</string>
+    <string name="scan_map_object_barcode_message">Escanear código de barra del objeto</string>
+    <string name="barcode_notavailable_message">El código %s que escaneó no esta disponible o ya fue asignado en esta session de trabajo.</string>
+    <string name="barcode_scannig_error_message">No se pudo escanear el código de barra. Por favor, verificar que está en formato CODE_128</string>
+    <string name="max_distance_threshold_broken_message">El objeto de mapa anterior está a más de %d m. ¿Has comenzado un nuevo ramal?</string>
+    <string name="map_object_saved_message">Objeto de mapa guardado</string>
+    <string name="distance_tip_message">La distancia que hay desde el lugar donde va a insertar el nuevo punto y el punto anterior definido por usted es de %d m.</string>
 </resources>

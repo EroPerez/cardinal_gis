@@ -80,22 +80,18 @@ import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
+import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -1197,6 +1193,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     editByGeometry(appContainer.getMapObjecTypeActive().getGeomType());
                 }
 
+                List<GPGeoPoint> points = new ArrayList<>();
+                points.add(new GPGeoPoint(centerLat, centerLon));
+                BarcodeReaderDialogFragment.newInstance(mapView, points).show(getSupportFragmentManager(), "dialog");
 
             } catch (Exception e) {
                 e.printStackTrace();

@@ -73,5 +73,6 @@ public class LabelSubLotAdapter extends ArrayAdapter<LabelSubLot> {
     public void reload(Long sessionId) {
         clear();
         addAll(LabelSubLotOperations.getInstance().loadAll(sessionId));
+        notifyDataSetChanged();
     }
 }

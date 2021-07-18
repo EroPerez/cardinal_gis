@@ -159,6 +159,14 @@ public class Label implements Serializable, IEntity{
         myDao.update(this);
     }
 
+    @Override
+    public String toString() {
+        return "Label{" +
+                "code='" + code + '\'' +
+                ", lotId=" + lotObj.getId() +
+                '}';
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 692607636)
     public void __setDaoSession(DaoSession daoSession) {

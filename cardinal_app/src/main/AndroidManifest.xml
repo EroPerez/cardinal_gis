@@ -10,7 +10,14 @@
         android:largeHeap="true"
         android:theme="@style/GeopapTheme"
         android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation" />
+
+
         <activity
             android:name=".ui.activities.MapObjectDefectImageGalleryActivity"
             android:label="@string/activity_defect_images_label"
@@ -109,5 +116,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 
 </manifest>

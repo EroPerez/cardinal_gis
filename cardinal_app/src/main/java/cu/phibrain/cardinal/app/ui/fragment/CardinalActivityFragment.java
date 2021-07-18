@@ -202,7 +202,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         View view = getView();
         try {
             int notesCount = 0;
-            String username = "Select";
+            String username = getResources().getString(R.string.select_one);
 
             if (((CardinalApplication) CardinalApplication.getInstance()).appContainer.getProjectActive() != null) {
                 notesCount = (int) WorkSessionOperations.getInstance().getDao().count();
@@ -226,7 +226,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             notesTextView.setText(notesText);
 
-            workSessionTextView.setText(getResources().getString(R.string.active_work_session) + username);
+            workSessionTextView.setText(String.format(getResources().getString(R.string.active_work_session), username));
 
             String gpsText = String.format(getResources().getString(eu.geopaparazzi.core.R.string.dashboard_msg_gps), logsCount);
             logsTextView.setText(gpsText);

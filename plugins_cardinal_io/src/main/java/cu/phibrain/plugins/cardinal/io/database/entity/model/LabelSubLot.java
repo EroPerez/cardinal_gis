@@ -183,7 +183,7 @@ public class LabelSubLot implements Serializable, IEntity{
 
     @Override
     public String toString() {
-        return labelObj.getCode();
+        return getLabelObj().getCode();
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -192,4 +192,5 @@ public class LabelSubLot implements Serializable, IEntity{
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getLabelSubLotDao() : null;
     }
+
 }
