@@ -29,6 +29,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.map.GPGeoPoint;
@@ -201,7 +202,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
             coords.add(new GPGeoPoint(cord.x,cord.y));
         }
         mo.setCoord(coords);
-        mo.update();
+        MapObjectOperations.getInstance().save(mo);
         this.reloadData();
         EditManager.INSTANCE.setEditLayer(null);
     }

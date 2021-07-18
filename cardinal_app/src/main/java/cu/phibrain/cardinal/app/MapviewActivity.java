@@ -32,7 +32,6 @@ import android.graphics.BitmapFactory;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -68,7 +67,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
-import org.oscim.layers.Layer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -1169,14 +1167,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                             obj.setSessionId(appContainer.getWorkSessionActive().getId());
                             MapObjectOperations.getInstance().save(obj);
 
-                            if (appContainer.getMapObjectActive() != null) { // Daniel verificar si el Mapobject no es completo
-                                                                             //No es completo?????
+                            if (appContainer.getMapObjectActive() != null) {
+                                 // Daniel verificar si el Mapobject no es completo
+                                //  No es completo?????
                                 RouteSegment edge = new RouteSegment(null, appContainer.getMapObjectActive().getId(), obj.getId(), new Date());
                                 RouteSegmentOperations.getInstance().save(edge);
                             }
 
                             appContainer.setMapObjectActive(obj);
-
                             mapView.reloadLayer(CardinalLayer.class);
                             mapView.reloadLayer(EdgesLayer.class);
                             //updateSelectMapObj(appContainer.getMapObjecTypeActive());
@@ -1225,9 +1223,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 //                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
 //                return;
             } else if (editLayer.getGeometryType().isPolygon())
-                activeToolGroup = new PolygonMainEditingToolGroup(mapView);
+                activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView);
             else if (editLayer.getGeometryType().isLine())
-                activeToolGroup = new LineMainEditingToolGroup(mapView);
+                activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView);
             else if (editLayer.getGeometryType().isPoint())
                 activeToolGroup = new PointMainEditingToolGroup(mapView);
             EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);

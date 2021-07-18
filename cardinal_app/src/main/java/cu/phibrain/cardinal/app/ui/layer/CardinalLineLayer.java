@@ -30,6 +30,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
@@ -202,7 +203,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
             coords.add(new GPGeoPoint(cord.x,cord.y));
         }
         mo.setCoord(coords);
-        mo.update();
+        MapObjectOperations.getInstance().save(mo);
         this.reloadData();
         EditManager.INSTANCE.setEditLayer(null);
     }
