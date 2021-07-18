@@ -107,7 +107,7 @@ public class AppContainer {
         return mapObjectActive;
     }
 
-    public void setMapObjectActive(MapObject mapObjectActive) {
+    public void setCurrentMapObject(MapObject mapObjectActive) {
         this.mapObjectActive = mapObjectActive;
     }
 
@@ -123,7 +123,7 @@ public class AppContainer {
         return edgeAddInMapObjSelect;
     }
 
-    public void setEdgeAddInMapObjSelect(MapObject edgeAddInMapObjSelect) {
+    public void setPreviousMapObject(MapObject edgeAddInMapObjSelect) {
         this.edgeAddInMapObjSelect = edgeAddInMapObjSelect;
     }
 

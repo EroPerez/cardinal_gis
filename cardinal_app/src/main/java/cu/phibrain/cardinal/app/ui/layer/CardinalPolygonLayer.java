@@ -23,7 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -32,6 +35,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperation
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
+import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
@@ -49,13 +53,15 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
     private GPMapView mapView;
     private Style lineStyle = null;
     private eu.geopaparazzi.library.style.Style gpStyle;
-    public CardinalPolygonLayer(GPMapView mapView) {
+    private IActivitySupporter activitySupporter;
+
+    public CardinalPolygonLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
 
         peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
         this.mapView = mapView;
         getName(mapView.getContext());
-
+        this.activitySupporter = activitySupporter;
         try {
             reloadData();
         } catch (IOException e) {
@@ -76,7 +82,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if(zoom > 18) {
+        if(zoom > LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
@@ -195,16 +201,12 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        MapObject mo = appContainer.getMapObjectActive();
-        List<GPGeoPoint> coords = new ArrayList<>();
-        for (Coordinate cord:geometry.getCoordinates()) {
-            coords.add(new GPGeoPoint(cord.x,cord.y));
-        }
-        mo.setCoord(coords);
-        MapObjectOperations.getInstance().save(mo);
-        this.reloadData();
-        EditManager.INSTANCE.setEditLayer(null);
+        BarcodeReaderDialogFragment.newInstance(
+                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
+        ).show(
+                ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
+                "dialog"
+        );
     }
 
     @Override

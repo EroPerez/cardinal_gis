@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.oscim.layers.Layer;
 
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
@@ -21,6 +22,22 @@ public class CardinalGPMapView extends GPMapView {
         }
         return null;
     }
+    public void reloadLayer(MapObjecType objecType) throws Exception {
+
+        switch (objecType.getGeomType())
+        {
+            case POLYLINE:
+                reloadLayer(CardinalLineLayer.class);
+                break;
+            case POLYGON:
+                reloadLayer(CardinalPolygonLayer.class);
+                break;
+            default:
+                reloadLayer(CardinalPointLayer.class);
+                break;
+        }
+    }
+
 //    public void reloadLayer(Class<? extends IGpLayer> layerClass, Long id) throws Exception {
 //        for (Layer layer : map().layers()) {
 //            if (layer.getClass().isAssignableFrom(layerClass) && ((CardinalLayer) layer).getID().equals(id)) {

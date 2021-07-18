@@ -25,7 +25,7 @@ import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -243,7 +243,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     LatLongUtils.MAX_DISTANCE),
                             () -> activity.runOnUiThread(() -> {
                                 // yes
-                                appContainer.setMapObjectActive(null);
+                                appContainer.setCurrentMapObject(null);
                                 dismiss();
 
                             }), () -> activity.runOnUiThread(() -> {
@@ -255,13 +255,13 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                                     RouteSegmentOperations.getInstance().save(edge);
                                 }
-                                appContainer.setMapObjectActive(currentObj);
+                                appContainer.setCurrentMapObject(currentObj);
 
 
                                 GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
 
                                 try {
-                                    mapView.reloadLayer(CardinalLayer.class);
+                                    ((CardinalGPMapView)mapView).reloadLayer(currentSelectedObjectType);
                                     mapView.reloadLayer(EdgesLayer.class);
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -279,12 +279,12 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                         RouteSegmentOperations.getInstance().save(edge);
                     }
-                    appContainer.setMapObjectActive(currentObj);
+                    appContainer.setCurrentMapObject(currentObj);
 
 
                     GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
 
-                    mapView.reloadLayer(CardinalLayer.class);
+                    ((CardinalGPMapView)mapView).reloadLayer(currentSelectedObjectType);
                     mapView.reloadLayer(EdgesLayer.class);
 
 

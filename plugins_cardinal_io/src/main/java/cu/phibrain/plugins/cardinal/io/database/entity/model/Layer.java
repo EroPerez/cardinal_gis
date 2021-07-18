@@ -220,7 +220,7 @@ public class Layer implements Serializable, IEntity {
     }
 
     public Integer getViewZoomLevel() {
-        return this.viewZoomLevel;
+        return this.viewZoomLevel==0 ? 17 : this.viewZoomLevel;
     }
 
     public void setViewZoomLevel(Integer viewZoomLevel) {
@@ -228,7 +228,8 @@ public class Layer implements Serializable, IEntity {
     }
 
     public Integer getEditZoomLevel() {
-        return this.editZoomLevel;
+
+        return this.editZoomLevel==0 ? 5 : this.editZoomLevel;
     }
 
     public void setEditZoomLevel(Integer editZoomLevel) {

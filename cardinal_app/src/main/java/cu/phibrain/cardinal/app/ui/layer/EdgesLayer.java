@@ -21,13 +21,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cu.phibrain.cardinal.app.CardinalApplication;
-import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
-import eu.geopaparazzi.library.util.GPDialogs;
+import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
@@ -42,9 +41,10 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
     private GPMapView mapView;
     private Style lineStyle = null;
     private eu.geopaparazzi.library.style.Style gpStyle;
-    public EdgesLayer(GPMapView mapView) {
+    private  IActivitySupporter activitySupporter;
+    public EdgesLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
-
+        activitySupporter = activitySupporter;
         peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
         this.mapView = mapView;
         getName(mapView.getContext());
@@ -69,11 +69,11 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if(zoom <= 18) {
+        if(zoom <= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
-                        .strokeColor(Color.BLACK)
-                        .strokeWidth(1.5f)
+                        .strokeColor(Color.YELLOW)
+                        .strokeWidth(2f)
                         .cap(Paint.Cap.ROUND)
                         .build();
             }

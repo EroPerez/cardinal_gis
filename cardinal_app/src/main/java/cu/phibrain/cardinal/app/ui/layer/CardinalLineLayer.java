@@ -1,4 +1,5 @@
 package cu.phibrain.cardinal.app.ui.layer;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -23,7 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -34,6 +38,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOpera
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
+import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
@@ -50,11 +55,14 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
     private GPMapView mapView;
     private Style lineStyle = null;
     private eu.geopaparazzi.library.style.Style gpStyle;
-    public CardinalLineLayer(GPMapView mapView) {
+    private IActivitySupporter activitySupporter;
+
+    public CardinalLineLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
 
         peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
         this.mapView = mapView;
+        this.activitySupporter = activitySupporter;
         getName(mapView.getContext());
 
         try {
@@ -77,7 +85,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if(zoom > 18 ) {
+        if (zoom > LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
@@ -86,17 +94,17 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                         .build();
             }
             List<Layer> layers = LayerOperations.getInstance().getAll();
-            for (Layer layer:layers) {
-                if(layer.getEnabled()){
-                    for (MapObjecType mto:layer.getMapobjectypes()) {
-                        if(mto.getGeomType() == MapObjecType.GeomType.POLYLINE) {
+            for (Layer layer : layers) {
+                if (layer.getEnabled()) {
+                    for (MapObjecType mto : layer.getMapobjectypes()) {
+                        if (mto.getGeomType() == MapObjecType.GeomType.POLYLINE) {
                             mto.resetMapObjects();
                             for (MapObject mo : mto.getMapObjects()) {
                                 List<GeoPoint> points = new ArrayList<>();
-                                for (GPGeoPoint point :mo.getCoord()) {
-                                    points.add(((GeoPoint)point));
+                                for (GPGeoPoint point : mo.getCoord()) {
+                                    points.add(((GeoPoint) point));
                                 }
-                                if(points.size()>1) {
+                                if (points.size() > 1) {
                                     GPLineDrawable drawable = new GPLineDrawable(points, lineStyle, mo.getId());
                                     add(drawable);
                                 }
@@ -106,7 +114,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                 }
             }
         }
-       update();
+        update();
     }
 
     public void disable() {
@@ -163,11 +171,11 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
 
-        if (g instanceof Gesture.Tap){
-            if(tmpDrawables.size()>0) {
-                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size()-1);
+        if (g instanceof Gesture.Tap) {
+            if (tmpDrawables.size() > 0) {
+                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
 
-              //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
+                //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
                 tmpDrawables.clear();
             }
         }
@@ -196,18 +204,13 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        MapObject mo = appContainer.getMapObjectActive();
-        List<GPGeoPoint> coords = new ArrayList<>();
-        for (Coordinate cord:geometry.getCoordinates()) {
-            coords.add(new GPGeoPoint(cord.x,cord.y));
-        }
-        mo.setCoord(coords);
-        MapObjectOperations.getInstance().save(mo);
-        this.reloadData();
-        EditManager.INSTANCE.setEditLayer(null);
+        BarcodeReaderDialogFragment.newInstance(
+                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
+        ).show(
+            ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
+                        "dialog"
+         );
     }
-
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
 

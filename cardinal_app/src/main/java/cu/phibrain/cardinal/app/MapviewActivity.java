@@ -65,7 +65,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -80,8 +79,8 @@ import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
-import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
@@ -107,6 +106,7 @@ import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.gps.GpsLoggingStatus;
 import eu.geopaparazzi.library.gps.GpsServiceStatus;
 import eu.geopaparazzi.library.gps.GpsServiceUtilities;
+import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.network.NetworkUtilities;
 import eu.geopaparazzi.library.share.ShareUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
@@ -389,9 +389,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     @Override
     public void onUpdate(GPMapPosition mapPosition) {
         setGuiZoomText(mapPosition.getZoomLevel(), (int) mapView.getScaleX());
-        if(mapPosition.getZoomLevel() == 19 || mapPosition.getZoomLevel() == 18 && currentZoomLevel != mapPosition.getZoomLevel()){
+        if (mapPosition.getZoomLevel() == 19 || mapPosition.getZoomLevel() == 18 && currentZoomLevel != mapPosition.getZoomLevel()) {
             try {
-                mapView.reloadLayer(CardinalLayer.class);
+                mapView.reloadLayer(CardinalPointLayer.class);
                 mapView.reloadLayer(EdgesLayer.class);
                 mapView.reloadLayer(CardinalLineLayer.class);
                 mapView.reloadLayer(CardinalPolygonLayer.class);
@@ -1128,7 +1128,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
             //Evento del Mot Selcecionado
-            appContainer.setMapObjectActive(null);
+            appContainer.setCurrentMapObject(null);
             appContainer.setMapObjecTypeActive(null);
             selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
             //EdgesLayer edgesLayer = new EdgesLayer(mapView);
@@ -1145,57 +1145,19 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 List<GPGeoPoint> poins = new ArrayList<>();
                 poins.add(new GPGeoPoint(centerLat, centerLon));
 
-                MapObject obj = new MapObject();
-                final String proposedName = "0000";//NON-NLS
-
-                String message = "Code de etiqueta papa";
-                GPDialogs.inputMessageDialog(this, message, proposedName, new TextRunnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (theTextToRunOn.length() < 1) {
-                                theTextToRunOn = proposedName;
-                            }
-                            obj.setCode(theTextToRunOn);
-                            obj.setCoord(poins);
-                            obj.setMapObjectTypeId(appContainer.getMapObjecTypeActive().getId());
-                            obj.setNodeGrade(1);
-                            obj.setSessionId(appContainer.getWorkSessionActive().getId());
-                            MapObjectOperations.getInstance().save(obj);
-
-                            if (appContainer.getMapObjectActive() != null) {
-                                 // Daniel verificar si el Mapobject no es completo
-                                //  No es completo?????
-                                RouteSegment edge = new RouteSegment(null, appContainer.getMapObjectActive().getId(), obj.getId(), new Date());
-                                RouteSegmentOperations.getInstance().save(edge);
-                            }
-
-                            appContainer.setMapObjectActive(obj);
-                            mapView.reloadLayer(CardinalLayer.class);
-                            mapView.reloadLayer(EdgesLayer.class);
-                            //updateSelectMapObj(appContainer.getMapObjecTypeActive());
+//                if(appContainer.getMapObjecTypeActive()!=null && appContainer.getMapObjecTypeActive().getGeomType() != MapObjecType.GeomType.POINT){
+//
+//                    if(appContainer.getMapObjecTypeActive().getGeomType() == MapObjecType.GeomType.POLYLINE)
+//                        EditManager.INSTANCE.setEditLayer(((CardinalLineLayer)mapView.getLayer(CardinalLineLayer.class)));
+//                    else if(appContainer.getMapObjecTypeActive().getGeomType() == MapObjecType.GeomType.POLYGON)
+//                        EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer)mapView.getLayer(CardinalPolygonLayer.class)));
+//
+//                    setZoom(19);
+//                    editByGeometry(appContainer.getMapObjecTypeActive().getGeomType());
+//                }
 
 
-
-                        } catch (Exception e) {
-                            GPLog.error(this, e.getLocalizedMessage(), e);
-                        }
-                    }
-                });
-                if(appContainer.getMapObjecTypeActive()!=null && appContainer.getMapObjecTypeActive().getGeomType() != MapObjecType.GeomType.POINT){
-
-                    if(appContainer.getMapObjecTypeActive().getGeomType() == MapObjecType.GeomType.POLYLINE)
-                        EditManager.INSTANCE.setEditLayer(((CardinalLineLayer)mapView.getLayer(CardinalLineLayer.class)));
-                    else if(appContainer.getMapObjecTypeActive().getGeomType() == MapObjecType.GeomType.POLYGON)
-                        EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer)mapView.getLayer(CardinalPolygonLayer.class)));
-
-                    setZoom(19);
-                    editByGeometry(appContainer.getMapObjecTypeActive().getGeomType());
-                }
-
-                List<GPGeoPoint> points = new ArrayList<>();
-                points.add(new GPGeoPoint(centerLat, centerLon));
-                BarcodeReaderDialogFragment.newInstance(mapView, points).show(getSupportFragmentManager(), "dialog");
+                // BarcodeReaderDialogFragment.newInstance(mapView, points).show(getSupportFragmentManager(), "dialog");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1204,16 +1166,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
     }
 
-    private void editByGeometry(MapObjecType.GeomType geomType) {
+    private void  editByGeometry() {
         ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
-        boolean isEditing = activeToolGroup != null;
 
-        checkLabelButton();
-
-        if (isEditing) {
-            disableEditing();
-            mapView.releaseMapBlock();
-        } else {
             toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
             IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
             if (editLayer == null) {
@@ -1231,9 +1186,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             setLeftButtoonsEnablement(false);
 
             mapView.blockMap();
-        }
-
     }
+
+
 
     private void onMenuMTO() {
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
@@ -1440,31 +1395,45 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
     @Override
     public void selectedMto(MapObjecType _mtoModel) {
+        ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
+        boolean isEditing = activeToolGroup != null;
+
+        checkLabelButton();
+
+        if (isEditing) {
+            disableEditing();
+            mapView.releaseMapBlock();
+        }
+
         descriptorMto.setText(_mtoModel.getCaption());
         appContainer.setMapObjecTypeActive(_mtoModel);
         if (appContainer.getMapObjecTypeActive() != null) {
             byte[] icon = _mtoModel.getIconAsByteArray();
             if (icon != null) {
-                Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-                selectMto.setImageBitmap(ImageUtil.getScaledBitmap(bmp, 30,
-                        30, false));
+                selectMto.setImageBitmap(
+                        ImageUtil.getScaledBitmap(ImageUtilities.getImageFromImageData(icon),
+                                30,
+                                30, false));
             }
+            MapObjecType currentMOT = appContainer.getMapObjecTypeActive();
+            switch (currentMOT.getGeomType())
+            {
+                case POLYLINE:
+                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
+                    break;
+                case POLYGON:
+                    EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
+                    break;
+                default:
+                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class)));
+                    break;
+            }
+
+            setZoom(currentMOT.getLayerObj().getEditZoomLevel());
+            editByGeometry();
         }
     }
 
-
-    private EGeometryType convertMtoGeometryToEGeometryType(MapObjecType.GeomType type){
-        switch (type) {
-            case POINT:
-                return EGeometryType.POINT;
-            case POLYGON:
-                return EGeometryType.POLYGON;
-            case POLYLINE:
-                return EGeometryType.LINESTRING;
-            default:
-                return EGeometryType.POINT;
-        }
-    }
 }
 
 

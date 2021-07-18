@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
@@ -20,8 +19,6 @@ import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,7 +28,9 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
 import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -41,23 +40,20 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperation
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
-import eu.geopaparazzi.core.mapview.PanLabelsTool;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.util.Compat;
-import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
-import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
-public class CardinalLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, IEditableLayer, ICardinalLayer {
+public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, IEditableLayer, ICardinalLayer {
     private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
     private static final int BG_COLOR = 0x80FF69B4; // 50 percent pink. AARRGGBB
     private static final int TRANSP_WHITE = 0x80FFFFFF; // 50 percent white. AARRGGBB
@@ -73,7 +69,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     EGeometryType geometryMto;
     List<MapObject> mapObjectsList;
 
-    public CardinalLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
+    public CardinalPointLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
         super(mapView.map(), getMarkerSymbol(mapView, ID));
         this.mapView = mapView;
         this.ID = ID;
@@ -112,7 +108,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
     }
 
 
-    public CardinalLayer(Map map, MarkerSymbol defaultMarker) {
+    public CardinalPointLayer(Map map, MarkerSymbol defaultMarker) {
         super(map, defaultMarker);
     }
 
@@ -140,15 +136,11 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 //
 //    }
     private GPGeoPoint centerPoint(MapObject mapObject) {
-        switch (mapObject.getObjectType().getGeomType()) {
-//            case POINT:
-//                return mapObject.getCoord().get(0);
-            case POLYGON:
-                return mapObject.getCoord().get(2);
-            case POLYLINE:
-                return mapObject.getCoord().get(1);
-            default:
-                return mapObject.getCoord().get(0);
+        if(mapObject.getCoord().size() > 1){
+         return LatLongUtils.labelPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+        }
+        else{
+           return mapObject.getCoord().get(0);
         }
 
     }
@@ -162,7 +154,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
         for (MapObjecType mtoMapObjcType : cardinalLayer.getMapobjectypes()) {
             mtoMapObjcType.resetMapObjects();
             List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
-            if(zoom <= 18) {
+           if(zoom >= cardinalLayer.getViewZoomLevel()) {
                 List<MarkerItem> markerItems = new ArrayList<>();
 
                 byte[] icon = ImageUtil.getScaledBitmapAsByteArray(
@@ -176,16 +168,16 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
                 for (MapObject mapObject : mapObjects) {
                     mapObjectsList.add(mapObject);
                     String text = mapObject.getObjectType().getCaption();
-                    markerItems.add(new MarkerItem(mapObject.getId(), mapObject.getCode(), text, mapObject.getCoord().get(0)));
+                    markerItems.add(new MarkerItem(mapObject.getId(), mapObject.getCode(), text, centerPoint(mapObject)));
                 }
                 for (MarkerItem mi : markerItems) {
                     mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
                 }
                 addItems(markerItems);
             }
-            else{
-                removeAllItems();
-            }
+//            else{
+//                removeAllItems();
+//            }
             update();
         }
     }
@@ -206,7 +198,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
             Toast.makeText(this.activitySupporter.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
             MapObject mapObject = MapObjectOperations.getInstance().load((Long) item.getUid());
-            appContainer.setMapObjectActive(mapObject);
+            appContainer.setCurrentMapObject(mapObject);
             appContainer.setMapObjecTypeActive(mapObject.getObjectType());
 
             if (appContainer.getEdgeAddInMapObjSelect() == null) {
@@ -218,7 +210,7 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
                 RouteSegment edge = new RouteSegment(null, appContainer.getEdgeAddInMapObjSelect().getId(), mapObject.getId(), new Date());
                 RouteSegmentOperations.getInstance().save(edge);
 
-                appContainer.setEdgeAddInMapObjSelect(null);
+                appContainer.setPreviousMapObject(null);
 
                 removeItem(mItemList.size() - 1);
                 update();
@@ -232,50 +224,11 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
         }
 
-//        if (item != null) {
-//            String description = item.getSnippet();
-//            if (description.startsWith(NONFORMSTART)) {
-//                GPDialogs.infoDialog(mapView.getContext(), description.substring(1), null);
-//            } else {
-//                try {
-//                    long uid = (long) item.getUid();
-//                    ANote note = DefaultHelperClasses.getDefaulfNotesHelper().getNoteById(uid);
-//
-//                    GeoPoint point = item.getPoint();
-//                    double lat = point.getLatitude();
-//                    double lon = point.getLongitude();
-//                    Intent formIntent = new Intent(mapView.getContext(), FormActivity.class);
-//                    FormInfoHolder formInfoHolder = new FormInfoHolder();
-//                    formInfoHolder.sectionName = item.title;
-//                    formInfoHolder.formName = null;
-//                    formInfoHolder.noteId = note.getId();
-//                    formInfoHolder.longitude = lon;
-//                    formInfoHolder.latitude = lat;
-//                    formInfoHolder.sectionObjectString = item.getSnippet();
-//                    formInfoHolder.objectExists = true;
-//                    formIntent.putExtra(FormInfoHolder.BUNDLE_KEY_INFOHOLDER, formInfoHolder);
-//
-//                    activitySupporter.startActivityForResult(formIntent, FORMUPDATE_RETURN_CODE);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
+
         return true;
 
     }
-    private EGeometryType convertMtoGeometryToEGeometryType(MapObjecType.GeomType type){
-        switch (type) {
-            case POINT:
-                return EGeometryType.POINT;
-            case POLYGON:
-                return EGeometryType.POLYGON;
-            case POLYLINE:
-                return EGeometryType.LINESTRING;
-            default:
-                return EGeometryType.POINT;
-        }
-    }
+
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
 
@@ -289,9 +242,9 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
 
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-            appContainer.setMapObjectActive(mapObject);
+            appContainer.setCurrentMapObject(mapObject);
             appContainer.setMapObjecTypeActive(mapObject.getObjectType());
-            appContainer.setEdgeAddInMapObjSelect(mapObject);
+
 
             MarkerItem markerItem = new MarkerItem(-1, "", "", item.getPoint());
             Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), cu.phibrain.cardinal.app.R.drawable.long_select_mto);
@@ -410,12 +363,17 @@ public class CardinalLayer extends ItemizedLayer<MarkerItem> implements Itemized
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-
+        BarcodeReaderDialogFragment.newInstance(
+                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
+        ).show(
+                ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
+                "dialog"
+        );
     }
 
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
-        GPDialogs.toast(mapView.getContext(),  "NumPoints: " + geometry.getNumPoints(), 1);
+
     }
 
     @Override

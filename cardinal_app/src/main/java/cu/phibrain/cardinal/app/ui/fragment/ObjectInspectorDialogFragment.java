@@ -48,7 +48,7 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
@@ -144,7 +144,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         MapObject objectSelected = MapObjectOperations.getInstance().load(objectId);
 
         appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        appContainer.setMapObjectActive(objectSelected);
+        appContainer.setCurrentMapObject(objectSelected);
 
 
         try {
@@ -180,7 +180,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     public void dismiss() {
 
         try {
-            mapView.reloadLayer(CardinalLayer.class);
+            mapView.reloadLayer(CardinalPointLayer.class);
             mapView.reloadLayer(EdgesLayer.class);
         } catch (Exception e) {
             e.printStackTrace();
