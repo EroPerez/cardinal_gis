@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -248,6 +249,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
+                                GPLog.addLogEntry(String.format(getString(R.string.max_distance_threshold_broken_message),
+                                        LatLongUtils.MAX_DISTANCE));
 
                                 if (currentSelectedObjectTypeLayer.getIsTopology() &&
                                         previousObj != null &&
@@ -256,6 +259,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     RouteSegmentOperations.getInstance().save(edge);
                                 }
                                 appContainer.setCurrentMapObject(currentObj);
+                                //Update ui
+                                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                                intent.putExtra("update_map_object_active", true);
+                                getActivity().sendBroadcast(intent);
 
 
                                 GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
@@ -280,6 +287,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         RouteSegmentOperations.getInstance().save(edge);
                     }
                     appContainer.setCurrentMapObject(currentObj);
+                    //Update ui
+                    Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                    intent.putExtra("update_map_object_active", true);
+                    getActivity().sendBroadcast(intent);
 
 
                     GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));

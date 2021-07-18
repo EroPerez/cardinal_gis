@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.SpacesItemDecoration;
@@ -145,6 +146,11 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
         appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
         appContainer.setCurrentMapObject(objectSelected);
+
+        //Update ui
+        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+        intent.putExtra("update_map_object_active", true);
+        getActivity().sendBroadcast(intent);
 
 
         try {
