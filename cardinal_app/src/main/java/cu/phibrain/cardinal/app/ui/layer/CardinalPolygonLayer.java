@@ -82,7 +82,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if(zoom > LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if(zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)

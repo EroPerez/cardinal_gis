@@ -1444,13 +1444,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             Layer editLayer = _mtoModel.getLayerObj();
             switch (_mtoModel.getGeomType()) {
                 case POLYLINE:
-                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class, editLayer.getId())));
+                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
                     break;
                 case POLYGON:
                     EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
                     break;
                 default:
-                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class)));
+                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, editLayer.getId())));
                     break;
             }
 
