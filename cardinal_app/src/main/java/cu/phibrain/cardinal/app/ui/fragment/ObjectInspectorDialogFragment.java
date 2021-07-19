@@ -49,7 +49,7 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
@@ -145,11 +145,13 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         MapObject objectSelected = MapObjectOperations.getInstance().load(objectId);
 
         appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        appContainer.setMapObjectActive(objectSelected);
+        appContainer.setCurrentMapObject(objectSelected);
+        appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
 
         //Update ui
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
         intent.putExtra("update_map_object_active", true);
+        intent.putExtra("update_map_object_type_active", true);
         getActivity().sendBroadcast(intent);
 
 
@@ -186,7 +188,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     public void dismiss() {
 
         try {
-            mapView.reloadLayer(CardinalLayer.class);
+            mapView.reloadLayer(CardinalPointLayer.class);
             mapView.reloadLayer(EdgesLayer.class);
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,7 +206,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         switch (requestCode) {
             case (RETURNCODE_FOR_TAKE_PICTURE):
                 if (resultCode == Activity.RESULT_OK) {
-                    MapObject object = appContainer.getMapObjectActive();
+                    MapObject object = appContainer.getCurrentMapObject();
                     List<MapObjectImages> images = MapObjectImagesOperations.getInstance().loadAll(object.getId());
                     imagesAdapter.setMapObjectImages(images);
                     Log.d("TAKE_PICTURE size:", " " + images.size());

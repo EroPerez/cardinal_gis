@@ -1,5 +1,6 @@
 package cu.phibrain.cardinal.app.injections;
 
+import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -99,14 +100,14 @@ public class AppContainer {
         this.networksActive = networksActive;
     }
 
-    public MapObject getMapObjectActive() {
+    public MapObject getCurrentMapObject() {
         if (mapObjectActive != null)
             mapObjectActive = MapObjectOperations.getInstance().load(mapObjectActive.getId());
 
         return mapObjectActive;
     }
 
-    public void setMapObjectActive(MapObject mapObjectActive) {
+    public void setCurrentMapObject(MapObject mapObjectActive) {
         this.mapObjectActive = mapObjectActive;
     }
 
@@ -118,11 +119,13 @@ public class AppContainer {
         this.levelActive = levelActive;
     }
 
-    public MapObject getEdgeAddInMapObjSelect() {
+    public MapObject getPreviousMapObject() {
         return edgeAddInMapObjSelect;
     }
 
-    public void setEdgeAddInMapObjSelect(MapObject edgeAddInMapObjSelect) {
+    public void setPreviousMapObject(MapObject edgeAddInMapObjSelect) {
         this.edgeAddInMapObjSelect = edgeAddInMapObjSelect;
     }
+
+
 }

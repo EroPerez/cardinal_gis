@@ -26,7 +26,6 @@ import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
-import cu.phibrain.cardinal.app.ui.layer.CardinalLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -41,6 +40,8 @@ import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapView;
+import eu.geopaparazzi.map.features.editing.EditManager;
+import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -54,16 +55,13 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     // TODO: Customize parameter argument names
 
 
+    LabelAutoCompleteAdapter labelAutoCompleteAdapter;
     private BottomSheetBehavior mBehavior;
-
     private AppContainer appContainer;
-
     //View Objects
     private ImageButton buttonScan;
     private ImageButton buttonSave;
     private AutoCompleteTextView autoCompleteTextViewCode;
-    LabelAutoCompleteAdapter labelAutoCompleteAdapter;
-
     //qr code scanner object
     private IntentIntegrator code128BarcodeScan;
 
@@ -219,7 +217,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             FragmentActivity activity = getActivity();
             try {
                 MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
-                MapObject previousObj = appContainer.getMapObjectActive();
+                MapObject previousObj = appContainer.getCurrentMapObject();
                 Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
                 MapObject currentObj = new MapObject();
@@ -244,8 +242,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     LatLongUtils.MAX_DISTANCE),
                             () -> activity.runOnUiThread(() -> {
                                 // yes
-                                appContainer.setMapObjectActive(null);
-                                dismiss();
+                                appContainer.setCurrentMapObject(null);
+                                // dismiss();
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
@@ -258,23 +256,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                                     RouteSegmentOperations.getInstance().save(edge);
                                 }
-                                appContainer.setMapObjectActive(currentObj);
-                                //Update ui
-                                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-                                intent.putExtra("update_map_object_active", true);
-                                getActivity().sendBroadcast(intent);
-
-
-                                GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
-
-                                try {
-                                    mapView.reloadLayer(CardinalLayer.class);
-                                    mapView.reloadLayer(EdgesLayer.class);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                                dismiss();
+                                appContainer.setCurrentMapObject(currentObj);
 
                             })
                     );
@@ -286,23 +268,30 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                         RouteSegmentOperations.getInstance().save(edge);
                     }
-                    appContainer.setMapObjectActive(currentObj);
-                    //Update ui
-                    Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-                    intent.putExtra("update_map_object_active", true);
-                    getActivity().sendBroadcast(intent);
+                    appContainer.setCurrentMapObject(currentObj);
 
-
-                    GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
-
-                    mapView.reloadLayer(CardinalLayer.class);
-                    mapView.reloadLayer(EdgesLayer.class);
-
-
-                    dismiss();
                 }
+
+                //Update ui
+                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                intent.putExtra("update_map_object_active", true);
+                getActivity().sendBroadcast(intent);
+
+
+                GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
+
+                try {
+                    ((IGpLayer)EditManager.INSTANCE.getEditLayer()).reloadData();
+//                  ((CardinalGPMapView)mapView).reloadLayer(currentSelectedObjectType);
+                    mapView.reloadLayer(EdgesLayer.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                dismiss();
             } catch (Exception e) {
                 GPLog.error(this, e.getLocalizedMessage(), e);
+                e.printStackTrace();
             }
 
         }

@@ -426,60 +426,60 @@ public class NetworkUtilitiesCardinalOl {
      * @throws Exception if something goes wrong.
      */
     public static AuthToken sendGetAuthToken(String server, String user, String password) throws Exception {
-//        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).execute();
-//        if (response.isSuccessful()) {
-//            return response.body();
-//        }
-//        throw new ServerError(response.message(), response.code());
-        final AuthToken[] token = {null};
-        final APIError[] error = {null};
-        final boolean[] processed = {false};
-
-        ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).enqueue(new Callback<AuthToken>() {
-            /**
-             * Invoked for a received HTTP response.
-             *
-             * <p>Note: An HTTP response may still indicate an application-level failure such as a 404 or 500.
-             * Call {@link Response#isSuccessful()} to determine if the response indicates success.
-             *
-             * @param call
-             * @param response
-             */
-            @Override
-            public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
-                if (response.isSuccessful()) {
-                    // use response data and do some fancy stuff :)
-                    token[0] = response.body();
-                } else {
-                    // parse the response body …
-                    error[0] = ErrorUtils.parseError(response);
-
-                    // … or just log the issue like we’re doing :)
-                    Log.d("APIError", error[0].message());
-
-                }
-                processed[0] = true;
-            }
-
-            /**
-             * Invoked when a network exception occurred talking to the server or when an unexpected exception
-             * occurred creating the request or processing the response.
-             *
-             * @param call
-             * @param t
-             */
-            @Override
-            public void onFailure(Call<AuthToken> call, Throwable t) {
-                processed[0] = true;
-            }
-        });
-
-        while (!processed[0]) ;
-
-        if (error[0] != null)
-            throw new ServerError(error[0].message(), error[0].status());
-
-        return token[0];
+        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).execute();
+        if (response.isSuccessful()) {
+            return response.body();
+        }
+        throw new ServerError(response.message(), response.code());
+//        final AuthToken[] token = {null};
+//        final APIError[] error = {null};
+//        final boolean[] processed = {false};
+//
+//        ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).enqueue(new Callback<AuthToken>() {
+//            /**
+//             * Invoked for a received HTTP response.
+//             *
+//             * <p>Note: An HTTP response may still indicate an application-level failure such as a 404 or 500.
+//             * Call {@link Response#isSuccessful()} to determine if the response indicates success.
+//             *
+//             * @param call
+//             * @param response
+//             */
+//            @Override
+//            public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
+//                if (response.isSuccessful()) {
+//                    // use response data and do some fancy stuff :)
+//                    token[0] = response.body();
+//                } else {
+//                    // parse the response body …
+//                    error[0] = ErrorUtils.parseError(response);
+//
+//                    // … or just log the issue like we’re doing :)
+//                    Log.d("APIError", error[0].message());
+//
+//                }
+//                processed[0] = true;
+//            }
+//
+//            /**
+//             * Invoked when a network exception occurred talking to the server or when an unexpected exception
+//             * occurred creating the request or processing the response.
+//             *
+//             * @param call
+//             * @param t
+//             */
+//            @Override
+//            public void onFailure(Call<AuthToken> call, Throwable t) {
+//                processed[0] = true;
+//            }
+//        });
+//
+//        while (!processed[0]) ;
+//
+//        if (error[0] != null)
+//            throw new ServerError(error[0].message(), error[0].status());
+//
+//        return token[0];
     }
 
 

@@ -53,6 +53,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             }
             permissionHelper.requestPermission(this);
         }
+
         // PERMISSIONS STOP
 
         setContentView(eu.geopaparazzi.core.R.layout.activity_geopaparazzi);

@@ -98,7 +98,6 @@ public class LabelAutoCompleteAdapter extends ArrayAdapter<LabelSubLot> {
                 clear();
                 for (LabelSubLot subLot : filterList) {
                     add(subLot);
-                    notifyDataSetChanged();
                 }
             } else {
                 notifyDataSetInvalidated();

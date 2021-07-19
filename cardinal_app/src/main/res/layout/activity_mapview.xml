@@ -184,13 +184,13 @@
                 android:background="@null"
                 app:srcCompat="@drawable/ic_link_object_24dp" />
 
-<!--            <ImageButton-->
-<!--                android:id="@+id/addnotebytagbutton"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_margin="@dimen/mapview_sides_space"-->
-<!--                android:background="@null"-->
-<!--                app:srcCompat="@drawable/ic_mapview_notes_24dp" />-->
+            <!--            <ImageButton-->
+            <!--                android:id="@+id/addnotebytagbutton"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_margin="@dimen/mapview_sides_space"-->
+            <!--                android:background="@null"-->
+            <!--                app:srcCompat="@drawable/ic_mapview_notes_24dp" />-->
 
             <ImageButton
                 android:id="@+id/addbookmarkbutton"
