@@ -66,6 +66,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
+import org.oscim.map.Layers;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -74,18 +75,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
-import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
-import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
@@ -155,29 +157,40 @@ import static eu.geopaparazzi.library.util.LibraryConstants.ZOOMLEVEL;
  * @author Andrea Antonello (www.hydrologis.com)
  */
 public class MapviewActivity extends AppCompatActivity implements MtoAdapter.SelectedMto, IActivitySupporter, OnTouchListener, OnClickListener, OnLongClickListener, InsertCoordinatesDialogFragment.IInsertCoordinateListener, GPMapView.GPMapUpdateListener {
+    public static final String MAPSCALE_X = "MAPSCALE_X"; //$NON-NLS-1$
+    public static final String MAPSCALE_Y = "MAPSCALE_Y"; //$NON-NLS-1$
+    //Update MOA
+    public static final String ACTION_UPDATE_UI = "cu.phibrain.cardinal.app.UI_REFRESH";
+    private static final String ARE_BUTTONSVISIBLE_OPEN = "ARE_BUTTONSVISIBLE_OPEN"; //$NON-NLS-1$
     private final int INSERTCOORD_RETURN_CODE = 666;
     private final int ZOOM_RETURN_CODE = 667;
     private final int MENU_GO_TO = 1;
     private final int MENU_COMPASS_ID = 2;
     private final int MENU_SHAREPOSITION_ID = 3;
-
-    private static final String ARE_BUTTONSVISIBLE_OPEN = "ARE_BUTTONSVISIBLE_OPEN"; //$NON-NLS-1$
-    public static final String MAPSCALE_X = "MAPSCALE_X"; //$NON-NLS-1$
-    public static final String MAPSCALE_Y = "MAPSCALE_Y"; //$NON-NLS-1$
     private DecimalFormat formatter = new DecimalFormat("00"); //$NON-NLS-1$
     private CardinalGPMapView mapView;
     private SharedPreferences mPeferences;
     private int currentZoomLevel;
-
     private BroadcastReceiver gpsServiceBroadcastReceiver;
     private double[] lastGpsPosition;
-
     private TextView zoomLevelText;
     private TextView descriptorMto;
     private ImageButton buttom_sheet_background;
     private ImageView selectMto;
     private ImageView selectMo;
     private FrameLayout fragmentCenter;
+    private ImageButton centerOnGps;
+    private ImageButton batteryButton;
+    private BroadcastReceiver mapsSupportBroadcastReceiver;
+    private TextView coordView;
+    private String latString;
+    private String lonString;
+    private TextView batteryText;
+    private Spinner filterNetworks;
+    private ImageButton toggleEditingButton;
+    private ImageButton toggleLabelsButton;
+    private boolean hasLabelledLayers;
+    private AppContainer appContainer;
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -194,19 +207,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
 
     };
-
-    private ImageButton centerOnGps;
-    private ImageButton batteryButton;
-    private BroadcastReceiver mapsSupportBroadcastReceiver;
-    private TextView coordView;
-    private String latString;
-    private String lonString;
-    private TextView batteryText;
-    private Spinner filterNetworks;
-    private ImageButton toggleEditingButton;
-    private ImageButton toggleLabelsButton;
-    private boolean hasLabelledLayers;
-    private AppContainer appContainer;
     private BroadcastReceiver storageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -219,17 +219,17 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
 
     };
-
-    //Update MOA
-    public static final String ACTION_UPDATE_UI = "cu.phibrain.cardinal.app.UI_REFRESH";
     private BroadcastReceiver mMessageUiUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             boolean update_map_object_active = intent.getBooleanExtra("update_map_object_active", false);
             if (update_map_object_active) {
-                MapObject moa = appContainer.getMapObjectActive();
-                if (moa != null)
+                MapObject moa = appContainer.getCurrentMapObject();
+                if (moa != null) {
                     updateSelectMapObj(moa.getObjectType());
+                    GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+                    setNewCenter(point.getLongitude(), point.getLatitude());
+                }
             }
         }
 
@@ -406,16 +406,17 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     @Override
     public void onUpdate(GPMapPosition mapPosition) {
         setGuiZoomText(mapPosition.getZoomLevel(), (int) mapView.getScaleX());
-        if (mapPosition.getZoomLevel() == 19 || mapPosition.getZoomLevel() == 18 && currentZoomLevel != mapPosition.getZoomLevel()) {
-            try {
-                mapView.reloadLayer(CardinalPointLayer.class);
-                mapView.reloadLayer(EdgesLayer.class);
-                mapView.reloadLayer(CardinalLineLayer.class);
-                mapView.reloadLayer(CardinalPolygonLayer.class);
-                currentZoomLevel = mapPosition.getZoomLevel();
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (currentZoomLevel != mapPosition.getZoomLevel()) {
+            currentZoomLevel = mapPosition.getZoomLevel();
+            Layers layers = mapView.map().layers();
+            for (org.oscim.layers.Layer layer : layers) {
+                try {
+                    ((IGpLayer) layer).reloadData();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+
         }
     }
 
@@ -479,7 +480,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
         checkLabelButton();
 
-        disableEditing();
+        //disableEditing();
 
         super.onResume();
     }
@@ -1148,7 +1149,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //Evento del Mot Selcecionado
             appContainer.setCurrentMapObject(null);
             appContainer.setMapObjecTypeActive(null);
-            selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
+            //selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
+            disableEditing();
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("update_map_object_active", true);
+            sendBroadcast(intent);
+
             //EdgesLayer edgesLayer = new EdgesLayer(mapView);
             //EditManager.INSTANCE.setEditLayer(edgesLayer);
             GPDialogs.toast(this, getString(R.string.reset_route), Toast.LENGTH_SHORT);
@@ -1156,12 +1163,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         } else if (i == R.id.frameLayout) {
             //Test
             try {
-                GPMapPosition mapPosition = mapView.getMapPosition();
-                final double centerLat = mapPosition.getLatitude();
-                final double centerLon = mapPosition.getLongitude();
-
-                List<GPGeoPoint> poins = new ArrayList<>();
-                poins.add(new GPGeoPoint(centerLat, centerLon));
+//                GPMapPosition mapPosition = mapView.getMapPosition();
+//                final double centerLat = mapPosition.getLatitude();
+//                final double centerLon = mapPosition.getLongitude();
+//
+//                List<GPGeoPoint> poins = new ArrayList<>();
+//                poins.add(new GPGeoPoint(centerLat, centerLon));
 
 //                if(appContainer.getMapObjecTypeActive()!=null && appContainer.getMapObjecTypeActive().getGeomType() != MapObjecType.GeomType.POINT){
 //
@@ -1184,28 +1191,28 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
     }
 
-    private void  editByGeometry() {
+    private void editByGeometry() {
         ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
 
-            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
-            IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
-            if (editLayer == null) {
-                // if not layer is
-                activeToolGroup = new NoEditableLayerToolGroup(mapView);
+        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+        IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
+        if (editLayer == null) {
+            // if not layer is
+            activeToolGroup = new NoEditableLayerToolGroup(mapView);
 //                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
 //                return;
-            } else if (editLayer.getGeometryType().isPolygon())
-                activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView);
-            else if (editLayer.getGeometryType().isLine())
-                activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView);
-            else if (editLayer.getGeometryType().isPoint())
-                activeToolGroup = new PointMainEditingToolGroup(mapView);
-            EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
-            setLeftButtoonsEnablement(false);
+        } else if (editLayer.getGeometryType().isPolygon())
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView);
+        else if (editLayer.getGeometryType().isLine())
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView);
+        else if (editLayer.getGeometryType().isPoint())
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPointMainEditingToolGroup(mapView);
 
-            mapView.blockMap();
+        EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
+        setLeftButtoonsEnablement(false);
+
+        mapView.blockMap();
     }
-
 
 
     private void onMenuMTO() {
@@ -1240,18 +1247,18 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
             List<MapObjecType> mtoList;
 
-            if (appContainer.getMapObjectActive() == null) {
+            if (appContainer.getCurrentMapObject() == null) {
                 //Muestro todos por capas
                 mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
             } else {
                 //Muestro solo los aptos segun reglas topologicas
-                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getMapObjectActive().getObjectType(), null);
+                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getCurrentMapObject().getObjectType(), null);
             }
 
             MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
             recyclerView.setAdapter(mtoAdapter);
             bottomSheetDialog.setContentView(bottomSheetView);
-            if (appContainer.getMapObjectActive() == null) {
+            if (appContainer.getCurrentMapObject() == null) {
                 filterNetworks.setVisibility(View.VISIBLE);
                 filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -1389,7 +1396,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         zoomInButton.setVisibility(visibility);
         zoomLevelTextview.setVisibility(visibility);
         zoomOutButton.setVisibility(visibility);
-        toggleEditingButton.setVisibility(visibility);
+        toggleEditingButton.setVisibility(View.GONE);
     }
 
 
@@ -1433,11 +1440,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                                 30,
                                 30, false));
             }
-            MapObjecType currentMOT = appContainer.getMapObjecTypeActive();
-            switch (currentMOT.getGeomType())
-            {
+//            MapObjecType currentMOT = appContainer.getMapObjecTypeActive();
+            Layer editLayer = _mtoModel.getLayerObj();
+            switch (_mtoModel.getGeomType()) {
                 case POLYLINE:
-                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
+                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class, editLayer.getId())));
                     break;
                 case POLYGON:
                     EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
@@ -1447,7 +1454,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     break;
             }
 
-            setZoom(currentMOT.getLayerObj().getEditZoomLevel());
+            setZoom(editLayer.getEditZoomLevel());
             editByGeometry();
         }
     }

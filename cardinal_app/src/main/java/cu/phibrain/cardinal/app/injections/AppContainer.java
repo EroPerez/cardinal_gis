@@ -100,7 +100,7 @@ public class AppContainer {
         this.networksActive = networksActive;
     }
 
-    public MapObject getMapObjectActive() {
+    public MapObject getCurrentMapObject() {
         if (mapObjectActive != null)
             mapObjectActive = MapObjectOperations.getInstance().load(mapObjectActive.getId());
 
@@ -119,7 +119,7 @@ public class AppContainer {
         this.levelActive = levelActive;
     }
 
-    public MapObject getEdgeAddInMapObjSelect() {
+    public MapObject getPreviousMapObject() {
         return edgeAddInMapObjSelect;
     }
 

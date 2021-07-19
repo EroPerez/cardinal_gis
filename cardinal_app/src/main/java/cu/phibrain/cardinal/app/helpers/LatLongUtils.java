@@ -22,7 +22,8 @@ import eu.geopaparazzi.map.GPGeoPoint;
 
 public class LatLongUtils {
     public static final double MAX_DISTANCE = 50.0f;
-    public static final double  LINE_AND_POLYGON_VIEW_ZOOM = 15;
+    public static final double LINE_AND_POLYGON_VIEW_ZOOM = 15;
+
     public static double distance(MapObject mo1, MapObject mo2) {
         try {
             GPGeoPoint p1 = mo1.getCoord().get(mo1.getCoord().size() - 1);
@@ -47,36 +48,35 @@ public class LatLongUtils {
                 String.format(context.getString(R.string.distance_tip_message), distance),
                 Toast.LENGTH_LONG);
     }
-
-    public static List<GPGeoPoint> toGpGeoPoints(Geometry geometry){
+    /**
+     *   For coordinates captured using a GPS, or by any means, longitude is the X value
+     *   and latitude is the Y value. These are for a geographic coordinate system and have
+     *   units of degrees.
+     * */
+    public static List<GPGeoPoint> toGpGeoPoints(Geometry geometry) {
         List<GPGeoPoint> coords = new ArrayList<>();
-        for (Coordinate cord:geometry.getCoordinates()) {
-            coords.add(new GPGeoPoint(cord.x,cord.y));
+        for (Coordinate cord : geometry.getCoordinates()) {
+            coords.add(new GPGeoPoint(cord.y, cord.x));
         }
         return coords;
     }
 
-    public static  List<Coordinate> toCoordinates (List<GPGeoPoint> toGpGeoPoints){
-        List<Coordinate> coords = new ArrayList<>();
-        for (GPGeoPoint cord:toGpGeoPoints) {
-            coords.add(new Coordinate(cord.getLatitude(),cord.getLongitude()));
-        }
-        return coords;
-    }
 
-    public static  GPGeoPoint labelPoint(List<GPGeoPoint> points, MapObjecType.GeomType geomType){
+    public static GPGeoPoint labelPoint(List<GPGeoPoint> points, MapObjecType.GeomType geomType) {
         GeomBuilder builder = new GeomBuilder();
         for (GeoPoint point : points) {
             builder.point(point.getLongitude(),
                     point.getLatitude());
         }
         Point centroid = null;
-        if(geomType == MapObjecType.GeomType.POLYGON){
+        if (geomType == MapObjecType.GeomType.POLYGON) {
             centroid = builder.toPolygon().getCentroid();
-        }else if(geomType == MapObjecType.GeomType.POLYLINE){
+        } else if (geomType == MapObjecType.GeomType.POLYLINE) {
             centroid = builder.toLineString().getCentroid();
+        } else if (geomType == MapObjecType.GeomType.POINT) {
+            centroid = builder.toPoint().getCentroid();
         }
-        return centroid==null ? null: new GPGeoPoint(centroid.getX(), centroid.getY());
+        return centroid == null ? null : new GPGeoPoint(centroid.getY(), centroid.getX());
 
     }
 }

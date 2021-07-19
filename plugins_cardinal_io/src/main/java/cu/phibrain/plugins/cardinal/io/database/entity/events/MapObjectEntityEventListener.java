@@ -53,7 +53,7 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
             for (MapObjectTypeAttribute attr :
                     mapObjectObjectType.getAttributes()) {
 
-                String value = attr.getDefaultValue();
+                String value = ""+attr.getDefaultValue();
                 if (value.isEmpty()) value = " ";
 
                 MapObjectMetadataOperations.getInstance().insert(new MapObjectMetadata(mapObject.getId(), value, attr.getId()));
