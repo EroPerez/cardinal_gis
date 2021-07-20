@@ -85,7 +85,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if (zoom > LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if (zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
