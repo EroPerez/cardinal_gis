@@ -267,21 +267,21 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         centerOnGps.setOnClickListener(this);
         centerOnGps.setOnLongClickListener(this);
 
-//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-//        addnotebytagButton.setOnClickListener(this);
-//        addnotebytagButton.setOnLongClickListener(this);
-//
-//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-//        addBookmarkButton.setOnClickListener(this);
-//        addBookmarkButton.setOnLongClickListener(this);
-//
-//        final ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
-//        toggleMeasuremodeButton.setOnClickListener(this);
-//        toggleMeasuremodeButton.setOnLongClickListener(this);
-//
-//        final ImageButton toggleLogInfoButton = findViewById(R.id.toggleloginfobutton);
-//        toggleLogInfoButton.setOnClickListener(this);
-//        toggleLogInfoButton.setOnLongClickListener(this);
+        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+        addnotebytagButton.setOnClickListener(this);
+        addnotebytagButton.setOnLongClickListener(this);
+
+        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
+        addBookmarkButton.setOnClickListener(this);
+        addBookmarkButton.setOnLongClickListener(this);
+
+        final ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+        toggleMeasuremodeButton.setOnClickListener(this);
+        toggleMeasuremodeButton.setOnLongClickListener(this);
+
+        final ImageButton toggleLogInfoButton = findViewById(R.id.toggleloginfobutton);
+        toggleLogInfoButton.setOnClickListener(this);
+        toggleLogInfoButton.setOnLongClickListener(this);
 
         toggleEditingButton = findViewById(R.id.toggleEditingButton);
         toggleEditingButton.setOnClickListener(this);
@@ -1070,28 +1070,28 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
     }
 
     private void setLeftButtoonsEnablement(boolean enable) {
-//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-//        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
-//        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
+        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
+        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
         if (enable) {
-//            addnotebytagButton.setVisibility(View.VISIBLE);
-//            addBookmarkButton.setVisibility(View.VISIBLE);
-//            toggleLoginfoButton.setVisibility(View.VISIBLE);
-//            toggleMeasuremodeButton.setVisibility(View.VISIBLE);
+            addnotebytagButton.setVisibility(View.VISIBLE);
+            addBookmarkButton.setVisibility(View.VISIBLE);
+            toggleLoginfoButton.setVisibility(View.VISIBLE);
+            toggleMeasuremodeButton.setVisibility(View.VISIBLE);
         } else {
-//            addnotebytagButton.setVisibility(View.GONE);
-//            addBookmarkButton.setVisibility(View.GONE);
-//            toggleLoginfoButton.setVisibility(View.GONE);
-//            toggleMeasuremodeButton.setVisibility(View.GONE);
+            addnotebytagButton.setVisibility(View.GONE);
+            addBookmarkButton.setVisibility(View.GONE);
+            toggleLoginfoButton.setVisibility(View.GONE);
+            toggleMeasuremodeButton.setVisibility(View.GONE);
         }
     }
 
     private void setAllButtoonsEnablement(boolean enable) {
-//        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-//        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
-//        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
-//        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
+        ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
+        ImageButton addBookmarkButton = findViewById(R.id.addbookmarkbutton);
+        ImageButton toggleLoginfoButton = findViewById(R.id.toggleloginfobutton);
+        ImageButton toggleMeasuremodeButton = findViewById(R.id.togglemeasuremodebutton);
         ImageButton zoomInButton = findViewById(R.id.zoomin);
         TextView zoomLevelTextview = findViewById(R.id.zoomlevel);
         ImageButton zoomOutButton = findViewById(R.id.zoomout);
@@ -1101,10 +1101,10 @@ public class MapviewActivity extends AppCompatActivity implements IActivitySuppo
         if (!enable) {
             visibility = View.GONE;
         }
-//        addnotebytagButton.setVisibility(visibility);
-//        addBookmarkButton.setVisibility(visibility);
-//        toggleLoginfoButton.setVisibility(visibility);
-//        toggleMeasuremodeButton.setVisibility(visibility);
+        addnotebytagButton.setVisibility(visibility);
+        addBookmarkButton.setVisibility(visibility);
+        toggleLoginfoButton.setVisibility(visibility);
+        toggleMeasuremodeButton.setVisibility(visibility);
         batteryButton.setVisibility(visibility);
         centerOnGps.setVisibility(visibility);
         zoomInButton.setVisibility(visibility);

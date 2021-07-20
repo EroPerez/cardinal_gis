@@ -79,6 +79,7 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
@@ -228,7 +229,17 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 if (moa != null) {
                     updateSelectMapObj(moa.getObjectType());
                     GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
-                    setNewCenter(point.getLongitude(), point.getLatitude());
+                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+                }
+            }
+
+
+            boolean update_map_object_type_active = intent.getBooleanExtra("update_map_object_type_active", false);
+
+            if (update_map_object_type_active) {
+                MapObjecType mot = appContainer.getMapObjecTypeActive();
+                if (mot != null) {
+                    selectedMto(mot);
                 }
             }
         }
@@ -411,7 +422,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             Layers layers = mapView.map().layers();
             for (org.oscim.layers.Layer layer : layers) {
                 try {
-                    ((IGpLayer) layer).reloadData();
+                    if (layer.getClass().isAssignableFrom(IGpLayer.class)) {
+                        ((IGpLayer) layer).reloadData();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1194,7 +1207,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private void editByGeometry() {
         ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
 
-        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+//        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
         IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
         if (editLayer == null) {
             // if not layer is
@@ -1425,7 +1438,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         checkLabelButton();
 
-        if (isEditing) {
+        if (isEditing && appContainer.getMode() == UserMode.NONE) {
             disableEditing();
             mapView.releaseMapBlock();
         }
@@ -1444,13 +1457,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             Layer editLayer = _mtoModel.getLayerObj();
             switch (_mtoModel.getGeomType()) {
                 case POLYLINE:
-                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class, editLayer.getId())));
+                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
                     break;
                 case POLYGON:
                     EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
                     break;
                 default:
-                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class)));
+                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, editLayer.getId())));
                     break;
             }
 

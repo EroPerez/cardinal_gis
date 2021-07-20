@@ -41,6 +41,7 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.SpacesItemDecoration;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelSubLotAdapter;
@@ -49,7 +50,6 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
-import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
@@ -69,6 +69,8 @@ import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.map.GPMapView;
+import eu.geopaparazzi.map.features.editing.EditManager;
+import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -145,6 +147,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         MapObject objectSelected = MapObjectOperations.getInstance().load(objectId);
 
         appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        appContainer.setMode(UserMode.OBJECT_EDITION);
         appContainer.setCurrentMapObject(objectSelected);
         appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
 
@@ -188,11 +191,15 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     public void dismiss() {
 
         try {
-            mapView.reloadLayer(CardinalPointLayer.class);
+//            mapView.reloadLayer(CardinalPointLayer.class);
+
+            ((IGpLayer)EditManager.INSTANCE.getEditLayer()).reloadData();
             mapView.reloadLayer(EdgesLayer.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+//        appContainer.setMode(UserMode.NONE);
 
         super.dismiss();
 

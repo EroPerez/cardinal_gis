@@ -31,6 +31,7 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
 import cu.phibrain.plugins.cardinal.io.R;
@@ -45,6 +46,7 @@ import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.util.Compat;
+import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.map.GPGeoPoint;
@@ -134,7 +136,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 //
 //    }
     private GPGeoPoint centerPoint(MapObject mapObject) {
-            return LatLongUtils.labelPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+        return LatLongUtils.labelPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
     }
 
     @Override
@@ -235,18 +237,11 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     public boolean onItemLongPress(int index, MarkerItem item) {
 
         if (item != null && Long.parseLong("" + item.getUid()) != -1) {
-            MapObject mapObject = MapObjectOperations.getInstance().load((Long) item.getUid());
 
-            ObjectInspectorDialogFragment.newInstance(mapView, mapObject.getId()).show(
+            ObjectInspectorDialogFragment.newInstance(mapView, (Long) item.getUid()).show(
                     ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
                     "dialog"
             );
-
-
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-//            appContainer.setCurrentMapObject(mapObject);
-            appContainer.setMapObjecTypeActive(mapObject.getObjectType());
-
 
             MarkerItem markerItem = new MarkerItem(-1, "", "", item.getPoint());
             Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), cu.phibrain.cardinal.app.R.drawable.long_select_mto);
@@ -364,12 +359,27 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        BarcodeReaderDialogFragment.newInstance(
-                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
-        ).show(
-                ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
-                "dialog"
-        );
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+
+        if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
+            MapObject currentMO = appContainer.getCurrentMapObject();
+            currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
+            currentMO.update();
+            GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
+            appContainer.setMode(UserMode.NONE);
+            //Reload layers associated
+            reloadData();
+            mapView.reloadLayer(EdgesLayer.class);
+
+        } else {
+            appContainer.setMode(UserMode.OBJECT_ADDITION);
+            BarcodeReaderDialogFragment.newInstance(
+                    this.mapView, LatLongUtils.toGpGeoPoints(geometry)
+            ).show(
+                    ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
+                    "dialog"
+            );
+        }
     }
 
     @Override
