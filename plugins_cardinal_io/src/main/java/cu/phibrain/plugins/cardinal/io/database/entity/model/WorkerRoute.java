@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Transient;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -29,30 +30,47 @@ public class WorkerRoute implements Serializable, IEntity {
 
     @SerializedName("worker_session")
     @Expose
-    public Long workerSessionId;
+    private Long workerSessionId;
 
     @SerializedName("latitude")
     @Expose
-    public Double latitude;
+    @Transient
+    private Double latitude;
 
     @SerializedName("longitude")
     @Expose
-    public Double longitude;
+    @Transient
+    private Double longitude;
+
+    @SerializedName("altitude")
+    @Expose
+    @Transient
+    private Double altitude;
 
     @SerializedName("created_at")
     @Expose
-    public Date createdAt;
+    @Transient
+    private Date createdAt;
+
+    private Long gpsLogsTableId;
 
     private final static long serialVersionUID = 3887642485388034854L;
 
-    @Generated(hash = 248333154)
-    public WorkerRoute(Long id, Long workerSessionId, Double latitude, Double longitude,
-                       Date createdAt) {
+    public WorkerRoute(Long id, Long workerSessionId,  Double latitude, Double longitude, Double altitude, Date createdAt) {
         this.id = id;
         this.workerSessionId = workerSessionId;
-        this.latitude = latitude;
+        this.altitude = altitude;
         this.longitude = longitude;
+        this.latitude = latitude;
         this.createdAt = createdAt;
+    }
+
+
+    @Generated(hash = 1759396744)
+    public WorkerRoute(Long id, Long workerSessionId, Long gpsLogsTableId) {
+        this.id = id;
+        this.workerSessionId = workerSessionId;
+        this.gpsLogsTableId = gpsLogsTableId;
     }
 
     @Generated(hash = 369035617)
@@ -97,6 +115,22 @@ public class WorkerRoute implements Serializable, IEntity {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Double getAltitude() {
+        return this.altitude;
+    }
+
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
+    }
+
+    public Long getGpsLogsTableId() {
+        return this.gpsLogsTableId;
+    }
+
+    public void setGpsLogsTableId(Long gpsLogsTableId) {
+        this.gpsLogsTableId = gpsLogsTableId;
     }
 
 

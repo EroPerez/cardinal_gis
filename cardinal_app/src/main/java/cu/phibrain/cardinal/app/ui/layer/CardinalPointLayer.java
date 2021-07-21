@@ -30,11 +30,11 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
-import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -151,15 +151,14 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         int zoom = mapPosition.getZoomLevel();
 
 //        mapObjectsList = new ArrayList<>();
-//        Log.d("CardinalPointLayer", "Item Lis zize: " + getItemList().size());
+//        Log.d("CardinalPointLayer", "Item List zize: " + getItemList().size());
         List<MarkerItem> markerItems = new ArrayList<>();
         removeAllItems();
-        if (zoom >= cardinalLayer.getViewZoomLevel()) {
+        if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
+
+//            Log.d("CardinalPointLayer", "getViewZoomLevel: " + cardinalLayer.getViewZoomLevel());
 
             for (MapObjecType mtoMapObjcType : cardinalLayer.getMapobjectypes()) {
-                mtoMapObjcType.resetMapObjects();
-                List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
-
                 byte[] icon = ImageUtil.getScaledBitmapAsByteArray(
                         ImageUtilities.getImageFromImageData(
                                 mtoMapObjcType.getIconAsByteArray()
@@ -168,10 +167,14 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
                 Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
 
+                mtoMapObjcType.resetMapObjects();
+                List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
+
                 for (MapObject mapObject : mapObjects) {
-//                    mapObjectsList.add(mapObject);
-                    String text = mapObject.getObjectType().getCaption();
-                    MarkerItem mi = new MarkerItem(mapObject.getId(), mapObject.getCode(), text, centerPoint(mapObject));
+                    String text = mtoMapObjcType.getCaption();
+                    GPGeoPoint ct = centerPoint(mapObject);
+//                    Log.d("CardinalPointLayer", "MO: " + text);
+                    MarkerItem mi = new MarkerItem(mapObject.getId(), mapObject.getCode(), text, ct);
                     mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
                     markerItems.add(mi);
                 }
@@ -180,9 +183,6 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 //                }
 
             }
-//            else{
-//                removeAllItems();
-//            }
 
         }
         addItems(markerItems);
@@ -273,7 +273,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public String getId() {
-        return getName() + ID;
+        return getName() + "_" + ID;
     }
 
     @Override

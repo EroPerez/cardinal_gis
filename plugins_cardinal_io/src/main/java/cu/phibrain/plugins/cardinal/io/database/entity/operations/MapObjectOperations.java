@@ -50,5 +50,4 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
         query.setParameter(1, Id);
         return query.list();
     }
-
 }

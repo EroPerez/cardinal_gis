@@ -227,7 +227,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 currentObj.setCode(label.toString());
                 currentObj.setCoord(this.coordinates);
                 currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
-                currentObj.setNodeGrade(2);
+                currentObj.setNodeGrade(currentSelectedObjectTypeLayer.getIsTopology() ? 2 : 1);
                 currentObj.setSessionId(currentSession.getId());
                 currentObj.setIsCompleted(false);
                 currentObj.setCreatedAt(new Date());

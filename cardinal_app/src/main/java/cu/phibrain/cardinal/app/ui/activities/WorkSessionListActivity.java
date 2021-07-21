@@ -21,10 +21,10 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.WorkSessionAdapter;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
-import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
 import eu.geopaparazzi.library.database.GPLog;
 
 public class WorkSessionListActivity extends AppCompatActivity implements WorkSessionAdapter.OnClickCallback {
@@ -87,7 +87,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
 
     private void refreshList() {
         if (GPLog.LOG_HEAVY)
-            GPLog.addLogEntry(this, "refreshing notes list"); //$NON-NLS-1$
+            GPLog.addLogEntry(this, "refreshing sessions list"); //$NON-NLS-1$
         try {
             visibleWorkSessionList.clear();
             collectAllSession();

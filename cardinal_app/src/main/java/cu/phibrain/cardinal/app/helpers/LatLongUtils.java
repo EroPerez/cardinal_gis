@@ -5,9 +5,7 @@ import android.widget.Toast;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.oscim.core.GeoPoint;
 import org.oscim.utils.geom.GeomBuilder;
 
@@ -76,7 +74,7 @@ public class LatLongUtils {
         } else if (geomType == MapObjecType.GeomType.POINT) {
             centroid = builder.toPoint().getCentroid();
         }
-        return centroid == null ? null : new GPGeoPoint(centroid.getY(), centroid.getX());
+        return centroid == null ? null : new GPGeoPoint(centroid.getY()+ 0.000001, centroid.getX()+ 0.000001);
 
     }
 }

@@ -66,7 +66,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
-import org.oscim.map.Layers;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -80,6 +79,7 @@ import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
@@ -88,12 +88,14 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
+import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
@@ -133,11 +135,8 @@ import eu.geopaparazzi.map.features.FeatureUtilities;
 import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.features.editing.EditingView;
 import eu.geopaparazzi.map.features.tools.MapTool;
-import eu.geopaparazzi.map.features.tools.impl.LineMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.impl.NoEditableLayerToolGroup;
 import eu.geopaparazzi.map.features.tools.impl.OnSelectionToolGroup;
-import eu.geopaparazzi.map.features.tools.impl.PointMainEditingToolGroup;
-import eu.geopaparazzi.map.features.tools.impl.PolygonMainEditingToolGroup;
 import eu.geopaparazzi.map.features.tools.interfaces.Tool;
 import eu.geopaparazzi.map.features.tools.interfaces.ToolGroup;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
@@ -235,6 +234,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     updateSelectMapObj(moa.getObjectType());
                     GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
                     setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+                } else {
+                    updateSelectMapObj(null);
                 }
 
             }
@@ -246,6 +247,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 MapObjecType mot = appContainer.getMapObjecTypeActive();
                 if (mot != null) {
                     selectedMto(mot);
+                } else {
+                    selectedMto(null);
                 }
             }
 
@@ -436,8 +439,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         registerReceiver(mMessageUiUpdateReceiver, new IntentFilter(MapviewActivity.ACTION_UPDATE_UI));
 
 
-
-
     }
 
     @Override
@@ -445,15 +446,18 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         setGuiZoomText(mapPosition.getZoomLevel(), (int) mapView.getScaleX());
         if (currentZoomLevel != mapPosition.getZoomLevel()) {
             currentZoomLevel = mapPosition.getZoomLevel();
-            Layers layers = mapView.map().layers();
-            for (org.oscim.layers.Layer layer : layers) {
-                try {
-                    if (layer.getClass().isAssignableFrom(IGpLayer.class)) {
-                        ((IGpLayer) layer).reloadData();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+            try {
+                mapView.reloadLayer(CardinalLineLayer.class);
+                mapView.reloadLayer(CardinalPolygonLayer.class);
+                mapView.reloadLayer(EdgesLayer.class);
+                for (Layer layer :
+                        LayerOperations.getInstance().getAll()) {
+                    if (layer.getEnabled())
+                        mapView.reloadLayer(layer.getId());
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
         }
@@ -520,19 +524,28 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         checkLabelButton();
 
         //disableEditing();
-        // refrescar la vista al crear la activity
-        MapObject curmo = appContainer.getCurrentMapObject();
-        setToggleMapObjectTools(curmo);
-        if (curmo != null) {
-            updateSelectMapObj(curmo.getObjectType());
+
+
+        //Update ui
+
+        MapObject moa = appContainer.getCurrentMapObject();
+        setToggleMapObjectTools(moa);
+        if (moa != null) {
+            updateSelectMapObj(moa.getObjectType());
+            GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+            setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+        } else {
+            updateSelectMapObj(null);
         }
 
-        MapObjecType curmot = appContainer.getMapObjecTypeActive();
-        if (curmot != null) {
-            selectedMto(curmot);
+        MapObjecType mot = appContainer.getMapObjecTypeActive();
+        if (mot != null) {
+            selectedMto(mot);
+        } else {
+            selectedMto(null);
         }
-        appContainer.getNetworksActive();
-        appContainer.getWorkSessionActive();
+
+
         super.onResume();
     }
 
@@ -1081,6 +1094,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         } else if (i == cu.phibrain.cardinal.app.R.id.frameLayout) {
             //temporal test, setando a null el map object activo en mapa
 
+        } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
+
+            Intent intent = new Intent(getContext(), SessionsStatsActivity.class);
+            startActivity(intent);
+
+        } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
+            toggleEditing();
         }
         return false;
     }
@@ -1200,7 +1220,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //Evento del Mot Selcecionado
             appContainer.setCurrentMapObject(null);
             appContainer.setMapObjecTypeActive(null);
-            //selectMto = findViewById(cu.phibrain.cardinal.app.R.id.selectMto);
             disableEditing();
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
@@ -1224,8 +1243,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 );
             }
 
-        }else if(i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton){
-            if(appContainer.getCurrentMapObject()!=null && appContainer.IsCurrentActiveLayerTopological()) {
+        } else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
+            if (appContainer.getCurrentMapObject() != null && appContainer.IsCurrentActiveLayerTopological()) {
                 appContainer.setAcctionAddEdge(!appContainer.getAcctionAddEdge());
                 if (appContainer.getAcctionAddEdge()) {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
@@ -1254,7 +1273,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 }
             }
         }
-
     }
 
     private void editByGeometry() {
@@ -1352,11 +1370,19 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     }
 
     private void updateSelectMapObj(MapObjecType mto) {
-        byte[] icon = mto.getIconAsByteArray();
-        if (icon != null) {
-            Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-            selectMo.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
-                    30, false));
+        if (mto != null) {
+            byte[] icon = mto.getIconAsByteArray();
+            if (icon != null) {
+                Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
+                selectMo.setImageBitmap(Bitmap.createScaledBitmap(bmp, 48,
+                        48, false));
+            } else {
+                Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
+                selectMo.setImageBitmap(bitmap);
+            }
+        } else {
+            Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
+            selectMo.setImageBitmap(bitmap);
         }
         appContainer.setAcctionAddEdge(false);
         addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
@@ -1373,23 +1399,24 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             disableEditing();
             mapView.releaseMapBlock();
         } else {
-            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
-            IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
-            if (editLayer == null) {
-                // if not layer is
-                activeToolGroup = new NoEditableLayerToolGroup(mapView);
-//                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
-//                return;
-            } else if (editLayer.getGeometryType().isPolygon())
-                activeToolGroup = new PolygonMainEditingToolGroup(mapView);
-            else if (editLayer.getGeometryType().isLine())
-                activeToolGroup = new LineMainEditingToolGroup(mapView);
-            else if (editLayer.getGeometryType().isPoint())
-                activeToolGroup = new PointMainEditingToolGroup(mapView);
-            EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
-            setLeftButtoonsEnablement(false);
-
-            mapView.blockMap();
+//            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+//            IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
+//            if (editLayer == null) {
+//                // if not layer is
+//                activeToolGroup = new NoEditableLayerToolGroup(mapView);
+////                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
+////                return;
+//            } else if (editLayer.getGeometryType().isPolygon())
+//                activeToolGroup = new PolygonMainEditingToolGroup(mapView);
+//            else if (editLayer.getGeometryType().isLine())
+//                activeToolGroup = new LineMainEditingToolGroup(mapView);
+//            else if (editLayer.getGeometryType().isPoint())
+//                activeToolGroup = new PointMainEditingToolGroup(mapView);
+//            EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
+//            setLeftButtoonsEnablement(false);
+//
+//            mapView.blockMap();
+            editByGeometry();
         }
 
     }
@@ -1513,10 +1540,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             if (icon != null) {
                 selectMto.setImageBitmap(
                         ImageUtil.getScaledBitmap(ImageUtilities.getImageFromImageData(icon),
-                                30,
-                                30, false));
+                                48,
+                                48, false));
+            } else {
+                Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
+                selectMto.setImageBitmap(bitmap);
             }
-//            MapObjecType currentMOT = appContainer.getMapObjecTypeActive();
             Layer editLayer = _mtoModel.getLayerObj();
             switch (_mtoModel.getGeomType()) {
                 case POLYLINE:
@@ -1532,23 +1561,26 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
             setZoom(editLayer.getEditZoomLevel());
             editByGeometry();
+        } else {
+            Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
+            selectMto.setImageBitmap(bitmap);
         }
     }
 
-    private void setToggleMapObjectTools(MapObject mapObject){
+    private void setToggleMapObjectTools(MapObject mapObject) {
 
         joinButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
         addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
-        if(mapObject != null) {
+        if (mapObject != null) {
             if (appContainer.IsCurrentActiveLayerTopological() && !mapObject.getIsCompleted()) {
                 addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 addRouteSegmentbutton.setVisibility(View.VISIBLE);
-            }else
+            } else
                 addRouteSegmentbutton.setVisibility(View.GONE);
 
             joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
             joinButton.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             addRouteSegmentbutton.setVisibility(View.GONE);
             joinButton.setVisibility(View.GONE);
         }

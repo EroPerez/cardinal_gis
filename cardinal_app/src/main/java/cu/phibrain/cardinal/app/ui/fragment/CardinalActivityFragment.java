@@ -45,10 +45,14 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOperations;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
@@ -72,6 +76,7 @@ import eu.geopaparazzi.library.database.DatabaseUtilities;
 import eu.geopaparazzi.library.database.DefaultHelperClasses;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.database.GPLogPreferencesHandler;
+import eu.geopaparazzi.library.database.IGpsLogDbHelper;
 import eu.geopaparazzi.library.database.TableDescriptions;
 import eu.geopaparazzi.library.gps.GpsLoggingStatus;
 import eu.geopaparazzi.library.gps.GpsServiceStatus;
@@ -311,7 +316,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
     }
 
-        @Override
+    @Override
     public void onPrepareOptionsMenu(Menu menu) {
         Profile activeProfile = ProfilesHandler.INSTANCE.getActiveProfile();
         if (activeProfile != null && activeProfile.profileProject != null && activeProfile.getFile(activeProfile.profileProject.getRelativePath()).exists()) {
@@ -465,12 +470,13 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             ImageButton imageButton = (ImageButton) v;
 
             String tooltip = imageButton.getContentDescription().toString();
-//            if (imageButton == mNotesButton) {
-//                Intent intent = new Intent(getActivity(), NotesListActivity.class);
-//                intent.putExtra(LibraryConstants.PREFS_KEY_MAP_ZOOM, false);
-//                startActivity(intent);
-//            } else
-            if (imageButton == mMetadataButton) {
+
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+
+            if (imageButton == mSessionButton && appContainer.getWorkSessionActive() != null) {
+                Intent intent = new Intent(getActivity(), SessionsStatsActivity.class);
+                startActivity(intent);
+            } else if (imageButton == mMetadataButton) {
                 try {
                     String databaseName = ResourcesManager.getInstance(getContext()).getDatabaseFile().getName();
                     tooltip += " (" + databaseName + ")";
@@ -485,21 +491,21 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
 
 
-//        if (v == mNotesButton) {
-//            StringBuilder tooltip = new StringBuilder("Available providers:");//NON-NLS
-//            FragmentActivity activity = getActivity();
-//            if (activity != null) {
-//                for (PackageInfo pack : activity.getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS)) {
-//                    ProviderInfo[] providers = pack.providers;
-//                    if (providers != null) {
-//                        for (ProviderInfo provider : providers) {
-//                            tooltip.append("\n").append(provider.authority);
-//                        }
-//                    }
-//                }
-//                Snackbar.make(v, tooltip.toString(), Snackbar.LENGTH_SHORT).show();
-//            }
-//        }
+        if (v == mSessionButton) {
+            StringBuilder tooltip = new StringBuilder("Available providers:");//NON-NLS
+            FragmentActivity activity = getActivity();
+            if (activity != null) {
+                for (PackageInfo pack : activity.getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS)) {
+                    ProviderInfo[] providers = pack.providers;
+                    if (providers != null) {
+                        for (ProviderInfo provider : providers) {
+                            tooltip.append("\n").append(provider.authority);
+                        }
+                    }
+                }
+                Snackbar.make(v, tooltip.toString(), Snackbar.LENGTH_SHORT).show();
+            }
+        }
 
 
         return true;
@@ -572,7 +578,19 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             panicIntent.putExtra(LibraryConstants.LONGITUDE, lon);
             startActivity(panicIntent);
         } else if (v == mGpslogButton) {
-            handleGpsLogAction();
+            try {
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+                if (appContainer.getProjectActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+                } else if (appContainer.getWorkSessionActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
+                } else {
+                    handleGpsLogAction();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
     }
@@ -793,6 +811,11 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                                     GpsServiceUtilities.startDatabaseLogging(appContext, newName, theBooleanToRunOn,
                                             DefaultHelperClasses.GPSLOG_HELPER_CLASS);
                                     GpsServiceUtilities.triggerBroadcast(getActivity());
+
+                                    //start logging worker route
+                                    if(!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging( DefaultHelperClasses.GPSLOG_HELPER_CLASS))){
+                                        GPDialogs.warningDialog(getActivity(), getString(R.string.gpslogging_stop_and_start_again), null);
+                                    }
                                 });
                             }
                         }
@@ -807,5 +830,57 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     @Override
     public BroadcastReceiver getGpsServiceBroadcastReceiver() {
         return mGpsServiceBroadcastReceiver;
+    }
+
+    protected boolean startWorkerRouteLogging(String GPSLOG_HELPER_CLASS) {
+
+        IGpsLogDbHelper dbHelper = null;
+        try {
+            Class<?> logHelper = Class.forName(GPSLOG_HELPER_CLASS);
+            dbHelper = (IGpsLogDbHelper) logHelper.newInstance();
+
+            long gpsLogId = dbHelper.getLastLogId();
+            Log.d("WorkerRouteLogging", "...with gps log id: " + gpsLogId);
+            //save current log
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+            WorkSession session = appContainer.getWorkSessionActive();
+            if (WorkerRouteOperations.getInstance().load(session.getId(), gpsLogId) == null)
+                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));
+
+
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        } catch (java.lang.InstantiationException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            // ignore and create a new one
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Waits a bit before next gps query.
+     *
+     * @param waitForMillis millis to wait.
+     * @return <code>false</code> if the gps logging got interrupted, <code>true</code> else.
+     */
+    private boolean holdABitForLoggingStartMillis(long waitForMillis) {
+        try {
+            Thread.sleep(waitForMillis);
+            return true;
+        } catch (InterruptedException e) {
+            String msg = getResources().getString(eu.geopaparazzi.library.R.string.cantwrite_gpslog);
+            GPLog.error(this, msg, e);
+            return true;
+        }
+
     }
 }

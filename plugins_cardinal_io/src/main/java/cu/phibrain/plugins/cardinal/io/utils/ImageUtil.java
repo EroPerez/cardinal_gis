@@ -1,8 +1,13 @@
 package cu.phibrain.plugins.cardinal.io.utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.Base64;
+
+import androidx.annotation.DrawableRes;
 
 import java.io.ByteArrayOutputStream;
 
@@ -85,5 +90,17 @@ public class ImageUtil {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         scaled.compress(Bitmap.CompressFormat.WEBP, 90, stream);
         return stream.toByteArray();
+    }
+
+    public static Bitmap getBitmap(Context context, @DrawableRes final int resId) {
+        Drawable drawable = context.getResources().getDrawable(resId);
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 }

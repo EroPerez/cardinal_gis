@@ -14,12 +14,4 @@
     <string name="geometry_type">Created At:</string>
     <string name="srid">ID: </string>
     <string name="enter_a_name_for_downloaded_project">Set name for downloaded project database</string>
-    <string name="layername_edges">Route segments layer</string>
-    <string name="layername_mot">Map object layer</string>
-    <string name="not_project_active">You don\'t have an active project.</string>
-    <string name="route_reset">Route resetting.</string>
-    <string name="cardinal_line">Cardinal Line</string>
-    <string name="cardinal_polygon">Cardinal Poligon</string>
-    <string name="no_topology_layer">No pertenece a una capa topológica.</string>
-    <string name="obj_destination_completed">El objeto destino esta completado según el grado definido, aumente el grado y reintente la operación.</string>
 </resources>

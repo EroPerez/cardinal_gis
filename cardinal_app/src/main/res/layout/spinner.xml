@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
-    android:padding="10dp"
+    android:layout_marginTop="2dp"
+    android:layout_marginBottom="1dp"
     android:background="@drawable/background">
 
     <ImageView
@@ -14,7 +15,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:contentDescription="networs icon"
-        android:src="@drawable/ic_database_primary_24dp" />
+        android:src="@drawable/ic_marker_map_24dp" />
 
 
     <ImageView
@@ -22,7 +23,8 @@
         android:layout_height="32dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@android:drawable/ic_input_add"
+        android:tint="@color/main_background" />
 
     <TextView
         android:id="@+id/tvNetworkLabel"
@@ -34,7 +36,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginLeft="10dp"
         android:layout_toEndOf="@id/netIcon"
-        android:textColor="@color/colorPrimaryText"
+        android:textColor="@color/main_background"
         android:textSize="18sp"
         android:textStyle="bold"
         tools:text="Networks" />

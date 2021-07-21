@@ -13,10 +13,14 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
         <activity
+            android:name=".ui.activities.SessionsStatsActivity"
+            android:label="@string/stats_session_view_label"
+            android:parentActivityName=".MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar" />
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
-
         <activity
             android:name=".ui.activities.MapObjectDefectImageGalleryActivity"
             android:label="@string/activity_defect_images_label"
@@ -85,12 +89,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cu.phibrain.cardinal.app.MapviewActivity" />
         </activity>
+
         <provider
             android:name="eu.geopaparazzi.core.providers.ProfilesContentProvider"
             android:authorities="eu.geopaparazzi.provider.profiles"
             android:enabled="true"
             android:exported="true" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.library.fileprovider"
@@ -101,7 +105,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
-
     <!-- NORMAL PERMISSIONS -->
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -117,6 +120,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 

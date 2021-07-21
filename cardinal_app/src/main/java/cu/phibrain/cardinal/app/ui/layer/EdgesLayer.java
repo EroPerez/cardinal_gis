@@ -1,4 +1,5 @@
 package cu.phibrain.cardinal.app.ui.layer;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -21,8 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
-import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
@@ -41,7 +42,8 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
     private GPMapView mapView;
     private Style lineStyle = null;
     private eu.geopaparazzi.library.style.Style gpStyle;
-    private  IActivitySupporter activitySupporter;
+    private IActivitySupporter activitySupporter;
+
     public EdgesLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
         activitySupporter = activitySupporter;
@@ -67,9 +69,13 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
         GPMapPosition mapPosition = mapView.getMapPosition();
         int zoom = mapPosition.getZoomLevel();
 
+        if (!isEnabled()) {
+            return;
+        }
+
         tmpDrawables.clear();
         mDrawables.clear();
-        if(zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if ((double) zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.BLACK)
@@ -81,14 +87,14 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
             for (RouteSegment route : routeSegments) {
                 List<GeoPoint> list_GeoPoints = new ArrayList<>();
                 if (route.getOriginObj() != null && route.getDestinyObj() != null) {
-                    list_GeoPoints.add(route.getOriginObj().getCoord().get(0));
-                    list_GeoPoints.add(route.getDestinyObj().getCoord().get(0));
+                    list_GeoPoints.add(LatLongUtils.labelPoint(route.getOriginObj().getCoord(), route.getOriginObj().getObjectType().getGeomType()));
+                    list_GeoPoints.add( LatLongUtils.labelPoint(route.getDestinyObj().getCoord(), route.getDestinyObj().getObjectType().getGeomType()));
                     GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, route.getId());
                     add(drawable);
                 }
             }
         }
-       update();
+        update();
     }
 
     public void disable() {
@@ -145,11 +151,11 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
 
-        if (g instanceof Gesture.Tap){
-            if(tmpDrawables.size()>0) {
-                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size()-1);
+        if (g instanceof Gesture.Tap) {
+            if (tmpDrawables.size() > 0) {
+                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
 
-              //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
+                //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
                 tmpDrawables.clear();
             }
         }
