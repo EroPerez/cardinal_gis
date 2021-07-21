@@ -23,7 +23,7 @@ import eu.geopaparazzi.map.GPGeoPoint;
 public class LatLongUtils {
     public static final double MAX_DISTANCE = 50.0f;
     public static final double LINE_AND_POLYGON_VIEW_ZOOM = 15;
-
+    public static final int RADIUS_JOIN_MO = 100;
     public static double distance(MapObject mo1, MapObject mo2) {
         try {
             GPGeoPoint p1 = mo1.getCoord().get(mo1.getCoord().size() - 1);
@@ -62,7 +62,7 @@ public class LatLongUtils {
     }
 
 
-    public static GPGeoPoint labelPoint(List<GPGeoPoint> points, MapObjecType.GeomType geomType) {
+    public static GPGeoPoint centerPoint(List<GPGeoPoint> points, MapObjecType.GeomType geomType) {
         GeomBuilder builder = new GeomBuilder();
         for (GeoPoint point : points) {
             builder.point(point.getLongitude(),

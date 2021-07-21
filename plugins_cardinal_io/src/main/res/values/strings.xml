@@ -21,4 +21,5 @@
     <string name="cardinal_line">Cardinal Line</string>
     <string name="cardinal_polygon">Cardinal Poligon</string>
     <string name="no_topology_layer">No pertenece a una capa topológica.</string>
+    <string name="obj_destination_completed">El objeto destino esta completado según el grado definido, aumente el grado y reintente la operación.</string>
 </resources>

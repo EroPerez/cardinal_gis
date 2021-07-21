@@ -32,7 +32,6 @@ import android.graphics.BitmapFactory;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -234,7 +233,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 setToggleMapObjectTools(moa);
                 if (moa != null) {
                     updateSelectMapObj(moa.getObjectType());
-                    GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+                    GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
                     setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
                 }
 
@@ -255,7 +254,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             if (edit_map_object_active_coord) {
                 MapObject moa = appContainer.getCurrentMapObject();
                 if (moa != null) {
-                    GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+                    GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
                     setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
 
                     MapObjecType mot = moa.getObjectType();
@@ -1216,7 +1215,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         } else if (i == R.id.selectMo) {
             MapObject mapObject = appContainer.getCurrentMapObject();
             if(mapObject!=null) {
-                GPGeoPoint point = LatLongUtils.labelPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+                GPGeoPoint point = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
                 setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), mapObject.getLayer().getEditZoomLevel());
 
                 ObjectInspectorDialogFragment.newInstance(mapView, mapObject.getId()).show(
@@ -1230,11 +1229,32 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 appContainer.setAcctionAddEdge(!appContainer.getAcctionAddEdge());
                 if (appContainer.getAcctionAddEdge()) {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
+                    appContainer.setAcctionJoinMo(false);
                 } else {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 }
             }
+        }else if(i == cu.phibrain.cardinal.app.R.id.jointobutton){
+            //preguntar si tienen que ser topologico el mo
+            if(appContainer.getCurrentMapObject()!=null && appContainer.IsCurrentActiveLayerTopological()) {
+                appContainer.setAcctionJoinMo(!appContainer.getAcctionJoinMo());
+                if (appContainer.getAcctionJoinMo()) {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
+                    MapObject currentMO = appContainer.getCurrentMapObject();
+                    Layer layer = currentMO.getLayer();
+                    CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
+                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
+
+                    addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+                    appContainer.setAcctionAddEdge(false);
+
+                } else {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
+                }
+            }
         }
+
     }
 
     private void editByGeometry() {
