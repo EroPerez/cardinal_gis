@@ -72,7 +72,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
     private boolean selectMarker;
-//    List<MapObject> mapObjectsList;
+    //    List<MapObject> mapObjectsList;
     private AppContainer appContainer;
 
     public CardinalPointLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
@@ -325,7 +325,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public boolean isEditable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -382,17 +382,19 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         return ID;
     }
 
-    private boolean addEdge(MarkerItem item, MapObject currentObj, MapObject previousObj){
+    private boolean addEdge(MarkerItem item, MapObject currentObj, MapObject previousObj) {
         MapviewActivity activity = (MapviewActivity) this.activitySupporter;
-        if (item != null && Long.parseLong("" + item.getUid()) != -1 &&
+        if (item != null &&
+                Long.parseLong("" + item.getUid()) != -1 &&
                 appContainer.getAcctionAddEdge() &&
-                previousObj.getId() != currentObj.getId()) {
+                !previousObj.equals(currentObj)
+        ) {
 
-            Layer currentSelectedObjectTypeLayer = previousObj.getLayer();
-            if (!currentObj.getLayer().getIsTopology()) {
+
+            if (!currentObj.belongToTopoLayer()) {
                 GPDialogs.toast(this.activitySupporter.getContext(), R.string.no_topology_layer, Toast.LENGTH_SHORT);
                 return true;
-            }else if(currentObj.getIsCompleted()){
+            } else if (currentObj.getIsCompleted()) {
                 GPDialogs.toast(this.activitySupporter.getContext(), R.string.obj_destination_completed, Toast.LENGTH_SHORT);
                 return true;
             }
@@ -407,17 +409,12 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                             GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
                                     LatLongUtils.MAX_DISTANCE));
 
-                            if (currentSelectedObjectTypeLayer.getIsTopology() &&
-                                    previousObj != null &&
-                                    !previousObj.getIsCompleted()) {
-                                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
-                                RouteSegmentOperations.getInstance().save(edge);
-                                try {
-                                    mapView.reloadLayer(EdgesLayer.class);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
+                            RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                            RouteSegmentOperations.getInstance().save(edge);
+                            try {
+                                mapView.reloadLayer(EdgesLayer.class);
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
 
 
@@ -429,17 +426,12 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 );
             } else {
 
-                if (currentSelectedObjectTypeLayer.getIsTopology() &&
-                        previousObj != null &&
-                        !previousObj.getIsCompleted()) {
-                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
-                    RouteSegmentOperations.getInstance().save(edge);
-                    try {
-                        mapView.reloadLayer(EdgesLayer.class);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
+                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                RouteSegmentOperations.getInstance().save(edge);
+                try {
+                    mapView.reloadLayer(EdgesLayer.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }
@@ -453,17 +445,17 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         return true;
     }
 
-    private boolean joinMo(MarkerItem item, MapObject currentObj, MapObject previousObj){
+    private boolean joinMo(MarkerItem item, MapObject currentObj, MapObject previousObj) {
         MapviewActivity activity = (MapviewActivity) this.activitySupporter;
 
         return true;
     }
 
-    public void circleMarkerJoin(org.oscim.core.GeoPoint point){
+    public void circleMarkerJoin(org.oscim.core.GeoPoint point) {
 
-        int bitmapHeight = LatLongUtils.RADIUS_JOIN_MO-20;
+        int bitmapHeight = LatLongUtils.RADIUS_JOIN_MO - 20;
         int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
-        int symbolWidth = LatLongUtils.RADIUS_JOIN_MO-20;
+        int symbolWidth = LatLongUtils.RADIUS_JOIN_MO - 20;
         int xSize = symbolWidth;
         int ySize = symbolWidth + dist2symbol;
 
@@ -476,7 +468,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         paint.setStyle(org.oscim.backend.canvas.Paint.Style.STROKE);
         paint.setStrokeWidth(4.5f);
 
-        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f),LatLongUtils.RADIUS_JOIN_MO,paint);
+        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f), LatLongUtils.RADIUS_JOIN_MO, paint);
         MarkerItem markerItem = new MarkerItem(-2, "", "", point);
         markerItem.setMarker(new MarkerSymbol(bitMap, MarkerSymbol.HotspotPlace.CENTER, false));
         addItem(markerItem);

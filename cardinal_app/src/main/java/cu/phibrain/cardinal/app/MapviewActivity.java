@@ -267,6 +267,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     }
                 }
             }
+
+            boolean is_map_object_terminal = intent.getBooleanExtra("is_map_object_terminal", false);
+
+            if (is_map_object_terminal) {
+                disableEditing();
+            }
         }
 
     };
@@ -532,7 +538,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         setToggleMapObjectTools(moa);
         if (moa != null) {
             updateSelectMapObj(moa.getObjectType());
-            GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+            GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
             setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
         } else {
             updateSelectMapObj(null);
@@ -1098,9 +1104,20 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
             Intent intent = new Intent(getContext(), SessionsStatsActivity.class);
             startActivity(intent);
+            return true;
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
             toggleEditing();
+            return true;
+        } else if (i == cu.phibrain.cardinal.app.R.id.selectMo) {
+            MapObject mapObject = appContainer.getCurrentMapObject();
+            if (mapObject != null) {
+                GPGeoPoint point = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+                setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), mapObject.getLayer().getViewZoomLevel());
+
+            }
+            return true;
+
         }
         return false;
     }
@@ -1231,9 +1248,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //EditManager.INSTANCE.setEditLayer(edgesLayer);
             GPDialogs.toast(this, getString(R.string.reset_route), Toast.LENGTH_SHORT);
 
-        } else if (i == R.id.selectMo) {
+        } else if (i == cu.phibrain.cardinal.app.R.id.selectMo) {
             MapObject mapObject = appContainer.getCurrentMapObject();
-            if(mapObject!=null) {
+            if (mapObject != null) {
                 GPGeoPoint point = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
                 setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), mapObject.getLayer().getEditZoomLevel());
 
@@ -1254,9 +1271,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 }
             }
-        }else if(i == cu.phibrain.cardinal.app.R.id.jointobutton){
+        } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
             //preguntar si tienen que ser topologico el mo
-            if(appContainer.getCurrentMapObject()!=null && appContainer.IsCurrentActiveLayerTopological()) {
+            if (appContainer.getCurrentMapObject() != null ) {
                 appContainer.setAcctionJoinMo(!appContainer.getAcctionJoinMo());
                 if (appContainer.getAcctionJoinMo()) {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
@@ -1531,11 +1548,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             mapView.releaseMapBlock();
         }
 
-        if (descriptorMto != null) //evitar exeption cuando se invoca este metodo en un lugar distinto del buttonshee
-            descriptorMto.setText(_mtoModel.getCaption());
 
         appContainer.setMapObjecTypeActive(_mtoModel);
         if (appContainer.getMapObjecTypeActive() != null) {
+
+            if (descriptorMto != null) //evitar exeption cuando se invoca este metodo en un lugar distinto del buttonshee
+                descriptorMto.setText(_mtoModel.getCaption());
+
             byte[] icon = _mtoModel.getIconAsByteArray();
             if (icon != null) {
                 selectMto.setImageBitmap(
@@ -1571,7 +1590,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         joinButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
         addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
-        if (mapObject != null) {
+        if (mapObject != null && !mapObject.getObjectType().getIsTerminal()) {
             if (appContainer.IsCurrentActiveLayerTopological() && !mapObject.getIsCompleted()) {
                 addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 addRouteSegmentbutton.setVisibility(View.VISIBLE);

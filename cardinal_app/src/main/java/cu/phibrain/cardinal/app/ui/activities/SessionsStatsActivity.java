@@ -234,7 +234,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
                     MapObject mapObject = mapObjectMap.get(mapObjectText.getText().toString());
                     if (mapObject != null) {
 
-                        GPGeoPoint centerPoint = LatLongUtils.labelPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+                        GPGeoPoint centerPoint = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
 
                         Intent intent = new Intent(getContext(), MapsSupportService.class);
                         intent.putExtra(MapsSupportService.CENTER_ON_POSITION_REQUEST, true);

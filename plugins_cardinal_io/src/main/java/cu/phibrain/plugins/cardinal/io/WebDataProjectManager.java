@@ -229,26 +229,28 @@ public enum WebDataProjectManager {
                 mapObjectList.addAll(session.getMapObjects());
 
                 List<WorkerRoute> gpslogs = session.getWorkerRoute();
-                //generate local gps log
-                final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
-                long now = System.currentTimeMillis();
+                if (!gpslogs.isEmpty()) {
+                    //generate local gps log
+                    final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
+                    long now = System.currentTimeMillis();
 
-                long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
+                    long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
 
-                for (WorkerRoute log :
-                        gpslogs) {
-                    dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
+                    for (WorkerRoute log :
+                            gpslogs) {
+                        dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
+                    }
+
+                    try {
+                        DaoGpsLog.updateLogLength(gpsLogId);
+                    } catch (IOException e) {
+                        GPLog.error(this, "ERROR", e);//NON-NLS
+                    }
+
+
+                    //save current log
+                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));
                 }
-
-                try {
-                    DaoGpsLog.updateLogLength(gpsLogId);
-                } catch (IOException e) {
-                    GPLog.error(this, "ERROR", e);//NON-NLS
-                }
-
-                //save current log
-                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));
-
             }
 
 

@@ -181,7 +181,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
     @Override
     public boolean isEditable() {
-        return true;
+        return false;
     }
 
     @Override

@@ -49,6 +49,8 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
@@ -69,6 +71,7 @@ import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
+import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
 /**
@@ -179,15 +182,21 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     public void dismiss() {
 
         try {
-//            mapView.reloadLayer(CardinalPointLayer.class);
-
-            ((IGpLayer)EditManager.INSTANCE.getEditLayer()).reloadData();
+            IEditableLayer layer = EditManager.INSTANCE.getEditLayer();
+            layer.reloadData();
             mapView.reloadLayer(EdgesLayer.class);
+
+            if (!(layer instanceof CardinalPointLayer))
+//                if (!layer.getClass().isAssignableFrom(CardinalPointLayer.class))
+
+                ((CardinalGPMapView) mapView).reloadLayer(
+                        appContainer.getMapObjecTypeActive().getLayerId()
+                );
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-//        appContainer.setMode(UserMode.NONE);
 
         super.dismiss();
 
@@ -276,7 +285,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         }
 
         // Grado del nodo
-        Boolean isTopological = object.getLayer().getIsTopology();
+        Boolean isTopological = object.belongToTopoLayer();
 
         if (!isTopological) {
             view.findViewById(R.id.tvGrade).setVisibility(View.GONE);
@@ -286,21 +295,30 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             MapObjectOperations.getInstance().save(object);
         } else {
             EditText edtGrade = view.findViewById(R.id.edtGrade);
-            edtGrade.setText(String.valueOf(object.getNodeGrade()));
-            edtGrade.setOnEditorActionListener((v, actionId, event) -> {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
-                    Long value = Long.parseLong(String.valueOf(v.getText()));
-                    object.setNodeGrade(value > 0 ? value : value * -1);
-                    MapObjectOperations.getInstance().save(object);
-                    handled = true;
-                    //close keyboard
-                    edtGrade.clearFocus();
-                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
-                }
-                return handled;
-            });
+
+            if (object.isTerminal()) {
+                object.setNodeGrade(1);
+                edtGrade.setText(String.valueOf(object.getNodeGrade()));
+                MapObjectOperations.getInstance().save(object);
+                edtGrade.setEnabled(false);
+            } else {
+                edtGrade.setText(String.valueOf(object.getNodeGrade()));
+                edtGrade.setOnEditorActionListener((v, actionId, event) -> {
+                    boolean handled = false;
+                    if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
+                        Long value = Long.parseLong(String.valueOf(v.getText()));
+                        object.setNodeGrade(value > 2 ? value : 2);
+                        MapObjectOperations.getInstance().save(object);
+                        v.setText(String.valueOf(object.getNodeGrade()));
+                        handled = true;
+                        //close keyboard
+                        edtGrade.clearFocus();
+                        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+                    }
+                    return handled;
+                });
+            }
         }
 
 
@@ -439,6 +457,10 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                             MapObjectOperations.getInstance().delete(object);
                             ObjectInspectorDialogFragment.this.dismiss();
 
+                            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                            intent.putExtra("update_map_object_active", true);
+                            getActivity().sendBroadcast(intent);
+
                         }), null
                 );
 
@@ -447,7 +469,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
         // Delete node button
         ImageButton editCoord = view.findViewById(R.id.imgBtnEditCord);
-        editCoord.setOnClickListener(v->{
+        editCoord.setOnClickListener(v -> {
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
             intent.putExtra("edit_map_object_active_coord", true);

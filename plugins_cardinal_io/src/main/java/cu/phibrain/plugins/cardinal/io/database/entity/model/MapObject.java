@@ -723,6 +723,16 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
+    public boolean isTerminal(){
+        return this.getObjectType().getIsTerminal();
+    }
+
+
+    public boolean belongToTopoLayer(){
+        return getLayer().getIsTopology();
+    }
+
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 788755102)
     public void __setDaoSession(DaoSession daoSession) {

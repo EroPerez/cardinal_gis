@@ -182,7 +182,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     @Override
     public boolean isEditable() {
-        return true;
+        return false;
     }
 
     @Override
