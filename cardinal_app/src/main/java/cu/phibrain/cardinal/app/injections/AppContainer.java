@@ -29,7 +29,8 @@ public class AppContainer {
     protected MapObject mapObjectActive;
     protected Worker currentWorker;
     private MapObject edgeAddInMapObjSelect;
-
+    private Boolean acctionAddEdge=false;
+    private Boolean isTopology = false;
     public AppContainer() throws IOException {
 //        refreshProject();
         setWorkSessionActive(null);
@@ -109,6 +110,12 @@ public class AppContainer {
 
     public void setCurrentMapObject(MapObject mapObjectActive) {
         this.mapObjectActive = mapObjectActive;
+        if(mapObjectActive !=null)
+            setTopology(mapObjectActive.getLayer().getIsTopology());
+        else
+            setTopology(false);
+
+
     }
 
     public Long getLevelActive() {
@@ -128,4 +135,19 @@ public class AppContainer {
     }
 
 
+    public Boolean getAcctionAddEdge() {
+        return acctionAddEdge;
+    }
+
+    public void setAcctionAddEdge(Boolean acctionAddEdge) {
+        this.acctionAddEdge = acctionAddEdge;
+    }
+
+    public Boolean IsTopology() {
+        return isTopology;
+    }
+
+    private void setTopology(Boolean topology) {
+        isTopology = topology;
+    }
 }

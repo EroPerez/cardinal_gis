@@ -191,6 +191,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private ImageButton toggleLabelsButton;
     private boolean hasLabelledLayers;
     private AppContainer appContainer;
+
+    private ImageButton addRouteSegmentbutton;
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -366,7 +368,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         toggleLogInfoButton.setOnClickListener(this);
         toggleLogInfoButton.setOnLongClickListener(this);
 
-        final ImageButton addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+        addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
         addRouteSegmentbutton.setOnClickListener(this);
         addRouteSegmentbutton.setOnLongClickListener(this);
 
@@ -1188,6 +1190,15 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 e.printStackTrace();
             }
 
+        }else if(i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton){
+            if(appContainer.getCurrentMapObject()!=null && appContainer.IsTopology()) {
+                appContainer.setAcctionAddEdge(!appContainer.getAcctionAddEdge());
+                if (appContainer.getAcctionAddEdge()) {
+                    addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
+                } else {
+                    addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+                }
+            }
         }
     }
 
@@ -1292,6 +1303,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             selectMo.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
                     30, false));
         }
+        appContainer.setAcctionAddEdge(false);
+        addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+
     }
 
     private void toggleEditing() {
@@ -1343,7 +1357,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private void setLeftButtoonsEnablement(boolean enable) {
 //        ImageButton addnotebytagButton = findViewById(cu.phibrain.cardinal.app.R.id.addnotebytagbutton);
         ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
-        ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+        //ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
 
         ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
         ImageButton toggleLoginfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
@@ -1351,7 +1365,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         if (enable) {
 //            addnotebytagButton.setVisibility(View.VISIBLE);
             jointobuttonButton.setVisibility(View.VISIBLE);
-            addroutesegmentButton.setVisibility(View.VISIBLE);
+            addRouteSegmentbutton.setVisibility(View.VISIBLE);
+            if (appContainer.getAcctionAddEdge()) {
+                addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
+            } else {
+                addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+            }
 
             addBookmarkButton.setVisibility(View.VISIBLE);
             toggleLoginfoButton.setVisibility(View.VISIBLE);
@@ -1359,7 +1378,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         } else {
 //            addnotebytagButton.setVisibility(View.GONE);
             jointobuttonButton.setVisibility(View.GONE);
-            addroutesegmentButton.setVisibility(View.GONE);
+            addRouteSegmentbutton.setVisibility(View.GONE);
 
             addBookmarkButton.setVisibility(View.GONE);
             toggleLoginfoButton.setVisibility(View.GONE);
@@ -1370,7 +1389,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private void setAllButtoonsEnablement(boolean enable) {
 //      ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
         ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
-        ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+        //ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
 
         ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
         ImageButton toggleLoginfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
@@ -1386,7 +1405,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
 //      addnotebytagButton.setVisibility(visibility);
         jointobuttonButton.setVisibility(visibility);
-        addroutesegmentButton.setVisibility(visibility);
+        addRouteSegmentbutton.setVisibility(visibility);
 
         addBookmarkButton.setVisibility(visibility);
         toggleLoginfoButton.setVisibility(visibility);

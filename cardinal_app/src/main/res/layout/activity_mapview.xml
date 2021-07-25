@@ -83,6 +83,21 @@
             android:orientation="vertical">
 
             <ImageButton
+                android:id="@+id/addroutesegmentbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/mapview_sides_space"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_create_route_segment_line_24dp" />
+            <ImageButton
+                android:id="@+id/jointobutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/mapview_sides_space"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_link_object_24dp" />
+
+            <ImageButton
                 android:id="@+id/toggleLabels"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -168,21 +183,6 @@
                 android:orientation="vertical"
                 android:paddingLeft="@dimen/mapview_sides_space"
                 android:paddingBottom="@dimen/mapview_sides_space" />
-
-            <ImageButton
-                android:id="@+id/addroutesegmentbutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_create_route_segment_line_24dp" />
-            <ImageButton
-                android:id="@+id/jointobutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_link_object_24dp" />
 
             <!--            <ImageButton-->
             <!--                android:id="@+id/addnotebytagbutton"-->

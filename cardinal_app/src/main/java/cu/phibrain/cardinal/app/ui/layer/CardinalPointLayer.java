@@ -68,6 +68,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     private Long ID;
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
+    private boolean selectMarker;
 //    List<MapObject> mapObjectsList;
 
     public CardinalPointLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
@@ -78,6 +79,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         geometryMto = EGeometryType.POINT;
         this.activitySupporter = activitySupporter;
         setOnItemGestureListener(this);
+        selectMarker = false;
         try {
             reloadData();
         } catch (IOException e) {
@@ -195,35 +197,21 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
-
-        if (item != null && Long.parseLong("" + item.getUid()) != -1) {
-            Toast.makeText(this.activitySupporter.getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-            MapObject mapObject = MapObjectOperations.getInstance().load((Long) item.getUid());
-            appContainer.setCurrentMapObject(mapObject);
-            appContainer.setMapObjecTypeActive(mapObject.getObjectType());
-
-            if (appContainer.getPreviousMapObject() == null) {
-                GPMapPosition mapPosition = mapView.getMapPosition();
-                mapPosition.setZoomLevel(mapObject.getLayer().getViewZoomLevel());
-                mapPosition.setPosition(mapObject.getCoord().get(0).getLatitude(), mapObject.getCoord().get(0).getLongitude());
-                mapView.setMapPosition(mapPosition);
-            } else {
-                RouteSegment edge = new RouteSegment(null, appContainer.getPreviousMapObject().getId(), mapObject.getId(), new Date());
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        MapObject previousObj = appContainer.getCurrentMapObject();
+        MapObject currentObj   = MapObjectOperations.getInstance().load((Long)item.getUid());
+        if(appContainer.getCurrentMapObject()!=null && appContainer.getAcctionAddEdge()){
+            if(currentObj.getLayer().getIsTopology()){
+                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                 RouteSegmentOperations.getInstance().save(edge);
-
-                appContainer.setPreviousMapObject(null);
-
-                removeItem(mItemList.size() - 1);
-                update();
                 try {
                     mapView.reloadLayer(EdgesLayer.class);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
+            }else{
+                Toast.makeText(this.activitySupporter.getContext(), R.string.no_topology_layer, Toast.LENGTH_SHORT).show();
             }
-
         }
 
 
@@ -234,7 +222,11 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
 
+
+
         if (item != null && Long.parseLong("" + item.getUid()) != -1) {
+            if(selectMarker)
+                removeItem(size()-1);
             MapObject mapObject = MapObjectOperations.getInstance().load((Long) item.getUid());
 
             ObjectInspectorDialogFragment.newInstance(mapView, mapObject.getId()).show(
@@ -243,20 +235,17 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             );
 
 
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-//            appContainer.setCurrentMapObject(mapObject);
-            appContainer.setMapObjecTypeActive(mapObject.getObjectType());
-
-
             MarkerItem markerItem = new MarkerItem(-1, "", "", item.getPoint());
             Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), cu.phibrain.cardinal.app.R.drawable.long_select_mto);
             mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
             markerItem.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
             addItem(markerItem);
+            selectMarker = true;
         }
         return true;
 
     }
+
 
 
     /**
