@@ -64,16 +64,21 @@ public class MapObjectDefectsAdapter extends RecyclerView.Adapter<MapObjectDefec
             holder.imgBtnAddDefectImage.setVisibility(View.INVISIBLE);
         else
             holder.imgBtnAddDefectImage.setVisibility(View.VISIBLE);
-
-        holder.icon.setImageBitmap(
-                ImageUtil.getScaledBitmap(
-                        ImageUtilities.getImageFromImageData(defect.getIcon()),
-                        48,
-                        48,
-                        true
-                )
-        );
-
+        try {
+            byte[] icon = defect.getIcon();
+            if (icon != null) {
+                holder.icon.setImageBitmap(
+                        ImageUtil.getScaledBitmap(
+                                ImageUtilities.getImageFromImageData(icon),
+                                48,
+                                48,
+                                true
+                        )
+                );
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
         holder.setPosition(position);
     }
 
@@ -123,7 +128,7 @@ public class MapObjectDefectsAdapter extends RecyclerView.Adapter<MapObjectDefec
             imgBtnAddDefectImage = itemView.findViewById(R.id.imgBtnAddDefectImage);
 
             checkBox = itemView.findViewById(R.id.CheckBoxDefects);
-            checkBox.setOnClickListener(v ->{
+            checkBox.setOnClickListener(v -> {
                 // Is the view now checked?
                 boolean isSelected = ((CheckBox) v).isChecked();
                 MapObjecTypeDefect defect = typeDefectList.get(position);

@@ -1,7 +1,6 @@
 package cu.phibrain.cardinal.app.ui.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,7 +110,7 @@ public class MapObjectStatesAdapter extends RecyclerView.Adapter<MapObjectStates
                         notifyDataSetChanged();
                     }
                 }
-                Log.d("Defect", "isClicked: " + position);
+//              Log.d("Defect", "isClicked: " + position);
 
 
             });

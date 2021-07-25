@@ -49,7 +49,6 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
-import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
@@ -69,6 +68,8 @@ import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.map.GPMapView;
+import eu.geopaparazzi.map.features.editing.EditManager;
+import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -188,11 +189,15 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
     public void dismiss() {
 
         try {
-            mapView.reloadLayer(CardinalPointLayer.class);
+//            mapView.reloadLayer(CardinalPointLayer.class);
+
+            ((IGpLayer)EditManager.INSTANCE.getEditLayer()).reloadData();
             mapView.reloadLayer(EdgesLayer.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+//        appContainer.setMode(UserMode.NONE);
 
         super.dismiss();
 
@@ -449,6 +454,17 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
             });
         } else deleteObject.setVisibility(View.INVISIBLE);
+
+        // Delete node button
+        ImageButton editCoord = view.findViewById(R.id.imgBtnEditCord);
+        editCoord.setOnClickListener(v->{
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("edit_map_object_active_coord", true);
+            getActivity().sendBroadcast(intent);
+            ObjectInspectorDialogFragment.this.dismiss();
+
+        });
 
     }
 
