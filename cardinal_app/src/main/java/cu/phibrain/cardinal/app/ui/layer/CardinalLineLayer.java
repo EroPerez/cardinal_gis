@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.oscim.backend.canvas.Paint;
@@ -27,15 +27,13 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
@@ -43,8 +41,8 @@ import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
-import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
+import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPLineDrawable;
 
@@ -175,7 +173,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
             if (tmpDrawables.size() > 0) {
                 GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
 
-                //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
+                GPDialogs.toast(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT);
                 tmpDrawables.clear();
             }
         }
@@ -204,13 +202,31 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        BarcodeReaderDialogFragment.newInstance(
-                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
-        ).show(
-            ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
-                        "dialog"
-         );
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
+            MapObject currentMO = appContainer.getCurrentMapObject();
+            currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
+            currentMO.update();
+            GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
+            appContainer.setMode(UserMode.NONE);
+            //Reload layers associated
+            this.reloadData();
+            //Reload current point layers
+            Layer editLayer = currentMO.getLayer();
+            ((IGpLayer) ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, editLayer.getId())).reloadData();
+
+            mapView.reloadLayer(EdgesLayer.class);
+
+        } else {
+            BarcodeReaderDialogFragment.newInstance(
+                    this.mapView, LatLongUtils.toGpGeoPoints(geometry)
+            ).show(
+                    ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
+                    "dialog"
+            );
+        }
     }
+
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
 

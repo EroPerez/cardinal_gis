@@ -27,6 +27,8 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -248,7 +250,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
-                                GPLog.addLogEntry(String.format(getString(R.string.max_distance_threshold_broken_message),
+                                GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
                                         LatLongUtils.MAX_DISTANCE));
 
                                 if (currentSelectedObjectTypeLayer.getIsTopology() &&
@@ -283,7 +285,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                 try {
                     ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
-//                  ((CardinalGPMapView)mapView).reloadLayer(currentSelectedObjectType);
+                    ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, currentSelectedObjectTypeLayer.getId());
+
                     mapView.reloadLayer(EdgesLayer.class);
                 } catch (Exception e) {
                     e.printStackTrace();

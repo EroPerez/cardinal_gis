@@ -368,11 +368,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
             appContainer.setMode(UserMode.NONE);
             //Reload layers associated
-            reloadData();
+            this.reloadData();
             mapView.reloadLayer(EdgesLayer.class);
 
         } else {
-            appContainer.setMode(UserMode.OBJECT_ADDITION);
             BarcodeReaderDialogFragment.newInstance(
                     this.mapView, LatLongUtils.toGpGeoPoints(geometry)
             ).show(

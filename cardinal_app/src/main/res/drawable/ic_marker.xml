@@ -3,14 +3,6 @@
     android:height="60dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!--    <path-->
-    <!--        android:fillColor="@color/main_decorations"-->
-    <!--        android:pathData="m12,0.5c-6.348,0 -11.5,5.152 -11.5,11.5 0,6.348 5.152,11.5 11.5,11.5 6.348,0 11.5,-5.152 11.5,-11.5 0,-6.348 -5.152,-11.5 -11.5,-11.5z"-->
-    <!--        android:strokeWidth="1"-->
-    <!--        android:strokeAlpha="1"-->
-    <!--        android:strokeColor="@color/main_background"-->
-    <!--        android:strokeLineCap="butt"-->
-    <!--        android:strokeLineJoin="miter" />-->
     <path
         android:fillColor="@color/main_decorations"
         android:pathData="M12.4951,7.4029C10.2861,7.4029 8.4951,8.755 8.4951,10.4226c-0.0199,1.6676 4,6.5803 4,6.5803 0,0 4,-4.8976 4,-6.5803C16.4951,8.755 14.704,7.4029 12.4951,7.4029ZM12.4951,12.7963c-1.791,0 -3.2438,-1.0967 -3.2438,-2.4488 0,-1.3521 1.4527,-2.4488 3.2438,-2.4488 1.791,0 3.2437,1.0967 3.2437,2.4488 0,1.3371 -1.4527,2.4488 -3.2437,2.4488z"

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.IEntity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -56,7 +57,7 @@ public class AppContainer {
         if (!projectMetadata.isEmpty()) {
             for (final Metadata metaData : projectMetadata) {
                 if (metaData.key.toLowerCase().equals(key.toLowerCase())) {
-                    return Long.parseLong(metaData.value);
+                    return NumberUtiles.parseStringToLong(metaData.value, null);
                 }
             }
         }
@@ -115,6 +116,11 @@ public class AppContainer {
     }
 
     public Worker getCurrentWorker() {
+        try {
+            refreshSession();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return currentWorker;
     }
 

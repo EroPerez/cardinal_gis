@@ -41,7 +41,6 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.SpacesItemDecoration;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelSubLotAdapter;
@@ -147,7 +146,6 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         MapObject objectSelected = MapObjectOperations.getInstance().load(objectId);
 
         appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        appContainer.setMode(UserMode.OBJECT_EDITION);
         appContainer.setCurrentMapObject(objectSelected);
         appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
 
@@ -456,6 +454,17 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
             });
         } else deleteObject.setVisibility(View.INVISIBLE);
+
+        // Delete node button
+        ImageButton editCoord = view.findViewById(R.id.imgBtnEditCord);
+        editCoord.setOnClickListener(v->{
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("edit_map_object_active_coord", true);
+            getActivity().sendBroadcast(intent);
+            ObjectInspectorDialogFragment.this.dismiss();
+
+        });
 
     }
 
