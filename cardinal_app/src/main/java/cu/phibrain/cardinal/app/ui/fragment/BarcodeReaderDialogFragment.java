@@ -25,7 +25,10 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -232,7 +235,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                 MapObjectOperations.getInstance().save(currentObj);
 
-                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
+//                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
 
 
                 if (LatLongUtils.soFar(previousObj, LatLongUtils.MAX_DISTANCE, currentObj)) {
@@ -247,7 +250,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
-                                GPLog.addLogEntry(String.format(getString(R.string.max_distance_threshold_broken_message),
+                                GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
                                         LatLongUtils.MAX_DISTANCE));
 
                                 if (currentSelectedObjectTypeLayer.getIsTopology() &&
@@ -281,12 +284,15 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
 
                 try {
-                    ((IGpLayer)EditManager.INSTANCE.getEditLayer()).reloadData();
-//                  ((CardinalGPMapView)mapView).reloadLayer(currentSelectedObjectType);
+                    ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
+                    ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, currentSelectedObjectTypeLayer.getId());
+
                     mapView.reloadLayer(EdgesLayer.class);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                appContainer.setMode(UserMode.NONE);
 
                 dismiss();
             } catch (Exception e) {

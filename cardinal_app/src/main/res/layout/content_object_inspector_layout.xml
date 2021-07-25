@@ -44,6 +44,17 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+                    <ImageButton
+                        android:id="@+id/imgBtnEditCord"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@drawable/button_background_states"
+                        app:srcCompat="@drawable/ic_marker_map_24dp"
+                        android:contentDescription="TODO" />
 
                     <ImageButton
                         android:id="@+id/imgBtnDelete"

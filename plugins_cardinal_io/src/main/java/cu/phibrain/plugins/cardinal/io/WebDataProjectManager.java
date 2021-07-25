@@ -163,6 +163,11 @@ public enum WebDataProjectManager {
             DaoMetadata.initProjectMetadata(db, project.getName(), project.getDescription(), null, user, uniqueDeviceId);
             DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldName(), CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldLabel(), "");
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.MAP_OBJECT_TYPE_ID.getFieldName(), CardinalMetadataTableDefaultValues.MAP_OBJECT_TYPE_ID.getFieldLabel(), "");
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldLabel(), "");
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PREVIOUS_MAP_OBJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PREVIOUS_MAP_OBJECT_ID.getFieldLabel(), "");
+            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.NETWORK_ID.getFieldName(), CardinalMetadataTableDefaultValues.NETWORK_ID.getFieldLabel(), "");
 
             //Inserts Operations
             WorkerOperations.getInstance().insertAll(workerList);

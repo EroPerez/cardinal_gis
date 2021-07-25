@@ -79,6 +79,7 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
@@ -230,7 +231,33 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 if (moa != null) {
                     updateSelectMapObj(moa.getObjectType());
                     GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
-                    setNewCenter(point.getLongitude(), point.getLatitude());
+                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+                }
+            }
+
+
+            boolean update_map_object_type_active = intent.getBooleanExtra("update_map_object_type_active", false);
+
+            if (update_map_object_type_active) {
+                MapObjecType mot = appContainer.getMapObjecTypeActive();
+                if (mot != null) {
+                    selectedMto(mot);
+                }
+            }
+
+            boolean edit_map_object_active_coord = intent.getBooleanExtra("edit_map_object_active_coord", false);
+
+            if (edit_map_object_active_coord) {
+                MapObject moa = appContainer.getCurrentMapObject();
+                if (moa != null) {
+                    GPGeoPoint point = LatLongUtils.labelPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+
+                    MapObjecType mot = moa.getObjectType();
+                    if (mot != null) {
+                        appContainer.setMode(UserMode.OBJECT_EDITION);
+                        selectedMto(mot);
+                    }
                 }
             }
         }
@@ -413,7 +440,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             Layers layers = mapView.map().layers();
             for (org.oscim.layers.Layer layer : layers) {
                 try {
-                    ((IGpLayer) layer).reloadData();
+                    if (layer.getClass().isAssignableFrom(IGpLayer.class)) {
+                        ((IGpLayer) layer).reloadData();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1156,6 +1185,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
             intent.putExtra("update_map_object_active", true);
+            intent.putExtra("update_map_object_type_active", true);
             sendBroadcast(intent);
 
             //EdgesLayer edgesLayer = new EdgesLayer(mapView);
@@ -1205,7 +1235,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private void editByGeometry() {
         ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
 
-        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
+//        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
         IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
         if (editLayer == null) {
             // if not layer is
@@ -1444,12 +1474,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         checkLabelButton();
 
-        if (isEditing) {
+        if (isEditing && appContainer.getMode() == UserMode.NONE) {
             disableEditing();
             mapView.releaseMapBlock();
         }
 
-        descriptorMto.setText(_mtoModel.getCaption());
+        if (descriptorMto != null) //evitar exeption cuando se invoca este metodo en un lugar distinto del buttonshee
+            descriptorMto.setText(_mtoModel.getCaption());
+
         appContainer.setMapObjecTypeActive(_mtoModel);
         if (appContainer.getMapObjecTypeActive() != null) {
             byte[] icon = _mtoModel.getIconAsByteArray();
