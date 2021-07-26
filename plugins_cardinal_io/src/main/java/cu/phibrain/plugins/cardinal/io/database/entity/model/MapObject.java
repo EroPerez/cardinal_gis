@@ -673,7 +673,7 @@ public class MapObject implements Serializable, IEntity {
 
     /** Get a map object type layer */
     public Layer getLayer(){
-        return this.objectType.getLayerObj();
+        return this.getObjectType().getLayerObj();
     }
 
 
