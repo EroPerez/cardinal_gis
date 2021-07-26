@@ -72,8 +72,8 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
         if(zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
-                        .strokeColor(Color.YELLOW)
-                        .strokeWidth(2f)
+                        .strokeColor(Color.BLACK)
+                        .strokeWidth(1.5f)
                         .cap(Paint.Cap.ROUND)
                         .build();
             }

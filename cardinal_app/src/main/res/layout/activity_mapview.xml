@@ -83,6 +83,21 @@
             android:orientation="vertical">
 
             <ImageButton
+                android:id="@+id/addroutesegmentbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/mapview_sides_space"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_create_route_segment_line_24dp" />
+            <ImageButton
+                android:id="@+id/jointobutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/mapview_sides_space"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_link_object_24dp" />
+
+            <ImageButton
                 android:id="@+id/toggleLabels"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -144,6 +159,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
                         android:layout_centerVertical="true"
+                        android:elevation="2dp"
                         />
 
 
@@ -168,21 +184,6 @@
                 android:orientation="vertical"
                 android:paddingLeft="@dimen/mapview_sides_space"
                 android:paddingBottom="@dimen/mapview_sides_space" />
-
-            <ImageButton
-                android:id="@+id/addroutesegmentbutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_create_route_segment_line_24dp" />
-            <ImageButton
-                android:id="@+id/jointobutton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/mapview_sides_space"
-                android:background="@null"
-                app:srcCompat="@drawable/ic_link_object_24dp" />
 
             <!--            <ImageButton-->
             <!--                android:id="@+id/addnotebytagbutton"-->
@@ -231,15 +232,18 @@
                     android:background="@drawable/ic_mapview_mot_children_24dp"
                     android:layout_height="48dp"
                     >
+
                     <ImageView
-                        android:layout_width="wrap_content"
                         android:id="@+id/selectMo"
-                        android:layout_margin="10dp"
-                        android:src="@drawable/ic_mapview_mot_parent_24dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true"
-                        />
+                        android:layout_centerInParent="true"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:elevation="2dp"
+                        android:src="@drawable/ic_mapview_mot_parent_24dp" />
 
                 </RelativeLayout>
             </LinearLayout>

@@ -20,4 +20,5 @@
     <string name="route_reset">Route resetting.</string>
     <string name="cardinal_line">Cardinal Line</string>
     <string name="cardinal_polygon">Cardinal Poligon</string>
+    <string name="no_topology_layer">No pertenece a una capa topológica.</string>
 </resources>
