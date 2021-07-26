@@ -235,6 +235,11 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                 MapObjectOperations.getInstance().save(currentObj);
 
+                appContainer.setCurrentMapObject(currentObj);
+                appContainer.setMode(UserMode.NONE);
+                reloadLayer(currentSelectedObjectTypeLayer);
+                GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
+
 //                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
 
 
@@ -246,7 +251,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                             () -> activity.runOnUiThread(() -> {
                                 // yes
                                 appContainer.setCurrentMapObject(null);
-                                // dismiss();
+
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
@@ -258,8 +263,14 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                         !previousObj.getIsCompleted()) {
                                     RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                                     RouteSegmentOperations.getInstance().save(edge);
+                                    try {
+                                        mapView.reloadLayer(EdgesLayer.class);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
                                 }
-                                appContainer.setCurrentMapObject(currentObj);
+
 
                             })
                     );
@@ -270,37 +281,42 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                             !previousObj.getIsCompleted()) {
                         RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                         RouteSegmentOperations.getInstance().save(edge);
+                        mapView.reloadLayer(EdgesLayer.class);
+
                     }
-                    appContainer.setCurrentMapObject(currentObj);
+
 
                 }
 
-                //Update ui
-                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-                intent.putExtra("update_map_object_active", true);
-                getActivity().sendBroadcast(intent);
 
+                refreshUI();
 
-                GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
-
-                try {
-                    ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
-                    ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, currentSelectedObjectTypeLayer.getId());
-
-                    mapView.reloadLayer(EdgesLayer.class);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                appContainer.setMode(UserMode.NONE);
-
-                dismiss();
             } catch (Exception e) {
                 GPLog.error(this, e.getLocalizedMessage(), e);
                 e.printStackTrace();
+
+                refreshUI();
+
             }
 
         }
+    }
+
+    void reloadLayer(Layer layer) throws Exception {
+
+        ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
+        ((IGpLayer) ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, layer.getId())).reloadData();
+
+    }
+
+    void refreshUI() {
+        //Update ui
+        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+        intent.putExtra("update_map_object_active", true);
+        getActivity().sendBroadcast(intent);
+
+
+        dismiss();
     }
 
 }

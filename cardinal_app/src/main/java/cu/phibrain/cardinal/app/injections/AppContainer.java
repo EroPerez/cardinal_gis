@@ -7,6 +7,7 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.IEntity;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
@@ -31,6 +32,8 @@ public class AppContainer {
     protected MapObject mapObjectActive;
     protected Worker currentWorker;
     private MapObject edgeAddInMapObjSelect;
+    private Boolean acctionAddEdge = false;
+    private Boolean isTopology = false;
 
     protected UserMode umode;
 
@@ -191,13 +194,14 @@ public class AppContainer {
 
     private void refreshCMO() throws IOException {
         Long Id = geId(CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldName());
-        //Load Project Active
-        if (mapObjectActive == null || mapObjectActive.getId() != Id) {
 
-            if (Id != null) {
-                mapObjectActive = MapObjectOperations.getInstance().load(Id);
-            }
+        if (Id != null) {
+            if (this.mapObjectActive != null)
+                MapObjectOperations.getInstance().detach(this.mapObjectActive);
+
+            mapObjectActive = MapObjectOperations.getInstance().load(Id);
         }
+
     }
 
     public MapObject getCurrentMapObject() {
@@ -212,6 +216,14 @@ public class AppContainer {
 
     public void setCurrentMapObject(MapObject mapObjectActive) {
         this.mapObjectActive = mapObjectActive;
+        Layer layer;
+        if (this.mapObjectActive != null) {
+            layer = this.mapObjectActive.getLayer();
+            setTopology(layer.getIsTopology());
+        } else
+            setTopology(false);
+
+
         setValue(
                 CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldName(),
                 this.mapObjectActive
@@ -247,6 +259,22 @@ public class AppContainer {
         );
     }
 
+
+    public Boolean getAcctionAddEdge() {
+        return acctionAddEdge;
+    }
+
+    public void setAcctionAddEdge(Boolean acctionAddEdge) {
+        this.acctionAddEdge = acctionAddEdge;
+    }
+
+    public Boolean IsCurrentActiveLayerTopological() {
+        return isTopology;
+    }
+
+    private void setTopology(Boolean topology) {
+        isTopology = topology;
+    }
 
     public UserMode getMode() {
         return umode;

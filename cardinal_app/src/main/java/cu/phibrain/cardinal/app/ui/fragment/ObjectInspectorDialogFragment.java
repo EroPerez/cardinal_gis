@@ -140,21 +140,11 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         BottomSheetDialog dialog = new MyBottomSheetDialog(this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme);
 
         View view = View.inflate(getContext(), R.layout.fragment_object_inspector_dialog_list_dialog, null);
+        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
 
         Long objectId = getArguments().getLong(ARG_MAP_OBJECT_ID);
 
         MapObject objectSelected = MapObjectOperations.getInstance().load(objectId);
-
-        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        appContainer.setCurrentMapObject(objectSelected);
-        appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
-
-        //Update ui
-        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-        intent.putExtra("update_map_object_active", true);
-        intent.putExtra("update_map_object_type_active", true);
-        getActivity().sendBroadcast(intent);
-
 
         try {
             // Basic attribute section

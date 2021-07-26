@@ -59,11 +59,11 @@ import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
  */
 public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickListener, OnTouchListener {
 
-    private ImageButton selectAllButton;
+    //private ImageButton selectAllButton;
     private GPMapView mapView;
 
-    private ImageButton selectEditableButton;
-    private int selectionColor;
+//    private ImageButton selectEditableButton;
+//    private int selectionColor;
     private ImageButton createFeatureButton;
     private ImageButton cutButton;
     private ImageButton extendButton;
@@ -82,7 +82,7 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
         this.mapView = mapView;
 
         LinearLayout parent = EditManager.INSTANCE.getToolsLayout();
-        selectionColor = Compat.getColor(parent.getContext(), R.color.main_selection);
+        //selectionColor = Compat.getColor(parent.getContext(), R.color.main_selection);
     }
 
     public void activate() {
@@ -123,28 +123,28 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
             createFeatureButton.setOnTouchListener(this);
             parent.addView(createFeatureButton);
 
-            selectEditableButton = new ImageButton(context);
-            selectEditableButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT));
-            selectEditableButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_editable_24dp));
-            selectEditableButton.setPadding(0, padding, 0, padding);
-            selectEditableButton.setOnClickListener(this);
-            selectEditableButton.setOnTouchListener(this);
-            parent.addView(selectEditableButton);
+//            selectEditableButton = new ImageButton(context);
+//            selectEditableButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+//                    LayoutParams.WRAP_CONTENT));
+//            selectEditableButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_editable_24dp));
+//            selectEditableButton.setPadding(0, padding, 0, padding);
+//            selectEditableButton.setOnClickListener(this);
+//            selectEditableButton.setOnTouchListener(this);
+//            parent.addView(selectEditableButton);
         }
 
-        selectAllButton = new ImageButton(context);
-        selectAllButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        Tool activeTool = EditManager.INSTANCE.getActiveTool();
-        if (activeTool instanceof InfoTool) {
-            selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_active_24dp));
-        } else {
-            selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_24dp));
-        }
-        selectAllButton.setPadding(0, padding, 0, padding);
-        selectAllButton.setOnClickListener(this);
-        selectAllButton.setOnTouchListener(this);
-        parent.addView(selectAllButton);
+//        selectAllButton = new ImageButton(context);
+//        selectAllButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//        Tool activeTool = EditManager.INSTANCE.getActiveTool();
+//        if (activeTool instanceof InfoTool) {
+//            selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_active_24dp));
+//        } else {
+//            selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_24dp));
+//        }
+//        selectAllButton.setPadding(0, padding, 0, padding);
+//        selectAllButton.setOnClickListener(this);
+//        selectAllButton.setOnTouchListener(this);
+//        parent.addView(selectAllButton);
 
         if (editLayer != null) {
             undoButton = new ImageButton(context);
@@ -175,40 +175,41 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
     }
 
     public void onClick(View v) {
-        if (v == selectAllButton) {
-            Tool currentTool = EditManager.INSTANCE.getActiveTool();
-            if (currentTool instanceof InfoTool) {
-                // if the same tool is re-selected, it is disabled
-                EditManager.INSTANCE.setActiveTool(null);
-            } else {
-                // check maps enablement
-                try {
-                    List<IEditableLayer> editableLayers = LayerManager.INSTANCE.getEditableLayers(mapView);
-                    final Context context = EditManager.INSTANCE.getEditingView().getContext();
-                    if (editableLayers.size() == 0) {
-                        LinearLayout parent = EditManager.INSTANCE.getToolsLayout();
-                        if (parent != null) {
-                            GPDialogs.warningDialog(context, context.getString(R.string.no_queriable_layer_is_visible), null);
-                        }
-                        return;
-                    }
-                } catch (Exception e) {
-                    GPLog.error(this, null, e);
-                }
-
-                Tool activeTool = new InfoTool(this, mapView);
-                EditManager.INSTANCE.setActiveTool(activeTool);
-            }
-        } else if (v == selectEditableButton) {
-            Tool currentTool = EditManager.INSTANCE.getActiveTool();
-            if (currentTool instanceof SelectionTool) {
-                // if the same tool is re-selected, it is disabled
-                EditManager.INSTANCE.setActiveTool(null);
-            } else {
-                Tool activeTool = new SelectionTool(mapView);
-                EditManager.INSTANCE.setActiveTool(activeTool);
-            }
-        } else if (v == createFeatureButton) {
+//        if (v == selectAllButton) {
+//            Tool currentTool = EditManager.INSTANCE.getActiveTool();
+//            if (currentTool instanceof InfoTool) {
+//                // if the same tool is re-selected, it is disabled
+//                EditManager.INSTANCE.setActiveTool(null);
+//            } else {
+//                // check maps enablement
+//                try {
+//                    List<IEditableLayer> editableLayers = LayerManager.INSTANCE.getEditableLayers(mapView);
+//                    final Context context = EditManager.INSTANCE.getEditingView().getContext();
+//                    if (editableLayers.size() == 0) {
+//                        LinearLayout parent = EditManager.INSTANCE.getToolsLayout();
+//                        if (parent != null) {
+//                            GPDialogs.warningDialog(context, context.getString(R.string.no_queriable_layer_is_visible), null);
+//                        }
+//                        return;
+//                    }
+//                } catch (Exception e) {
+//                    GPLog.error(this, null, e);
+//                }
+//
+//                Tool activeTool = new InfoTool(this, mapView);
+//                EditManager.INSTANCE.setActiveTool(activeTool);
+//            }
+//        } else if (v == selectEditableButton) {
+//            Tool currentTool = EditManager.INSTANCE.getActiveTool();
+//            if (currentTool instanceof SelectionTool) {
+//                // if the same tool is re-selected, it is disabled
+//                EditManager.INSTANCE.setActiveTool(null);
+//            } else {
+//                Tool activeTool = new SelectionTool(mapView);
+//                EditManager.INSTANCE.setActiveTool(activeTool);
+//            }
+//        } else
+            if (v == createFeatureButton) {
             ToolGroup createFeatureToolGroup = new PolygonCreateFeatureToolGroup(mapView);
             EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
         } else if (v == cutButton) {
@@ -274,22 +275,22 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
     private void handleToolIcons(View activeToolButton) {
         Context context = activeToolButton.getContext();
         Tool currentTool = EditManager.INSTANCE.getActiveTool();
-        if (selectEditableButton != null) {
-            if (currentTool != null && activeToolButton == selectEditableButton) {
-                selectEditableButton.setBackground(Compat.getDrawable(context,
-                        R.drawable.ic_editing_select_editable_active_24dp));
-            } else {
-                selectEditableButton.setBackground(Compat.getDrawable(context,
-                        R.drawable.ic_editing_select_editable_24dp));
-            }
-        }
-        if (selectAllButton != null)
-            if (currentTool != null && activeToolButton == selectAllButton) {
-                selectAllButton
-                        .setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_active_24dp));
-            } else {
-                selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_24dp));
-            }
+//        if (selectEditableButton != null) {
+//            if (currentTool != null && activeToolButton == selectEditableButton) {
+//                selectEditableButton.setBackground(Compat.getDrawable(context,
+//                        R.drawable.ic_editing_select_editable_active_24dp));
+//            } else {
+//                selectEditableButton.setBackground(Compat.getDrawable(context,
+//                        R.drawable.ic_editing_select_editable_24dp));
+//            }
+//        }
+//        if (selectAllButton != null)
+//            if (currentTool != null && activeToolButton == selectAllButton) {
+//                selectAllButton
+//                        .setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_active_24dp));
+//            } else {
+//                selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_24dp));
+//            }
         if (cutButton != null)
             if (currentTool != null && activeToolButton == cutButton) {
                 cutButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_cut_active_24dp));
@@ -308,7 +309,7 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                v.getBackground().setColorFilter(selectionColor, Mode.SRC_ATOP);
+               // v.getBackground().setColorFilter(selectionColor, Mode.SRC_ATOP);
                 v.invalidate();
                 break;
             }
