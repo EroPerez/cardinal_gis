@@ -45,6 +45,7 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
@@ -311,7 +312,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
     }
 
-        @Override
+    @Override
     public void onPrepareOptionsMenu(Menu menu) {
         Profile activeProfile = ProfilesHandler.INSTANCE.getActiveProfile();
         if (activeProfile != null && activeProfile.profileProject != null && activeProfile.getFile(activeProfile.profileProject.getRelativePath()).exists()) {
@@ -465,12 +466,13 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             ImageButton imageButton = (ImageButton) v;
 
             String tooltip = imageButton.getContentDescription().toString();
-//            if (imageButton == mNotesButton) {
-//                Intent intent = new Intent(getActivity(), NotesListActivity.class);
-//                intent.putExtra(LibraryConstants.PREFS_KEY_MAP_ZOOM, false);
-//                startActivity(intent);
-//            } else
-            if (imageButton == mMetadataButton) {
+
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+
+            if (imageButton == mSessionButton && appContainer.getWorkSessionActive() != null) {
+                Intent intent = new Intent(getActivity(), SessionsStatsActivity.class);
+                startActivity(intent);
+            } else if (imageButton == mMetadataButton) {
                 try {
                     String databaseName = ResourcesManager.getInstance(getContext()).getDatabaseFile().getName();
                     tooltip += " (" + databaseName + ")";
@@ -485,21 +487,21 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
 
 
-//        if (v == mNotesButton) {
-//            StringBuilder tooltip = new StringBuilder("Available providers:");//NON-NLS
-//            FragmentActivity activity = getActivity();
-//            if (activity != null) {
-//                for (PackageInfo pack : activity.getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS)) {
-//                    ProviderInfo[] providers = pack.providers;
-//                    if (providers != null) {
-//                        for (ProviderInfo provider : providers) {
-//                            tooltip.append("\n").append(provider.authority);
-//                        }
-//                    }
-//                }
-//                Snackbar.make(v, tooltip.toString(), Snackbar.LENGTH_SHORT).show();
-//            }
-//        }
+        if (v == mSessionButton) {
+            StringBuilder tooltip = new StringBuilder("Available providers:");//NON-NLS
+            FragmentActivity activity = getActivity();
+            if (activity != null) {
+                for (PackageInfo pack : activity.getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS)) {
+                    ProviderInfo[] providers = pack.providers;
+                    if (providers != null) {
+                        for (ProviderInfo provider : providers) {
+                            tooltip.append("\n").append(provider.authority);
+                        }
+                    }
+                }
+                Snackbar.make(v, tooltip.toString(), Snackbar.LENGTH_SHORT).show();
+            }
+        }
 
 
         return true;
