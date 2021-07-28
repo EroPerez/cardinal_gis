@@ -25,11 +25,11 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
-import cu.phibrain.plugins.cardinal.io.R;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -82,7 +82,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if (zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if ((double)zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
@@ -210,11 +210,10 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
             GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
             appContainer.setMode(UserMode.NONE);
             //Reload layers associated
+            mapView.reloadLayer(EdgesLayer.class);
             this.reloadData();
             Layer editLayer = currentMO.getLayer();
             ((IGpLayer) ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, editLayer.getId())).reloadData();
-
-            mapView.reloadLayer(EdgesLayer.class);
 
         } else {
             BarcodeReaderDialogFragment.newInstance(

@@ -8,7 +8,7 @@ public class NumberUtiles {
 
     public static Long parseStringToLong(String value, Long defaultValue) {
         try {
-            return value == null || value.trim().isEmpty() ? defaultValue : Long.parseLong(value);
+            return value == null || value.trim().isEmpty() ? defaultValue : Long.parseLong("0" + value);
         } catch (Exception ex) {
             ex.printStackTrace();
 

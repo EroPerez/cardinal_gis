@@ -5,9 +5,7 @@ import android.widget.Toast;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.oscim.core.GeoPoint;
 import org.oscim.utils.geom.GeomBuilder;
 
@@ -22,7 +20,7 @@ import eu.geopaparazzi.map.GPGeoPoint;
 
 public class LatLongUtils {
     public static final double MAX_DISTANCE = 50.0f;
-    public static final double LINE_AND_POLYGON_VIEW_ZOOM = 15;
+    public static final double LINE_AND_POLYGON_VIEW_ZOOM = 15.0f;
 
     public static double distance(MapObject mo1, MapObject mo2) {
         try {
@@ -76,7 +74,7 @@ public class LatLongUtils {
         } else if (geomType == MapObjecType.GeomType.POINT) {
             centroid = builder.toPoint().getCentroid();
         }
-        return centroid == null ? null : new GPGeoPoint(centroid.getY(), centroid.getX());
+        return centroid == null ? null : new GPGeoPoint(centroid.getY()+ 0.000001, centroid.getX()+ 0.000001);
 
     }
 }

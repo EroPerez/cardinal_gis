@@ -3,24 +3,18 @@
     android:height="60dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!--    <path-->
-    <!--        android:fillColor="@color/main_decorations"-->
-    <!--        android:pathData="m12,0.5c-6.348,0 -11.5,5.152 -11.5,11.5 0,6.348 5.152,11.5 11.5,11.5 6.348,0 11.5,-5.152 11.5,-11.5 0,-6.348 -5.152,-11.5 -11.5,-11.5z"-->
-    <!--        android:strokeWidth="1"-->
-    <!--        android:strokeAlpha="1"-->
-    <!--        android:strokeColor="@color/main_background"-->
-    <!--        android:strokeLineCap="butt"-->
-    <!--        android:strokeLineJoin="miter" />-->
+
     <path
-        android:fillColor="@color/main_decorations"
+        android:fillColor="@color/main_background"
         android:pathData="M12.4951,7.4029C10.2861,7.4029 8.4951,8.755 8.4951,10.4226c-0.0199,1.6676 4,6.5803 4,6.5803 0,0 4,-4.8976 4,-6.5803C16.4951,8.755 14.704,7.4029 12.4951,7.4029ZM12.4951,12.7963c-1.791,0 -3.2438,-1.0967 -3.2438,-2.4488 0,-1.3521 1.4527,-2.4488 3.2438,-2.4488 1.791,0 3.2437,1.0967 3.2437,2.4488 0,1.3371 -1.4527,2.4488 -3.2437,2.4488z"
-        android:strokeWidth="1"
+        android:strokeWidth=".2"
         android:strokeAlpha="1"
-        android:strokeColor="@color/main_background" />
+        android:strokeColor="@color/main_decorations" />
 
     <path
         android:fillColor="@color/main_background"
         android:pathData="m12.4666,8.3787c-1.0313,0 -1.8674,0.7423 -1.8674,1.6581 0,0.9157 0.8361,1.658 1.8674,1.658 1.0313,0 1.8674,-0.7423 1.8674,-1.6581 0,-0.9157 -0.8361,-1.658 -1.8674,-1.658zM13.1279,9.8366 L11.8516,10.971c-0.0054,0.0048 -0.0122,0.0083 -0.0196,0.01l-0.5082,0.1183c-0.0148,0.0034 -0.0307,-0.0004 -0.0415,-0.01 -0.0109,-0.0097 -0.0152,-0.0237 -0.0113,-0.0369l0.1327,-0.4513c0.0019,-0.0066 0.0058,-0.0127 0.0112,-0.0174l1.2764,-1.1344c0.0169,-0.015 0.0443,-0.015 0.0612,0l0.1036,0.0918c0.0168,0.015 0.0169,0.0393 0,0.0544l-0.8525,0.7577 0.1072,0.0951 0.8525,-0.7577c0.0168,-0.015 0.0442,-0.015 0.0611,0l0.1036,0.0918c0.0169,0.0149 0.0169,0.0393 -0.0001,0.0543zM13.651,9.3717 L13.2638,9.7158c-0.0168,0.015 -0.0442,0.015 -0.0611,0l-0.3755,-0.3331c-0.0169,-0.015 -0.0169,-0.0393 -0,-0.0544l0.3871,-0.3441c0.0169,-0.015 0.0443,-0.015 0.0612,0l0.3755,0.3332c0.017,0.015 0.017,0.0393 0,0.0544z"
-        android:strokeWidth="1"
-        android:strokeAlpha="1" />
+        android:strokeWidth=".2"
+        android:strokeAlpha="1"
+        android:strokeColor="@color/main_decorations"/>
 </vector>

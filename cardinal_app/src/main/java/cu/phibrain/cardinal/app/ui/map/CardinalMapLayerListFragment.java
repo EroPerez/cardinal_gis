@@ -56,6 +56,7 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
+import cu.phibrain.cardinal.app.ui.layer.ICardinalLayer;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
 import eu.geopaparazzi.library.util.FileUtilities;
@@ -354,9 +355,12 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
         for (JSONObject layerDefinition : layerDefinitions) {
             MapLayerItem layerItem = null;
             String layerClass = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
-            if(layerClass.equals(EdgesLayer.class.getCanonicalName())
-                    || layerClass.equals(CardinalLineLayer.class.getCanonicalName())
+            if(layerClass.equals(CardinalLineLayer.class.getCanonicalName())
                     || layerClass.equals(CardinalPolygonLayer.class.getCanonicalName()))
+            {
+                continue;
+            }
+            else if(layerClass.equals(EdgesLayer.class.getCanonicalName()))
                 layerItem = getCardinalSimpleItem(index, layerDefinition);
             else
                 layerItem = getCardinalLayerItem(index, layerDefinition);
@@ -428,7 +432,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
     private CardinalMapLayerItem getCardinalLayerItem(int index, JSONObject layerDefinition) throws JSONException {
         String name = layerDefinition.getString(IGpLayer.LAYERNAME_TAG);
         String type = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
-        Long id = layerDefinition.getLong("ID");
+        Long id = layerDefinition.getLong(ICardinalLayer.LAYERID_TAG);
 
         boolean isEnabled = true;
         if (layerDefinition.has(IGpLayer.LAYERENABLED_TAG)) {

@@ -17,6 +17,7 @@ import org.greenrobot.greendao.annotation.ToOne;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.GPGeoPointListConverter;
 import eu.geopaparazzi.map.GPGeoPoint;
@@ -702,6 +703,23 @@ public class MapObject implements Serializable, IEntity {
                 ", sessionId=" + sessionId +
                 ", isCompleted=" + isCompleted +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapObject mapObject = (MapObject) o;
+        return sessionId == mapObject.sessionId &&
+                id.equals(mapObject.id) &&
+                code.equals(mapObject.code) &&
+                mapObjectTypeId.equals(mapObject.mapObjectTypeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, code, mapObjectTypeId, sessionId);
     }
 
 
