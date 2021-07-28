@@ -47,13 +47,14 @@ public class CardinalGPMapView extends GPMapView {
 //        }
 //    }
 
-//    public void reloadLayer(Class<? extends IGpLayer> layerClass, Long id) throws Exception {
-//        for (Layer layer : map().layers()) {
-//            if (layer.getClass().isAssignableFrom(layerClass) && ((CardinalLayer) layer).getID().equals(id)) {
-//                ((CardinalLayer) layer).reloadData(id);
-//                break;
-//            }
-//        }
-//    }
+    public void reloadLayer( Long id) throws Exception {
+        for (Layer layer : map().layers()) {
+            if (layer.getClass().isAssignableFrom(CardinalPointLayer.class) && ((ICardinalLayer) layer).getLayerId().equals(id)) {
+                ((CardinalPointLayer) layer).reloadData();
+//                Log.d("RL", ((IGpLayer) layer).getId());
+                break;
+            }
+        }
+    }
 
 }

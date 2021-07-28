@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Cardinal</string>
+
     <string name="reset_route">Started a new branch.</string>
+    <string name="layername_edges">Route segments layer</string>
+    <string name="layername_mot">Point type map object layer</string>
+    <string name="not_project_active">You don\'t have an active project.</string>
+    <string name="cardinal_line">Line type map object layer</string>
+    <string name="cardinal_polygon">Polygon type map object layer</string>
+    <string name="no_topology_layer">Not belong to a topological layer.</string>
+
     <string name="seleccione_un_objeto_de_mapa">Select a Map Object</string>
     <string name="panic">Panic button</string>
     <string name="work_session_not_active">Please, you must activate a work session</string>
@@ -37,7 +45,9 @@
     <string name="distance_tip_message">The distance from where you are going to insert the new point and the previous point defined by you is %.2f m.</string>
     <string name="max_distance_threshold_broken_message_edge">The above map object is more than %.2f m away. Do you want to create a route segment anyway?</string>
     <string name="stats_session_view_label">Work session stats</string>
-    <string name="km_covered">Distance: %.2f m</string>
-    <string name="captured_points">Points: %d</string>
+    <string name="km_covered">Route length: %.2f m</string>
+    <string name="captured_points">Geolocated points: %d</string>
+    <string name="map_object_incomplete_count">Incomplete: %d</string>
+    <string name="gpslogging_stop_and_start_again">Could not start worker route logging. Stop the logging and restart it by checking the "Continue last logging" button.</string>
 
 </resources>

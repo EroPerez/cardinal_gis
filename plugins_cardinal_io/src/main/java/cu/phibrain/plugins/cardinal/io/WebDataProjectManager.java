@@ -5,11 +5,30 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Label;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelBatches;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelMaterialOperations;
@@ -39,30 +58,19 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperatio
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ZoneOperations;
 import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Label;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelBatches;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import cu.phibrain.plugins.cardinal.io.utils.CardinalMetadataTableDefaultValues;
+import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.library.R;
 import eu.geopaparazzi.library.core.ResourcesManager;
+import eu.geopaparazzi.library.database.DefaultHelperClasses;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.database.IGpsLogDbHelper;
 import eu.geopaparazzi.library.database.TableDescriptions;
+import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.library.util.Utilities;
 
 
@@ -205,15 +213,42 @@ public enum WebDataProjectManager {
             }
 
             WorkSessionOperations.getInstance().insertAll(workSessionList);
-            //Get and save all objects in worksessions
+
             List<MapObject> mapObjectList = new ArrayList<>();
+            // Prepare log table to transfer cardus log to gp log
+            DaoGpsLog.createTables(db);
+            Class<?> logHelper = Class.forName(DefaultHelperClasses.GPSLOG_HELPER_CLASS);
+            IGpsLogDbHelper dbHelper = (IGpsLogDbHelper) logHelper.newInstance();
+
+            //Get and save all objects in worksessions
             for (WorkSession session :
                     workSessionList) {
-                WorkerRouteOperations.getInstance().insertAll(session.getWorkerRoute());
                 MaterialOperations.getInstance().insertAll(session.getMaterials());
                 LabelSubLotOperations.getInstance().insertAll(session.getLabels());
                 SignalEventsOperations.getInstance().insertAll(session.getEvents());
                 mapObjectList.addAll(session.getMapObjects());
+
+                List<WorkerRoute> gpslogs = session.getWorkerRoute();
+                //generate local gps log
+                final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
+                long now = System.currentTimeMillis();
+
+                long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
+
+                for (WorkerRoute log :
+                        gpslogs) {
+                    dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
+                }
+
+                try {
+                    DaoGpsLog.updateLogLength(gpsLogId);
+                } catch (IOException e) {
+                    GPLog.error(this, "ERROR", e);//NON-NLS
+                }
+
+                //save current log
+                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));
+
             }
 
 

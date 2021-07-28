@@ -16,7 +16,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NavUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,11 +32,14 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
+import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.util.StringAsyncTask;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.MapsSupportService;
 
@@ -45,33 +50,80 @@ public class SessionsStatsActivity extends AppCompatActivity {
     private Comparator<MapObject> mapObjectComparator = new ItemComparators.MapObjectComparator(false);
     private ListView listView;
     private EditText filterText;
+    private TextView tvCapturePoint;
+    private TextView trackLengthTextView;
     private WorkSession wsa;
+    private AppContainer appContainer;
+    private int incompledCounter;
+
+    private double lengthm;
+    private StringAsyncTask task = null;
+    private TextView incompleteMOTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sessions_stats);
 
-        AppContainer appContainer = ((CardinalApplication) getApplication()).appContainer;
+        appContainer = ((CardinalApplication) getApplication()).appContainer;
 
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        if (null != toolbar) {
+            toolbar.setNavigationOnClickListener(v -> NavUtils.navigateUpFromSameTask(SessionsStatsActivity.this));
+
+        }
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         listView = findViewById(R.id.mapObjectsList);
         wsa = appContainer.getWorkSessionActive();
+        incompledCounter = 0;
+
+        tvCapturePoint = findViewById(R.id.tvCapturePoint);
+        trackLengthTextView = findViewById(R.id.tvKm);
+
+        incompleteMOTextView = findViewById(R.id.tvIncompleteMO);
+
+        task = new StringAsyncTask(SessionsStatsActivity.this) {
+            @Override
+            protected void doUiPostWork(String response) {
+                trackLengthTextView.setText(response);
+                dispose();
+            }
+
+            @Override
+            protected String doBackgroundWork() {
+                lengthm = 0.0;
+                wsa.resetWorkerRoute();
+                for (WorkerRoute log :
+                        wsa.getWorkerRoute()) {
+                    try {
+                        lengthm += DaoGpsLog.updateLogLength(log.getGpsLogsTableId());
+                    } catch (IOException e) {
+                        GPLog.error(this, "ERROR", e);//NON-NLS
+                    }
+                }
+                return getString(R.string.km_covered, lengthm);//NON-NLS
+            }
+        };
+        task.setProgressDialog(null, getString(eu.geopaparazzi.core.R.string.calculate_length), false, null);
+        task.execute();
+
+//        final ImageButton chartButton = findViewById(R.id.stats_gpslog_chart);
+//        chartButton.setOnClickListener(v -> {
+//            Intent intent = new Intent(SessionsStatsActivity.this, ProfileChartActivity.class);
+//            intent.putExtra(Constants.ID, item.getId());
+//            startActivity(intent);
+//        });
 
         refreshList();
 
         filterText = findViewById(R.id.search_box_mo);
         filterText.addTextChangedListener(filterTextWatcher);
 
-        TextView tvKm = findViewById(R.id.tvKm);
-        tvKm.setText(getString(R.string.km_covered, 0.0f));
-        TextView tvCapturePoint = findViewById(R.id.tvCapturePoint);
-        tvCapturePoint.setText(getString(R.string.captured_points, wsa.getMapObjects().size()));
     }
 
     @Override
@@ -95,7 +147,6 @@ public class SessionsStatsActivity extends AppCompatActivity {
         if (GPLog.LOG_HEAVY)
             GPLog.addLogEntry(this, "refreshing map objects list"); //$NON-NLS-1$
 
-
         wsa.resetMapObjects();
 
         List<MapObject> mapObjectList = wsa.getMapObjects();
@@ -110,6 +161,8 @@ public class SessionsStatsActivity extends AppCompatActivity {
             mapobjectsCodes[index] = code;
             index++;
         }
+
+        tvCapturePoint.setText(getString(R.string.captured_points, mapObjectList.size()));
 
         redoAdapter();
     }
@@ -142,6 +195,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
     }
 
     private void redoAdapter() {
+        incompledCounter = 0;
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, eu.geopaparazzi.core.R.layout.activity_bookmarkslist_row, mapobjectsCodes) {
             @Override
             public View getView(int position, View cView, ViewGroup parent) {
@@ -193,6 +247,12 @@ public class SessionsStatsActivity extends AppCompatActivity {
                     finish();
                 });
 
+                //check completitud del nodo
+                final MapObject mapObject = mapObjectMap.get(mapobjectsCodes[position]);
+
+                if (!mapObject.getIsCompleted())
+                    incompledCounter++;
+
 
                 return rowView;
             }
@@ -200,6 +260,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
         };
 
         listView.setAdapter(arrayAdapter);
+        incompleteMOTextView.setText(getString(R.string.map_object_incomplete_count, incompledCounter));
     }
 
     private TextWatcher filterTextWatcher = new TextWatcher() {

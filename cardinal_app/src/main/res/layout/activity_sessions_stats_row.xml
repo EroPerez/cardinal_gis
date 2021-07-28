@@ -3,8 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mapobjectsrowlayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="10dip">
+    android:layout_height="wrap_content"
+    android:background="@drawable/item_backgroud_outline"
+    android:layout_marginBottom="3dp"
+    android:padding="4dp">
 
     <HorizontalScrollView
         android:id="@+id/hsvContent"

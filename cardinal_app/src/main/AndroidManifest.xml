@@ -15,14 +15,8 @@
         <activity
             android:name=".ui.activities.SessionsStatsActivity"
             android:label="@string/stats_session_view_label"
-            android:parentActivityName=".CardinalActivity"
-            android:theme="@style/GeopapTheme.NoActionBar"
-            >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="cu.phibrain.cardinal.app.CardinalActivity" />
-            >
-        </activity>
+            android:parentActivityName=".MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar" />
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="fullSensor"

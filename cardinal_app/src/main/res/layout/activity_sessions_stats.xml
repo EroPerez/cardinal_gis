@@ -29,29 +29,48 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
-            android:id="@+id/stats_container"
+
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="4dp"
             android:paddingRight="4dp">
-
-            <!-- Include other widget or layout tags here. These are considered
-                    "child views" or "children" of the linear layout -->
-
             <TextView
                 android:id="@+id/tvKm"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginEnd="3dp"
                 android:layout_weight="1"
                 android:text="@string/km_covered"
                 android:textAlignment="center"
-                android:textAppearance="@style/GPTextViewStyle"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/main_text_color"
                 android:textStyle="bold" />
+
+<!--            <ImageButton-->
+<!--                android:id="@+id/stats_gpslog_chart"-->
+<!--                android:layout_width="@dimen/min_touch_size"-->
+<!--                android:layout_height="@dimen/min_touch_size"-->
+<!--                android:layout_margin="10dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:background="@null"-->
+<!--                app:srcCompat="@drawable/ic_chart_primary_24dp" />-->
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/stats_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp">
 
             <TextView
                 android:id="@+id/tvCapturePoint"
@@ -61,9 +80,25 @@
                 android:layout_weight="1"
                 android:text="@string/captured_points"
                 android:textAlignment="center"
-                android:textAppearance="@style/GPTextViewStyle"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/main_text_color"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvIncompleteMO"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:text="@string/map_object_incomplete_count"
+                android:textAlignment="center"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/main_text_color"
+                android:textStyle="bold" />
+
         </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -90,7 +125,8 @@
                 android:id="@+id/mapObjectsList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical" />
+                android:orientation="vertical"
+                tools:listitem="@layout/activity_sessions_stats_row" />
 
         </LinearLayout>
 
