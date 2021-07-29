@@ -46,4 +46,5 @@
     <string name="captured_points">Puntos geolocalizados: %d</string>
     <string name="map_object_incomplete_count">Incompletos: %d</string>
     <string name="gpslogging_stop_and_start_again">No se pudo iniciar el registro de ruta del operario. Detenga el registro y reinícielo marcando el botón "Continuar con el último registro".</string>
+    <string name="obj_destination_completed">El objeto destino esta completado según el grado definido, aumente el grado y reintente la operación.</string>
 </resources>

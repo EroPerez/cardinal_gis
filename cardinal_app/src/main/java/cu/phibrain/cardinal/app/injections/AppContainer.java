@@ -33,6 +33,7 @@ public class AppContainer {
     protected Worker currentWorker;
     private MapObject edgeAddInMapObjSelect;
     private Boolean acctionAddEdge = false;
+    private Boolean acctionJoinMo= false;
     private Boolean isTopology = false;
 
     protected UserMode umode;
@@ -282,5 +283,13 @@ public class AppContainer {
 
     public void setMode(UserMode umode) {
         this.umode = umode;
+    }
+
+    public Boolean getAcctionJoinMo() {
+        return acctionJoinMo;
+    }
+
+    public void setAcctionJoinMo(Boolean acctionJoinMo) {
+        this.acctionJoinMo = acctionJoinMo;
     }
 }

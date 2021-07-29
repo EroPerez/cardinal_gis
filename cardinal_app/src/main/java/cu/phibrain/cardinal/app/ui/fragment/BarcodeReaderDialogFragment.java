@@ -218,16 +218,19 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             code128BarcodeScan.initiateScan();
         } else if (i == R.id.imgBtnSave) {
             FragmentActivity activity = getActivity();
+            boolean terminalFound = false;
             try {
                 MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
                 MapObject previousObj = appContainer.getCurrentMapObject();
                 Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
+                long grade = currentSelectedObjectTypeLayer.getIsTopology() ? currentSelectedObjectType.getIsTerminal() ? 1 : 2 : 0;
+
                 MapObject currentObj = new MapObject();
                 currentObj.setCode(label.toString());
                 currentObj.setCoord(this.coordinates);
                 currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
-                currentObj.setNodeGrade(currentSelectedObjectTypeLayer.getIsTopology() ? 2 : 1);
+                currentObj.setNodeGrade(grade);
                 currentObj.setSessionId(currentSession.getId());
                 currentObj.setIsCompleted(false);
                 currentObj.setCreatedAt(new Date());
@@ -235,12 +238,27 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
                 MapObjectOperations.getInstance().save(currentObj);
 
-                appContainer.setCurrentMapObject(currentObj);
+                if (!currentObj.isTerminal()) {
+                    appContainer.setCurrentMapObject(currentObj);
+                } else {
+                    appContainer.setCurrentMapObject(null);
+                    appContainer.setMapObjecTypeActive(null);
+                    appContainer.setNetworksActive(null);
+                    terminalFound = true;
+                }
                 appContainer.setMode(UserMode.NONE);
                 reloadLayer(currentSelectedObjectTypeLayer);
                 GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
 
 //                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
+
+                if (!currentSelectedObjectTypeLayer.getIsTopology() ||
+                        previousObj == null ||
+                        !previousObj.belongToTopoLayer() ||
+                        !previousObj.getIsCompleted()) {
+                    refreshUI(terminalFound);
+                    return;
+                }
 
 
                 if (LatLongUtils.soFar(previousObj, LatLongUtils.MAX_DISTANCE, currentObj)) {
@@ -258,17 +276,12 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                 GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
                                         LatLongUtils.MAX_DISTANCE));
 
-                                if (currentSelectedObjectTypeLayer.getIsTopology() &&
-                                        previousObj != null &&
-                                        !previousObj.getIsCompleted()) {
-                                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
-                                    RouteSegmentOperations.getInstance().save(edge);
-                                    try {
-                                        mapView.reloadLayer(EdgesLayer.class);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-
+                                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                                RouteSegmentOperations.getInstance().save(edge);
+                                try {
+                                    mapView.reloadLayer(EdgesLayer.class);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
 
 
@@ -276,26 +289,19 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     );
                 } else {
 
-                    if (currentSelectedObjectTypeLayer.getIsTopology() &&
-                            previousObj != null &&
-                            !previousObj.getIsCompleted()) {
-                        RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
-                        RouteSegmentOperations.getInstance().save(edge);
-                        mapView.reloadLayer(EdgesLayer.class);
-
-                    }
-
-
+                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                    RouteSegmentOperations.getInstance().save(edge);
+                    mapView.reloadLayer(EdgesLayer.class);
                 }
 
 
-                refreshUI();
+                refreshUI(terminalFound);
 
             } catch (Exception e) {
                 GPLog.error(this, e.getLocalizedMessage(), e);
                 e.printStackTrace();
 
-                refreshUI();
+                refreshUI(terminalFound);
 
             }
 
@@ -309,10 +315,12 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
     }
 
-    void refreshUI() {
+    void refreshUI(boolean terminalFound) {
         //Update ui
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
         intent.putExtra("update_map_object_active", true);
+        intent.putExtra("update_map_object_type_active", true);
+        intent.putExtra("is_map_object_terminal", terminalFound);
         getActivity().sendBroadcast(intent);
 
 

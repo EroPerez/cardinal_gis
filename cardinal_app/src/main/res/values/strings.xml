@@ -49,5 +49,5 @@
     <string name="captured_points">Geolocated points: %d</string>
     <string name="map_object_incomplete_count">Incomplete: %d</string>
     <string name="gpslogging_stop_and_start_again">Could not start worker route logging. Stop the logging and restart it by checking the "Continue last logging" button.</string>
-
+    <string name="obj_destination_completed">El objeto destino esta completado según el grado definido, aumente el grado y reintente la operación.</string>
 </resources>

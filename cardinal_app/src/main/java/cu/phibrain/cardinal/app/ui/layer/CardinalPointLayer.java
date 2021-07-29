@@ -15,6 +15,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.backend.canvas.Color;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
@@ -71,7 +72,8 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
     private boolean selectMarker;
-//    List<MapObject> mapObjectsList;
+    //    List<MapObject> mapObjectsList;
+    private AppContainer appContainer;
 
     public CardinalPointLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
         super(mapView.map(), getMarkerSymbol(mapView, ID));
@@ -82,6 +84,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         this.activitySupporter = activitySupporter;
         setOnItemGestureListener(this);
         selectMarker = false;
+        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
         try {
             reloadData();
         } catch (IOException e) {
@@ -115,8 +118,30 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         return new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.UPPER_LEFT_CORNER, false);
     }
 
+    //    public void reloadData(Long id) throws IOException {
+//        cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(id);
+//        for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
+//            mtoMapObjcType.resetMapObjects();
+//            List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
+//
+//            byte [] icon = mtoMapObjcType.getIconAsByteArray();
+//            Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
+//
+//            List<MarkerItem> pts = new ArrayList<>();
+//            for (MapObject mapObject : mapObjects) {
+//                String text = mapObject.getObjectType().getCaption();
+//                pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), centerPoint(mapObject)));
+//            }
+//            for (MarkerItem mi : pts) {
+//                mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
+//            }
+//            addItems(pts);
+//            update();
+//        }
+//
+//    }
     private GPGeoPoint centerPoint(MapObject mapObject) {
-        return LatLongUtils.labelPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+        return LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
     }
 
     @Override
@@ -177,74 +202,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-
-        MapviewActivity activity = (MapviewActivity) this.activitySupporter;
-        if (item != null && Long.parseLong("" + item.getUid()) != -1 && appContainer.getAcctionAddEdge()) {
-
-            MapObject previousObj = appContainer.getCurrentMapObject();
-            Layer currentSelectedObjectTypeLayer = previousObj.getLayer();
-            MapObject currentObj = MapObjectOperations.getInstance().load((Long) item.getUid());
-            if (!currentObj.getLayer().getIsTopology()) {
-                GPDialogs.toast(this.activitySupporter.getContext(), R.string.no_topology_layer, Toast.LENGTH_SHORT);
-                return true;
-            }
-            if (LatLongUtils.soFar(previousObj, LatLongUtils.MAX_DISTANCE, currentObj)) {
-
-                GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
-                        String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
-                                LatLongUtils.MAX_DISTANCE),
-                        () -> activity.runOnUiThread(() -> {
-                            // yes
-                            GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
-                                    LatLongUtils.MAX_DISTANCE));
-
-                            if (currentSelectedObjectTypeLayer.getIsTopology() &&
-                                    previousObj != null &&
-                                    !previousObj.getIsCompleted()) {
-                                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
-                                RouteSegmentOperations.getInstance().save(edge);
-                                try {
-                                    mapView.reloadLayer(EdgesLayer.class);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-
-
-                        }), () -> activity.runOnUiThread(() -> {
-                            // no
-
-
-                        })
-                );
-            } else {
-
-                if (currentSelectedObjectTypeLayer.getIsTopology() &&
-                        previousObj != null &&
-                        !previousObj.getIsCompleted()) {
-                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
-                    RouteSegmentOperations.getInstance().save(edge);
-                    try {
-                        mapView.reloadLayer(EdgesLayer.class);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-            }
-
-            //Update ui
-            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-            intent.putExtra("update_map_object_active", true);
-            activity.sendBroadcast(intent);
-
-        }
-
-        if (item != null)
-            GPDialogs.toast(mapView.getContext(), item.getTitle(), Toast.LENGTH_SHORT);
+        MapObject previousObj = appContainer.getCurrentMapObject();
+        MapObject currentObj = MapObjectOperations.getInstance().load((Long) item.getUid());
+        addEdge(item, currentObj, previousObj);
+        joinMo(item, currentObj, previousObj);
 
         return true;
 
@@ -257,7 +218,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             if (selectMarker)
                 removeItem(size() - 1);
             MapObject objectSelected = MapObjectOperations.getInstance().load((Long) item.getUid());
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+//            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
             appContainer.setCurrentMapObject(objectSelected);
             appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
 
@@ -364,7 +325,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public boolean isEditable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -384,7 +345,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+//        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
 
         if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
             MapObject currentMO = appContainer.getCurrentMapObject();
@@ -419,5 +380,97 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     @Override
     public Long getLayerId() {
         return ID;
+    }
+
+    private boolean addEdge(MarkerItem item, MapObject currentObj, MapObject previousObj) {
+        MapviewActivity activity = (MapviewActivity) this.activitySupporter;
+        if (item != null &&
+                Long.parseLong("" + item.getUid()) != -1 &&
+                appContainer.getAcctionAddEdge() &&
+                !previousObj.equals(currentObj)
+        ) {
+
+
+            if (!currentObj.belongToTopoLayer()) {
+                GPDialogs.toast(this.activitySupporter.getContext(), R.string.no_topology_layer, Toast.LENGTH_SHORT);
+                return true;
+            } else if (currentObj.getIsCompleted()) {
+                GPDialogs.toast(this.activitySupporter.getContext(), R.string.obj_destination_completed, Toast.LENGTH_SHORT);
+                return true;
+            }
+
+            if (LatLongUtils.soFar(previousObj, LatLongUtils.MAX_DISTANCE, currentObj)) {
+
+                GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
+                        String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
+                                LatLongUtils.MAX_DISTANCE),
+                        () -> activity.runOnUiThread(() -> {
+                            // yes
+                            GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
+                                    LatLongUtils.MAX_DISTANCE));
+
+                            RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                            RouteSegmentOperations.getInstance().save(edge);
+                            try {
+                                mapView.reloadLayer(EdgesLayer.class);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+
+                        }), () -> activity.runOnUiThread(() -> {
+                            // no
+
+
+                        })
+                );
+            } else {
+
+                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                RouteSegmentOperations.getInstance().save(edge);
+                try {
+                    mapView.reloadLayer(EdgesLayer.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("update_map_object_active", true);
+            activity.sendBroadcast(intent);
+
+        }
+        return true;
+    }
+
+    private boolean joinMo(MarkerItem item, MapObject currentObj, MapObject previousObj) {
+        MapviewActivity activity = (MapviewActivity) this.activitySupporter;
+
+        return true;
+    }
+
+    public void circleMarkerJoin(org.oscim.core.GeoPoint point) {
+
+        int bitmapHeight = LatLongUtils.RADIUS_JOIN_MO - 20;
+        int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
+        int symbolWidth = LatLongUtils.RADIUS_JOIN_MO - 20;
+        int xSize = symbolWidth;
+        int ySize = symbolWidth + dist2symbol;
+
+        Bitmap bitMap = CanvasAdapter.newBitmap(xSize, ySize, 0);
+        org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
+        markerCanvas.setBitmap(bitMap);
+
+        org.oscim.backend.canvas.Paint paint = CanvasAdapter.newPaint();
+        paint.setColor(Color.RED);
+        paint.setStyle(org.oscim.backend.canvas.Paint.Style.STROKE);
+        paint.setStrokeWidth(4.5f);
+
+        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f), LatLongUtils.RADIUS_JOIN_MO, paint);
+        MarkerItem markerItem = new MarkerItem(-2, "", "", point);
+        markerItem.setMarker(new MarkerSymbol(bitMap, MarkerSymbol.HotspotPlace.CENTER, false));
+        addItem(markerItem);
     }
 }

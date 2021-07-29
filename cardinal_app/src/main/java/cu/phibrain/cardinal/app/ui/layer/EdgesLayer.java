@@ -87,8 +87,8 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
             for (RouteSegment route : routeSegments) {
                 List<GeoPoint> list_GeoPoints = new ArrayList<>();
                 if (route.getOriginObj() != null && route.getDestinyObj() != null) {
-                    list_GeoPoints.add(LatLongUtils.labelPoint(route.getOriginObj().getCoord(), route.getOriginObj().getObjectType().getGeomType()));
-                    list_GeoPoints.add( LatLongUtils.labelPoint(route.getDestinyObj().getCoord(), route.getDestinyObj().getObjectType().getGeomType()));
+                    list_GeoPoints.add(LatLongUtils.centerPoint(route.getOriginObj().getCoord(), route.getOriginObj().getObjectType().getGeomType()));
+                    list_GeoPoints.add( LatLongUtils.centerPoint(route.getDestinyObj().getCoord(), route.getDestinyObj().getObjectType().getGeomType()));
                     GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, route.getId());
                     add(drawable);
                 }
@@ -164,7 +164,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
 
     @Override
     public boolean isEditable() {
-        return true;
+        return false;
     }
 
     @Override
