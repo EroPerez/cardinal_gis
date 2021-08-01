@@ -72,7 +72,6 @@ import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
-import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -143,7 +142,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         BottomSheetDialog dialog = new MyBottomSheetDialog(this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme);
 
         View view = View.inflate(getContext(), R.layout.fragment_object_inspector_dialog_list_dialog, null);
-        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
         Long objectId = getArguments().getLong(ARG_MAP_OBJECT_ID);
 

@@ -9,6 +9,7 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by Ero on 17/02/2021.
@@ -53,68 +54,80 @@ public class MapObjectTypeAttribute implements Serializable, IEntity {
 
     private final static long serialVersionUID = -376582677171152532L;
 
-@Generated(hash = 2090174285)
-public MapObjectTypeAttribute(Long id, Integer atype, String name, Long mapObjecTypeId,
-        String defaultValue, String description) {
-    this.id = id;
-    this.atype = atype;
-    this.name = name;
-    this.mapObjecTypeId = mapObjecTypeId;
-    this.defaultValue = defaultValue;
-    this.description = description;
-}
+    @Generated(hash = 2090174285)
+    public MapObjectTypeAttribute(Long id, Integer atype, String name, Long mapObjecTypeId,
+                                  String defaultValue, String description) {
+        this.id = id;
+        this.atype = atype;
+        this.name = name;
+        this.mapObjecTypeId = mapObjecTypeId;
+        this.defaultValue = defaultValue;
+        this.description = description;
+    }
 
-@Generated(hash = 407216157)
-public MapObjectTypeAttribute() {
-}
+    @Generated(hash = 407216157)
+    public MapObjectTypeAttribute() {
+    }
 
-public Long getId() {
-    return this.id;
-}
+    public Long getId() {
+        return this.id;
+    }
 
-public void setId(Long id) {
-    this.id = id;
-}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-public Integer getAtype() {
-    return this.atype;
-}
+    public Integer getAtype() {
+        return this.atype;
+    }
 
-public void setAtype(Integer atype) {
-    this.atype = atype;
-}
+    public void setAtype(Integer atype) {
+        this.atype = atype;
+    }
 
-public String getName() {
-    return this.name;
-}
+    public String getName() {
+        return this.name;
+    }
 
-public void setName(String name) {
-    this.name = name;
-}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-public Long getMapObjecTypeId() {
-    return this.mapObjecTypeId;
-}
+    public Long getMapObjecTypeId() {
+        return this.mapObjecTypeId;
+    }
 
-public void setMapObjecTypeId(Long mapObjecTypeId) {
-    this.mapObjecTypeId = mapObjecTypeId;
-}
+    public void setMapObjecTypeId(Long mapObjecTypeId) {
+        this.mapObjecTypeId = mapObjecTypeId;
+    }
 
-public String getDefaultValue() {
-    return this.defaultValue;
-}
+    public String getDefaultValue() {
+        return this.defaultValue;
+    }
 
-public void setDefaultValue(String defaultValue) {
-    this.defaultValue = defaultValue;
-}
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
 
-public String getDescription() {
-    return this.description;
-}
+    public String getDescription() {
+        return this.description;
+    }
 
-public void setDescription(String description) {
-    this.description = description;
-}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapObjectTypeAttribute that = (MapObjectTypeAttribute) o;
+        return id.equals(that.id) &&
+                mapObjecTypeId.equals(that.mapObjecTypeId);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, mapObjecTypeId);
+    }
 }

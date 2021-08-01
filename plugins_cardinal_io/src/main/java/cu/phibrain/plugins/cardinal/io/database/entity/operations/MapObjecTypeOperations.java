@@ -8,6 +8,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDao;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeState;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectTypeAttribute;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.TopologicalRule;
 
 public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObjecTypeDao> {
@@ -78,6 +79,19 @@ public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObje
             mapObjectObjectType = mapObjectObjectType.getParentObj();
         }
         return states;
+    }
+
+    public List<MapObjectTypeAttribute> getAttrs(Long mapObjecTypeId) {
+        List<MapObjectTypeAttribute> attributes = new ArrayList<>();
+        MapObjecType mapObjectObjectType = load(mapObjecTypeId);
+
+        while (mapObjectObjectType != null) {
+
+            attributes.addAll(mapObjectObjectType.getAttributes());
+
+            mapObjectObjectType = mapObjectObjectType.getParentObj();
+        }
+        return attributes;
     }
 
 }

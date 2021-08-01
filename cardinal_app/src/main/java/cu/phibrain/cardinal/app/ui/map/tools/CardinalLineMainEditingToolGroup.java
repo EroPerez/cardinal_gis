@@ -21,7 +21,6 @@ package cu.phibrain.cardinal.app.ui.map.tools;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.PorterDuff.Mode;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,49 +29,77 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import java.util.List;
-
-import eu.geopaparazzi.library.database.GPLog;
+import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
+import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
+import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.util.Compat;
-import eu.geopaparazzi.library.util.GPDialogs;
+import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.R;
 import eu.geopaparazzi.map.features.editing.EditManager;
-import eu.geopaparazzi.map.features.tools.impl.InfoTool;
-import eu.geopaparazzi.map.features.tools.impl.LineCreateFeatureToolGroup;
-import eu.geopaparazzi.map.features.tools.impl.SelectionTool;
 import eu.geopaparazzi.map.features.tools.interfaces.Tool;
 import eu.geopaparazzi.map.features.tools.interfaces.ToolGroup;
-import eu.geopaparazzi.map.layers.LayerManager;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 
 /**
  * The main line layer editing tool group, which just shows the tool palette.
  *
- * @author Andrea Antonello (www.hydrologis.com)
+ * @author Erodis Pérez Michel (eperezm1986@gmail.com)
  */
 public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListener, OnTouchListener {
 
-//    private ImageButton selectAllButton;
+
     private GPMapView mapView;
 
-//    private ImageButton selectEditableButton;
-//    private int selectionColor;
+    private int selectionColor;
     private ImageButton createFeatureButton;
     private ImageButton commitButton;
 
     private ImageButton undoButton;
+    private ImageButton editButton;
+    private ImageButton editCoordButton;
+    private ImageButton deleteButton;
+    private AppContainer appContainer;
+
+    // To handle edit action
+    public static IActivitySupporter activitySupporter;
+
+
+    public static void setActivitySupporter(IActivitySupporter activity) {
+        if (activitySupporter == null) {
+            activitySupporter = activity;
+        }
+    }
 
     /**
      * Constructor.
      *
      * @param mapView the map view.
      */
-    public CardinalLineMainEditingToolGroup(GPMapView mapView) {
+    public CardinalLineMainEditingToolGroup(GPMapView mapView, IActivitySupporter activitySupporter) {
         this.mapView = mapView;
 
         LinearLayout parent = EditManager.INSTANCE.getToolsLayout();
-       // selectionColor = Compat.getColor(parent.getContext(), R.color.main_selection);
+        selectionColor = Compat.getColor(parent.getContext(), R.color.main_selection);
+
+        appContainer = ((CardinalApplication) GPApplication.getInstance()).getContainer();
+
+        setActivitySupporter(activitySupporter);
+    }
+
+    /**
+     * Constructor user en create tool.
+     *
+     * @param mapView the map view.
+     */
+    public CardinalLineMainEditingToolGroup(GPMapView mapView) {
+        this.mapView = mapView;
+        appContainer = ((CardinalApplication) GPApplication.getInstance()).getContainer();
+
+        setActivitySupporter(null);
     }
 
     public void activate() {
@@ -97,30 +124,6 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
             createFeatureButton.setOnTouchListener(this);
             parent.addView(createFeatureButton);
 
-//            selectEditableButton = new ImageButton(context);
-//            selectEditableButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-//                    LayoutParams.WRAP_CONTENT));
-//            selectEditableButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_editable_24dp));
-//            selectEditableButton.setPadding(0, padding, 0, padding);
-//            selectEditableButton.setOnClickListener(this);
-//            selectEditableButton.setOnTouchListener(this);
-//            parent.addView(selectEditableButton);
-        }
-
-//        selectAllButton = new ImageButton(context);
-//        selectAllButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-//        Tool activeTool = EditManager.INSTANCE.getActiveTool();
-//        if (activeTool instanceof InfoTool) {
-//            selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_active_24dp));
-//        } else {
-//            selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_24dp));
-//        }
-//        selectAllButton.setPadding(0, padding, 0, padding);
-//        selectAllButton.setOnClickListener(this);
-//        selectAllButton.setOnTouchListener(this);
-//        parent.addView(selectAllButton);
-
-        if (editLayer != null) {
             undoButton = new ImageButton(context);
             undoButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
             undoButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_undo_24dp));
@@ -139,6 +142,47 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
             parent.addView(commitButton);
             commitButton.setVisibility(View.GONE);
         }
+
+        if (editLayer != null && appContainer.getCurrentMapObject() != null) {
+            //edit
+            editButton = new ImageButton(context);
+            editButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
+                editButton
+                        .setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.ic_mapview_toggle_editing_on_24dp));
+            else
+                editButton
+                        .setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.ic_mapview_toggle_editing_off_24dp));
+
+            editButton.setPadding(0, padding, 0, padding);
+            editButton.setOnTouchListener(this);
+            editButton.setOnClickListener(this);
+            parent.addView(editButton);
+            //edit coord
+            editCoordButton = new ImageButton(context);
+            editCoordButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+            editCoordButton.setImageBitmap(ImageUtil.getBitmap(context, cu.phibrain.cardinal.app.R.drawable.ic_marker_map_24dp));
+            editCoordButton
+                    .setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.button_background_states));
+            editCoordButton.setPadding(0, padding, 0, padding);
+            editCoordButton.setOnTouchListener(this);
+            editCoordButton.setOnClickListener(this);
+            parent.addView(editCoordButton);
+            if (activitySupporter == null)
+                editButton.setVisibility(View.GONE);
+
+            //delete
+            deleteButton = new ImageButton(context);
+            deleteButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+            deleteButton.setImageBitmap(ImageUtil.getBitmap(context, cu.phibrain.cardinal.app.R.drawable.ic_delete_24dp));
+            deleteButton
+                    .setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.button_background_states));
+            deleteButton.setPadding(0, padding, 0, padding);
+            deleteButton.setOnTouchListener(this);
+            deleteButton.setOnClickListener(this);
+            parent.addView(deleteButton);
+
+        }
     }
 
     public void disable() {
@@ -149,50 +193,37 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
     }
 
     public void onClick(View v) {
-//        if (v == selectAllButton) {
-//            Tool currentTool = EditManager.INSTANCE.getActiveTool();
-//            if (currentTool != null && currentTool instanceof InfoTool) {
-//                // if the same tool is re-selected, it is disabled
-//                EditManager.INSTANCE.setActiveTool(null);
-//            } else {
-//                // check maps enablement
-//                try {
-//                    List<IEditableLayer> editableLayers = LayerManager.INSTANCE.getEditableLayers(mapView);
-//                    final Context context = EditManager.INSTANCE.getEditingView().getContext();
-//                    if (editableLayers.size() == 0) {
-//                        LinearLayout parent = EditManager.INSTANCE.getToolsLayout();
-//                        if (parent != null) {
-//                            GPDialogs.warningDialog(context, context.getString(R.string.no_queriable_layer_is_visible), null);
-//                        }
-//                        return;
-//                    }
-//                } catch (Exception e) {
-//                    GPLog.error(this, null, e);
-//                }
-//
-//                Tool activeTool = new InfoTool(this, mapView);
-//                EditManager.INSTANCE.setActiveTool(activeTool);
-//            }
-//        } else if (v == selectEditableButton) {
-//            Tool currentTool = EditManager.INSTANCE.getActiveTool();
-//            if (currentTool instanceof SelectionTool) {
-//                // if the same tool is re-selected, it is disabled
-//                EditManager.INSTANCE.setActiveTool(null);
-//            } else {
-//                Tool activeTool = new SelectionTool(mapView);
-//                EditManager.INSTANCE.setActiveTool(activeTool);
-//            }
-//        } else
         if (v == createFeatureButton) {
-            ToolGroup createFeatureToolGroup = new LineCreateFeatureToolGroup(mapView, null);
+            ToolGroup createFeatureToolGroup = new CardinalLineCreateFeatureToolGroup(mapView, UserMode.OBJECT_ADDITION);
             EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
         } else if (v == undoButton) {
-//            if (cutExtendProcessedFeature != null) {
-//                EditManager.INSTANCE.setActiveTool(null);
-//                commitButton.setVisibility(View.GONE);
-//                undoButton.setVisibility(View.GONE);
-//                EditManager.INSTANCE.invalidateEditingView();
-//            }
+            EditManager.INSTANCE.invalidateEditingView();
+            editCoordButton.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.VISIBLE);
+            appContainer.setMode(UserMode.NONE);
+        } else if (v == editButton) {
+            if (appContainer.getMode() == UserMode.NONE) {
+                appContainer.setMode(UserMode.OBJECT_EDITION);
+                ((MapviewActivity)activitySupporter).onMenuMTO();
+                deleteButton.setVisibility(View.GONE);
+                editCoordButton.setVisibility(View.GONE);
+            } else {
+                appContainer.setMode(UserMode.NONE);
+                editCoordButton.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.VISIBLE);
+            }
+        } else if (v == deleteButton) {
+            IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
+            appContainer.setMode(UserMode.OBJECT_DELETION);
+            try {
+                editLayer.deleteFeatures(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (v == editCoordButton) {
+            appContainer.setMode(UserMode.OBJECT_COORD_EDITION);
+            ToolGroup createFeatureToolGroup = new CardinalLineCreateFeatureToolGroup(mapView, UserMode.OBJECT_COORD_EDITION);
+            EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
         }
 
         handleToolIcons(v);
@@ -200,30 +231,19 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
 
     @SuppressWarnings("deprecation")
     private void handleToolIcons(View activeToolButton) {
-//        Context context = activeToolButton.getContext();
-//        Tool currentTool = EditManager.INSTANCE.getActiveTool();
-//        if (selectEditableButton != null) {
-//            if (currentTool != null && activeToolButton == selectEditableButton) {
-//                selectEditableButton.setBackground(Compat.getDrawable(context,
-//                        R.drawable.ic_editing_select_editable_active_24dp));
-//            } else {
-//                selectEditableButton.setBackground(Compat.getDrawable(context,
-//                        R.drawable.ic_editing_select_editable_24dp));
-//            }
-//        }
-//        if (selectAllButton != null)
-//            if (currentTool != null && activeToolButton == selectAllButton) {
-//                selectAllButton
-//                        .setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_active_24dp));
-//            } else {
-//                selectAllButton.setBackground(Compat.getDrawable(context, R.drawable.ic_editing_select_all_24dp));
-//            }
+        Context context = activeToolButton.getContext();
+        if (editButton != null)
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION && activeToolButton == editButton) {
+                editButton
+                        .setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.ic_mapview_toggle_editing_on_24dp));
+            } else {
+                editButton.setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.ic_mapview_toggle_editing_off_24dp));
+            }
     }
 
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-//                v.getBackground().setColorFilter(selectionColor, Mode.SRC_ATOP);
                 v.invalidate();
                 break;
             }

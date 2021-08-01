@@ -208,11 +208,11 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             int notesCount = 0;
             String username = getResources().getString(R.string.select_one);
 
-            if (((CardinalApplication) CardinalApplication.getInstance()).appContainer.getProjectActive() != null) {
+            if (((CardinalApplication) CardinalApplication.getInstance()).getContainer().getProjectActive() != null) {
                 notesCount = (int) WorkSessionOperations.getInstance().getDao().count();
             }
 
-            Worker currentWorker = ((CardinalApplication) CardinalApplication.getInstance()).appContainer.getCurrentWorker();
+            Worker currentWorker = ((CardinalApplication) CardinalApplication.getInstance()).getContainer().getCurrentWorker();
 
             if (currentWorker != null) {
                 username = currentWorker.getUsername();
@@ -471,7 +471,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             String tooltip = imageButton.getContentDescription().toString();
 
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
             if (imageButton == mSessionButton && appContainer.getWorkSessionActive() != null) {
                 Intent intent = new Intent(getActivity(), SessionsStatsActivity.class);
@@ -523,7 +523,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } else if (v == mMapviewButton) {
 
             try {
-                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
                 if (appContainer.getProjectActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
                 } else if (appContainer.getWorkSessionActive() == null) {
@@ -542,7 +542,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             startActivityForResult(importIntent, RETURNCODE_BROWSE_FOR_NEW_PREOJECT);
         } else if (v == mSessionButton) {
             //Load the curent worker
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
@@ -579,7 +579,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             startActivity(panicIntent);
         } else if (v == mGpslogButton) {
             try {
-                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
                 if (appContainer.getProjectActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
                 } else if (appContainer.getWorkSessionActive() == null) {
@@ -842,7 +842,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             long gpsLogId = dbHelper.getLastLogId();
             Log.d("WorkerRouteLogging", "...with gps log id: " + gpsLogId);
             //save current log
-            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
             WorkSession session = appContainer.getWorkSessionActive();
             if (WorkerRouteOperations.getInstance().load(session.getId(), gpsLogId) == null)
                 WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));

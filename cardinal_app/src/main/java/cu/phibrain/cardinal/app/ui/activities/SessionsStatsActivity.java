@@ -65,7 +65,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sessions_stats);
 
-        appContainer = ((CardinalApplication) getApplication()).appContainer;
+        appContainer = ((CardinalApplication) getApplication()).getContainer();
 
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);

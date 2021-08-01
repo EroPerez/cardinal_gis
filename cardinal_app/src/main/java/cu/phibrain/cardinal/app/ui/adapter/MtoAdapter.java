@@ -18,8 +18,8 @@ import java.util.List;
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
 
 public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> implements Filterable {
 
@@ -64,7 +64,7 @@ public class MtoAdapter extends RecyclerView.Adapter<MtoAdapter.MtoAdapterVh> im
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 FilterResults filterResults = new FilterResults();
-                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
                 if (charSequence == null | charSequence.length() == 0) {
                     filterResults.count = getMtoModelListFiltered.size();
                     filterResults.values = getMtoModelListFiltered;
