@@ -262,7 +262,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
                     MapObjecType mot = moa.getObjectType();
                     if (mot != null) {
-                        appContainer.setMode(UserMode.OBJECT_EDITION);
+                        appContainer.setMode(UserMode.OBJECT_COORD_EDITION);
                         selectedMto(mot);
                     }
                 }
@@ -281,7 +281,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         super.onCreate(icicle);
         setContentView(cu.phibrain.cardinal.app.R.layout.activity_mapview);
 
-        appContainer = ((CardinalApplication) getApplication()).appContainer;
+        appContainer = ((CardinalApplication) getApplication()).getContainer();
 
         mapsSupportBroadcastReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
@@ -1303,11 +1303,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 //                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
 //                return;
         } else if (editLayer.getGeometryType().isPolygon())
-            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView);
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView, this);
         else if (editLayer.getGeometryType().isLine())
-            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView);
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView, this);
         else if (editLayer.getGeometryType().isPoint())
-            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPointMainEditingToolGroup(mapView);
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPointMainEditingToolGroup(mapView, this);
 
         EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
         setLeftButtoonsEnablement(false);
@@ -1316,7 +1316,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     }
 
 
-    private void onMenuMTO() {
+    public void onMenuMTO() {
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(
                         cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
@@ -1439,7 +1439,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     }
 
     private void disableEditing() {
-        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
+//        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
         Tool activeTool = EditManager.INSTANCE.getActiveTool();
         if (activeTool != null) {
             activeTool.disable();

@@ -1,7 +1,5 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.events;
 
-import android.util.Log;
-
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -37,14 +35,14 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         if (labelSubLot != null) {
             labelSubLot.setGeolocated(true);
             LabelSubLotOperations.getInstance().update(labelSubLot);
-            Log.d("MOAEntityI", "label: " + labelSubLot.toString());
+//            Log.d("MOAEntityI", "label: " + labelSubLot.toString());
         }
         // update stock state
         Stock stock = StockOperations.getInstance().load(mapObject.getStockCodeId());
         if (stock != null) {
             stock.setLocated(true);
             StockOperations.getInstance().update(stock);
-            Log.d("MOAEntityI", "Stock: " + stock.getCode());
+//            Log.d("MOAEntityI", "Stock: " + stock.getCode());
         }
 
         //Create all extra attribute
@@ -69,8 +67,8 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         entityManager.detach(mapObject);
 
         MapObject oldMapObject = entityManager.load(mapObject.getId());
-        Log.d("MOBEntityI", "mapObject: " + mapObject.toString());
-        Log.d("MOBEntityI", "oldMapObject: " + oldMapObject.toString());
+//        Log.d("MOBEntityI", "mapObject: " + mapObject.toString());
+//        Log.d("MOBEntityI", "oldMapObject: " + oldMapObject.toString());
 
         if (oldMapObject.getCode() != mapObject.getCode()) {
             //update the state of old label assigned
@@ -82,7 +80,7 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
             if (oldlabelSubLot != null) {
                 oldlabelSubLot.setGeolocated(false);
                 LabelSubLotOperations.getInstance().update(oldlabelSubLot);
-                Log.d("MOBEntityI", "label: " + oldlabelSubLot.toString());
+//                Log.d("MOBEntityI", "label: " + oldlabelSubLot.toString());
             }
 
             //update the state of new label assigned
@@ -94,7 +92,7 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
             if (labelSubLot != null) {
                 labelSubLot.setGeolocated(true);
                 LabelSubLotOperations.getInstance().update(labelSubLot);
-                Log.d("MOBEntityI", "label: " + labelSubLot.toString());
+//                Log.d("MOBEntityI", "label: " + labelSubLot.toString());
             }
 
         }
@@ -105,14 +103,14 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
             if (oldStock != null) {
                 oldStock.setLocated(false);
                 StockOperations.getInstance().update(oldStock);
-                Log.d("MOAEntityI", "oldStock: " + oldStock.toString());
+//                Log.d("MOAEntityI", "oldStock: " + oldStock.toString());
             }
             //update the state of new stock assigned
             Stock stock = StockOperations.getInstance().load(mapObject.getStockCodeId());
             if (stock != null) {
                 stock.setLocated(true);
                 StockOperations.getInstance().update(stock);
-                Log.d("MOAEntityI", "Stock: " + stock.toString());
+//                Log.d("MOAEntityI", "Stock: " + stock.toString());
             }
         }
     }

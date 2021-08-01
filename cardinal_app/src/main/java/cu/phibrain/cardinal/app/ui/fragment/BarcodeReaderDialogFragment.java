@@ -28,7 +28,6 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
-import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -102,7 +101,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         View view = View.inflate(getContext(), R.layout.fragment_barcode_reader_dialog_list_dialog, null);
 
 
-        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         currentSession = appContainer.getWorkSessionActive();
 
         //View objects
@@ -311,7 +310,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     void reloadLayer(Layer layer) throws Exception {
 
         ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
-        ((IGpLayer) ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, layer.getId())).reloadData();
+        ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
 
     }
 

@@ -201,9 +201,9 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
-        if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
+        if (appContainer.getMode() == UserMode.OBJECT_COORD_EDITION) {
             MapObject currentMO = appContainer.getCurrentMapObject();
             currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
             currentMO.update();

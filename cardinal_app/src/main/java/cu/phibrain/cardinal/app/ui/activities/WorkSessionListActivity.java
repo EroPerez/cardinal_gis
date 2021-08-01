@@ -45,7 +45,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work_session_list);
-        appContainer = ((CardinalApplication) getApplication()).appContainer;
+        appContainer = ((CardinalApplication) getApplication()).getContainer();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
