@@ -200,17 +200,18 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
     public void deleteFeatures(List<Feature> features) throws Exception {
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         MapObject currentMO = appContainer.getCurrentMapObject();
+        Layer editLayer = currentMO.getLayer();
 
         GPDialogs.yesNoMessageDialog(this.activitySupporter.getContext(),
                 ((MapviewActivity) this.activitySupporter).getString(cu.phibrain.cardinal.app.R.string.do_you_want_to_delete_this_map_object),
                 () -> ((MapviewActivity) this.activitySupporter).runOnUiThread(() -> {
                     // stop logging
                     MapObjectOperations.getInstance().delete(currentMO);
+                    appContainer.setCurrentMapObject(null);
                     try {
                         this.reloadData();
                         mapView.reloadLayer(EdgesLayer.class);
                         //Reload current point layers
-                        Layer editLayer = currentMO.getLayer();
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
 
                     } catch (IOException e) {
@@ -220,6 +221,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                     }
                     Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
                     intent.putExtra("update_map_object_active", true);
+                    intent.putExtra("update_map_object_type_active", true);
 
                     ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
 
@@ -245,6 +247,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         MapObject currentMO = appContainer.getCurrentMapObject();
+        MapObjecType oldSelectedObjectType = null;
 
         if (appContainer.getMode() == UserMode.OBJECT_COORD_EDITION) {
 
@@ -255,15 +258,16 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
         } else if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
             //Do the clone process here
             currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
+            oldSelectedObjectType = currentMO.getObjectType();
             MapObjecType newSelectedObjectType = appContainer.getMapObjecTypeActive();
             currentMO.setMapObjectTypeId(newSelectedObjectType.getId());
-
             MapObjectOperations.getInstance().clone(currentMO);
+
+            appContainer.setCurrentMapObject(currentMO);
 
         }
 
         appContainer.setMode(UserMode.NONE);
-
         //Reload layers associated
         this.reloadData();
         mapView.reloadLayer(EdgesLayer.class);
@@ -271,7 +275,18 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
 
+        if(oldSelectedObjectType != null)
+        {
+            Layer layer = oldSelectedObjectType.getLayerObj();
+            ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
+        }
         GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
+
+        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+        intent.putExtra("update_map_object_active", true);
+        intent.putExtra("update_map_object_type_active", true);
+
+        ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
     }
 
     @Override

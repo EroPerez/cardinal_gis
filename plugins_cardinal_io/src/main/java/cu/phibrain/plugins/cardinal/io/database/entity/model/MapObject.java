@@ -136,6 +136,10 @@ public class MapObject implements Serializable, IEntity {
     @Expose
     private Boolean isCompleted;
 
+
+    @ToMany(referencedJoinProperty = "joinId")
+     private List<MapObject> joined;
+
     private final static long serialVersionUID = -4499872341492642530L;
     /**
      * Used to resolve relations
@@ -730,6 +734,36 @@ public class MapObject implements Serializable, IEntity {
 
     public boolean belongToTopoLayer(){
         return getLayer().getIsTopology();
+    }
+
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 133373295)
+    public List<MapObject> getJoined() {
+        if (joined == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjectDao targetDao = daoSession.getMapObjectDao();
+            List<MapObject> joinedNew = targetDao._queryMapObject_Joined(id);
+            synchronized (this) {
+                if (joined == null) {
+                    joined = joinedNew;
+                }
+            }
+        }
+        return joined;
+    }
+
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 867267577)
+    public synchronized void resetJoined() {
+        joined = null;
     }
 
 

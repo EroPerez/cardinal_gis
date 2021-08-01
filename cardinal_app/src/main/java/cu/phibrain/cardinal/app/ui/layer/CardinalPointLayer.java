@@ -35,6 +35,7 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
@@ -66,7 +67,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     private static Bitmap mtoBitmap;
     private static int textSize;
     private static String colorStr;
-    public static final int SELECT_MARKER_UID = -1;
+    public static final long SELECT_MARKER_UID = -1L;
     EGeometryType geometryMto;
     private Long ID;
     private GPMapView mapView;
@@ -82,7 +83,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         geometryMto = EGeometryType.POINT;
         this.activitySupporter = activitySupporter;
         setOnItemGestureListener(this);
-        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
+        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         try {
             reloadData();
         } catch (IOException e) {
@@ -202,9 +203,9 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
         MapObject previousObj = appContainer.getCurrentMapObject();
         MapObject currentObj = MapObjectOperations.getInstance().load((Long) item.getUid());
-        if(appContainer.getAcctionAddEdge())
+        if (appContainer.getAcctionAddEdge())
             addEdge(item, currentObj, previousObj);
-        else if(appContainer.getAcctionJoinMo())
+        else if (appContainer.getAcctionJoinMo())
             joinMo(item, currentObj, previousObj);
 
         return true;
@@ -213,13 +214,11 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
-        MarkerItem selectMarker =  getMarkerById(CardinalPointLayer.SELECT_MARKER_UID);
-        if (selectMarker!=null)
+        MarkerItem selectMarker = getMarkerById(CardinalPointLayer.SELECT_MARKER_UID);
+        if (selectMarker != null)
             removeItem(selectMarker);
 
-        if (item != null && Long.parseLong("" + item.getUid()) != -1) {
-            if (selectMarker)
-                removeItem(size() - 1);
+        if (item != null && Long.parseLong("" + item.getUid()) != -1L) {
             MapObject objectSelected = MapObjectOperations.getInstance().load((Long) item.getUid());
 //            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
             appContainer.setCurrentMapObject(objectSelected);
@@ -236,7 +235,6 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             intent.putExtra("update_map_object_active", true);
             intent.putExtra("update_map_object_type_active", true);
             ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
-
 
 
         }
@@ -350,6 +348,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 () -> ((MapviewActivity) this.activitySupporter).runOnUiThread(() -> {
                     // stop logging
                     MapObjectOperations.getInstance().delete(appContainer.getCurrentMapObject());
+                    appContainer.setCurrentMapObject(null);
                     try {
                         this.reloadData();
                         mapView.reloadLayer(EdgesLayer.class);
@@ -358,8 +357,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                     Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
                     intent.putExtra("update_map_object_active", true);
+                    intent.putExtra("update_map_object_type_active", true);
 
                     ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
 
@@ -383,6 +384,8 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
         MapObject currentMO = appContainer.getCurrentMapObject();
+        MapObjecType oldSelectedObjectType = null;
+
         if (appContainer.getMode() == UserMode.OBJECT_COORD_EDITION) {
 
             currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
@@ -393,8 +396,11 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             //Do the clone process here
             currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
             MapObjecType newSelectedObjectType = appContainer.getMapObjecTypeActive();
+            oldSelectedObjectType = currentMO.getObjectType();
             currentMO.setMapObjectTypeId(newSelectedObjectType.getId());
             MapObjectOperations.getInstance().clone(currentMO);
+
+            appContainer.setCurrentMapObject(currentMO);
 
         }
 
@@ -402,7 +408,20 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         //Reload layers associated
         this.reloadData();
         mapView.reloadLayer(EdgesLayer.class);
+        //Reload current point layers
+        if(oldSelectedObjectType != null)
+        {
+            Layer layer = oldSelectedObjectType.getLayerObj();
+            ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
+        }
+
         GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
+
+        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+        intent.putExtra("update_map_object_active", true);
+        intent.putExtra("update_map_object_type_active", true);
+
+        ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
     }
 
 
@@ -554,11 +573,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     }
 
 
-    private MarkerItem getMarkerById(int id){
-        for (MarkerItem index : getItemList()
-             ) {
-                 if(Integer.parseInt(index.getUid().toString())== id)
-                     return index;
+    private MarkerItem getMarkerById(Long id) {
+        for (MarkerItem item : getItemList()) {
+            if (id.equals(Long.parseLong("" + item.getUid())))
+                return item;
         }
         return null;
     }
