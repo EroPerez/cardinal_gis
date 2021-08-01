@@ -9,6 +9,7 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 
 /**
@@ -89,5 +90,19 @@ public class MapObjecTypeDefect implements Serializable, IEntity{
 
     public void setMapObjecTypeId(Long mapObjecTypeId) {
         this.mapObjecTypeId = mapObjecTypeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapObjecTypeDefect that = (MapObjecTypeDefect) o;
+        return id.equals(that.id) &&
+                mapObjecTypeId.equals(that.mapObjecTypeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, mapObjecTypeId);
     }
 }

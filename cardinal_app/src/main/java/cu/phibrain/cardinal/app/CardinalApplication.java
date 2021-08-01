@@ -64,7 +64,7 @@ public class CardinalApplication extends GeopaparazziApplication {
         return daoSession;
     }
 
-    public AppContainer appContainer;
+    protected AppContainer appContainer;
 
     @Override
     public void onCreate() {
@@ -105,10 +105,10 @@ public class CardinalApplication extends GeopaparazziApplication {
             WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
             LabelOperations.getInstance().attachTo(DaoSessionManager.getInstance());
 
-            appContainer = new AppContainer();
+            setContainer(new AppContainer());
             ResourcesManager.resetManager();
             ProfilesHandler.INSTANCE.checkActiveProfile(getContentResolver());
-            if (appContainer.getProjectActive() != null)
+            if (getContainer().getProjectActive() != null)
                 CardinalLayerManager.INSTANCE.init();
 
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
@@ -157,5 +157,13 @@ public class CardinalApplication extends GeopaparazziApplication {
         } catch (Exception ex) {
             Log.e("GEOPAPARAZZIAPPLICATION", "Was not able to restart application");
         }
+    }
+
+    public AppContainer getContainer() {
+        return appContainer;
+    }
+
+    public void setContainer(AppContainer appContainer) {
+        this.appContainer = appContainer;
     }
 }

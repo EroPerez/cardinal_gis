@@ -1,6 +1,7 @@
 package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
@@ -34,6 +35,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
@@ -42,7 +44,6 @@ import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
-import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPLineDrawable;
 
@@ -83,7 +84,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if ((double)zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if ((double) zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
@@ -197,38 +198,80 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     @Override
     public void deleteFeatures(List<Feature> features) throws Exception {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        MapObject currentMO = appContainer.getCurrentMapObject();
 
+        GPDialogs.yesNoMessageDialog(this.activitySupporter.getContext(),
+                ((MapviewActivity) this.activitySupporter).getString(cu.phibrain.cardinal.app.R.string.do_you_want_to_delete_this_map_object),
+                () -> ((MapviewActivity) this.activitySupporter).runOnUiThread(() -> {
+                    // stop logging
+                    MapObjectOperations.getInstance().delete(currentMO);
+                    try {
+                        this.reloadData();
+                        mapView.reloadLayer(EdgesLayer.class);
+                        //Reload current point layers
+                        Layer editLayer = currentMO.getLayer();
+                        ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                    intent.putExtra("update_map_object_active", true);
+
+                    ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
+
+                }), null
+        );
+        appContainer.setMode(UserMode.NONE);
     }
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
-        if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
-            MapObject currentMO = appContainer.getCurrentMapObject();
-            currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
-            currentMO.update();
-            GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
-            appContainer.setMode(UserMode.NONE);
-            //Reload layers associated
-            mapView.reloadLayer(EdgesLayer.class);
-            this.reloadData();
-            //Reload current point layers
-            Layer editLayer = currentMO.getLayer();
-            ((IGpLayer) ((CardinalGPMapView) mapView).getLayer(CardinalPointLayer.class, editLayer.getId())).reloadData();
 
-        } else {
-            BarcodeReaderDialogFragment.newInstance(
-                    this.mapView, LatLongUtils.toGpGeoPoints(geometry)
-            ).show(
-                    ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
-                    "dialog"
-            );
-        }
+        BarcodeReaderDialogFragment.newInstance(
+                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
+        ).show(
+                ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
+                "dialog"
+        );
+
     }
 
     @Override
     public void updateFeatureGeometry(Feature feature, Geometry geometry, int geometrySrid) throws Exception {
 
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        MapObject currentMO = appContainer.getCurrentMapObject();
+
+        if (appContainer.getMode() == UserMode.OBJECT_COORD_EDITION) {
+
+            currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
+            currentMO.update();
+
+
+        } else if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
+            //Do the clone process here
+            currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
+            MapObjecType newSelectedObjectType = appContainer.getMapObjecTypeActive();
+            currentMO.setMapObjectTypeId(newSelectedObjectType.getId());
+
+            MapObjectOperations.getInstance().clone(currentMO);
+
+        }
+
+        appContainer.setMode(UserMode.NONE);
+
+        //Reload layers associated
+        this.reloadData();
+        mapView.reloadLayer(EdgesLayer.class);
+        //Reload current point layers
+        Layer editLayer = currentMO.getLayer();
+        ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
+
+        GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
     }
 
     @Override

@@ -234,7 +234,7 @@ public enum WebDataProjectManager {
                     final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
                     long now = System.currentTimeMillis();
 
-                    long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
+                    long gpsLogId = dbHelper.addGpsLog(now, now, 0.0f, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
 
                     for (WorkerRoute log :
                             gpslogs) {
