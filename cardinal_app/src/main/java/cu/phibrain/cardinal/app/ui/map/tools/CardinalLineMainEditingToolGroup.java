@@ -200,7 +200,7 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
             EditManager.INSTANCE.invalidateEditingView();
             editCoordButton.setVisibility(View.VISIBLE);
             deleteButton.setVisibility(View.VISIBLE);
-            appContainer.setMode(UserMode.NONE);
+//            appContainer.setMode(UserMode.NONE);
         } else if (v == editButton) {
             if (appContainer.getMode() == UserMode.NONE) {
                 appContainer.setMode(UserMode.OBJECT_EDITION);
