@@ -74,7 +74,7 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
     /**
      * Constructor.
      *
-     * @param mapView the map view.
+     * @param mapView           the map view.
      * @param activitySupporter the map view activity
      */
     public CardinalPolygonMainEditingToolGroup(GPMapView mapView, IActivitySupporter activitySupporter) {
@@ -87,6 +87,7 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
 
         setActivitySupporter(activitySupporter);
     }
+
     /**
      * Constructor user en create tool.
      *
@@ -159,9 +160,9 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
             editButton.setPadding(0, padding, 0, padding);
             editButton.setOnTouchListener(this);
             editButton.setOnClickListener(this);
-            parent.addView(editButton);
             if (activitySupporter == null)
                 editButton.setVisibility(View.GONE);
+            parent.addView(editButton);
 
             //edit coord
             editCoordButton = new ImageButton(context);
@@ -172,6 +173,8 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
             editCoordButton.setPadding(0, padding, 0, padding);
             editCoordButton.setOnTouchListener(this);
             editCoordButton.setOnClickListener(this);
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
+                editCoordButton.setVisibility(View.GONE);
             parent.addView(editCoordButton);
 
             //delete
@@ -183,8 +186,10 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
             deleteButton.setPadding(0, padding, 0, padding);
             deleteButton.setOnTouchListener(this);
             deleteButton.setOnClickListener(this);
-            parent.addView(deleteButton);
 
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
+                deleteButton.setVisibility(View.GONE);
+            parent.addView(deleteButton);
         }
     }
 
@@ -197,18 +202,27 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
 
     public void onClick(View v) {
         if (v == createFeatureButton) {
-            ToolGroup createFeatureToolGroup = new CardinalPolygonCreateFeatureToolGroup(mapView, UserMode.OBJECT_COORD_EDITION);
+            if(appContainer.getMode()== UserMode.NONE)
+                appContainer.setMode(UserMode.OBJECT_ADDITION);
+            ToolGroup createFeatureToolGroup = new CardinalPolygonCreateFeatureToolGroup(mapView, appContainer.getMode());
             EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
-        }  else if (v == undoButton) {
+        } else if (v == undoButton) {
             editCoordButton.setVisibility(View.VISIBLE);
             deleteButton.setVisibility(View.VISIBLE);
             //appContainer.setMode(UserMode.NONE);
         } else if (v == editButton) {
             if (appContainer.getMode() == UserMode.NONE) {
                 appContainer.setMode(UserMode.OBJECT_EDITION);
-                ((MapviewActivity)activitySupporter).onMenuMTO();
-                deleteButton.setVisibility(View.GONE);
-                editCoordButton.setVisibility(View.GONE);
+                try {
+                    ((MapviewActivity) activitySupporter).onMenuMTO();
+                    deleteButton.setVisibility(View.GONE);
+                    editCoordButton.setVisibility(View.GONE);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    appContainer.setMode(UserMode.NONE);
+                    editCoordButton.setVisibility(View.VISIBLE);
+                    deleteButton.setVisibility(View.VISIBLE);
+                }
             } else {
                 appContainer.setMode(UserMode.NONE);
                 editCoordButton.setVisibility(View.VISIBLE);
@@ -221,6 +235,7 @@ public class CardinalPolygonMainEditingToolGroup implements ToolGroup, OnClickLi
                 editLayer.deleteFeatures(null);
             } catch (Exception e) {
                 e.printStackTrace();
+                appContainer.setMode(UserMode.NONE);
             }
         } else if (v == editCoordButton) {
             appContainer.setMode(UserMode.OBJECT_COORD_EDITION);

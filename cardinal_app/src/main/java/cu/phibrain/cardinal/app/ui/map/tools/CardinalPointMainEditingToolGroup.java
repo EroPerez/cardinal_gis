@@ -144,10 +144,9 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
             editButton.setPadding(0, padding, 0, padding);
             editButton.setOnTouchListener(this);
             editButton.setOnClickListener(this);
-            parent.addView(editButton);
             if (activitySupporter == null)
                 editButton.setVisibility(View.GONE);
-
+            parent.addView(editButton);
 
             //edit coord
             editCoordButton= new ImageButton(context);
@@ -158,6 +157,8 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
             editCoordButton.setPadding(0, padding, 0, padding);
             editCoordButton.setOnTouchListener(this);
             editCoordButton.setOnClickListener(this);
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
+                editCoordButton.setVisibility(View.GONE);
             parent.addView(editCoordButton);
 
             //delete
@@ -169,6 +170,8 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
             deleteButton.setPadding(0, padding, 0, padding);
             deleteButton.setOnTouchListener(this);
             deleteButton.setOnClickListener(this);
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
+                deleteButton.setVisibility(View.GONE);
             parent.addView(deleteButton);
 
         }
@@ -183,8 +186,9 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
 
     public void onClick(View v) {
         if (v == createFeatureButton) {
-            appContainer.setMode(UserMode.OBJECT_ADDITION);
-            ToolGroup createFeatureToolGroup = new CardinalPointCreateFeatureToolGroup(mapView, UserMode.OBJECT_ADDITION);
+            if(appContainer.getMode()== UserMode.NONE)
+                appContainer.setMode(UserMode.OBJECT_ADDITION);
+            ToolGroup createFeatureToolGroup = new CardinalPointCreateFeatureToolGroup(mapView, appContainer.getMode());
             EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
         } else if (v == undoButton) {
             editCoordButton.setVisibility(View.VISIBLE);
@@ -193,9 +197,16 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
         } else if (v == editButton) {
             if (appContainer.getMode() == UserMode.NONE) {
                 appContainer.setMode(UserMode.OBJECT_EDITION);
-                ((MapviewActivity)activitySupporter).onMenuMTO();
-                deleteButton.setVisibility(View.GONE);
-                editCoordButton.setVisibility(View.GONE);
+                try {
+                    ((MapviewActivity) activitySupporter).onMenuMTO();
+                    deleteButton.setVisibility(View.GONE);
+                    editCoordButton.setVisibility(View.GONE);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    appContainer.setMode(UserMode.NONE);
+                    editCoordButton.setVisibility(View.VISIBLE);
+                    deleteButton.setVisibility(View.VISIBLE);
+                }
             } else {
                 appContainer.setMode(UserMode.NONE);
                 editCoordButton.setVisibility(View.VISIBLE);
@@ -208,6 +219,7 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
                 editLayer.deleteFeatures(null);
             } catch (Exception e) {
                 e.printStackTrace();
+                appContainer.setMode(UserMode.NONE);
             }
         } else if(v == editCoordButton){
             appContainer.setMode(UserMode.OBJECT_COORD_EDITION);

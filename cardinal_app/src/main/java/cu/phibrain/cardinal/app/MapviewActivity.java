@@ -249,6 +249,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     selectedMto(mot);
                 } else {
                     selectedMto(null);
+
                 }
             }
 
@@ -1273,7 +1274,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
             //preguntar si tienen que ser topologico el mo
-            if (appContainer.getCurrentMapObject() != null ) {
+            if (appContainer.getCurrentMapObject() != null) {
                 appContainer.setAcctionJoinMo(!appContainer.getAcctionJoinMo());
                 if (appContainer.getAcctionJoinMo()) {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
@@ -1348,7 +1349,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
             List<MapObjecType> mtoList;
 
-            if (appContainer.getCurrentMapObject() == null) {
+            if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
                 //Muestro todos por capas
                 mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
             } else {
