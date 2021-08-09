@@ -97,6 +97,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
@@ -1119,6 +1120,25 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
             return true;
 
+        }else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
+            //preguntar si tienen que ser topologico el mo
+            if (appContainer.getCurrentMapObject() != null) {
+                appContainer.setAcctionJoinMo(!appContainer.getAcctionJoinMo());
+                if (appContainer.getAcctionJoinMo()) {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
+                    MapObject currentMO = appContainer.getCurrentMapObject();
+                    Layer layer = currentMO.getLayer();
+                    CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
+                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
+
+                    addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+                    appContainer.setAcctionAddEdge(false);
+
+                } else {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
+                }
+            }
+            return true;
         }
         return false;
     }
@@ -1267,29 +1287,19 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 if (appContainer.getAcctionAddEdge()) {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
+
                     appContainer.setAcctionJoinMo(false);
                 } else {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 }
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
-            //preguntar si tienen que ser topologico el mo
             if (appContainer.getCurrentMapObject() != null) {
-                appContainer.setAcctionJoinMo(!appContainer.getAcctionJoinMo());
-                if (appContainer.getAcctionJoinMo()) {
-                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
                     MapObject currentMO = appContainer.getCurrentMapObject();
-                    Layer layer = currentMO.getLayer();
-                    CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
-                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
-
-                    addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
-                    appContainer.setAcctionAddEdge(false);
-
-                } else {
-                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
-                }
+                        currentMO.setNodeGrade(currentMO.getNodeGrade()+1);
+                        MapObjectOperations.getInstance().save(currentMO);
             }
+
         }
     }
 
