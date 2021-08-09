@@ -7,6 +7,8 @@ import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +34,7 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
+import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
@@ -50,6 +53,7 @@ import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.util.TextRunnable;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
@@ -203,9 +207,9 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     public boolean onItemSingleTapUp(int index, MarkerItem item) {
         MapObject previousObj = appContainer.getCurrentMapObject();
         MapObject currentObj = MapObjectOperations.getInstance().load((Long) item.getUid());
-        if (appContainer.getAcctionAddEdge())
+        if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE)
             addEdge(item, currentObj, previousObj);
-        else if (appContainer.getAcctionJoinMo())
+        else if (appContainer.getMode() == UserMode.OBJECT_JOINTO)
             joinMo(item, currentObj, previousObj);
 
         return true;
@@ -371,13 +375,21 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
+        AppCompatActivity activity = (MapviewActivity) this.activitySupporter;
 
-        BarcodeReaderDialogFragment.newInstance(
-                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
-        ).show(
-                ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
-                "dialog"
-        );
+        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "0", new TextRunnable() {
+            @Override
+            public void run() {
+               long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
+                BarcodeReaderDialogFragment.newInstance(
+                        mapView, LatLongUtils.toGpGeoPoints(geometry), grade
+                ).show(
+                        activity.getSupportFragmentManager(),
+                        "dialog"
+                );
+            }
+        });
+
 
     }
 
@@ -409,8 +421,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         this.reloadData();
         mapView.reloadLayer(EdgesLayer.class);
         //Reload current point layers
-        if(oldSelectedObjectType != null)
-        {
+        if (oldSelectedObjectType != null) {
             Layer layer = oldSelectedObjectType.getLayerObj();
             ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
         }
@@ -439,7 +450,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         MapviewActivity activity = (MapviewActivity) this.activitySupporter;
         if (item != null &&
                 Long.parseLong("" + item.getUid()) != -1L &&
-                appContainer.getAcctionAddEdge() &&
+                appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE &&
                 !previousObj.equals(currentObj)
         ) {
 
@@ -452,15 +463,15 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 return true;
             }
 
-            if (LatLongUtils.soFar(previousObj, LatLongUtils.MAX_DISTANCE, currentObj)) {
+            if (LatLongUtils.soFar(previousObj, LatLongUtils.getMaxDistance(), currentObj)) {
 
                 GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
                         String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
-                                LatLongUtils.MAX_DISTANCE),
+                                LatLongUtils.getMaxDistance()),
                         () -> activity.runOnUiThread(() -> {
                             // yes
                             GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
-                                    LatLongUtils.MAX_DISTANCE));
+                                    LatLongUtils.getMaxDistance()));
 
                             RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                             RouteSegmentOperations.getInstance().save(edge);
@@ -502,18 +513,18 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         MapviewActivity activity = (MapviewActivity) this.activitySupporter;
         if (item != null &&
                 Long.parseLong("" + item.getUid()) != CardinalPointLayer.SELECT_MARKER_UID &&
-                appContainer.getAcctionJoinMo() &&
+                appContainer.getMode() == UserMode.OBJECT_JOINTO &&
                 !previousObj.equals(currentObj)
         ) {
 
 
             GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
-                    String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
-                            LatLongUtils.RADIUS_JOIN_MO),
+                    String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
+                            LatLongUtils.getRadiusJoinMo()),
                     () -> activity.runOnUiThread(() -> {
                         // yes
-                        GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_edge),
-                                LatLongUtils.RADIUS_JOIN_MO));
+                        GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
+                                LatLongUtils.getRadiusJoinMo()));
 
                         currentObj.setJoinObj(previousObj);
                         currentObj.update();
@@ -551,9 +562,9 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     public void circleMarkerJoin(org.oscim.core.GeoPoint point) {
 
-        float bitmapHeight = LatLongUtils.RADIUS_JOIN_MO - 20;
+        float bitmapHeight = LatLongUtils.getRadiusJoinMo() - 20;
         int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
-        float symbolWidth = LatLongUtils.RADIUS_JOIN_MO - 20;
+        float symbolWidth = LatLongUtils.getRadiusJoinMo() - 20;
         int xSize = Math.round(symbolWidth);
         int ySize = Math.round(symbolWidth + dist2symbol);
 
@@ -566,7 +577,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         paint.setStyle(org.oscim.backend.canvas.Paint.Style.STROKE);
         paint.setStrokeWidth(4.5f);
 
-        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f), LatLongUtils.RADIUS_JOIN_MO, paint);
+        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f), LatLongUtils.getRadiusJoinMo(), paint);
         MarkerItem markerItem = new MarkerItem(-2, "", "", point);
         markerItem.setMarker(new MarkerSymbol(bitMap, MarkerSymbol.HotspotPlace.CENTER, false));
         addItem(markerItem);

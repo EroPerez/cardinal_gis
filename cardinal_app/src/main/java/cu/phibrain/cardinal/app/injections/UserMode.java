@@ -6,5 +6,7 @@ public enum UserMode {
     OBJECT_EDITION,
     OBJECT_ADDITION,
     OBJECT_DELETION,
+    OBJECT_JOINTO,
+    OBJECT_ADDING_EDGE
 
 }

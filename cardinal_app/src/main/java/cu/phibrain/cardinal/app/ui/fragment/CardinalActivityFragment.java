@@ -395,7 +395,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         FragmentActivity activity = getActivity();
-        if (activity == null) return;
+        if (activity == null || data == null) return;
         switch (requestCode) {
             case (RETURNCODE_BROWSE_FOR_NEW_PREOJECT): {
                 if (resultCode == Activity.RESULT_OK) {
