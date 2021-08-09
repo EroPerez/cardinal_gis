@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +30,7 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
+import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
@@ -39,12 +42,12 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOpera
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
+import eu.geopaparazzi.library.util.TextRunnable;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
-import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPPolygonDrawable;
 
@@ -84,7 +87,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if ((double) zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if ((double) zoom >= LatLongUtils.getLineAndPolygonViewZoom()) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
@@ -232,12 +235,20 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
 
     @Override
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
-        BarcodeReaderDialogFragment.newInstance(
-                this.mapView, LatLongUtils.toGpGeoPoints(geometry)
-        ).show(
-                ((MapviewActivity) this.activitySupporter).getSupportFragmentManager(),
-                "dialog"
-        );
+        AppCompatActivity activity = (MapviewActivity) this.activitySupporter;
+
+        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "0", new TextRunnable() {
+            @Override
+            public void run() {
+                long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
+                BarcodeReaderDialogFragment.newInstance(
+                        mapView, LatLongUtils.toGpGeoPoints(geometry), grade
+                ).show(
+                        activity.getSupportFragmentManager(),
+                        "dialog"
+                );
+            }
+        });
     }
 
     @Override

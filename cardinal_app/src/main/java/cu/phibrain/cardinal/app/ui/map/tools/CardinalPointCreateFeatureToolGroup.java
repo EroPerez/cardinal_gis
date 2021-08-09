@@ -44,6 +44,7 @@ import org.locationtech.jts.geom.MultiPoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
@@ -274,6 +275,7 @@ public class CardinalPointCreateFeatureToolGroup implements ToolGroup, OnClickLi
             }
         } else if (v == undoButton) {
             if (coordinatesList.size() == 0) {
+                ((CardinalApplication) GPApplication.getInstance()).getContainer().setMode(UserMode.NONE);
                 EditManager.INSTANCE.setActiveToolGroup(new CardinalPointMainEditingToolGroup(mapView));
                 EditManager.INSTANCE.setActiveTool(null);
                 return;

@@ -76,6 +76,13 @@ public class Project implements Serializable, IEntity{
     @Expose
     private List<LabelBatches> labelBatches;
 
+
+    @ToMany(referencedJoinProperty = "projectId")
+    @OrderBy("id ASC")
+    @SerializedName("configurations")
+    @Expose
+    private List<ProjectConfig> configurations;
+
     private final static long serialVersionUID = -7160043438657824243L;
 
     /**
@@ -320,6 +327,35 @@ public class Project implements Serializable, IEntity{
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 1896548995)
+    public List<ProjectConfig> getConfigurations() {
+        if (configurations == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            ProjectConfigDao targetDao = daoSession.getProjectConfigDao();
+            List<ProjectConfig> configurationsNew = targetDao
+                    ._queryProject_Configurations(id);
+            synchronized (this) {
+                if (configurations == null) {
+                    configurations = configurationsNew;
+                }
+            }
+        }
+        return configurations;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 2023637819)
+    public synchronized void resetConfigurations() {
+        configurations = null;
     }
 
     /** called by internal mechanisms, do not call yourself. */

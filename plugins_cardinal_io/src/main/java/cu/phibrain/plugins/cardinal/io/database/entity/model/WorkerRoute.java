@@ -52,6 +52,7 @@ public class WorkerRoute implements Serializable, IEntity {
     @Transient
     private Date createdAt;
 
+    @Expose (serialize = false, deserialize = false)
     private Long gpsLogsTableId;
 
     private final static long serialVersionUID = 3887642485388034854L;

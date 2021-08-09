@@ -138,7 +138,8 @@ public class MapObject implements Serializable, IEntity {
 
 
     @ToMany(referencedJoinProperty = "joinId")
-     private List<MapObject> joined;
+    @Expose (serialize = false, deserialize = false)
+    private List<MapObject> joinedList;
 
     private final static long serialVersionUID = -4499872341492642530L;
     /**
@@ -733,7 +734,7 @@ public class MapObject implements Serializable, IEntity {
 
 
     public boolean belongToTopoLayer(){
-        return getLayer().getIsTopology();
+        return this.getNodeGrade() > 0;
     }
 
 
@@ -741,29 +742,29 @@ public class MapObject implements Serializable, IEntity {
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 133373295)
-    public List<MapObject> getJoined() {
-        if (joined == null) {
+    @Generated(hash = 1851045019)
+    public List<MapObject> getJoinedList() {
+        if (joinedList == null) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
             MapObjectDao targetDao = daoSession.getMapObjectDao();
-            List<MapObject> joinedNew = targetDao._queryMapObject_Joined(id);
+            List<MapObject> joinedListNew = targetDao._queryMapObject_JoinedList(id);
             synchronized (this) {
-                if (joined == null) {
-                    joined = joinedNew;
+                if (joinedList == null) {
+                    joinedList = joinedListNew;
                 }
             }
         }
-        return joined;
+        return joinedList;
     }
 
 
     /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    @Generated(hash = 867267577)
-    public synchronized void resetJoined() {
-        joined = null;
+    @Generated(hash = 93047367)
+    public synchronized void resetJoinedList() {
+        joinedList = null;
     }
 
 

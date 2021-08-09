@@ -1282,24 +1282,47 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
 
         } else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
+
             if (appContainer.getCurrentMapObject() != null && appContainer.IsCurrentActiveLayerTopological()) {
-                appContainer.setAcctionAddEdge(!appContainer.getAcctionAddEdge());
-                if (appContainer.getAcctionAddEdge()) {
+                // toggle button
+                if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE)
+                    appContainer.setMode(UserMode.NONE);
+                else {
+                    appContainer.setMode(UserMode.OBJECT_ADDING_EDGE);
+                }
+
+                if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE) {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
-
-                    appContainer.setAcctionJoinMo(false);
+//                    appContainer.setAcctionJoinMo(false);
                 } else {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 }
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
+            //preguntar si tienen que ser topologico el mo
             if (appContainer.getCurrentMapObject() != null) {
-                    MapObject currentMO = appContainer.getCurrentMapObject();
-                        currentMO.setNodeGrade(currentMO.getNodeGrade()+1);
-                        MapObjectOperations.getInstance().save(currentMO);
-            }
+                if (appContainer.getMode() == UserMode.OBJECT_JOINTO)
+                    appContainer.setMode(UserMode.NONE);
+                else {
+                    appContainer.setMode(UserMode.OBJECT_JOINTO);
+                }
 
+                if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
+
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
+                    MapObject currentMO = appContainer.getCurrentMapObject();
+                    Layer layer = currentMO.getLayer();
+                    CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
+                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
+
+                    addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+//                    appContainer.setAcctionAddEdge(false);
+
+                } else {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
+                }
+            }
         }
     }
 

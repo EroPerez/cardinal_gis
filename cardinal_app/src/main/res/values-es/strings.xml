@@ -7,7 +7,7 @@
     <string name="layername_mot">Capa de objetos de mapa tipo Punto</string>
     <string name="cardinal_line">Capa de objetos de mapa tipo Línea</string>
     <string name="cardinal_polygon">Capa de objetos de mapa tipo Polígono</string>
-    <string name="no_topology_layer">No pertenece a una capa topológica.</string>
+    <string name="no_topology_layer">El objeto selecionado no es topológico.</string>
 
     <string name="seleccione_un_objeto_de_mapa">Seleccione un Objeto de Mapa</string>
     <string name="panic">panic button</string>
@@ -42,9 +42,10 @@
     <string name="distance_tip_message">La distancia que hay desde el lugar donde va a insertar el nuevo punto y el punto anterior definido por usted es de %.2f m.</string>
     <string name="max_distance_threshold_broken_message_edge">El objeto de mapa anterior está a más de %.2f m. ¿Desea crear el segmento de ruta de todas forma?</string>
     <string name="stats_session_view_label">Estadísticas de la Sesión</string>
-    <string name="km_covered">Distancia recorrida: %.2f m</string>
+    <string name="km_covered">Distancia recorrida: %.2f km</string>
     <string name="captured_points">Puntos geolocalizados: %d</string>
     <string name="map_object_incomplete_count">Incompletos: %d</string>
     <string name="gpslogging_stop_and_start_again">No se pudo iniciar el registro de ruta del operario. Detenga el registro y reinícielo marcando el botón "Continuar con el último registro".</string>
     <string name="obj_destination_completed">El objeto destino esta completado según el grado definido, aumente el grado y reintente la operación.</string>
+    <string name="max_distance_threshold_broken_message_jointo">El objeto de mapa seleccionado esta a más de %.2f metros ¿Desea acoplarlos de todas forma?</string>
 </resources>
