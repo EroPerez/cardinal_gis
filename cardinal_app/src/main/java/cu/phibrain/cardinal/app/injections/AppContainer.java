@@ -7,7 +7,6 @@ import java.util.List;
 
 import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.IEntity;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
@@ -31,16 +30,11 @@ public class AppContainer {
     protected Networks networksActive;
     protected MapObject mapObjectActive;
     protected Worker currentWorker;
-    private MapObject edgeAddInMapObjSelect;
-    private Boolean acctionAddEdge = false;
-    private Boolean acctionJoinMo= false;
     private Boolean isTopology = false;
 
     protected UserMode umode;
 
-    public AppContainer() throws IOException {
-//        refreshProject();
-//        setWorkSessionActive(null);
+    public AppContainer() {
         setMode(UserMode.NONE);
     }
 
@@ -217,10 +211,8 @@ public class AppContainer {
 
     public void setCurrentMapObject(MapObject mapObjectActive) {
         this.mapObjectActive = mapObjectActive;
-        Layer layer;
         if (this.mapObjectActive != null) {
-            layer = this.mapObjectActive.getLayer();
-            setTopology(layer.getIsTopology());
+            setTopology(mapObjectActive.belongToTopoLayer());
         } else
             setTopology(false);
 
@@ -232,42 +224,6 @@ public class AppContainer {
     }
 
 
-    private void refreshPMO() throws IOException {
-        Long Id = geId(CardinalMetadataTableDefaultValues.PREVIOUS_MAP_OBJECT_ID.getFieldName());
-        //Load Project Active
-        if (edgeAddInMapObjSelect == null || edgeAddInMapObjSelect.getId() != Id) {
-
-            if (Id != null) {
-                edgeAddInMapObjSelect = MapObjectOperations.getInstance().load(Id);
-            }
-        }
-    }
-
-    public MapObject getPreviousMapObject() {
-        try {
-            refreshPMO();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return edgeAddInMapObjSelect;
-    }
-
-    public void setPreviousMapObject(MapObject edgeAddInMapObjSelect) {
-        this.edgeAddInMapObjSelect = edgeAddInMapObjSelect;
-        setValue(
-                CardinalMetadataTableDefaultValues.PREVIOUS_MAP_OBJECT_ID.getFieldName(),
-                this.edgeAddInMapObjSelect
-        );
-    }
-
-
-    public Boolean getAcctionAddEdge() {
-        return acctionAddEdge;
-    }
-
-    public void setAcctionAddEdge(Boolean acctionAddEdge) {
-        this.acctionAddEdge = acctionAddEdge;
-    }
 
     public Boolean IsCurrentActiveLayerTopological() {
         return isTopology;
@@ -285,11 +241,4 @@ public class AppContainer {
         this.umode = umode;
     }
 
-    public Boolean getAcctionJoinMo() {
-        return acctionJoinMo;
-    }
-
-    public void setAcctionJoinMo(Boolean acctionJoinMo) {
-        this.acctionJoinMo = acctionJoinMo;
-    }
 }

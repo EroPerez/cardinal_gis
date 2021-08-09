@@ -37,6 +37,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOpera
 import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.library.util.StringAsyncTask;
@@ -86,31 +87,36 @@ public class SessionsStatsActivity extends AppCompatActivity {
         trackLengthTextView = findViewById(R.id.tvKm);
 
         incompleteMOTextView = findViewById(R.id.tvIncompleteMO);
+        try {
 
-        task = new StringAsyncTask(SessionsStatsActivity.this) {
-            @Override
-            protected void doUiPostWork(String response) {
-                trackLengthTextView.setText(response);
-                dispose();
-            }
 
-            @Override
-            protected String doBackgroundWork() {
-                lengthm = 0.0;
-                wsa.resetWorkerRoute();
-                for (WorkerRoute log :
-                        wsa.getWorkerRoute()) {
-                    try {
-                        lengthm += DaoGpsLog.updateLogLength(log.getGpsLogsTableId());
-                    } catch (IOException e) {
-                        GPLog.error(this, "ERROR", e);//NON-NLS
-                    }
+            task = new StringAsyncTask(SessionsStatsActivity.this) {
+                @Override
+                protected void doUiPostWork(String response) {
+                    trackLengthTextView.setText(response);
+                    dispose();
                 }
-                return getString(R.string.km_covered, lengthm);//NON-NLS
-            }
-        };
-        task.setProgressDialog(null, getString(eu.geopaparazzi.core.R.string.calculate_length), false, null);
-        task.execute();
+
+                @Override
+                protected String doBackgroundWork() {
+                    lengthm = 0.0;
+                    wsa.resetWorkerRoute();
+                    for (WorkerRoute log :
+                            wsa.getWorkerRoute()) {
+                        try {
+                            lengthm += DaoGpsLog.updateLogLength(log.getGpsLogsTableId());
+                        } catch (IOException e) {
+                            GPLog.error(this, "ERROR", e);//NON-NLS
+                        }
+                    }
+                    return getString(R.string.km_covered, lengthm / 1000);//NON-NLS
+                }
+            };
+            task.setProgressDialog(null, getString(eu.geopaparazzi.core.R.string.calculate_length), false, null);
+            task.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 //        final ImageButton chartButton = findViewById(R.id.stats_gpslog_chart);
 //        chartButton.setOnClickListener(v -> {
@@ -148,6 +154,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
             GPLog.addLogEntry(this, "refreshing map objects list"); //$NON-NLS-1$
 
         wsa.resetMapObjects();
+        incompledCounter = 0;
 
         List<MapObject> mapObjectList = wsa.getMapObjects();
 
@@ -159,10 +166,14 @@ public class SessionsStatsActivity extends AppCompatActivity {
             String code = mapObject.getCode();
             mapObjectMap.put(code, mapObject);
             mapobjectsCodes[index] = code;
+            //check completitud del nodo
+            if (!mapObject.getIsCompleted())
+                incompledCounter++;
             index++;
         }
 
         tvCapturePoint.setText(getString(R.string.captured_points, mapObjectList.size()));
+        incompleteMOTextView.setText(getString(R.string.map_object_incomplete_count, incompledCounter));
 
         redoAdapter();
     }
@@ -195,64 +206,60 @@ public class SessionsStatsActivity extends AppCompatActivity {
     }
 
     private void redoAdapter() {
-        incompledCounter = 0;
+
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, eu.geopaparazzi.core.R.layout.activity_bookmarkslist_row, mapobjectsCodes) {
             @Override
             public View getView(int position, View cView, ViewGroup parent) {
                 final View rowView = getLayoutInflater().inflate(R.layout.activity_sessions_stats_row, parent, false);
 
                 final TextView mapObjectText = rowView.findViewById(R.id.mapobjectsrowtext);
-                mapObjectText.setText(mapobjectsCodes[position]);
+                MapObject mapObject = mapObjectMap.get(mapobjectsCodes[position]);
+                mapObjectText.setText(mapObject.getCode());
+
+                if (!mapObject.getIsCompleted())
+                    mapObjectText.setTextColor(Compat.getColor(parent.getContext(), R.color.main_selection));
+//                    rowView.setBackgroundColor(Compat.getColor(parent.getContext(), R.color.main_selection));
 
                 final ImageButton deleteButton = rowView.findViewById(R.id.deleteMObutton);
-                deleteButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        final String code = mapObjectText.getText().toString();
-                        final MapObject mapObject = mapObjectMap.get(code);
-                        GPDialogs.yesNoMessageDialog(SessionsStatsActivity.this, getString(R.string.do_you_want_to_delete_this_map_object),
-                                new Runnable() {
-                                    public void run() {
-                                        new AsyncTask<String, Void, String>() {
-                                            protected String doInBackground(String... params) {
-                                                return ""; //$NON-NLS-1$
-                                            }
+                deleteButton.setOnClickListener(v -> {
+                    final String code = mapObjectText.getText().toString();
+                    final MapObject mapObject1 = mapObjectMap.get(code);
+                    GPDialogs.yesNoMessageDialog(SessionsStatsActivity.this, getString(R.string.do_you_want_to_delete_this_map_object),
+                            new Runnable() {
+                                public void run() {
+                                    new AsyncTask<String, Void, String>() {
+                                        protected String doInBackground(String... params) {
+                                            return ""; //$NON-NLS-1$
+                                        }
 
-                                            protected void onPostExecute(String response) {
-                                                MapObjectOperations.getInstance().delete(mapObject.getId());
-                                                refreshList();
-                                            }
-                                        }.execute((String) null);
+                                        protected void onPostExecute(String response) {
+                                            MapObjectOperations.getInstance().delete(mapObject1.getId());
+                                            refreshList();
+                                        }
+                                    }.execute((String) null);
 
-                                    }
-                                }, null);
+                                }
+                            }, null);
 
-                    }
                 });
 
                 final ImageButton goButton = rowView.findViewById(R.id.gotobutton);
                 goButton.setOnClickListener(v -> {
-                    MapObject mapObject = mapObjectMap.get(mapObjectText.getText().toString());
-                    if (mapObject != null) {
+                    final MapObject mapObject2 = mapObjectMap.get(mapObjectText.getText().toString());
+                    if (mapObject2 != null) {
 
-                        GPGeoPoint centerPoint = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+                        GPGeoPoint centerPoint = LatLongUtils.centerPoint(mapObject2.getCoord(), mapObject2.getObjectType().getGeomType());
 
                         Intent intent = new Intent(getContext(), MapsSupportService.class);
                         intent.putExtra(MapsSupportService.CENTER_ON_POSITION_REQUEST, true);
                         intent.putExtra(LibraryConstants.LONGITUDE, centerPoint.getLongitude());
                         intent.putExtra(LibraryConstants.LATITUDE, centerPoint.getLatitude());
-                        intent.putExtra(LibraryConstants.ZOOMLEVEL, (int) mapObject.getElevation() <= 0 ? LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM : (int) mapObject.getElevation());
+                        intent.putExtra(LibraryConstants.ZOOMLEVEL, (int) mapObject2.getElevation() <= 0 ? LatLongUtils.getLineAndPolygonViewZoom() : (int) mapObject2.getElevation());
                         getContext().startService(intent);
 
                     }
                     finish();
                 });
-
-                //check completitud del nodo
-                final MapObject mapObject = mapObjectMap.get(mapobjectsCodes[position]);
-
-                if (!mapObject.getIsCompleted())
-                    incompledCounter++;
-
 
                 return rowView;
             }
@@ -260,7 +267,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
         };
 
         listView.setAdapter(arrayAdapter);
-        incompleteMOTextView.setText(getString(R.string.map_object_incomplete_count, incompledCounter));
+
     }
 
     private TextWatcher filterTextWatcher = new TextWatcher() {

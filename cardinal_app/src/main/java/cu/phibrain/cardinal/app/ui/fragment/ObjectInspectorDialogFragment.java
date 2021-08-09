@@ -306,7 +306,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                     boolean handled = false;
                     if (actionId == EditorInfo.IME_ACTION_DONE && v != null) {
                         Long value = Long.parseLong(String.valueOf(v.getText()));
-                        object.setNodeGrade(value > 2 ? value : 2);
+                        object.setNodeGrade(value >= 2 ? value : 2);
                         MapObjectOperations.getInstance().save(object);
                         v.setText(String.valueOf(object.getNodeGrade()));
                         handled = true;
@@ -476,6 +476,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             ObjectInspectorDialogFragment.this.dismiss();
 
         });
+        editCoord.setVisibility(View.GONE);
 
     }
 

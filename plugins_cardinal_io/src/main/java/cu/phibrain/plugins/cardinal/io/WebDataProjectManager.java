@@ -22,6 +22,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.ProjectConfig;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
@@ -47,6 +48,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOpera
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectTypeAttributeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MaterialOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectConfigOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
@@ -148,11 +150,11 @@ public enum WebDataProjectManager {
             List<Networks> networksList = project.getNetworks();
             List<LabelBatches> labelBatchesList = project.getLabelBatches();
             List<Label> labelList = new ArrayList<>();
-
             for (LabelBatches lot :
                     labelBatchesList) {
                 labelList.addAll(lot.getLabels());
             }
+            List<ProjectConfig> configList = project.getConfigurations();
 
             DaoSessionManager.getInstance().setContext(context);
             DaoSessionManager.getInstance().setDatabaseName(newDbFileName);
@@ -174,7 +176,6 @@ public enum WebDataProjectManager {
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldName(), CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldLabel(), "");
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.MAP_OBJECT_TYPE_ID.getFieldName(), CardinalMetadataTableDefaultValues.MAP_OBJECT_TYPE_ID.getFieldLabel(), "");
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldLabel(), "");
-            DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PREVIOUS_MAP_OBJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PREVIOUS_MAP_OBJECT_ID.getFieldLabel(), "");
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.NETWORK_ID.getFieldName(), CardinalMetadataTableDefaultValues.NETWORK_ID.getFieldLabel(), "");
 
             //Inserts Operations
@@ -185,6 +186,7 @@ public enum WebDataProjectManager {
             NetworksOperations.getInstance().insertAll(networksList);
             LabelBatchesOperations.getInstance().insertAll(labelBatchesList);
             LabelOperations.getInstance().insertAll(labelList);
+            ProjectConfigOperations.getInstance().insertAll(configList);
 
             // Save all layers in networks
             List<Layer> layerList = new ArrayList<>();
@@ -215,6 +217,7 @@ public enum WebDataProjectManager {
             WorkSessionOperations.getInstance().insertAll(workSessionList);
 
             List<MapObject> mapObjectList = new ArrayList<>();
+
             // Prepare log table to transfer cardus log to gp log
             DaoGpsLog.createTables(db);
             Class<?> logHelper = Class.forName(DefaultHelperClasses.GPSLOG_HELPER_CLASS);

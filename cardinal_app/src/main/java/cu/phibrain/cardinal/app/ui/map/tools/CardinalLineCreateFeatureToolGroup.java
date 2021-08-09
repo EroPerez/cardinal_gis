@@ -44,6 +44,7 @@ import org.locationtech.jts.geom.LineString;
 import java.util.ArrayList;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
@@ -278,6 +279,7 @@ public class CardinalLineCreateFeatureToolGroup implements ToolGroup, OnClickLis
             }
         } else if (v == undoButton) {
             if (coordinatesList.size() == 0) {
+                ((CardinalApplication) GPApplication.getInstance()).getContainer().setMode(UserMode.NONE);
                 EditManager.INSTANCE.setActiveToolGroup(new CardinalLineMainEditingToolGroup(mapView));
                 EditManager.INSTANCE.setActiveTool(null);
                 return;

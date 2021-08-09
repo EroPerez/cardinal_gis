@@ -51,10 +51,6 @@ public class Layer implements Serializable, IEntity {
     @Expose
     private String icon;
 
-    @SerializedName("is_topology")
-    @Expose
-    private Boolean isTopology;
-
     @SerializedName("view_zoom_level")
     @Expose
     private Integer viewZoomLevel;
@@ -89,19 +85,20 @@ public class Layer implements Serializable, IEntity {
     }
 
 
-    @Generated(hash = 1637062830)
-    public Layer(Long id, String name, long groupId, String icon, Boolean isTopology,
-            Integer viewZoomLevel, Integer editZoomLevel, Boolean enabled) {
 
+    @Generated(hash = 217052673)
+    public Layer(Long id, String name, long groupId, String icon, Integer viewZoomLevel,
+            Integer editZoomLevel, Boolean enabled) {
         this.id = id;
         this.name = name;
         this.groupId = groupId;
         this.icon = icon;
-        this.isTopology = isTopology;
         this.viewZoomLevel = viewZoomLevel;
         this.editZoomLevel = editZoomLevel;
         this.enabled = enabled;
     }
+
+
 
     public Long getId() {
         return this.id;
@@ -207,16 +204,8 @@ public class Layer implements Serializable, IEntity {
         this.icon = icon;
     }
 
-    public Boolean getIsTopology() {
-        return this.isTopology;
-    }
-
     public Boolean getIsActive() {
         return this.enabled;
-    }
-
-    public void setIsTopology(Boolean isTopology) {
-        this.isTopology = isTopology;
     }
 
     public Integer getViewZoomLevel() {

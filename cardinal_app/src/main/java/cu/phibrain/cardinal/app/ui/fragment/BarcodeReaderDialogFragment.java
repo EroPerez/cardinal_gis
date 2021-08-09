@@ -73,20 +73,21 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     private GPMapView mapView;
     private LabelSubLot label;
     private WorkSession currentSession;
-    ;
+    private long grade;
 
     public BarcodeReaderDialogFragment() {
     }
 
-    public BarcodeReaderDialogFragment(GPMapView mapView, List<GPGeoPoint> points) {
+    public BarcodeReaderDialogFragment(GPMapView mapView, List<GPGeoPoint> points, long grade) {
         super();
         this.mapView = mapView;
         this.coordinates = points;
+        this.grade = grade;
     }
 
     // TODO: Customize parameters
-    public static BarcodeReaderDialogFragment newInstance(GPMapView mapView, List<GPGeoPoint> points) {
-        final BarcodeReaderDialogFragment fragment = new BarcodeReaderDialogFragment(mapView, points);
+    public static BarcodeReaderDialogFragment newInstance(GPMapView mapView, List<GPGeoPoint> points, long grade) {
+        final BarcodeReaderDialogFragment fragment = new BarcodeReaderDialogFragment(mapView, points, grade);
         final Bundle args = new Bundle();
 //        args.putLong(ARG_ITEM_COUNT, itemCount);
         fragment.setArguments(args);
@@ -124,26 +125,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             }
 
         });
-
-//        autoCompleteTextViewCode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-//                //this is the way to find selected object/item
-//                label = (LabelSubLot) adapterView.getItemAtPosition(position);
-//                if (label != null) {
-//                    buttonSave.setVisibility(View.VISIBLE);
-//                } else {
-//                    buttonSave.setVisibility(View.GONE);
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//                label = null;
-//                buttonSave.setVisibility(View.GONE);
-//                GPDialogs.toast(getActivity(), getString(R.string.barcode_notavailable_message), Toast.LENGTH_LONG);
-//            }
-//        });
 
         //intializing scan object
         code128BarcodeScan = IntentIntegrator.forSupportFragment(this); // `this` is the current Fragment
@@ -223,12 +204,13 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 MapObject previousObj = appContainer.getCurrentMapObject();
                 Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
-                long grade = currentSelectedObjectTypeLayer.getIsTopology() ? currentSelectedObjectType.getIsTerminal() ? 1 : 2 : 0;
-
                 MapObject currentObj = new MapObject();
                 currentObj.setCode(label.toString());
                 currentObj.setCoord(this.coordinates);
                 currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
+
+                grade = currentSelectedObjectType.getIsTerminal() ? 1 : grade;
+
                 currentObj.setNodeGrade(grade);
                 currentObj.setSessionId(currentSession.getId());
                 currentObj.setIsCompleted(false);
@@ -251,7 +233,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
 //                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
 
-                if (!currentSelectedObjectTypeLayer.getIsTopology() ||
+                if (!currentObj.belongToTopoLayer() ||
                         previousObj == null ||
                         !previousObj.belongToTopoLayer() ||
                         !previousObj.getIsCompleted()) {
@@ -260,11 +242,11 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 }
 
 
-                if (LatLongUtils.soFar(previousObj, LatLongUtils.MAX_DISTANCE, currentObj)) {
+                if (LatLongUtils.soFar(previousObj, LatLongUtils.getMaxDistance(), currentObj)) {
 
                     GPDialogs.yesNoMessageDialog(activity,
                             String.format(getString(R.string.max_distance_threshold_broken_message),
-                                    LatLongUtils.MAX_DISTANCE),
+                                    LatLongUtils.getMaxDistance()),
                             () -> activity.runOnUiThread(() -> {
                                 // yes
                                 appContainer.setCurrentMapObject(null);
@@ -273,7 +255,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
                                 GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
-                                        LatLongUtils.MAX_DISTANCE));
+                                        LatLongUtils.getMaxDistance()));
 
                                 RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                                 RouteSegmentOperations.getInstance().save(edge);

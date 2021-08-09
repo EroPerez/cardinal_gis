@@ -44,6 +44,7 @@ import org.locationtech.jts.geom.Polygon;
 import java.util.ArrayList;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
@@ -296,6 +297,7 @@ public class CardinalPolygonCreateFeatureToolGroup implements ToolGroup, OnClick
             }
         } else if (v == undoButton) {
             if (coordinatesList.size() == 0) {
+                ((CardinalApplication) GPApplication.getInstance()).getContainer().setMode(UserMode.NONE);
                 EditManager.INSTANCE.setActiveToolGroup(new CardinalPolygonMainEditingToolGroup(mapView));
                 EditManager.INSTANCE.setActiveTool(null);
                 return;

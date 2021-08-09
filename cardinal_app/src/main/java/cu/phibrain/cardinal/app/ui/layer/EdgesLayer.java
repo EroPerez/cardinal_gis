@@ -75,7 +75,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
 
         tmpDrawables.clear();
         mDrawables.clear();
-        if ((double) zoom >= LatLongUtils.LINE_AND_POLYGON_VIEW_ZOOM) {
+        if ((double) zoom >= LatLongUtils.getLineAndPolygonViewZoom()) {
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.BLACK)
