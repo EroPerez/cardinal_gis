@@ -583,28 +583,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         return true;
     }
 
-    public void circleMarkerJoin(org.oscim.core.GeoPoint point) {
 
-        float bitmapHeight = LatLongUtils.getRadiusJoinMo() - 20;
-        int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
-        float symbolWidth = LatLongUtils.getRadiusJoinMo() - 20;
-        int xSize = Math.round(symbolWidth);
-        int ySize = Math.round(symbolWidth + dist2symbol);
-
-        Bitmap bitMap = CanvasAdapter.newBitmap(xSize, ySize, 0);
-        org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
-        markerCanvas.setBitmap(bitMap);
-
-        org.oscim.backend.canvas.Paint paint = CanvasAdapter.newPaint();
-        paint.setColor(Color.RED);
-        paint.setStyle(org.oscim.backend.canvas.Paint.Style.STROKE);
-        paint.setStrokeWidth(4.5f);
-
-        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f), LatLongUtils.getRadiusJoinMo(), paint);
-        MarkerItem markerItem = new MarkerItem(-2, "", "", point);
-        markerItem.setMarker(new MarkerSymbol(bitMap, MarkerSymbol.HotspotPlace.CENTER, false));
-        addItem(markerItem);
-    }
 
 
     private MarkerItem getMarkerById(Long id) {

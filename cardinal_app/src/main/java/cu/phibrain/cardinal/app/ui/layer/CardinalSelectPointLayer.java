@@ -57,7 +57,7 @@ import eu.geopaparazzi.map.features.Feature;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
-public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, ICardinalLayer {
+public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer {
     public static final String NONFORMSTART = "@";
     public static final int FORMUPDATE_RETURN_CODE = 669;
     private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
@@ -225,7 +225,7 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
     @Override
     public JSONObject toJson() throws JSONException {
         JSONObject jo = toDefaultJson();
-        jo.put(LAYERID_TAG, 1L);
+        //jo.put(LAYERID_TAG, 1L);
         return jo;
     }
 
@@ -243,11 +243,5 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
     public void onPause() {
 
     }
-
-    @Override
-    public Long getLayerId() {
-        return 1L;
-    }
-
 
 }
