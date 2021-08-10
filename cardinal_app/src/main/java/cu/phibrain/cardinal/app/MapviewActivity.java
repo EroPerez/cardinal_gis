@@ -97,6 +97,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
@@ -1119,6 +1120,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
             return true;
 
+        }else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
+            MapObject currentMO = appContainer.getCurrentMapObject();
+            //preguntar si tienen que ser topologico el mo
+            if (currentMO != null && currentMO.belongToTopoLayer() && !currentMO.isTerminal()) {
+                currentMO.setNodeGrade(currentMO.getNodeGrade()+1);
+                MapObjectOperations.getInstance().save(currentMO);
+            }
+            return true;
         }
         return false;
     }
@@ -1294,8 +1303,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     MapObject currentMO = appContainer.getCurrentMapObject();
                     Layer layer = currentMO.getLayer();
                     CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
-                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
-
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
 //                    appContainer.setAcctionAddEdge(false);
 
@@ -1401,6 +1408,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     }
 
     private void updateSelectMapObj(MapObjecType mto) {
+        selectMo = findViewById(cu.phibrain.cardinal.app.R.id.selectMo);
         if (mto != null) {
             byte[] icon = mto.getIconAsByteArray();
             if (icon != null) {
@@ -1484,7 +1492,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             toggleMeasuremodeButton.setVisibility(View.VISIBLE);
         } else {
 //            addnotebytagButton.setVisibility(View.GONE);
-            if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE) {
+            if (appContainer.getMode()== UserMode.OBJECT_ADDING_EDGE) {
                 addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
 
             } else {
