@@ -13,6 +13,11 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
         <activity
+            android:name=".ui.activities.MapObjectJoinedActivity"
+            android:parentActivityName=".MapviewActivity"
+            android:label="@string/title_activity_map_object_joined"
+            android:theme="@style/GeopapTheme.NoActionBar"></activity>
+        <activity
             android:name=".ui.activities.SessionsStatsActivity"
             android:label="@string/stats_session_view_label"
             android:parentActivityName=".MapviewActivity"

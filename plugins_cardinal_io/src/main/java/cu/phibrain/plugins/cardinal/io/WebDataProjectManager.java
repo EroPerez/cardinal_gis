@@ -71,9 +71,11 @@ import eu.geopaparazzi.library.database.DefaultHelperClasses;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.database.IGpsLogDbHelper;
 import eu.geopaparazzi.library.database.TableDescriptions;
-import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.library.util.Utilities;
+
+import static eu.geopaparazzi.library.util.LibraryConstants.DEFAULT_LOG_WIDTH;
 
 
 /**
@@ -237,13 +239,17 @@ public enum WebDataProjectManager {
                     final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
                     long now = System.currentTimeMillis();
 
-                    long gpsLogId = dbHelper.addGpsLog(now, now, 0.0f, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
-
-                    for (WorkerRoute log :
-                            gpslogs) {
-                        dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
+                    long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, DEFAULT_LOG_WIDTH, ColorUtilities.BLUE.getHex(), true); //$NON-NLS-1$
+                    db.beginTransaction();
+                    try {
+                        for (WorkerRoute log :
+                                gpslogs) {
+                            dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
+                        }
+                        db.setTransactionSuccessful();
+                    } finally {
+                        db.endTransaction();
                     }
-
                     try {
                         DaoGpsLog.updateLogLength(gpsLogId);
                     } catch (IOException e) {

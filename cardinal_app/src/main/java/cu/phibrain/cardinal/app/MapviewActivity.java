@@ -79,6 +79,7 @@ import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.cardinal.app.ui.activities.MapObjectJoinedActivity;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
@@ -1119,6 +1120,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
             return true;
 
+        } else if(i == cu.phibrain.cardinal.app.R.id.jointobutton){ // lista de mapobjects acoplados al mapobject selccionado
+
+            Intent intent = new Intent(getContext(), MapObjectJoinedActivity.class);
+            startActivity(intent);
+            return true;
         }
         return false;
     }
