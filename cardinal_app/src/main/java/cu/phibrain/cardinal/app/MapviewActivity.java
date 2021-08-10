@@ -1309,11 +1309,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     MapObject currentMO = appContainer.getCurrentMapObject();
                     Layer layer = currentMO.getLayer();
                     CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
-                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
+//                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
 
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
-//                    appContainer.setAcctionAddEdge(false);
-
                 } else {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
                 }
