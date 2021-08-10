@@ -345,6 +345,10 @@ public enum CardinalLayerManager {
         } else {
             loadCardinalLayers(mapView, activitySupporter, cardinalLayersDefinitions);
         }
+
+        //Select
+        CardinalSelectPointLayer selectPointLayer = new CardinalSelectPointLayer(mapView, activitySupporter);
+        selectPointLayer.load();
     }
 
     private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException, IOException {
@@ -384,6 +388,8 @@ public enum CardinalLayerManager {
         jo.put(IGpLayer.LAYERNAME_TAG, polygonLayer.getName(context));
         cardinalLayersDefinitions.add(polygonLayer.toJson());
         polygonLayer.load();
+
+
     }
 
     public void loadMapLayers(GPMapView mapView, List<JSONObject> mapLayersDefinitions) throws Exception {

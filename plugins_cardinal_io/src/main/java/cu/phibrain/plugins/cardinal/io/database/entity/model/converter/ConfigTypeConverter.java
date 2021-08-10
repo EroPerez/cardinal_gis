@@ -7,7 +7,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.ProjectConfig;
 
 public  class ConfigTypeConverter implements PropertyConverter<ProjectConfig.ConfigType, Integer> {
     @Override
-    publicProjectConfig.ConfigType convertToEntityProperty(Integer databaseValue) {
+    public ProjectConfig.ConfigType convertToEntityProperty(Integer databaseValue) {
         if (databaseValue == null) {
             return null;
         }

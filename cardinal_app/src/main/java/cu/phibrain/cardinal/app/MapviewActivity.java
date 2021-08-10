@@ -98,6 +98,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
@@ -1120,6 +1121,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
             return true;
 
+        }else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
+            MapObject currentMO = appContainer.getCurrentMapObject();
+            //preguntar si tienen que ser topologico el mo
+            if (currentMO != null && currentMO.belongToTopoLayer() && !currentMO.isTerminal()) {
+                currentMO.setNodeGrade(currentMO.getNodeGrade()+1);
+                MapObjectOperations.getInstance().save(currentMO);
+            }
+            return true;
         } else if(i == cu.phibrain.cardinal.app.R.id.jointobutton){ // lista de mapobjects acoplados al mapobject selccionado
 
             Intent intent = new Intent(getContext(), MapObjectJoinedActivity.class);

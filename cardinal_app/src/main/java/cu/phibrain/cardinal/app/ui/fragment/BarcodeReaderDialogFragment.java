@@ -28,6 +28,7 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -236,21 +237,21 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 if (!currentObj.belongToTopoLayer() ||
                         previousObj == null ||
                         !previousObj.belongToTopoLayer() ||
-                        !previousObj.getIsCompleted()) {
+                        previousObj.getIsCompleted()) {
                     refreshUI(terminalFound);
                     return;
                 }
 
 
                 if (LatLongUtils.soFar(previousObj, LatLongUtils.getMaxDistance(), currentObj)) {
-
+                    final boolean tf = terminalFound;
                     GPDialogs.yesNoMessageDialog(activity,
                             String.format(getString(R.string.max_distance_threshold_broken_message),
                                     LatLongUtils.getMaxDistance()),
                             () -> activity.runOnUiThread(() -> {
                                 // yes
                                 appContainer.setCurrentMapObject(null);
-
+                                refreshUI(tf);
 
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
@@ -265,7 +266,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     e.printStackTrace();
                                 }
 
-
+                                refreshUI(tf);
                             })
                     );
                 } else {
@@ -273,10 +274,11 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
                     RouteSegmentOperations.getInstance().save(edge);
                     mapView.reloadLayer(EdgesLayer.class);
+                    refreshUI(terminalFound);
                 }
 
 
-                refreshUI(terminalFound);
+
 
             } catch (Exception e) {
                 GPLog.error(this, e.getLocalizedMessage(), e);
@@ -293,6 +295,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
         ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
         ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
+        ((CardinalGPMapView) mapView).reloadLayer(CardinalSelectPointLayer.class);
 
     }
 

@@ -18,6 +18,7 @@ import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
@@ -83,6 +84,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         super(mapView.map(), getMarkerSymbol(mapView, ID));
         this.mapView = mapView;
         this.ID = ID;
+        this.setEnabled(true);
         getName(mapView.getContext());
         geometryMto = EGeometryType.POINT;
         this.activitySupporter = activitySupporter;
@@ -224,16 +226,13 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
         if (item != null && Long.parseLong("" + item.getUid()) != -1L) {
             MapObject objectSelected = MapObjectOperations.getInstance().load((Long) item.getUid());
-//            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).appContainer;
             appContainer.setCurrentMapObject(objectSelected);
             appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
-
-            MarkerItem markerItem = new MarkerItem(CardinalPointLayer.SELECT_MARKER_UID, "", "", item.getPoint());
-            Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), cu.phibrain.cardinal.app.R.drawable.long_select_mto);
-            mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
-            markerItem.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
-            addItem(markerItem);
-
+            try {
+                mapView.reloadLayer(CardinalSelectPointLayer.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
             intent.putExtra("update_map_object_active", true);
@@ -259,9 +258,27 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
 
     private MarkerSymbol createAdvancedSymbol(MarkerItem item, Bitmap poiBitmap) {
+        final Paint textPainter = CanvasAdapter.newPaint();
+        textPainter.setStyle(Paint.Style.FILL);
+        int textColor = ColorUtilities.toColor(colorStr);
+        textPainter.setColor(textColor);
+        textPainter.setTextSize(textSize);
+        textPainter.setTypeface(Paint.FontFamily.MONOSPACE, Paint.FontStyle.NORMAL);
+
         int bitmapHeight = poiBitmap.getHeight();
         int margin = 3;
         int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
+
+        final Paint haloTextPainter = CanvasAdapter.newPaint();
+        haloTextPainter.setStyle(Paint.Style.FILL);
+        haloTextPainter.setColor(Color.WHITE);
+        haloTextPainter.setTextSize(textSize);
+        haloTextPainter.setTypeface(Paint.FontFamily.MONOSPACE, Paint.FontStyle.BOLD);
+
+        int titleWidth = ((int) haloTextPainter.getTextWidth(item.title) + 2 * margin);
+        int titleHeight = (int) (haloTextPainter.getTextHeight(item.title) + textPainter.getFontDescent() + 2 * margin);
+
+
 
         int symbolWidth = poiBitmap.getWidth();
 
@@ -272,6 +289,12 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         Bitmap markerBitmap = CanvasAdapter.newBitmap(xSize, ySize, 0);
         org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
         markerCanvas.setBitmap(markerBitmap);
+
+        org.oscim.backend.canvas.Canvas titleCanvas = CanvasAdapter.newCanvas();
+        titleCanvas.setBitmap(markerBitmap);
+        titleCanvas.fillRectangle(0, 0, titleWidth, titleHeight, TRANSP_WHITE);
+        titleCanvas.drawText(item.title, margin, titleHeight - margin - textPainter.getFontDescent(), haloTextPainter);
+        titleCanvas.drawText(item.title, margin, titleHeight - margin - textPainter.getFontDescent(), textPainter);
 
         markerCanvas.drawBitmap(poiBitmap, xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f));
 
@@ -560,28 +583,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         return true;
     }
 
-    public void circleMarkerJoin(org.oscim.core.GeoPoint point) {
 
-        float bitmapHeight = (float) (LatLongUtils.getRadiusJoinMo() - 20);
-        int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
-        float symbolWidth = (float) (LatLongUtils.getRadiusJoinMo() - 20);
-        int xSize = Math.round(symbolWidth);
-        int ySize = Math.round(symbolWidth + dist2symbol);
-
-        Bitmap bitMap = CanvasAdapter.newBitmap(xSize, ySize, 0);
-        org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
-        markerCanvas.setBitmap(bitMap);
-
-        org.oscim.backend.canvas.Paint paint = CanvasAdapter.newPaint();
-        paint.setColor(Color.RED);
-        paint.setStyle(org.oscim.backend.canvas.Paint.Style.STROKE);
-        paint.setStrokeWidth(4.5f);
-
-        markerCanvas.drawCircle(xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f), (float) LatLongUtils.getRadiusJoinMo(), paint);
-        MarkerItem markerItem = new MarkerItem(-2, "", "", point);
-        markerItem.setMarker(new MarkerSymbol(bitMap, MarkerSymbol.HotspotPlace.CENTER, false));
-        addItem(markerItem);
-    }
 
 
     private MarkerItem getMarkerById(Long id) {
