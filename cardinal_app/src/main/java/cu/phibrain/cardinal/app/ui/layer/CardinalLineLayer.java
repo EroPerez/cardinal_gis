@@ -217,6 +217,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                         mapView.reloadLayer(EdgesLayer.class);
                         //Reload current point layers
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
+                        mapView.reloadLayer(CardinalSelectPointLayer.class);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -282,6 +283,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
         //Reload layers associated
         this.reloadData();
         mapView.reloadLayer(EdgesLayer.class);
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
         //Reload current point layers
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());

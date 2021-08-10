@@ -217,6 +217,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                         //Reload current point layers
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
 
+                        mapView.reloadLayer(CardinalSelectPointLayer.class);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -282,6 +283,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         //Reload current point layers
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
 
         if(oldSelectedObjectType != null)
         {

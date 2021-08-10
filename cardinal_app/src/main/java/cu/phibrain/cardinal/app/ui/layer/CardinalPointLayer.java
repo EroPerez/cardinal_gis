@@ -379,6 +379,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                     try {
                         this.reloadData();
                         mapView.reloadLayer(EdgesLayer.class);
+                        mapView.reloadLayer(CardinalSelectPointLayer.class);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -443,6 +444,9 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         //Reload layers associated
         this.reloadData();
         mapView.reloadLayer(EdgesLayer.class);
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
+        mapView.reloadLayer(CardinalLineLayer.class);
+        mapView.reloadLayer(CardinalPolygonLayer.class);
         //Reload current point layers
         if (oldSelectedObjectType != null) {
             Layer layer = oldSelectedObjectType.getLayerObj();
