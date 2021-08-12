@@ -1,11 +1,14 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.events;
 
+import java.util.List;
+
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectMetadata;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectTypeAttribute;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectHasDefectOperations;
@@ -51,7 +54,7 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
             for (MapObjectTypeAttribute attr :
                     mapObjectObjectType.getAttributes()) {
 
-                String value = ""+attr.getDefaultValue();
+                String value = "" + attr.getDefaultValue();
                 if (value.isEmpty()) value = " ";
 
                 MapObjectMetadataOperations.getInstance().insert(new MapObjectMetadata(mapObject.getId(), value, attr.getId()));
@@ -117,8 +120,9 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
 
     @Override
     public void onAfterEntityUpdate(MapObject mapObject, MapObjectOperations entityManager) {
+        List<RouteSegment> routeSegmentsInOut = entityManager.getRouteSegments(mapObject.getId());
 
-        if (mapObject.getNodeGrade() == mapObject.getRouteSegments().size()) {
+        if (routeSegmentsInOut.size() >= mapObject.getNodeGrade()) {
             mapObject.setIsCompleted(true);
         } else {
             mapObject.setIsCompleted(false);
@@ -144,31 +148,36 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
 
         if (labelSubLot != null) {
             labelSubLot.setGeolocated(false);
-            LabelSubLotOperations.getInstance().update();
+            LabelSubLotOperations.getInstance().update(labelSubLot);
         }
 
-        //Release stock code to be relocated again
+        // Release stock code to be relocated again
         Stock stock = StockOperations.getInstance().load(mapObject.getStockCodeId());
         // Stock stock = mapObject.getStockCode();
-        if (stock != null)
-        {
+        if (stock != null) {
             stock.setLocated(false);
             StockOperations.getInstance().update(stock);
         }
 
-        //Delete all related metadata
+        // Delete all related metadata
         MapObjectMetadataOperations.getInstance().deleteAll(mapObject.getMetadata());
-        //Delete all related states
+        // Delete all related states
         MapObjectHasStateOperations.getInstance().deleteAll(mapObject.getStates());
         //Delete all related images
         MapObjectImagesOperations.getInstance().deleteAll(mapObject.getImages());
         // Delete all related route segments
         RouteSegmentOperations.getInstance().deleteAll(entityManager.getRouteSegments(mapObject.getId()));
 
-        //Delete all related defects and images of defects
+        // Delete all related defects and images of defects
         for (MapObjectHasDefect defect :
                 mapObject.getDefects()) {
             MapObjectHasDefectOperations.getInstance().delete(defect);
+        }
+        // Release docket object to this mapObject
+        for (MapObject joined :
+                mapObject.getJoinedList()) {
+            joined.setJoinId(-1L);
+            entityManager.save(joined);
         }
 
 

@@ -176,6 +176,8 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             }
             CardinalApplication.getInstance().closeDatabase();
             ResourcesManager.resetManager();
+            ((CardinalApplication)CardinalApplication.getInstance()).resetContainer();
+
         }
 
         Handler handler = new Handler();

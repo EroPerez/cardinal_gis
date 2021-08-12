@@ -239,7 +239,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
         AppCompatActivity activity = (MapviewActivity) this.activitySupporter;
 
-        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "0", new TextRunnable() {
+        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "2", new TextRunnable() {
             @Override
             public void run() {
                 long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);

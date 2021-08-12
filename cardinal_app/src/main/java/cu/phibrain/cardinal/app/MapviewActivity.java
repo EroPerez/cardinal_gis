@@ -89,6 +89,7 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -460,6 +461,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 mapView.reloadLayer(CardinalLineLayer.class);
                 mapView.reloadLayer(CardinalPolygonLayer.class);
                 mapView.reloadLayer(EdgesLayer.class);
+                mapView.reloadLayer(CardinalSelectPointLayer.class);
                 for (Layer layer :
                         LayerOperations.getInstance().getAll()) {
                     if (layer.getEnabled())
@@ -1289,10 +1291,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE) {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
-//                    appContainer.setAcctionJoinMo(false);
+
                 } else {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 }
+
+                toggleEditing();
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
             //preguntar si tienen que ser topologico el mo
@@ -1306,15 +1310,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
 
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
-                    MapObject currentMO = appContainer.getCurrentMapObject();
-                    Layer layer = currentMO.getLayer();
-                    CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
-//                    map_layer.circleMarkerJoin(LatLongUtils.centerPoint(currentMO.getCoord(), currentMO.getObjectType().getGeomType()));
 
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 } else {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
                 }
+
+                toggleEditing();
             }
         }
     }

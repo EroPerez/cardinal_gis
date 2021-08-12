@@ -21,7 +21,7 @@ public class RouteSegmentEntityEventListener implements EntityEventListener<Rout
         MapObject origin = routeSegment.getOriginObj();
         List<RouteSegment> routeSegmentsInOut = MapObjectOperations.getInstance().getRouteSegments(routeSegment.getOriginId());
 
-        if (origin.getNodeGrade() == routeSegmentsInOut.size()) {
+        if (routeSegmentsInOut.size() >= origin.getNodeGrade()  ) {
             origin.setIsCompleted(true);
         } else {
             origin.setIsCompleted(false);
@@ -33,7 +33,7 @@ public class RouteSegmentEntityEventListener implements EntityEventListener<Rout
 
         List<RouteSegment> routeSegmentsOutIn = MapObjectOperations.getInstance().getRouteSegments(routeSegment.getDestinyId());
 
-        if (destiny.getNodeGrade() == routeSegmentsOutIn.size()) {
+        if (routeSegmentsOutIn.size() >= destiny.getNodeGrade() ) {
             destiny.setIsCompleted(true);
         } else {
             destiny.setIsCompleted(false);

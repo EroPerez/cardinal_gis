@@ -545,7 +545,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
+            String user = preferences.getString(Constants.PREF_KEY_USER, "cardinal"); //$NON-NLS-1$
 
             try {
                 if (appContainer.getProjectActive() != null)
@@ -813,7 +813,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                                     GpsServiceUtilities.triggerBroadcast(getActivity());
 
                                     //start logging worker route
-                                    if(!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging( DefaultHelperClasses.GPSLOG_HELPER_CLASS))){
+                                    if (!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging(DefaultHelperClasses.GPSLOG_HELPER_CLASS))) {
                                         GPDialogs.warningDialog(getActivity(), getString(R.string.gpslogging_stop_and_start_again), null);
                                     }
                                 });
@@ -841,6 +841,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             long gpsLogId = dbHelper.getLastLogId();
             Log.d("WorkerRouteLogging", "...with gps log id: " + gpsLogId);
+            if (gpsLogId < 0) return false;
             //save current log
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
             WorkSession session = appContainer.getWorkSessionActive();

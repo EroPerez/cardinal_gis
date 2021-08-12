@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -47,6 +49,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperation
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
+import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
@@ -62,14 +65,11 @@ import eu.geopaparazzi.map.features.Feature;
 import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
+import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_TEXT_VISIBLE;
+
 public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, IEditableLayer, ICardinalLayer {
-    public static final String NONFORMSTART = "@";
-    public static final int FORMUPDATE_RETURN_CODE = 669;
-    private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
-    private static final int BG_COLOR = 0x80FF69B4; // 50 percent pink. AARRGGBB
     private static final int TRANSP_WHITE = 0x80FFFFFF; // 50 percent white. AARRGGBB
     private static String NAME = null;
-    private static Bitmap mtoBitmap;
     private static int textSize;
     private static String colorStr;
     public static final long SELECT_MARKER_UID = -1L;
@@ -77,8 +77,9 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     private Long ID;
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
-    //    List<MapObject> mapObjectsList;
     private AppContainer appContainer;
+    private boolean showLabels;
+    private static Bitmap notesBitmap;
 
     public CardinalPointLayer(GPMapView mapView, IActivitySupporter activitySupporter, Long ID) throws IOException {
         super(mapView.map(), getMarkerSymbol(mapView, ID));
@@ -96,6 +97,8 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             GPLog.error(this, null, e);
         }
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
+        showLabels = preferences.getBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, true);
 
     }
 
@@ -112,39 +115,39 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     private static MarkerSymbol getMarkerSymbol(GPMapView mapView, Long _ID) throws IOException {
         SharedPreferences peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
-        //String textSizeStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_TEXT_SIZE, LibraryConstants.DEFAULT_NOTES_SIZE + ""); //$NON-NLS-1$
+        // notes type
+        boolean doCustom = peferences.getBoolean(LibraryConstants.PREFS_KEY_NOTES_CHECK, true);
+        String textSizeStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_TEXT_SIZE, LibraryConstants.DEFAULT_NOTES_SIZE + ""); //$NON-NLS-1$
+        textSize = (int)(Integer.parseInt(textSizeStr)/1.5);
         colorStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_CUSTOMCOLOR, ColorUtilities.ALMOST_BLACK.getHex());
-        Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), eu.geopaparazzi.library.R.drawable.ic_bookmarks_48dp);
+        Drawable notesDrawable;
+        if (doCustom) {
+            String opacityStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_OPACITY, "255"); //$NON-NLS-1$
+            String sizeStr = peferences.getString(LibraryConstants.PREFS_KEY_NOTES_SIZE, LibraryConstants.DEFAULT_NOTES_SIZE + ""); //$NON-NLS-1$
+            int noteSize = Integer.parseInt(sizeStr);
+            float opacity = Integer.parseInt(opacityStr);
 
-        mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
-        //byte [] icon = mtoMapObjecType.getIconAsByteArray();
-        //mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
+            OvalShape notesShape = new OvalShape();
+            android.graphics.Paint notesPaint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+            notesPaint.setStyle(android.graphics.Paint.Style.FILL);
+            notesPaint.setColor(ColorUtilities.toColor(colorStr));
+            notesPaint.setAlpha((int) opacity);
 
-        return new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.UPPER_LEFT_CORNER, false);
+            ShapeDrawable notesShapeDrawable = new ShapeDrawable(notesShape);
+            android.graphics.Paint paint = notesShapeDrawable.getPaint();
+            paint.set(notesPaint);
+            notesShapeDrawable.setIntrinsicHeight(noteSize);
+            notesShapeDrawable.setIntrinsicWidth(noteSize);
+            notesDrawable = notesShapeDrawable;
+        } else {
+            notesDrawable = Compat.getDrawable(mapView.getContext(), eu.geopaparazzi.library.R.drawable.ic_place_accent_24dp);
+        }
+        notesBitmap = AndroidGraphics.drawableToBitmap(notesDrawable);
+
+        return new MarkerSymbol(notesBitmap, MarkerSymbol.HotspotPlace.CENTER, false);
     }
 
-    //    public void reloadData(Long id) throws IOException {
-//        cu.phibrain.plugins.cardinal.io.model.Layer cardinalLayer = LayerOperations.getInstance().load(id);
-//        for (MapObjecType mtoMapObjcType: cardinalLayer.getMapobjectypes()) {
-//            mtoMapObjcType.resetMapObjects();
-//            List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
-//
-//            byte [] icon = mtoMapObjcType.getIconAsByteArray();
-//            Bitmap _mtoBitmap = AndroidGraphics.decodeBitmap(new ByteArrayInputStream(icon));
-//
-//            List<MarkerItem> pts = new ArrayList<>();
-//            for (MapObject mapObject : mapObjects) {
-//                String text = mapObject.getObjectType().getCaption();
-//                pts.add(new MarkerItem(mapObject.getId(), text, mapObject.getObjectType().getDescription(), centerPoint(mapObject)));
-//            }
-//            for (MarkerItem mi : pts) {
-//                mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
-//            }
-//            addItems(pts);
-//            update();
-//        }
-//
-//    }
+
     private GPGeoPoint centerPoint(MapObject mapObject) {
         return LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
     }
@@ -155,13 +158,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         GPMapPosition mapPosition = mapView.getMapPosition();
         int zoom = mapPosition.getZoomLevel();
 
-//        mapObjectsList = new ArrayList<>();
-//        Log.d("CardinalPointLayer", "Item List zize: " + getItemList().size());
+
         List<MarkerItem> markerItems = new ArrayList<>();
         removeAllItems();
         if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
-
-//            Log.d("CardinalPointLayer", "getViewZoomLevel: " + cardinalLayer.getViewZoomLevel());
 
             for (MapObjecType mtoMapObjcType : cardinalLayer.getMapobjectypes()) {
                 byte[] icon = ImageUtil.getScaledBitmapAsByteArray(
@@ -178,14 +178,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 for (MapObject mapObject : mapObjects) {
                     String text = mtoMapObjcType.getCaption();
                     GPGeoPoint ct = centerPoint(mapObject);
-//                    Log.d("CardinalPointLayer", "MO: " + text);
                     MarkerItem mi = new MarkerItem(mapObject.getId(), mapObject.getCode(), text, ct);
                     mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
                     markerItems.add(mi);
                 }
-//                for (MarkerItem mi : markerItems) {
-//                    mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
-//                }
 
             }
 
@@ -193,7 +189,6 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         addItems(markerItems);
         update();
 
-//        Log.d("CardinalPointLayer", "Item Final zize: " + getItemList().size());
     }
 
     public void disable() {
@@ -265,38 +260,41 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         textPainter.setTextSize(textSize);
         textPainter.setTypeface(Paint.FontFamily.MONOSPACE, Paint.FontStyle.NORMAL);
 
-        int bitmapHeight = poiBitmap.getHeight();
-        int margin = 3;
-        int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
-
         final Paint haloTextPainter = CanvasAdapter.newPaint();
         haloTextPainter.setStyle(Paint.Style.FILL);
         haloTextPainter.setColor(Color.WHITE);
         haloTextPainter.setTextSize(textSize);
         haloTextPainter.setTypeface(Paint.FontFamily.MONOSPACE, Paint.FontStyle.BOLD);
 
+        int bitmapHeight = poiBitmap.getHeight();
+        int margin = 3;
+        int dist2symbol = (int) Math.round(bitmapHeight * 1.7);
+
         int titleWidth = ((int) haloTextPainter.getTextWidth(item.title) + 2 * margin);
         int titleHeight = (int) (haloTextPainter.getTextHeight(item.title) + textPainter.getFontDescent() + 2 * margin);
 
-
-
         int symbolWidth = poiBitmap.getWidth();
 
-        int xSize = symbolWidth;
-        int ySize = symbolWidth + dist2symbol;
+        int xSize = Math.max(titleWidth, symbolWidth);
+        int ySize = titleHeight + symbolWidth + dist2symbol;
 
         // markerCanvas, the drawing area for all: title, description and symbol
         Bitmap markerBitmap = CanvasAdapter.newBitmap(xSize, ySize, 0);
         org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
         markerCanvas.setBitmap(markerBitmap);
 
+        // titleCanvas for the title text
+        Bitmap titleBitmap = CanvasAdapter.newBitmap(titleWidth + margin, titleHeight + margin, 0);
         org.oscim.backend.canvas.Canvas titleCanvas = CanvasAdapter.newCanvas();
-        titleCanvas.setBitmap(markerBitmap);
+        titleCanvas.setBitmap(titleBitmap);
+
         titleCanvas.fillRectangle(0, 0, titleWidth, titleHeight, TRANSP_WHITE);
         titleCanvas.drawText(item.title, margin, titleHeight - margin - textPainter.getFontDescent(), haloTextPainter);
         titleCanvas.drawText(item.title, margin, titleHeight - margin - textPainter.getFontDescent(), textPainter);
 
-        markerCanvas.drawBitmap(poiBitmap, xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f));
+        if (showLabels)
+            markerCanvas.drawBitmap(titleBitmap, xSize * 0.5f - (titleWidth * 0.5f), 0);
+        markerCanvas.drawBitmap(poiBitmap, xSize * 0.5f - (symbolWidth * 0.5f), ySize * 0.5f - (symbolWidth * 0.5f));
 
         return (new MarkerSymbol(markerBitmap, MarkerSymbol.HotspotPlace.CENTER, true));
     }
@@ -401,10 +399,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
         AppCompatActivity activity = (MapviewActivity) this.activitySupporter;
 
-        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "0", new TextRunnable() {
+        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "2", new TextRunnable() {
             @Override
             public void run() {
-               long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
+                long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
                 BarcodeReaderDialogFragment.newInstance(
                         mapView, LatLongUtils.toGpGeoPoints(geometry), grade
                 ).show(
@@ -482,10 +480,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         ) {
 
 
-            if (!currentObj.belongToTopoLayer()) {
+            if (!currentObj.belongToTopoLayer() || !previousObj.belongToTopoLayer()) {
                 GPDialogs.toast(this.activitySupporter.getContext(), R.string.no_topology_layer, Toast.LENGTH_SHORT);
                 return true;
-            } else if (currentObj.getIsCompleted()) {
+            } else if (currentObj.getIsCompleted() || previousObj.getIsCompleted()) {
                 GPDialogs.toast(this.activitySupporter.getContext(), R.string.obj_destination_completed, Toast.LENGTH_SHORT);
                 return true;
             }
@@ -544,50 +542,38 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 !previousObj.equals(currentObj)
         ) {
 
+            if (LatLongUtils.soFar(previousObj, LatLongUtils.getRadiusJoinMo(), currentObj)) {
+                GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
+                        String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
+                                LatLongUtils.getRadiusJoinMo()),
+                        () -> activity.runOnUiThread(() -> {
+                            // yes
+                            GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
+                                    LatLongUtils.getRadiusJoinMo()));
 
-            GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
-                    String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
-                            LatLongUtils.getRadiusJoinMo()),
-                    () -> activity.runOnUiThread(() -> {
-                        // yes
-                        GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
-                                LatLongUtils.getRadiusJoinMo()));
-
-                        currentObj.setJoinObj(previousObj);
-                        currentObj.update();
-                        try {
-                            //mapView.reloadLayer(EdgesLayer.class);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                            currentObj.setJoinObj(previousObj);
+                            currentObj.update();
 
 
-                    }), () -> activity.runOnUiThread(() -> {
-                        // no
+                        }), () -> activity.runOnUiThread(() -> {
+                            // no
 
 
-                    })
-            );
-        } else {
-            currentObj.setJoinObj(previousObj);
-            currentObj.update();
-            try {
-                //mapView.reloadLayer(EdgesLayer.class);
-            } catch (Exception e) {
-                e.printStackTrace();
+                        })
+                );
+            } else {
+                currentObj.setJoinObj(previousObj);
+                currentObj.update();
+
             }
 
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("update_map_object_active", true);
+            activity.sendBroadcast(intent);
         }
-
-        //Update ui
-        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-        intent.putExtra("update_map_object_active", true);
-        activity.sendBroadcast(intent);
-
         return true;
     }
-
-
 
 
     private MarkerItem getMarkerById(Long id) {
