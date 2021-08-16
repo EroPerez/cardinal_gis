@@ -10,14 +10,22 @@
             <intent-filter>
                 <action android:name="eu.geopaparazzi.core.extension.importer.spatialite.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            </intent-filter>
+                </intent-filter>
         </activity>
 
         <service android:name="cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterMenuProvider"
             android:exported="false">
             <intent-filter>
                 <action android:name="eu.geopaparazzi.core.extension.ep.importer.MENU_PROVIDER" />
+                <category android:name="androidsrc.intent.category.MENU_PROVIDER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="cu.phibrain.plugins.cardinal.io.exporter.CardinalExportsMenuProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="eu.geopaparazzi.core.extension.ep.exporter.MENU_PROVIDER" />
                 <category android:name="androidsrc.intent.category.MENU_PROVIDER" />
             </intent-filter>
         </service>

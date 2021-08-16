@@ -393,7 +393,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+//        super.onActivityResult(requestCode, resultCode, data);
         FragmentActivity activity = getActivity();
         if (activity == null || data == null) return;
         switch (requestCode) {
@@ -443,24 +443,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 }
                 break;
             }
-//            case (RETURNCODE_NOTES): {
-//                if (resultCode == Activity.RESULT_OK) {
-//                    String[] noteArray = data.getStringArrayExtra(LibraryConstants.PREFS_KEY_NOTE);
-//                    if (noteArray != null) {
-//                        try {
-//                            double lon = Double.parseDouble(noteArray[0]);
-//                            double lat = Double.parseDouble(noteArray[1]);
-//                            double elev = Double.parseDouble(noteArray[2]);
-//                            DaoNotes.addNote(lon, lat, elev, Long.parseLong(noteArray[3]), noteArray[4], "POI", null,
-//                                    null);
-//                        } catch (Exception e) {
-//                            GPLog.error(this, null, e); //$NON-NLS-1$
-//                            Utilities.messageDialog(this, eu.geopaparazzi.library.R.string.notenonsaved, null);
-//                        }
-//                    }
-//                }
-//                break;
-//            }
         }
     }
 
@@ -545,7 +527,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
+            String user = preferences.getString(Constants.PREF_KEY_USER, "cardinal"); //$NON-NLS-1$
 
             try {
                 if (appContainer.getProjectActive() != null)
@@ -564,6 +546,15 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             }
 
         } else if (v == mExportButton) {
+            AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+            try {
+                if (appContainer.getProjectActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Intent exportIntent = new Intent(getActivity(), ExportActivity.class);
             startActivity(exportIntent);
         } else if (v == mPanicFAB) {
@@ -813,7 +804,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                                     GpsServiceUtilities.triggerBroadcast(getActivity());
 
                                     //start logging worker route
-                                    if(!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging( DefaultHelperClasses.GPSLOG_HELPER_CLASS))){
+                                    if (!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging(DefaultHelperClasses.GPSLOG_HELPER_CLASS))) {
                                         GPDialogs.warningDialog(getActivity(), getString(R.string.gpslogging_stop_and_start_again), null);
                                     }
                                 });
@@ -841,11 +832,12 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             long gpsLogId = dbHelper.getLastLogId();
             Log.d("WorkerRouteLogging", "...with gps log id: " + gpsLogId);
+            if (gpsLogId < 0) return false;
             //save current log
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
             WorkSession session = appContainer.getWorkSessionActive();
             if (WorkerRouteOperations.getInstance().load(session.getId(), gpsLogId) == null)
-                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));
+                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, null, false, null, 0));
 
 
         } catch (IllegalAccessException e) {

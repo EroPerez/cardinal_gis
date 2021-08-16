@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteConstraintException;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -21,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
@@ -41,6 +43,7 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.SpacesItemDecoration;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelSubLotAdapter;
@@ -50,6 +53,7 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
@@ -65,6 +69,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOp
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
+import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
@@ -184,6 +189,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
             IEditableLayer layer = EditManager.INSTANCE.getEditLayer();
             layer.reloadData();
             mapView.reloadLayer(EdgesLayer.class);
+            mapView.reloadLayer(CardinalJoinsLayer.class);
 
             if (!(layer instanceof CardinalPointLayer))
 //                if (!layer.getClass().isAssignableFrom(CardinalPointLayer.class))
@@ -195,6 +201,12 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        appContainer.setMode(UserMode.NONE);
+
+        Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+        intent.putExtra("update_map_object_active", true);
+        intent.putExtra("update_map_object_type_active", true);
+        getActivity().sendBroadcast(intent);
 
 
         super.dismiss();
@@ -314,42 +326,13 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                         edtGrade.clearFocus();
                         InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+                        updateCompleteness(view, object);
                     }
                     return handled;
                 });
             }
         }
 
-
-//        Spinner spnInv = view.findViewById(R.id.spnInv);
-//        StockAdapter stockAdapter = new StockAdapter(this.getContext(), R.layout.spinner_inv, appContainer.getProjectActive().getStocks());
-//        spnInv.setAdapter(stockAdapter);
-//        if (object.getStockCode() != null) {
-//            spnInv.setSelection(stockAdapter.select(object.getStockCode()));
-//        }
-//        spnInv.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//
-////                if (position == 0) {
-////                    return;
-////                } else {
-////                    position = position - 1;
-////                }
-//                // Get the selected value
-//                Spinner spinner = (Spinner) parent;
-//                Stock data = (Stock) spinner.getItemAtPosition(position);
-//                object.setStockCode(data);
-//                MapObjectOperations.getInstance().update(object);
-//
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
 
         // Nro de inv
         AutoCompleteTextView autoCompleteTextViewInv = view.findViewById(R.id.autoCompleteTextViewInv);
@@ -456,10 +439,6 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                             MapObjectOperations.getInstance().delete(object);
                             ObjectInspectorDialogFragment.this.dismiss();
 
-                            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-                            intent.putExtra("update_map_object_active", true);
-                            getActivity().sendBroadcast(intent);
-
                         }), null
                 );
 
@@ -478,6 +457,22 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         });
         editCoord.setVisibility(View.GONE);
 
+        updateCompleteness(view, object);
+
+    }
+
+    private void updateCompleteness(View view, MapObject object){
+        ImageView imvCompleted = view.findViewById(R.id.imvCompleted);
+//        byte[] icon = object.getIcon();
+        if (!object.getIsCompleted()) {
+            imvCompleted.setBackground(getContext().getDrawable(R.drawable.ic_mapview_mot_parent_24dp));
+            Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mo_incompled_24dp);
+            imvCompleted.setImageBitmap(bitmap);
+        } else {
+            imvCompleted.setBackground(getContext().getDrawable(R.drawable.ic_mapview_mot_children_24dp));
+            Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mo_complete_24dp);
+            imvCompleted.setImageBitmap(bitmap);
+        }
     }
 
 

@@ -83,7 +83,7 @@ dependencies {
     api 'com.android.support:appcompat-v7:28.0.0'
 
     implementation project(':geopaparazzi_core')
-    implementation project(':geopaparazzi_default_export_plugins')
+//    implementation project(':geopaparazzi_default_export_plugins')
     implementation project(':geopaparazzi_default_import_plugins')
 //    implementation project(':geopaparazzi_pdf_export_plugins')
 //    implementation project(':geopaparazzi_profiles_export_plugins')
@@ -104,5 +104,7 @@ dependencies {
     implementation "androidx.slidingpanelayout:slidingpanelayout:1.2.0-alpha02"
     implementation('com.journeyapps:zxing-android-embedded:4.2.0') { transitive = false }
     implementation 'com.google.zxing:core:3.3.0'
+    //Joda Time
+    implementation 'net.danlew:android.joda:2.10.6.1'
 
 }

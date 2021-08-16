@@ -1,60 +1,38 @@
 package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
-import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.backend.canvas.Color;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
-import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
-import cu.phibrain.cardinal.app.injections.UserMode;
-import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
-import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.library.database.GPLog;
-import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.util.Compat;
-import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.LibraryConstants;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
-import eu.geopaparazzi.map.features.Feature;
-import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
 public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer {
@@ -121,26 +99,32 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
 
     @Override
     public void reloadData() throws IOException {
+        GPMapPosition mapPosition = mapView.getMapPosition();
+        int zoom = mapPosition.getZoomLevel();
 
         MapObject currentMo = appContainer.getCurrentMapObject();
         removeAllItems();
         if(currentMo!=null) {
-            selectMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", centerPoint(currentMo));
-            Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
-            mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
-            selectMarker.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
+            Layer cardinalLayer = LayerOperations.getInstance().load(currentMo.getLayer().getId());
 
-            joinMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", centerPoint(currentMo));
-            Drawable imagesJoinDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
-            imagesDrawable.setBounds(0,0,200,200);
-            Bitmap joinBitmap = AndroidGraphics.drawableToBitmap(imagesJoinDrawable);
-            joinMarker.setMarker(new MarkerSymbol(joinBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
+            if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
+                selectMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", centerPoint(currentMo));
+                Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
+                mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
+                selectMarker.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
 
-            //probar esto
-            //imagesDrawable.setLevel()
-            addItem(selectMarker);
-            addItem(joinMarker);
-            update();
+                joinMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", centerPoint(currentMo));
+                Drawable imagesJoinDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
+                imagesDrawable.setBounds(0, 0, 200, 200);
+                Bitmap joinBitmap = AndroidGraphics.drawableToBitmap(imagesJoinDrawable);
+                joinMarker.setMarker(new MarkerSymbol(joinBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
+
+                //probar esto
+                //imagesDrawable.setLevel()
+                addItem(selectMarker);
+                addItem(joinMarker);
+                update();
+            }
         }
 
     }

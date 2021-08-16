@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,9 +19,15 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefectHasImages;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasState;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectMetadata;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.ProjectConfig;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Stock;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
@@ -61,19 +66,26 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOpe
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ZoneOperations;
 import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
+import cu.phibrain.plugins.cardinal.io.network.api.APIError;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import cu.phibrain.plugins.cardinal.io.utils.CardinalMetadataTableDefaultValues;
+import cu.phibrain.plugins.cardinal.io.utils.GsonHelper;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
+import eu.geopaparazzi.core.database.objects.Line;
 import eu.geopaparazzi.library.R;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.DefaultHelperClasses;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.database.IGpsLogDbHelper;
 import eu.geopaparazzi.library.database.TableDescriptions;
-import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.network.NetworkUtilities;
+import eu.geopaparazzi.library.style.ColorUtilities;
+import eu.geopaparazzi.library.util.DynamicDoubleArray;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.library.util.Utilities;
+
+import static eu.geopaparazzi.library.util.LibraryConstants.DEFAULT_LOG_WIDTH;
 
 
 /**
@@ -87,6 +99,357 @@ public enum WebDataProjectManager {
      * Singleton instance.
      */
     INSTANCE;
+
+
+    /**
+     * Uploads a project to the given server via POST.
+     *
+     * @param context   the {@link Context} to use.
+     * @param server    the server to which to upload.
+     * @param user      the username for authentication.
+     * @param passwd    the password for authentication.
+     * @param projectId the project id to upload
+     * @return the return message.
+     */
+    public String uploadProject(Context context, String server, String user, String passwd, long projectId) {
+        boolean interrupted = false;
+        try {
+            server = addActionPath(server, "");
+            //First login into cardinal cloud service
+            AuthToken token = NetworkUtilitiesCardinalOl.sendGetAuthToken(server, user, passwd);
+
+            List<Contract> contractList = ContractOperations.getInstance().findAllBy(projectId);
+            List<RouteSegment> routeSegments = new ArrayList<>();
+            // Collect all session in project
+            for (Contract contract : contractList) {
+
+                // export to server from here
+                // Get and save all objects in worksessions
+                for (WorkSession session : contract.getWorkSessions()) {
+
+                    // Synchronize work session
+                    if (session.mustExport()) {
+                        if (!NetworkUtilitiesCardinalOl.sendPut2WorkSession(server, token, (WorkSession) session.toRemoteObject())) {
+                            interrupted = true;
+                            break;
+                        } else {
+                            session.setSyncDate(new Date());
+                            session.update();
+                        }
+                    }
+
+                    // Synchronize signal events
+                    session.resetEvents();
+                    List<SignalEvents> eventList = session.getEvents();
+                    for (SignalEvents event : eventList) {
+                        if (event.mustExport()) {
+                            if (event.getIsSync()) {
+                                if (!NetworkUtilitiesCardinalOl.sendPut2SignalEvents(server, token, (SignalEvents) event.toRemoteObject())) {
+                                    interrupted = true;
+                                    break;
+                                } else {
+                                    event.setSyncDate(new Date());
+                                    event.update();
+                                }
+                            } else {
+                                SignalEvents remoteEvent = NetworkUtilitiesCardinalOl.sendPostSignalEvents(server, token, (SignalEvents) event.toRemoteObject());
+                                if (remoteEvent != null) {
+                                    event.setIsSync(true);
+                                    event.setSyncDate(new Date());
+                                    event.setRemoteId(remoteEvent.getId());
+                                    event.update();
+                                } else {
+                                    interrupted = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Synchronize worker route
+                    session.resetWorkerRoute();
+                    List<WorkerRoute> routeList = session.getWorkerRoute();
+                    for (WorkerRoute wroute : routeList) {
+                        if (wroute.mustExport()) {
+                            Line line = DaoGpsLog.getGpslogAsLine(wroute.getGpsLogsTableId(), -1);
+                            DynamicDoubleArray lonArray = line.getLonList();
+                            DynamicDoubleArray latArray = line.getLatList();
+                            DynamicDoubleArray elevArray = line.getAltimList();
+                            List<String> dates = line.getDateList();
+                            for (int i = (int) wroute.getSyncPointCount(); i < lonArray.size(); i++) {
+                                double elev = elevArray.get(i);
+                                double lat = latArray.get(i);
+                                double lon = lonArray.get(i);
+                                String dateStr = dates.get(i);
+                                long time = Long.parseLong(dateStr);
+
+                                if (!NetworkUtilitiesCardinalOl.sendPostWorkerRoute(server, token, new WorkerRoute(null, session.getId(), lat, lon, elev, new Date(time)))) {
+                                    interrupted = true;
+                                    break;
+                                }
+                            }
+
+                            if (!interrupted) {
+                                wroute.setIsSync(true);
+                                wroute.setSyncDate(new Date());
+                                wroute.setSyncPointCount(lonArray.size());
+                                WorkerRouteOperations.getInstance().update2(wroute);
+                            }
+                        }
+
+                    }
+
+                    // Synchronize map objects
+                    session.resetMapObjects();
+                    List<MapObject> mapObjectList = session.getMapObjects();
+                    for (MapObject mapObject : mapObjectList) {
+                        // Sync map object itself
+                        if (mapObject.mustExport()) {
+                            MapObject mapObjectJoinObj = mapObject.getJoinObj();
+                            if (mapObjectJoinObj == null || updateJoinObjBefore(server, token, mapObjectJoinObj)) {
+                                mapObject.refresh();
+                                mapObject.setSyncDate(new Date());
+                                if (mapObject.getIsSync()) {
+                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObject(server, token, (MapObject) mapObject.toRemoteObject())) {
+                                        interrupted = true;
+                                        break;
+                                    }
+                                } else {
+                                    mapObject.setIsSync(true);
+                                    MapObject mapObjectRemote = NetworkUtilitiesCardinalOl.sendPostMapObject(server, token, (MapObject) mapObject.toRemoteObject());
+                                    if (mapObjectRemote != null) {
+                                        mapObject.setRemoteId(mapObjectRemote.getId());
+                                    } else {
+                                        interrupted = true;
+                                        break;
+                                    }
+                                }
+                                mapObject.update();
+                            } else {
+                                interrupted = true;
+                                break;
+                            }
+                        }
+                        // Select route segments to sync
+                        mapObject.resetRouteSegments();
+                        for (RouteSegment route : mapObject.getRouteSegments()) {
+                            if (route.mustExport()) {
+                                routeSegments.add(route);
+                            }
+                        }
+
+                        // Sync MapObjectHasState
+                        mapObject.resetStates();
+                        List<MapObjectHasState> statesList = mapObject.getStates();
+                        for (MapObjectHasState state : statesList) {
+                            if (state.mustExport()) {
+                                if (state.getIsSync()) {
+                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasState(server, token, (MapObjectHasState) state.toRemoteObject())) {
+                                        interrupted = true;
+                                        break;
+                                    } else {
+                                        state.setSyncDate(new Date());
+                                    }
+                                } else {
+                                    MapObjectHasState remoteState = NetworkUtilitiesCardinalOl.sendPostMapObjectHasState(server, token, (MapObjectHasState) state.toRemoteObject());
+                                    if (remoteState != null) {
+                                        state.setIsSync(true);
+                                        state.setSyncDate(new Date());
+                                        state.setRemoteId(remoteState.getId());
+                                    } else {
+                                        interrupted = true;
+                                        break;
+                                    }
+                                }
+                                state.update();
+                            }
+                        }
+                        // Sync MapObjectImages
+                        mapObject.resetImages();
+                        List<MapObjectImages> imageList = mapObject.getImages();
+                        for (MapObjectImages objectImages : imageList) {
+                            if (objectImages.mustExport()) {
+                                if (objectImages.getIsSync()) {
+                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject())) {
+                                        interrupted = true;
+                                        break;
+                                    } else {
+                                        objectImages.setSyncDate(new Date());
+                                    }
+                                } else {
+                                    MapObjectImages remoteImage = NetworkUtilitiesCardinalOl.sendPostMapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject());
+                                    if (remoteImage != null) {
+                                        objectImages.setIsSync(true);
+                                        objectImages.setSyncDate(new Date());
+                                        objectImages.setRemoteId(remoteImage.getId());
+                                    } else {
+                                        interrupted = true;
+                                        break;
+                                    }
+                                }
+                                objectImages.update();
+                            }
+                        }
+
+                        // Sync MapObjectMetadata
+                        mapObject.resetMetadata();
+                        List<MapObjectMetadata> metadata = mapObject.getMetadata();
+                        for (MapObjectMetadata objectMetadata : metadata) {
+                            if (objectMetadata.mustExport()) {
+                                if (objectMetadata.getIsSync()) {
+                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectMetadata(server, token, (MapObjectMetadata) objectMetadata.toRemoteObject())) {
+                                        interrupted = true;
+                                        break;
+                                    } else {
+                                        objectMetadata.setSyncDate(new Date());
+                                    }
+                                } else {
+                                    MapObjectMetadata remoteMeta = NetworkUtilitiesCardinalOl.sendPostMapObjectMetadata(server, token, (MapObjectMetadata) objectMetadata.toRemoteObject());
+                                    if (remoteMeta != null) {
+                                        objectMetadata.setIsSync(true);
+                                        objectMetadata.setSyncDate(new Date());
+                                        remoteMeta.setRemoteId(remoteMeta.getId());
+                                        objectMetadata.update();
+                                    } else {
+                                        interrupted = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Sync MapObjectHasDefect
+                        mapObject.resetDefects();
+                        List<MapObjectHasDefect> mapObjectHasDefectList = mapObject.getDefects();
+                        for (MapObjectHasDefect defect : mapObjectHasDefectList) {
+                            if (defect.mustExport()) {
+                                if (defect.getIsSync()) {
+                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject())) {
+                                        interrupted = true;
+                                        break;
+                                    } else {
+                                        defect.setSyncDate(new Date());
+                                    }
+                                } else {
+                                    MapObjectHasDefect defectRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject());
+                                    if (defectRemote != null) {
+                                        defect.setIsSync(true);
+                                        defect.setSyncDate(new Date());
+                                        defect.setRemoteId(defectRemote.getId());
+                                    } else {
+                                        interrupted = true;
+                                        break;
+                                    }
+                                }
+                                defect.update();
+                            }
+
+                            // Sync images in defect
+                            defect.resetImages();
+                            List<MapObjectHasDefectHasImages> hasDefectHasImages = defect.getImages();
+                            for (MapObjectHasDefectHasImages images : hasDefectHasImages) {
+                                if (images.mustExport()) {
+                                    if (images.getIsSync()) {
+                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject())) {
+                                            interrupted = true;
+                                            break;
+                                        } else {
+                                            defect.setSyncDate(new Date());
+                                        }
+                                    } else {
+                                        MapObjectHasDefectHasImages defectImageRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject());
+                                        if (defectImageRemote != null) {
+                                            images.setIsSync(true);
+                                            images.setSyncDate(new Date());
+                                            images.setRemoteId(defectImageRemote.getId());
+
+                                        } else {
+                                            interrupted = true;
+                                            break;
+                                        }
+                                    }
+                                    images.update();
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            //Finally sync al rout segment to server
+            for (RouteSegment route : routeSegments) {
+
+                Log.d("RouteSegmenTag", route.toString());
+                if (route.getIsSync()) {
+                    if (!NetworkUtilitiesCardinalOl.sendPut2RouteSegment(server, token, (RouteSegment) route.toRemoteObject())) {
+                        interrupted = true;
+                        break;
+                    } else {
+                        route.setSyncDate(new Date());
+                    }
+                } else {
+                    RouteSegment routeSegmentRemote = NetworkUtilitiesCardinalOl.sendPostRouteSegment(server, token, (RouteSegment) route.toRemoteObject());
+                    if (routeSegmentRemote != null) {
+                        route.setIsSync(true);
+                        route.setSyncDate(new Date());
+                        route.setRemoteId(routeSegmentRemote.getId());
+
+                    } else {
+                        interrupted = true;
+                        break;
+                    }
+                }
+                route.update();
+
+            }
+
+            if (!interrupted) {
+                return NetworkUtilities.getMessageForCode(context, 200,
+                        context.getResources().getString(R.string.post_completed_properly));
+            }
+
+            return NetworkUtilities.getMessageForCode(context, 200,
+                    context.getResources().getString(cu.phibrain.plugins.cardinal.io.R.string.post_not_completed_properly));
+        } catch (
+                Exception e) {
+            GPLog.error(this, null, e);
+            if (GsonHelper.isJSONValid(e.getMessage())) {
+                APIError error = GsonHelper.createPojoFromString(e.getMessage(), APIError.class);
+                return NetworkUtilities.getMessageForCode(context, error.status(), error.message());
+            } else
+                return  e.getLocalizedMessage();
+        }
+
+    }
+
+
+    private boolean updateJoinObjBefore(String server, AuthToken token, MapObject mapObjectJoinObj) {
+
+        MapObject mapObject = mapObjectJoinObj.getJoinObj();
+
+        if (mapObject == null) {
+
+            if (mapObjectJoinObj.mustExport()) {
+                if (!mapObjectJoinObj.getIsSync()) {
+                    mapObjectJoinObj.setSyncDate(new Date());
+                    mapObjectJoinObj.setIsSync(true);
+                    MapObject mapObjectRemote = NetworkUtilitiesCardinalOl.sendPostMapObject(server, token, (MapObject) mapObjectJoinObj.toRemoteObject());
+                    if (mapObjectRemote != null) {
+                        mapObjectJoinObj.setRemoteId(mapObjectRemote.getId());
+                        mapObjectJoinObj.update();
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        return updateJoinObjBefore(server, token, mapObject);
+    }
 
 
     private String addActionPath(String server, String path) {
@@ -110,7 +473,6 @@ public enum WebDataProjectManager {
      */
     public String downloadProject(Context context, String server, String user, String passwd, WebDataProjectModel webproject, String outputFileName) throws DownloadError {
         try {
-            //File outputDir = ResourcesManager.getInstance(context).getApplicationSupporterDir();
             File outputDir = ResourcesManager.getInstance(context).getMainStorageDir();
             File downloadedProjectFile = new File(outputDir, outputFileName);
             String newDbFileName = downloadedProjectFile.getPath();
@@ -237,22 +599,20 @@ public enum WebDataProjectManager {
                     final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
                     long now = System.currentTimeMillis();
 
-                    long gpsLogId = dbHelper.addGpsLog(now, now, 0.0f, logName, LibraryConstants.DEFAULT_LOG_WIDTH, "red", true);
-
-                    for (WorkerRoute log :
-                            gpslogs) {
-                        dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
-                    }
-
+                    long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, DEFAULT_LOG_WIDTH, ColorUtilities.BLUE.getHex(), true); //$NON-NLS-1$
+                    db.beginTransaction();
                     try {
-                        DaoGpsLog.updateLogLength(gpsLogId);
-                    } catch (IOException e) {
-                        GPLog.error(this, "ERROR", e);//NON-NLS
+                        for (WorkerRoute log :
+                                gpslogs) {
+                            dbHelper.addGpsLogDataPoint(db, gpsLogId, log.getLongitude(), log.getLatitude(), log.getAltitude(), log.getCreatedAt().getTime());
+                        }
+                        db.setTransactionSuccessful();
+                    } finally {
+                        db.endTransaction();
                     }
-
 
                     //save current log
-                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, session.getId(), gpsLogId));
+                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, new Date(now), true, new Date(now), (long) gpslogs.size()));
                 }
             }
 
@@ -260,8 +620,7 @@ public enum WebDataProjectManager {
             MapObjectOperations.getInstance().insertAll(mapObjectList);
             //Get and save all object in mapObjects
             List<MapObjectHasDefect> mapObjectHasDefectList = new ArrayList<>();
-            for (MapObject mapObject :
-                    mapObjectList) {
+            for (MapObject mapObject : mapObjectList) {
                 RouteSegmentOperations.getInstance().insertAll(mapObject.getRouteSegments());
                 MapObjectHasStateOperations.getInstance().insertAll(mapObject.getStates());
                 MapObjectImagesOperations.getInstance().insertAll(mapObject.getImages());
@@ -271,8 +630,7 @@ public enum WebDataProjectManager {
             }
             MapObjectHasDefectOperations.getInstance().insertAll(mapObjectHasDefectList);
 
-            for (MapObjectHasDefect mapObjectdefect :
-                    mapObjectHasDefectList) {
+            for (MapObjectHasDefect mapObjectdefect : mapObjectHasDefectList) {
                 MapObjectHasDefectHasImagesOperations.getInstance().insertAll(mapObjectdefect.getImages());
             }
 
@@ -287,7 +645,15 @@ public enum WebDataProjectManager {
             throw e;
         } catch (Exception e) {
             GPLog.error(this, null, e);
-            throw new DownloadError(e);
+            APIError error = null;
+            if (GsonHelper.isJSONValid(e.getMessage())) {
+                error = GsonHelper.createPojoFromString(e.getMessage(), APIError.class);
+                throw new DownloadError(NetworkUtilities.getMessageForCode(context, error.status(), null));
+
+            } else {
+                error = new APIError(500, e.getMessage());
+                throw new DownloadError(error.message());
+            }
         }
     }
 

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -175,12 +174,13 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
     public boolean onGesture(Gesture g, MotionEvent e) {
 
         if (g instanceof Gesture.Tap) {
-            if (tmpDrawables.size() > 0) {
-                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
-
-                GPDialogs.toast(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT);
-                tmpDrawables.clear();
-            }
+//            if (tmpDrawables.size() > 0) {
+//                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
+//
+//                GPDialogs.toast(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT);
+//                tmpDrawables.clear();
+//
+//            }
         }
         return false;
     }
@@ -218,6 +218,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                         //Reload current point layers
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
                         mapView.reloadLayer(CardinalSelectPointLayer.class);
+                        mapView.reloadLayer(CardinalJoinsLayer.class);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -239,7 +240,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
         AppCompatActivity activity = (MapviewActivity) this.activitySupporter;
 
-        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "0", new TextRunnable() {
+        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "2", new TextRunnable() {
             @Override
             public void run() {
                 long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
@@ -264,8 +265,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
         if (appContainer.getMode() == UserMode.OBJECT_COORD_EDITION) {
 
             currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
-            currentMO.update();
-
+            MapObjectOperations.getInstance().save(currentMO);
 
         } else if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
             //Do the clone process here
@@ -283,7 +283,6 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
         //Reload layers associated
         this.reloadData();
         mapView.reloadLayer(EdgesLayer.class);
-        mapView.reloadLayer(CardinalSelectPointLayer.class);
         //Reload current point layers
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
@@ -293,6 +292,10 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
             Layer layer = oldSelectedObjectType.getLayerObj();
             ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
         }
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
+        mapView.reloadLayer(CardinalPolygonLayer.class);
+        mapView.reloadLayer(CardinalJoinsLayer.class);
+
         GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
 
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);

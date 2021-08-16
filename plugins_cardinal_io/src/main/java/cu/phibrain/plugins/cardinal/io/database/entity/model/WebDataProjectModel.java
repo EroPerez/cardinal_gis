@@ -1,5 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.model;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * The class holding webdata project info.
  *
@@ -10,21 +12,25 @@ public class WebDataProjectModel {
     /**
      * The machine id for the project.
      */
+    @Expose
     public Integer id;
 
     /**
      * The machine name for the project.
      */
+    @Expose
     public String name;
 
     /**
      * The description of the project.
      */
+    @Expose
     public String description;
 
     /**
      * Last date of editing.
      */
+    @Expose
     public String created_at;
 
     public boolean isSelected;

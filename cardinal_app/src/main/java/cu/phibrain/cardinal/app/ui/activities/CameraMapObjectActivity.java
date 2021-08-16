@@ -79,7 +79,7 @@ public class CameraMapObjectActivity extends AbstractCameraActivity {
             if (imageDataArray != null)
                 infoBuilder.append("imageDataArray size: ").append(imageDataArray.length).append("\n");
 
-            MapObjectImages image = new MapObjectImages(mapObjectId, imageDataArray, currentDate, lon, lat, elevation, azimuth);
+            MapObjectImages image = new MapObjectImages(null, mapObjectId, imageDataArray, currentDate, lon, lat, elevation, azimuth);
             MapObjectImagesOperations.getInstance().insert(image);
 
 

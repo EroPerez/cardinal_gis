@@ -52,5 +52,14 @@ public class ContractOperations extends BaseOperations<Contract, ContractDao> {
 
     }
 
+    public List<Contract> findAllBy(long projectId) {
+
+        return this.queryBuilder().where(
+                ContractDao.Properties.ProjectId.eq(projectId)
+
+        ).list();
+
+    }
+
 
 }

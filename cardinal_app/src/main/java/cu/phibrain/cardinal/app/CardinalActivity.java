@@ -42,7 +42,8 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        permissionHelper.add(new PermissionWriteStorage()).add(new PermissionFineLocation()).add(new PermissionForegroundService());
+        permissionHelper = new PermissionWriteStorage();
+        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService());
 
         // PERMISSIONS START
         if (permissionHelper.hasPermission(this) && permissionHelper.getNextWithoutPermission(this) == null) {
@@ -53,7 +54,6 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             }
             permissionHelper.requestPermission(this);
         }
-
         // PERMISSIONS STOP
 
         setContentView(eu.geopaparazzi.core.R.layout.activity_geopaparazzi);
@@ -176,6 +176,8 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             }
             CardinalApplication.getInstance().closeDatabase();
             ResourcesManager.resetManager();
+            ((CardinalApplication)CardinalApplication.getInstance()).resetContainer();
+
         }
 
         Handler handler = new Handler();

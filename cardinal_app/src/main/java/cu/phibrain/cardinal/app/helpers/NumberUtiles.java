@@ -8,13 +8,14 @@ public class NumberUtiles {
 
     public static Long parseStringToLong(String value, Long defaultValue) {
         try {
-            return value == null || value.trim().isEmpty() ? defaultValue : Long.parseLong("0" + value);
+            if (value == null || value.trim().isEmpty())
+                return defaultValue;
+            else
+                return Long.parseLong(value);
         } catch (Exception ex) {
             ex.printStackTrace();
 
         }
-
-        Long o = null;
-        return o;
+        return null;
     }
 }

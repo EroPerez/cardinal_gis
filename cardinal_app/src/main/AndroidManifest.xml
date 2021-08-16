@@ -13,6 +13,11 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
         <activity
+            android:name=".ui.activities.MapObjectJoinedActivity"
+            android:parentActivityName=".MapviewActivity"
+            android:label="@string/title_activity_map_object_joined"
+            android:theme="@style/GeopapTheme.NoActionBar"></activity>
+        <activity
             android:name=".ui.activities.SessionsStatsActivity"
             android:label="@string/stats_session_view_label"
             android:parentActivityName=".MapviewActivity"
@@ -36,7 +41,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cu.phibrain.cardinal.app.CardinalActivity" />
-            >
         </activity>
         <activity
             android:name=".CardinalActivity"
@@ -104,6 +108,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <service
+            android:name="cu.phibrain.cardinal.app.plugins.CardinalProjectExportMenuProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="eu.geopaparazzi.core.extension.ep.exporter.MENU_PROVIDER" />
+                <category android:name="androidsrc.intent.category.MENU_PROVIDER" />
+            </intent-filter>
+        </service>
     </application>
     <!-- NORMAL PERMISSIONS -->
     <uses-feature android:name="android.hardware.location.gps" />

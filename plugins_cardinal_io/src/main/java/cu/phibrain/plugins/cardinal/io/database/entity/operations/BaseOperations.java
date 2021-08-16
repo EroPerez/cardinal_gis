@@ -3,6 +3,7 @@ package cu.phibrain.plugins.cardinal.io.database.entity.operations;
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.Date;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
@@ -10,6 +11,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.events.EntityEventListene
 import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoMaster;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.IEntity;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.IExportable;
 import cu.phibrain.plugins.cardinal.io.utils.Observer;
 import cu.phibrain.plugins.cardinal.io.utils.Subject;
 
@@ -86,17 +88,36 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
     }
 
     /**
-     * Insert a batch of Entity, this method do no t dispatch any event
+     * Insert a batch of Entity, this method dispatch event
      *
      * @param entityList
      */
     public void insertAll(List<Entity> entityList) {
         if (entityList != null && !entityList.isEmpty())
-            getDao().insertOrReplaceInTx(entityList);
+            for (Entity entity :
+                    entityList) {
+                insert(entity);
+            }
+
     }
 
     public void insert(Entity entity) {
         if (entity != null) {
+
+            //update field value if Exportable
+            if (entity instanceof IExportable) {
+
+                if (((IExportable) entity).getCreatedAt() == null)
+                    ((IExportable) entity).setCreatedAt(new Date());
+
+                if (hasKey(entity)) {
+                    ((IExportable) entity).setIsSync(true);
+                    ((IExportable) entity).setSyncDate(new Date());
+                    ((IExportable) entity).setRemoteId(entity.getId());
+                } else
+                    ((IExportable) entity).setIsSync(false);
+            }
+
             //Dispatch pre insert event
             if (this.dispatcher != null)
                 this.dispatcher.onBeforeEntityInsert(entity, this);
@@ -151,19 +172,47 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
      */
     public void deleteAll(List<Entity> entityList) {
         if (entityList != null && !entityList.isEmpty())
-            getDao().deleteInTx(entityList);
+            for (Entity entity :
+                    entityList) {
+                delete(entity);
+            }
+
     }
 
     public void update(Entity entity) {
 
         if (entity != null) {
-            //Dispatch pre insert event
+
+            //update field value if Exportable
+            if (entity instanceof IExportable)
+                ((IExportable) entity).setUpdatedAt(new Date());
+
+            //Dispatch pre update event
             if (this.dispatcher != null)
                 this.dispatcher.onBeforeEntityUpdate(entity, this);
 
             getDao().updateInTx(entity);
 
-            //Dispatch post insert event
+            //Dispatch post update event
+            if (this.dispatcher != null)
+                this.dispatcher.onAfterEntityUpdate(entity, this);
+        }
+    }
+
+    /**
+     *  Update entity without tracking updateAt parameter
+     * @param entity
+     */
+    public void update2(Entity entity) {
+
+        if (entity != null) {
+            //Dispatch pre update event
+            if (this.dispatcher != null)
+                this.dispatcher.onBeforeEntityUpdate(entity, this);
+
+            getDao().updateInTx(entity);
+
+            //Dispatch post update event
             if (this.dispatcher != null)
                 this.dispatcher.onAfterEntityUpdate(entity, this);
         }
@@ -198,8 +247,6 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
     }
 
     public boolean detach(Entity entity) {
-
         return getDao().detach(entity);
-
     }
 }

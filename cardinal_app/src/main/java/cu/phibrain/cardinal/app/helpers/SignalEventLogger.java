@@ -2,8 +2,8 @@ package cu.phibrain.cardinal.app.helpers;
 
 import java.util.Date;
 
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
 
 public class SignalEventLogger {
 
@@ -13,7 +13,7 @@ public class SignalEventLogger {
      * @param types
      * @param sessionId
      * @param level
-     * @param currentDate Current date when event do
+     * @param currentDate Current date when event it is trigger
      * @param gpsPosition Current gps positions if it on.
      */
 
@@ -28,6 +28,6 @@ public class SignalEventLogger {
 
         SignalEvents event = new SignalEvents(types, currentDate, currentDate, level, sessionId, gpsLat, gpsLon);
 
-        SignalEventsOperations.getInstance().insert(event);
+        SignalEventsOperations.getInstance().save(event);
     }
 }

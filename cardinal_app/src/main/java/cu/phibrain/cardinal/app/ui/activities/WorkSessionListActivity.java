@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
@@ -24,8 +25,10 @@ import cu.phibrain.cardinal.app.ui.adapter.WorkSessionAdapter;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.GPDialogs;
 
 public class WorkSessionListActivity extends AppCompatActivity implements WorkSessionAdapter.OnClickCallback {
 
@@ -152,8 +155,26 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
     };
 
     @Override
-    public void OnClickListener(WorkSession aSession) {
-        appContainer.setWorkSessionActive(aSession);
-        finish();
+    public void OnClickListener(WorkSession aSession, boolean isLogin) {
+
+        if (isLogin) {
+            aSession.setActive(true);
+            aSession.setStartDate(new Date());
+            WorkSessionOperations.getInstance().save(aSession);
+            appContainer.setWorkSessionActive(aSession);
+            finish();
+        } else {
+            GPDialogs.yesNoMessageDialog(WorkSessionListActivity.this, getString(R.string.do_you_want_to_logout_this_work_session),
+                    () -> WorkSessionListActivity.this.runOnUiThread(() -> {
+                        aSession.setActive(false);
+                        aSession.setEndDate(new Date());
+                        WorkSessionOperations.getInstance().save(aSession);
+                        appContainer.setWorkSessionActive(null);
+                        finish();
+
+                    }), null
+            );
+
+        }
     }
 }

@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -33,6 +35,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOpera
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectTypeAttributeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MaterialOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectConfigOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ProjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.SignalEventsOperations;
@@ -51,10 +54,10 @@ import eu.geopaparazzi.library.profiles.ProfilesHandler;
 public class CardinalApplication extends GeopaparazziApplication {
     private DaoSession daoSession;
     private static Context context;
+    protected AppContainer appContainer;
 
     public CardinalApplication() {
     }
-
 
     public static Context getContext() {
         return context;
@@ -64,7 +67,6 @@ public class CardinalApplication extends GeopaparazziApplication {
         return daoSession;
     }
 
-    protected AppContainer appContainer;
 
     @Override
     public void onCreate() {
@@ -104,14 +106,19 @@ public class CardinalApplication extends GeopaparazziApplication {
             WorkerRouteOperations.getInstance().attachTo(DaoSessionManager.getInstance());
             WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
             LabelOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+            ProjectConfigOperations.getInstance().attachTo(DaoSessionManager.getInstance());
 
-            setContainer(new AppContainer());
+            appContainer = new AppContainer();
             ResourcesManager.resetManager();
             ProfilesHandler.INSTANCE.checkActiveProfile(getContentResolver());
-            if (getContainer().getProjectActive() != null)
+            if (appContainer.getProjectActive() != null)
                 CardinalLayerManager.INSTANCE.init();
 
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
+
+            // It's important to initialize the ResourceZoneInfoProvider; otherwise
+            // joda-time-android will not work.
+            JodaTimeAndroid.init(this);
 
         } catch (IOException | JSONException e) {
             e.printStackTrace();
@@ -156,14 +163,15 @@ public class CardinalApplication extends GeopaparazziApplication {
             }
         } catch (Exception ex) {
             Log.e("GEOPAPARAZZIAPPLICATION", "Was not able to restart application");
+
         }
     }
 
     public AppContainer getContainer() {
-        return appContainer;
+        return this.appContainer;
     }
 
-    public void setContainer(AppContainer appContainer) {
-        this.appContainer = appContainer;
+    public void resetContainer() {
+        this.appContainer = new AppContainer();
     }
 }

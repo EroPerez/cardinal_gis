@@ -10,13 +10,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.vector.VectorLayer;
+import org.oscim.layers.vector.geometries.Drawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
+import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,7 +82,9 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.BLACK)
-                        .strokeWidth(1.5f)
+                        .strokeWidth(3f)
+                        .stipple(25)
+                        .stippleColor(Color.RED)
                         .cap(Paint.Cap.ROUND)
                         .build();
             }
@@ -153,7 +158,18 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
 
         if (g instanceof Gesture.Tap) {
             if (tmpDrawables.size() > 0) {
-                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
+                GPLineDrawable selectedEdge = null;
+                GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(),  e.getY());
+                Point point = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+                for (Drawable drawable : tmpDrawables) {
+                    if (drawable.getGeometry().contains(point)) {
+                        selectedEdge = (GPLineDrawable) drawable;
+                        break;
+                    }
+                }
+
+                // Do your staff herre
+
 
                 //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
                 tmpDrawables.clear();

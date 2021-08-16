@@ -8,6 +8,11 @@ public class APIError {
     public APIError() {
     }
 
+    public APIError(int code, String msg) {
+        status_code = code;
+        message = msg;
+    }
+
     public int status() {
         return status_code;
     }

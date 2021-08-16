@@ -1,38 +1,30 @@
 package cu.phibrain.plugins.cardinal.io.network;
 
-import android.content.Context;
 import android.util.Log;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import com.google.gson.JsonSyntaxException;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LoginModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefect;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasDefectHasImages;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectHasState;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectMetadata;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Supplier;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WebDataProjectModel;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.exceptions.DownloadError;
 import cu.phibrain.plugins.cardinal.io.exceptions.ServerError;
 import cu.phibrain.plugins.cardinal.io.network.api.APIError;
@@ -40,8 +32,6 @@ import cu.phibrain.plugins.cardinal.io.network.api.ApiClient;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import cu.phibrain.plugins.cardinal.io.network.api.Envolve;
 import cu.phibrain.plugins.cardinal.io.network.api.ErrorUtils;
-import eu.geopaparazzi.library.database.GPLog;
-import eu.geopaparazzi.library.network.NetworkUtilities;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,370 +41,6 @@ import retrofit2.Response;
  */
 public class NetworkUtilitiesCardinalOl {
     private static final String TAG = "NETWORKUTILITIESCARDINAL";
-
-    public static final long maxBufferSize = 4096;
-    public static final String SLASH = "/";
-
-    private static String normalizeUrl(String url) {
-        return normalizeUrl(url, false);
-    }
-
-    private static String normalizeUrl(String url, boolean addSlash) {
-        if ((!url.startsWith("http://")) && (!url.startsWith("https://"))) {
-            url = "http://" + url;
-        }
-        if (addSlash && !url.endsWith(SLASH)) {
-            url = url + SLASH;
-        }
-        return url;
-    }
-
-    private static HttpURLConnection makeNewConnection(String fileUrl) throws Exception {
-        URL url = new URL(normalizeUrl(fileUrl));
-        return (HttpURLConnection) url.openConnection();
-    }
-
-    private static void setCsrfHeader(CookieManager session, HttpURLConnection connection) throws IOException {
-        String csrfToken = null;
-        for (HttpCookie c : session.getCookieStore().getCookies()) {
-            if (c.getName().equals("csrftoken") && c.getDomain().equals(connection.getURL().getHost())) {
-                csrfToken = c.getValue();
-            }
-        }
-        if (csrfToken == null) {
-            String message = "The session is not correctly authenticated.";
-            IOException ioException = new IOException(message);
-            GPLog.error(TAG, message, ioException);
-            throw ioException;
-        }
-        connection.setRequestProperty("X-CSRFToken", csrfToken);
-    }
-
-    private static String encodeFormData(HashMap<String, String> params) throws UnsupportedEncodingException {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (first)
-                first = false;
-            else
-                result.append("&");
-
-            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-        }
-
-        return result.toString();
-    }
-
-    public static CookieManager getAuthenticatedSession(String loginUrl, String user, String password) throws IOException {
-        HttpURLConnection conn = null;
-        CookieManager manager;
-        if (CookieHandler.getDefault() != null && (CookieHandler.getDefault() instanceof CookieManager)) {
-            manager = (CookieManager) CookieHandler.getDefault();
-        } else {
-            //manager = new CookieManager();
-            //CookieHandler previousDefault = CookieHandler.getDefault();
-            manager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
-            //CookieManager manager = new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER);
-            CookieHandler.setDefault(manager);
-        }
-        try {
-            if (user != null && password != null && user.trim().length() > 0 && password.trim().length() > 0) {
-                conn = makeNewConnection(loginUrl);
-                conn.setRequestMethod("POST");
-                conn.connect();
-                if (conn.getResponseCode() != 200) {
-                    String message = "Authentication failed. Check loginUrl. Response code: " + conn.getResponseCode() + ". Response message: " + conn.getResponseMessage();
-                    IOException ioException = new IOException(message);
-                    GPLog.error(TAG, message, ioException);
-                    throw ioException;
-                }
-                String csrfToken = null;
-                URL domainUrl = new URL(loginUrl);
-                CookieStore store = manager.getCookieStore();
-                for (HttpCookie c : store.getCookies()) {
-                    if (c.getName().equals("csrftoken") && c.getDomain().equals(domainUrl.getHost())) {
-                        csrfToken = c.getValue();
-                    } else if (c.getName().equals("sessionid") && c.getDomain().equals(domainUrl.getHost())) {
-                        store.remove(domainUrl.toURI(), c);
-                    }
-                }
-                if (csrfToken == null) {
-                    String message = "Authentication failed.";
-                    IOException ioException = new IOException(message);
-                    GPLog.error(TAG, message, ioException);
-                    throw ioException;
-                }
-
-                conn = makeNewConnection(loginUrl);
-                conn.setDoOutput(true);
-                conn.setRequestMethod("POST");
-
-                HashMap<String, String> auth = new HashMap<String, String>();
-                auth.put("username", user);
-                auth.put("password", password);
-                auth.put("csrfmiddlewaretoken", csrfToken);
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(encodeFormData(auth));
-                writer.flush();
-                writer.close();
-                os.close();
-                conn.connect();
-                if (conn.getResponseCode() != 200) {
-                    String message = "Authentication failed. Response code: " + conn.getResponseCode() + ". Response message: " + conn.getResponseMessage();
-                    IOException ioException = new IOException(message);
-                    GPLog.error(TAG, message, ioException);
-                    throw ioException;
-                }
-            }
-        } catch (IOException ex) {
-            throw ex;
-        } catch (Exception e) {
-            String message = "Authentication failed.";
-            IOException ioException = new IOException(message, e);
-            GPLog.error(TAG, message, ioException);
-            throw ioException;
-        }
-        return manager;
-    }
-
-    /**
-     * Send a file via HTTP POST using Django style authentication
-     *
-     * @param context    the context to use.
-     * @param urlStr     the url to which to send to.
-     * @param string     the string to send as post body.
-     * @param user       the user or <code>null</code>.
-     * @param password   the password or <code>null</code>.
-     * @param outputFile the file to save to.
-     * @param loginUrl   the login URL
-     * @throws Exception if something goes wrong.
-     */
-    public static void sendPostForFile(Context context,
-                                       String urlStr,
-                                       String string,
-                                       String user,
-                                       String password,
-                                       File outputFile,
-                                       String loginUrl) throws Exception {
-
-        loginUrl = normalizeUrl(loginUrl, true);
-        CookieManager manager = getAuthenticatedSession(loginUrl, user, password);
-
-        BufferedOutputStream wr = null;
-        HttpURLConnection conn = null;
-        try {
-            urlStr = normalizeUrl(urlStr, true);
-            conn = makeNewConnection(urlStr);
-            setCsrfHeader(manager, conn);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            // conn.setChunkedStreamingMode(0);
-            conn.setUseCaches(false);
-            if (user != null && password != null && user.trim().length() > 0 && password.trim().length() > 0) {
-                conn.setRequestProperty("Authorization", NetworkUtilities.getB64Auth(user, password));
-            }
-            conn.connect();
-
-            // Make server believe we are form data...
-            wr = new BufferedOutputStream(conn.getOutputStream());
-            byte[] bytes = string.getBytes();
-            wr.write(bytes);
-            wr.flush();
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                InputStream in = null;
-                FileOutputStream out = null;
-                long bytesCount = 0;
-                try {
-                    in = conn.getInputStream();
-                    out = new FileOutputStream(outputFile);
-
-                    byte[] buffer = new byte[(int) maxBufferSize];
-                    int bytesRead = in.read(buffer, 0, (int) maxBufferSize);
-                    while (bytesRead > 0) {
-                        out.write(buffer, 0, bytesRead);
-                        bytesRead = in.read(buffer, 0, (int) maxBufferSize);
-                        bytesCount += bytesRead;
-                    }
-                    out.flush();
-                } finally {
-                    if (in != null)
-                        in.close();
-                    if (out != null)
-                        out.close();
-                }
-                if (bytesCount == 0) {
-                    throw new RuntimeException("Error downloading the data. Buffer was empty.");
-                }
-            } else {
-                throw new RuntimeException("Error downloading the data. Got error code: " + responseCode);
-            }
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (conn != null)
-                conn.disconnect();
-        }
-    }
-
-    /**
-     * Send a GET request, previously authenticating on the provided loginUrl.
-     * Necessary to properly authenticate with CSRF protected frameworks such
-     * as Django.
-     *
-     * @param urlStr            the url.
-     * @param requestParameters request parameters or <code>null</code>.
-     * @param user              user or <code>null</code>.
-     * @param password          password or <code>null</code>.
-     * @param loginUrl          The URL used to authenticate
-     * @return the fetched text.
-     * @throws Exception if something goes wrong.
-     */
-    public static String sendGetRequest(String urlStr,
-                                        String requestParameters,
-                                        String user,
-                                        String password,
-                                        String loginUrl) throws Exception {
-
-        loginUrl = normalizeUrl(loginUrl, true);
-        CookieManager manager = getAuthenticatedSession(loginUrl, user, password);
-        HttpURLConnection conn = null;
-        BufferedReader in = null;
-        try {
-            conn = makeNewConnection(urlStr);
-            conn.connect();
-
-            in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), "UTF-8"));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            return response.toString();
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (in != null)
-                in.close();
-            if (conn != null)
-                conn.disconnect();
-        }
-    }
-
-    /**
-     * Send a file via HTTP POST using Django style authentication
-     *
-     * @param context  the context to use.
-     * @param urlStr   the server url to POST to.
-     * @param file     the file to send.
-     * @param user     the user or <code>null</code>.
-     * @param password the password or <code>null</code>.
-     * @param loginUrl the login URL
-     * @return the return string from the POST.
-     * @throws Exception if something goes wrong.
-     */
-    public static String sendFilePost(Context context,
-                                      String urlStr,
-                                      File file,
-                                      String user,
-                                      String password,
-                                      String loginUrl) throws Exception {
-        loginUrl = normalizeUrl(loginUrl, true);
-        CookieManager manager = getAuthenticatedSession(loginUrl, user, password);
-        BufferedOutputStream wr = null;
-        FileInputStream fis = null;
-        HttpURLConnection conn = null;
-        InputStream connResponseStream = null;
-        try {
-            long fileSize = file.length();
-            fis = new FileInputStream(file);
-            urlStr = normalizeUrl(urlStr, true);
-            urlStr = urlStr + "?name=" + file.getName();
-            conn = makeNewConnection(urlStr);
-            conn.setRequestMethod("POST");
-            setCsrfHeader(manager, conn);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-
-            conn.setRequestProperty("Content-Type", "application/octet-stream");
-            conn.setRequestProperty("Content-Length", "" + fileSize);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                conn.setFixedLengthStreamingMode(fileSize);
-            } else {
-                conn.setFixedLengthStreamingMode((int) fileSize);
-            }
-            conn.connect();
-
-            wr = new BufferedOutputStream(conn.getOutputStream());
-            long bufferSize = Math.min(fileSize, maxBufferSize);
-
-            if (GPLog.LOG)
-                GPLog.addLogEntry(TAG, "BUFFER USED: " + bufferSize);
-            byte[] buffer = new byte[(int) bufferSize];
-            int bytesRead = fis.read(buffer, 0, (int) bufferSize);
-            long totalBytesWritten = 0;
-            while (bytesRead > 0) {
-                wr.write(buffer, 0, (int) bufferSize);
-                totalBytesWritten = totalBytesWritten + bufferSize;
-                if (totalBytesWritten >= fileSize)
-                    break;
-
-                bufferSize = Math.min(fileSize - totalBytesWritten, maxBufferSize);
-                bytesRead = fis.read(buffer, 0, (int) bufferSize);
-            }
-            wr.flush();
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode < 400) {
-                connResponseStream = conn.getInputStream();
-            } else {
-                connResponseStream = conn.getErrorStream();
-            }
-            StringBuilder responseBuilder = new StringBuilder();
-            if (connResponseStream != null) {
-                Reader reader = null;
-                try {
-                    int charCount = 0;
-                    int maxChars = 1048576; // Avoid downloading response bodies bigger than 1 MB
-                    reader = new BufferedReader(new InputStreamReader(connResponseStream, "UTF-8"));
-                    int c = 0;
-                    while ((c = reader.read()) != -1 && charCount < maxChars) {
-                        responseBuilder.append((char) c);
-                        charCount++;
-                    }
-                } finally {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                }
-            }
-            if (responseCode != 200 && responseCode != 204) {
-                if (GPLog.LOG)
-                    GPLog.addLogEntry(TAG, "Error uploading data. Code " + responseCode);
-                throw new ServerError(responseBuilder.toString(), responseCode);
-            }
-            return responseBuilder.toString();
-        } finally {
-            if (wr != null)
-                wr.close();
-            if (fis != null)
-                fis.close();
-            if (connResponseStream != null) {
-                connResponseStream.close();
-            }
-            if (conn != null)
-                conn.disconnect();
-        }
-    }
-
 
     /**
      * Send authentication data via HTTP POST using Django style
@@ -431,55 +57,51 @@ public class NetworkUtilitiesCardinalOl {
             return response.body();
         }
         throw new ServerError(response.message(), response.code());
-//        final AuthToken[] token = {null};
-//        final APIError[] error = {null};
-//        final boolean[] processed = {false};
-//
-//        ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).enqueue(new Callback<AuthToken>() {
-//            /**
-//             * Invoked for a received HTTP response.
-//             *
-//             * <p>Note: An HTTP response may still indicate an application-level failure such as a 404 or 500.
-//             * Call {@link Response#isSuccessful()} to determine if the response indicates success.
-//             *
-//             * @param call
-//             * @param response
-//             */
-//            @Override
-//            public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
-//                if (response.isSuccessful()) {
-//                    // use response data and do some fancy stuff :)
-//                    token[0] = response.body();
-//                } else {
-//                    // parse the response body …
-//                    error[0] = ErrorUtils.parseError(response);
-//
-//                    // … or just log the issue like we’re doing :)
-//                    Log.d("APIError", error[0].message());
-//
-//                }
-//                processed[0] = true;
-//            }
-//
-//            /**
-//             * Invoked when a network exception occurred talking to the server or when an unexpected exception
-//             * occurred creating the request or processing the response.
-//             *
-//             * @param call
-//             * @param t
-//             */
-//            @Override
-//            public void onFailure(Call<AuthToken> call, Throwable t) {
-//                processed[0] = true;
-//            }
-//        });
-//
-//        while (!processed[0]) ;
-//
-//        if (error[0] != null)
-//            throw new ServerError(error[0].message(), error[0].status());
-//
-//        return token[0];
+    }
+
+    public static void sendGetAuthToken(String server, String user, String password, @NotNull OnLoginCallback loginCallback) {
+
+        ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).enqueue(new Callback<AuthToken>() {
+            /**
+             * Invoked for a received HTTP response.
+             *
+             * <p>Note: An HTTP response may still indicate an application-level failure such as a 404 or 500.
+             * Call {@link Response#isSuccessful()} to determine if the response indicates success.
+             *
+             * @param call
+             * @param response
+             */
+            @Override
+            public void onResponse(Call<AuthToken> call, Response<AuthToken> response) {
+                if (response.isSuccessful()) {
+                    // use response data and do some fancy stuff :)
+                    loginCallback.onLoginSuccess(response.body());
+                } else {
+                    // parse the response body …
+                    APIError error = ErrorUtils.parseError(response);
+
+                    loginCallback.onLoginFailure(error);
+
+                    // … or just log the issue like we’re doing :)
+                    Log.d("APIError", String.valueOf(error));
+
+                }
+            }
+
+            /**
+             * Invoked when a network exception occurred talking to the server or when an unexpected exception
+             * occurred creating the request or processing the response.
+             *
+             * @param call
+             * @param t
+             */
+            @Override
+            public void onFailure(Call<AuthToken> call, Throwable t) {
+                APIError error = new APIError(500, t.getLocalizedMessage());
+                loginCallback.onLoginFailure(error);
+                Log.d("APIError", String.valueOf(error));
+            }
+        });
     }
 
 
@@ -534,9 +156,9 @@ public class NetworkUtilitiesCardinalOl {
     /**
      * Send via HTTP GET a request to obtain a project data
      *
-     * @param server the base url to which to send to.
-     * @param token  the auth token login credential
-     * @param filters     the filters to apply
+     * @param server  the base url to which to send to.
+     * @param token   the auth token login credential
+     * @param filters the filters to apply
      * @return List<Supplier>    A current remote selected suppliers to import
      * @throws Exception if something goes wrong.
      */
@@ -555,9 +177,9 @@ public class NetworkUtilitiesCardinalOl {
     /**
      * Send via HTTP GET a request to obtain a project data
      *
-     * @param server the base url to which to send to.
-     * @param token  the auth token login credential
-     * @param filters     the filters to apply
+     * @param server  the base url to which to send to.
+     * @param token   the auth token login credential
+     * @param filters the filters to apply
      * @return List<LabelMaterial>  A current remote selected LabelMaterials to import
      * @throws Exception if something goes wrong.
      */
@@ -573,4 +195,287 @@ public class NetworkUtilitiesCardinalOl {
     }
 
 
+    public static boolean sendPut2WorkSession(String server, AuthToken token, WorkSession session) {
+        try {
+            Response<WorkSession> response = ApiClient.getApiService(server).updateWorkSession(token.toString(), session.getId(), session).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean sendPut2MapObject(String server, AuthToken token, MapObject mapObject) {
+        try {
+            Response<MapObject> response = ApiClient.getApiService(server).updateMapObject(token.toString(), mapObject.getRemoteId(), mapObject).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static MapObject sendPostMapObject(String server, AuthToken token, MapObject mapObject) {
+        try {
+            Response<MapObject> response = ApiClient.getApiService(server).createMapObject(token.toString(), mapObject).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    public static boolean sendPut2SignalEvents(String server, AuthToken token, SignalEvents events) {
+        try {
+            Response<SignalEvents> response = ApiClient.getApiService(server).updateSignalEvents(token.toString(), events.getRemoteId(), events).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static SignalEvents sendPostSignalEvents(String server, AuthToken token, SignalEvents events) {
+        try {
+            Response<SignalEvents> response = ApiClient.getApiService(server).createSignalEvents(token.toString(), events).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPut2WorkerRoute(String server, AuthToken token, WorkerRoute route) {
+        try {
+
+            Response<WorkerRoute> response = ApiClient.getApiService(server).updateWorkerRoute(token.toString(), route.getId(), route).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+
+    public static boolean sendPostWorkerRoute(String server, AuthToken token, WorkerRoute route) {
+        try {
+
+            Response<WorkerRoute> response = ApiClient.getApiService(server).createWorkerRoute(token.toString(), route).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+
+    public static boolean sendPut2RouteSegment(String server, AuthToken token, RouteSegment route) {
+        try {
+
+            Response<RouteSegment> response = ApiClient.getApiService(server).updateRouteSegment(token.toString(), route.getRemoteId(), route).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static RouteSegment sendPostRouteSegment(String server, AuthToken token, RouteSegment route) {
+        try {
+
+            Response<RouteSegment> response = ApiClient.getApiService(server).createRouteSegment(token.toString(), route).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPut2MapObjectHasState(String server, AuthToken token, MapObjectHasState state) {
+        try {
+
+            Response<MapObjectHasState> response = ApiClient.getApiService(server).updateMapObjectHasState(token.toString(), state.getRemoteId(), state).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static MapObjectHasState sendPostMapObjectHasState(String server, AuthToken token, MapObjectHasState state) {
+        try {
+
+            Response<MapObjectHasState> response = ApiClient.getApiService(server).createMapObjectHasState(token.toString(), state).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPut2MapObjectImages(String server, AuthToken token, MapObjectImages objectImages) {
+        try {
+
+            Response<MapObjectImages> response = ApiClient.getApiService(server).updateMapObjectImages(token.toString(), objectImages.getRemoteId(), objectImages).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static MapObjectImages sendPostMapObjectImages(String server, AuthToken token, MapObjectImages objectImages) {
+        try {
+
+            Response<MapObjectImages> response = ApiClient.getApiService(server).createMapObjectImages(token.toString(), objectImages).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPut2MapObjectMetadata(String server, AuthToken token, MapObjectMetadata objectMetadata) {
+        try {
+
+            Response<MapObjectMetadata> response = ApiClient.getApiService(server).updateMapObjectMetadata(token.toString(), objectMetadata.getRemoteId(), objectMetadata).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static MapObjectMetadata sendPostMapObjectMetadata(String server, AuthToken token, MapObjectMetadata objectMetadata) {
+        try {
+
+            Response<MapObjectMetadata> response = ApiClient.getApiService(server).createMapObjectMetadata(token.toString(), objectMetadata).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPut2MapObjectHasDefect(String server, AuthToken token, MapObjectHasDefect defect) {
+        try {
+
+            Response<MapObjectHasDefect> response = ApiClient.getApiService(server).updateMapObjectHasDefect(token.toString(), defect.getRemoteId(), defect).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static MapObjectHasDefect sendPostMapObjectHasDefect(String server, AuthToken token, MapObjectHasDefect defect) {
+        try {
+
+            Response<MapObjectHasDefect> response = ApiClient.getApiService(server).createMapObjectHasDefect(token.toString(), defect).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static MapObjectHasDefectHasImages sendPostMapObjectHasDefectHasImages(String server, AuthToken token, MapObjectHasDefectHasImages images) {
+        try {
+
+            Response<MapObjectHasDefectHasImages> response = ApiClient.getApiService(server).createMapObjectHasDefectHasImages(token.toString(), images).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPut2MapObjectHasDefectHasImages(String server, AuthToken token, MapObjectHasDefectHasImages images) {
+        try {
+
+            Response<MapObjectHasDefectHasImages> response = ApiClient.getApiService(server).updateMapObjectHasDefectHasImages(token.toString(), images.getRemoteId(), images).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
 }
