@@ -2,7 +2,6 @@ package cu.phibrain.cardinal.app.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +12,21 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
+import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
+import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
+import eu.geopaparazzi.library.images.ImageUtilities;
 
 public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
 
     public interface OnClickCallback {
-        void OnClickListener(WorkSession aSession);
+        void OnClickListener(WorkSession aSession, boolean isLogin);
     }
 
     ;
@@ -36,6 +38,7 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
         TextView sessionZoneText;
         TextView sessionStartDateText;
         ImageButton goButton;
+        boolean isLogin;
     }
 
     /**
@@ -62,11 +65,13 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
                 holder.sessionStartDateText = rowView.findViewById(R.id.worksessionstartdatetext);
                 holder.goButton = rowView.findViewById(R.id.activatebutton);
                 holder.goButton.setVisibility(View.VISIBLE);
+                holder.isLogin = false;
 
                 rowView.setTag(holder);
             } else {
                 holder = (ViewHolder) rowView.getTag();
                 holder.goButton.setVisibility(View.VISIBLE);
+                holder.isLogin = false;
             }
 
             final WorkSession workSession = getItem(position);
@@ -74,22 +79,34 @@ public class WorkSessionAdapter extends ArrayAdapter<WorkSession> {
 
             if (!worker.getAvatar().isEmpty()) {
                 byte[] avatarByteCodes = worker.getAvatarAsByteArray();
-                Bitmap avatar = BitmapFactory.decodeStream(new ByteArrayInputStream(avatarByteCodes));
+                Bitmap avatar = ImageUtilities.getImageFromImageData(avatarByteCodes);
                 holder.ivAvatar.setImageBitmap(avatar);
 
             }
 
             holder.sessionWorkerText.setText("Worker: " + worker.getFullName());
             holder.sessionZoneText.setText("Zone: " + workSession.getZoneObj().getName());
+            holder.sessionStartDateText.setText("Start Date: " + JodaTimeHelper.formatDate("yyyy-MM-dd", workSession.getStartDate()));
 
-          //  holder.sessionStartDateText.setText("Start Date: " + JodaTimeHelper.formatDate("yyyy-MM-dd", workSession.getStartDate()));
+            if (workSession.getActive()) {
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+                WorkSession activeSession = appContainer.getWorkSessionActive();
 
-            if (!workSession.getActive())
+                if (workSession.equals(activeSession)) {
+                    holder.goButton.setImageBitmap(ImageUtil.getBitmap(parent.getContext(), R.drawable.ic_logout_session));
+                    holder.isLogin = true;
+                } else {
+                    holder.goButton.setImageBitmap(ImageUtil.getBitmap(parent.getContext(), R.drawable.ic_login_session));
+                    holder.isLogin = false;
+                }
+            } else
                 holder.goButton.setVisibility(View.GONE);
 
             holder.goButton.setOnClickListener(v -> {
-                if (onClickCallback != null)
-                    onClickCallback.OnClickListener(workSession);
+                holder.isLogin = !holder.isLogin;
+                if (onClickCallback != null) {
+                    onClickCallback.OnClickListener(workSession, holder.isLogin);
+                }
             });
 
         } catch (Exception e) {

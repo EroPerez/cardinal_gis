@@ -17,28 +17,31 @@ public class RouteSegmentEntityEventListener implements EntityEventListener<Rout
     @Override
     public void onAfterEntityInsert(RouteSegment routeSegment, RouteSegmentOperations entityManager) {
 
+        try {
+            MapObject origin = routeSegment.getOriginObj();
+            List<RouteSegment> routeSegmentsInOut = MapObjectOperations.getInstance().getRouteSegments(routeSegment.getOriginId());
 
-        MapObject origin = routeSegment.getOriginObj();
-        List<RouteSegment> routeSegmentsInOut = MapObjectOperations.getInstance().getRouteSegments(routeSegment.getOriginId());
+            if (routeSegmentsInOut.size() >= origin.getNodeGrade()) {
+                origin.setIsCompleted(true);
+            } else {
+                origin.setIsCompleted(false);
+            }
+            origin.update();
 
-        if (routeSegmentsInOut.size() >= origin.getNodeGrade()  ) {
-            origin.setIsCompleted(true);
-        } else {
-            origin.setIsCompleted(false);
+
+            MapObject destiny = routeSegment.getDestinyObj();
+
+            List<RouteSegment> routeSegmentsOutIn = MapObjectOperations.getInstance().getRouteSegments(routeSegment.getDestinyId());
+
+            if (routeSegmentsOutIn.size() >= destiny.getNodeGrade()) {
+                destiny.setIsCompleted(true);
+            } else {
+                destiny.setIsCompleted(false);
+            }
+            destiny.update();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        MapObjectOperations.getInstance().update(origin);
-
-
-        MapObject destiny = routeSegment.getDestinyObj();
-
-        List<RouteSegment> routeSegmentsOutIn = MapObjectOperations.getInstance().getRouteSegments(routeSegment.getDestinyId());
-
-        if (routeSegmentsOutIn.size() >= destiny.getNodeGrade() ) {
-            destiny.setIsCompleted(true);
-        } else {
-            destiny.setIsCompleted(false);
-        }
-        MapObjectOperations.getInstance().update(destiny);
     }
 
     @Override

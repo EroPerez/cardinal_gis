@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -174,12 +173,12 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
     public boolean onGesture(Gesture g, MotionEvent e) {
 
         if (g instanceof Gesture.Tap) {
-            if (tmpDrawables.size() > 0) {
-                GPPolygonDrawable indexLine = (GPPolygonDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
-
-                GPDialogs.toast(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT);
-                tmpDrawables.clear();
-            }
+//            if (tmpDrawables.size() > 0) {
+//                GPPolygonDrawable indexLine = (GPPolygonDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
+//
+//                GPDialogs.toast(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT);
+//                tmpDrawables.clear();
+//            }
         }
         return false;
     }
@@ -216,8 +215,8 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                         mapView.reloadLayer(EdgesLayer.class);
                         //Reload current point layers
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
-
                         mapView.reloadLayer(CardinalSelectPointLayer.class);
+                        mapView.reloadLayer(CardinalJoinsLayer.class);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -261,7 +260,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         if (appContainer.getMode() == UserMode.OBJECT_COORD_EDITION) {
 
             currentMO.setCoord(LatLongUtils.toGpGeoPoints(geometry));
-            currentMO.update();
+            MapObjectOperations.getInstance().save(currentMO);
 
 
         } else if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
@@ -283,13 +282,15 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         //Reload current point layers
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
-        mapView.reloadLayer(CardinalSelectPointLayer.class);
-
         if(oldSelectedObjectType != null)
         {
             Layer layer = oldSelectedObjectType.getLayerObj();
             ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
         }
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
+        mapView.reloadLayer(CardinalLineLayer.class);
+        mapView.reloadLayer(CardinalJoinsLayer.class);
+
         GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
 
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);

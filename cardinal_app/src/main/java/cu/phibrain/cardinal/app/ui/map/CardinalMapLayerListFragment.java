@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
@@ -360,7 +361,10 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
             {
                 continue;
             }
-            else if(layerClass.equals(EdgesLayer.class.getCanonicalName()))
+            else
+            if (layerClass.equals(EdgesLayer.class.getCanonicalName()))
+                layerItem = getCardinalSimpleItem(index, layerDefinition);
+            else if (layerClass.equals(CardinalJoinsLayer.class.getCanonicalName()))
                 layerItem = getCardinalSimpleItem(index, layerDefinition);
             else
                 layerItem = getCardinalLayerItem(index, layerDefinition);

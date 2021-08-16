@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -113,6 +115,10 @@ public class CardinalApplication extends GeopaparazziApplication {
                 CardinalLayerManager.INSTANCE.init();
 
             Log.i("GEOPAPARAZZIAPPLICATION", "ACRA Initialized.");
+
+            // It's important to initialize the ResourceZoneInfoProvider; otherwise
+            // joda-time-android will not work.
+            JodaTimeAndroid.init(this);
 
         } catch (IOException | JSONException e) {
             e.printStackTrace();

@@ -169,7 +169,7 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
                                         }
 
                                         protected void onPostExecute(String response) {
-                                            mapObject.setJoinId(-1l);
+                                            mapObject.setJoinId(null);
 
                                             MapObjectOperations.getInstance().save(mapObject);
                                             refreshList();

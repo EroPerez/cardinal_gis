@@ -1,5 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.events;
 
+import android.util.Log;
+
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
@@ -51,13 +53,22 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         //Create all extra attribute
         MapObjecType mapObjectObjectType = mapObject.getObjectType();
         while (mapObjectObjectType != null) {
-            for (MapObjectTypeAttribute attr :
-                    mapObjectObjectType.getAttributes()) {
+            for (MapObjectTypeAttribute attr : mapObjectObjectType.getAttributes()) {
+                boolean skip = false;
+                for (MapObjectMetadata metadata : mapObject.getMetadata()) {
 
-                String value = "" + attr.getDefaultValue();
-                if (value.isEmpty()) value = " ";
+                    if (attr.getId().equals(metadata.getObjAttributeId())) {
+                        skip = true;
+                        break;
+                    }
+                }
 
-                MapObjectMetadataOperations.getInstance().insert(new MapObjectMetadata(mapObject.getId(), value, attr.getId()));
+                if (!skip) {
+                    String value = "" + attr.getDefaultValue();
+                    if (value.isEmpty()) value = " ";
+
+                    MapObjectMetadataOperations.getInstance().insert(new MapObjectMetadata(null, mapObject.getId(), value, attr.getId()));
+                }
 
             }
 
@@ -70,8 +81,8 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         entityManager.detach(mapObject);
 
         MapObject oldMapObject = entityManager.load(mapObject.getId());
-//        Log.d("MOBEntityI", "mapObject: " + mapObject.toString());
-//        Log.d("MOBEntityI", "oldMapObject: " + oldMapObject.toString());
+       Log.d("MOBEntityI", "mapObject: " + mapObject.toString());
+       Log.d("MOBEntityI", "oldMapObject: " + oldMapObject.toString());
 
         if (oldMapObject.getCode() != mapObject.getCode()) {
             //update the state of old label assigned
@@ -169,14 +180,12 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
         RouteSegmentOperations.getInstance().deleteAll(entityManager.getRouteSegments(mapObject.getId()));
 
         // Delete all related defects and images of defects
-        for (MapObjectHasDefect defect :
-                mapObject.getDefects()) {
+        for (MapObjectHasDefect defect : mapObject.getDefects()) {
             MapObjectHasDefectOperations.getInstance().delete(defect);
         }
-        // Release docket object to this mapObject
-        for (MapObject joined :
-                mapObject.getJoinedList()) {
-            joined.setJoinId(-1L);
+        // Release docked object to this mapObject
+        for (MapObject joined : mapObject.getJoinedList()) {
+            joined.setJoinId(null);
             entityManager.save(joined);
         }
 

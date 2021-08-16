@@ -73,16 +73,14 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
 
         //Create all extra attribute not common
         other.resetMetadata();
-        for (MapObjectTypeAttribute attr :
-                attributes) {
-            for (MapObjectMetadata metadata :
-                    other.getMetadata()) {
+        for (MapObjectTypeAttribute attr : attributes) {
+            for (MapObjectMetadata metadata : other.getMetadata()) {
 
                 if (!attr.equals(metadata.getAttribute())) {
                     String value = "" + attr.getDefaultValue();
                     if (value.isEmpty()) value = " ";
 
-                    MapObjectMetadataOperations.getInstance().save(new MapObjectMetadata(other.getId(), value, attr.getId()));
+                    MapObjectMetadataOperations.getInstance().save(new MapObjectMetadata(null, other.getId(), value, attr.getId()));
                 }
             }
         }
@@ -104,4 +102,5 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
         }
         save(other);
     }
+
 }

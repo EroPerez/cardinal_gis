@@ -165,6 +165,13 @@ public enum CardinalLayerManager {
         jo.put(IGpLayer.LAYERENABLED_TAG, true);
         cardinalLayersDefinitions.add(jo);
 
+        //Capa de Agregaciones
+        jo = new JSONObject();
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
+        jo.put(IGpLayer.LAYERENABLED_TAG, true);
+        cardinalLayersDefinitions.add(jo);
+
         jo = new JSONObject();
         jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLineLayer.class.getCanonicalName());
         jo.put(IGpLayer.LAYERNAME_TAG, CardinalLineLayer.getName(context));
@@ -330,21 +337,34 @@ public enum CardinalLayerManager {
                     EdgesLayer sysLayer = new EdgesLayer(mapView, activitySupporter);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
-                } else if (layerClass.equals(CardinalLineLayer.class.getCanonicalName())) {
-                    CardinalLineLayer sysLayer = new CardinalLineLayer(mapView, activitySupporter);
-                    sysLayer.load();
-                    sysLayer.setEnabled(isEnabled);
-                } else if (layerClass.equals(CardinalPolygonLayer.class.getCanonicalName())) {
-                    CardinalPolygonLayer sysLayer = new CardinalPolygonLayer(mapView, activitySupporter);
+                }
+//                else if (layerClass.equals(CardinalLineLayer.class.getCanonicalName())) {
+//                    CardinalLineLayer sysLayer = new CardinalLineLayer(mapView, activitySupporter);
+//                    sysLayer.load();
+//                    sysLayer.setEnabled(isEnabled);
+//                } else if (layerClass.equals(CardinalPolygonLayer.class.getCanonicalName())) {
+//                    CardinalPolygonLayer sysLayer = new CardinalPolygonLayer(mapView, activitySupporter);
+//                    sysLayer.load();
+//                    sysLayer.setEnabled(isEnabled);
+//                }
+                else if (layerClass.equals(CardinalJoinsLayer.class.getCanonicalName())) {
+                    CardinalJoinsLayer sysLayer = new CardinalJoinsLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
                 }
+
 
 
             }
         } else {
             loadCardinalLayers(mapView, activitySupporter, cardinalLayersDefinitions);
         }
+
+        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
+        lineLayer.load();
+
+        CardinalPolygonLayer polygonLayer = new CardinalPolygonLayer(mapView, activitySupporter);
+        polygonLayer.load();
 
         //Select
         CardinalSelectPointLayer selectPointLayer = new CardinalSelectPointLayer(mapView, activitySupporter);
@@ -375,19 +395,26 @@ public enum CardinalLayerManager {
         cardinalLayersDefinitions.add(edgeLayer.toJson());
         edgeLayer.load();
 
-        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
+        CardinalJoinsLayer joinsLayer = new CardinalJoinsLayer(mapView);
         jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLineLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, lineLayer.getName(context));
-        cardinalLayersDefinitions.add(lineLayer.toJson());
-        lineLayer.load();
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
+        cardinalLayersDefinitions.add(joinsLayer.toJson());
+        joinsLayer.load();
 
-        CardinalPolygonLayer polygonLayer = new CardinalPolygonLayer(mapView, activitySupporter);
-        jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalPolygonLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, polygonLayer.getName(context));
-        cardinalLayersDefinitions.add(polygonLayer.toJson());
-        polygonLayer.load();
+//        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
+//        jo = new JSONObject();
+//        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLineLayer.class.getCanonicalName());
+//        jo.put(IGpLayer.LAYERNAME_TAG, lineLayer.getName(context));
+//        cardinalLayersDefinitions.add(lineLayer.toJson());
+//        lineLayer.load();
+//
+//        CardinalPolygonLayer polygonLayer = new CardinalPolygonLayer(mapView, activitySupporter);
+//        jo = new JSONObject();
+//        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalPolygonLayer.class.getCanonicalName());
+//        jo.put(IGpLayer.LAYERNAME_TAG, polygonLayer.getName(context));
+//        cardinalLayersDefinitions.add(polygonLayer.toJson());
+//        polygonLayer.load();
 
 
     }
@@ -583,12 +610,6 @@ public enum CardinalLayerManager {
                             //El estado no se pierde porque lo mando a cargar siempre de la BD, quedar'a como lo dejamos
                             layerIndex.setEnabled(layer.isEnabled());
                             LayerOperations.getInstance().save(layerIndex);
-//                            JSONObject jo = new JSONObject();
-//                            jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLayer.class.getCanonicalName());
-//                            jo.put(IGpLayer.LAYERNAME_TAG, layerIndex.getName());
-//                            jo.put("ID", layerIndex.getId());
-//                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
-//                            cardinalLayersArray.put(jo);
                             gpLayer.dispose();
                         } else if (layer instanceof ICardinalEdge) {
 
@@ -615,7 +636,15 @@ public enum CardinalLayerManager {
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
-                        } else {
+                        } else if(layer instanceof  ICardinalJoint){
+                            IGpLayer gpLayer = (IGpLayer) layer;
+                            JSONObject jo = new JSONObject();
+                            jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
+                            jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
+                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
+                            cardinalLayersArray.put(jo);
+                            gpLayer.dispose();
+                        }else {
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jsonObject = gpLayer.toJson();
                             systemLayersArray.put(jsonObject);

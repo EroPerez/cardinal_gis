@@ -8,6 +8,8 @@ import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.text.DecimalFormat;
 
+import eu.geopaparazzi.library.core.ResourcesManager;
+
 public class StorageUtilities {
 
     public static String getTotalExternalMemorySize(Context context) {
@@ -58,7 +60,24 @@ public class StorageUtilities {
             long availableBlocks = stat.getAvailableBlocksLong();
             return readableFileLongSize(availableBlocks * blockSize);
         }
-        return -1;
+        return -1L;
+
+    }
+
+    public static long getAvailableMemorySizeInMainStorageDir(Context context) {
+        File dirs;
+        try {
+            dirs = ResourcesManager.getInstance(context).getMainStorageDir();
+            StatFs stat = new StatFs(dirs.getPath());
+            long blockSize = stat.getBlockSizeLong();
+            long availableBlocks = stat.getAvailableBlocksLong();
+            return readableFileLongSize(availableBlocks * blockSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return -1L;
 
     }
 

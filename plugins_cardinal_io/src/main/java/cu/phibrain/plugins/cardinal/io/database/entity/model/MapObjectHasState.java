@@ -32,17 +32,20 @@ import java.util.Objects;
                 @Index(value = "mapObjectId,mapObjectStateId", unique = true)
         }
 )
-public class MapObjectHasState implements Serializable, IEntity {
+public class MapObjectHasState implements Serializable, IExportable {
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("map_object_barcode")
     @Expose
     private long mapObjectId;
 
     @ToOne(joinProperty = "mapObjectId")
+    @Expose(serialize = false, deserialize = false)
     private MapObject mapObject;
 
     @SerializedName("map_object_state")
@@ -50,6 +53,7 @@ public class MapObjectHasState implements Serializable, IEntity {
     private long mapObjectStateId;
 
     @ToOne(joinProperty = "mapObjectStateId")
+    @Expose(serialize = false, deserialize = false)
     private MapObjecTypeState mapObjectState;
 
     @SerializedName("created_at")
@@ -71,14 +75,20 @@ public class MapObjectHasState implements Serializable, IEntity {
     @Generated(hash = 779550990)
     private transient MapObjectHasStateDao myDao;
 
+    private Date SyncDate;
 
-    @Generated(hash = 1261174875)
-    public MapObjectHasState(Long id, long mapObjectId, long mapObjectStateId,
-                             Date createdAt) {
+
+    @Generated(hash = 860696342)
+    public MapObjectHasState(Long id, Long remoteId, long mapObjectId, long mapObjectStateId, Date createdAt,
+            Date SyncDate, Date updatedAt, Boolean isSync) {
         this.id = id;
+        this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.mapObjectStateId = mapObjectStateId;
         this.createdAt = createdAt;
+        this.SyncDate = SyncDate;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
     }
 
 
@@ -91,6 +101,14 @@ public class MapObjectHasState implements Serializable, IEntity {
         this.mapObjectId = mapObjectId;
         this.mapObjectStateId = mapObjectStateId;
         this.createdAt = new Date();
+    }
+
+    public MapObjectHasState(Long remoteId, long mapObjectId, long mapObjectStateId, Date createdAt) {
+        this.id = null;
+        this.remoteId= remoteId;
+        this.mapObjectId = mapObjectId;
+        this.mapObjectStateId = mapObjectStateId;
+        this.createdAt = createdAt;
     }
 
 
@@ -124,15 +142,66 @@ public class MapObjectHasState implements Serializable, IEntity {
     }
 
 
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
+
+    @Override
     public Date getCreatedAt() {
         return this.createdAt;
     }
 
-
+    @Override
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+        this.SyncDate = SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+        return new MapObjectHasState(remoteId, getMapObject().getRemoteId(), mapObjectStateId, createdAt);
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
 
     @Generated(hash = 1028776990)
     private transient Long mapObject__resolvedKey;
@@ -272,6 +341,11 @@ public class MapObjectHasState implements Serializable, IEntity {
     @Override
     public int hashCode() {
         return Objects.hash(mapObjectId, mapObjectStateId);
+    }
+
+
+    public Date getSyncDate() {
+        return this.SyncDate;
     }
 
 

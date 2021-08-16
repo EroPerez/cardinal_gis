@@ -70,7 +70,6 @@ import eu.geopaparazzi.map.MapsSupportService;
 import eu.geopaparazzi.map.R;
 import eu.geopaparazzi.map.gui.MapLayerItem;
 import eu.geopaparazzi.map.layers.ELayerTypes;
-import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 import eu.geopaparazzi.map.layers.userlayers.GeopackageTableLayer;
 import eu.geopaparazzi.map.layers.utils.ColorStrokeObject;
@@ -81,6 +80,8 @@ import eu.geopaparazzi.map.layers.utils.SpatialiteColorStrokeDialogFragment;
 import eu.geopaparazzi.map.layers.utils.SpatialiteConnectionsHandler;
 import eu.geopaparazzi.map.layers.utils.SpatialiteLabelDialogFragment;
 import eu.geopaparazzi.map.utils.MapUtilities;
+
+import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_TEXT_VISIBLE;
 
 class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.cardinal.app.ui.map.CardinalMapLayerAdapter.ViewHolder> {
 
@@ -139,7 +140,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            if(item instanceof ICardinalItem || item instanceof ICardinalEdgeItem){
+            if (item instanceof ICardinalItem || item instanceof ICardinalEdgeItem) {
                 CardinalLayerManager.INSTANCE.setEnabled(item.position, item.enabled);
             } else {
                 CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
@@ -266,12 +267,18 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
                                 } else if (actionName.equals(toggleLabels)) {
                                     List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);
+                                    boolean doLabels = false;
                                     if (jsonObject.has(IGpLayer.LAYERDOLABELS_TAG)) {
-                                        boolean doLabels = jsonObject.getBoolean(IGpLayer.LAYERDOLABELS_TAG);
+                                        doLabels = jsonObject.getBoolean(IGpLayer.LAYERDOLABELS_TAG);
                                         jsonObject.put(IGpLayer.LAYERDOLABELS_TAG, !doLabels);
                                     } else {
-                                        jsonObject.put(IGpLayer.LAYERDOLABELS_TAG, false);
+                                        jsonObject.put(IGpLayer.LAYERDOLABELS_TAG, doLabels);
                                     }
+                                    // Hiding mapobject labels
+                                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
+                                    SharedPreferences.Editor prefEditor = preferences.edit();
+                                    prefEditor.putBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, doLabels);
+                                    prefEditor.commit();
                                 } else if (actionName.equals(zoomTo)) {
                                     List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);

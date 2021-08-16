@@ -19,7 +19,7 @@ public class ISO8601DateAdapter implements JsonSerializer<Date>, JsonDeserialize
     private String datePattern;
 
     public ISO8601DateAdapter() {
-        datePattern = "yyyy-MM-dd'T'HH:mm:ssTDZ";
+        datePattern = "yyyy-MM-dd'T'HH:mm:ssZ";
     }
 
     @Override
