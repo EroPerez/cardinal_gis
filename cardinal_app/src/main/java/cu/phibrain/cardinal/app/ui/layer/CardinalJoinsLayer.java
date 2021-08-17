@@ -71,7 +71,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         if (!isEnabled()) {
             return;
         }
-        synchronized (tmpDrawables) {
+
             tmpDrawables.clear();
             mDrawables.clear();
             if ((double) zoom >= LatLongUtils.getLineAndPolygonViewZoom()) {
@@ -96,7 +96,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                 }
             }
             update();
-        }
+
     }
 
     public void disable() {

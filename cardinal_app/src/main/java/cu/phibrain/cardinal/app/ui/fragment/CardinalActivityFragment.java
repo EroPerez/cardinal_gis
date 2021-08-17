@@ -3,6 +3,8 @@
 package cu.phibrain.cardinal.app.ui.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -58,7 +60,6 @@ import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
 import eu.geopaparazzi.core.profiles.ProfilesActivity;
-import eu.geopaparazzi.core.ui.activities.AboutActivity;
 import eu.geopaparazzi.core.ui.activities.AdvancedSettingsActivity;
 import eu.geopaparazzi.core.ui.activities.ExportActivity;
 import eu.geopaparazzi.core.ui.activities.ImportActivity;
@@ -123,6 +124,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private FloatingActionButton mPanicFAB;
     private ResourcesManager mResourcesManager;
     private boolean hasProfilesProvider = false;
+    private String packageName = "eu.hydrologis.geopaparazzi";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -155,6 +157,13 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             GPLog.error(this, null, e);
         }
+
+        try {
+            packageName = ResourcesManager.getInstance(getActivity()).getPackageName();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return v; // return the fragment's view for display
     }
 
@@ -249,7 +258,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 metadataTextView.setText(projectName);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             GPLog.error(this, null, e);
         }
 
@@ -328,9 +337,12 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             menu.findItem(eu.geopaparazzi.core.R.id.action_new).setEnabled(true);
         }
         menu.findItem(eu.geopaparazzi.core.R.id.action_profiles).setVisible(hasProfilesProvider);
+//        menu.findItem(eu.geopaparazzi.core.R.id.action_profiles).setVisible(false);
 
         MenuItem gpsItem = menu.findItem(eu.geopaparazzi.core.R.id.action_gps);
         checkGpsItemStatus(gpsItem);
+
+        menu.findItem(eu.geopaparazzi.core.R.id.action_advanced_settings).setVisible(false);
 
         super.onPrepareOptionsMenu(menu);
     }
@@ -377,8 +389,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             startActivityForResult(profilesIntent, RETURNCODE_PROFILES);
             return true;
         } else if (i == eu.geopaparazzi.core.R.id.action_about) {
-            Intent intent = new Intent(getActivity(), AboutActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(getActivity(), AboutActivity.class);
+//            startActivity(intent);
+            showAboutUs();
             return true;
         } else if (i == eu.geopaparazzi.core.R.id.action_exit) {
             appChangeListener.onAppIsShuttingDown();
@@ -874,5 +887,27 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             return true;
         }
 
+    }
+
+
+    private void showAboutUs() {
+        Builder builder = new Builder(getActivity());
+        View v = getLayoutInflater().inflate(R.layout.activity_aboutus, null);
+        if (packageName != null) {
+            String version = "";
+            try {
+                PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA);
+                version = pInfo.versionName;
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            ((TextView) v.findViewById(R.id.vers)).setText(getResources().getString(R.string.version, version));
+        }
+
+        builder.setView(v);
+        AlertDialog ad = builder.create();
+        ad.setCancelable(true);
+        ad.show();
     }
 }

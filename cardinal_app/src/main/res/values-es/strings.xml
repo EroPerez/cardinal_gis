@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cardinal</string>
+    <string name="app_name">Cardus GIS</string>
 
     <string name="reset_route">Comenzado un nuevo ramal.</string>
     <string name="not_project_active">No tiene un proyecto activo aún.</string>
@@ -54,4 +54,7 @@
     <string name="map_object_already_docked_to_that_mapobject_message" >El objeto de mapa seleccionado ya esta acoplado a este objeto de mapa.</string>
     <string name="layername_jointo">Capa de objectos tipo Agregación</string>
     <string name="do_you_want_to_logout_this_work_session">¿Está seguro de que desea cerrar la sesión? Tenga en cuenta que este proceso no se puede deshacer.</string>
+    <string name="version">Versión %s</string>
+    <string name="derechos"></string>
+    <string name="desarrollado_por">Desarrolladores:</string>
 </resources>
