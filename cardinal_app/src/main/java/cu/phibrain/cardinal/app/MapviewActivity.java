@@ -67,7 +67,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1411,7 +1410,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
             recyclerView.setAdapter(mtoAdapter);
             bottomSheetDialog.setContentView(bottomSheetView);
-            if (appContainer.getCurrentMapObject() == null) {
+
+            if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
                 filterNetworks.setVisibility(View.VISIBLE);
                 filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -1433,7 +1433,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 filterNetworks.setVisibility(View.GONE);
             }
             bottomSheetDialog.show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
