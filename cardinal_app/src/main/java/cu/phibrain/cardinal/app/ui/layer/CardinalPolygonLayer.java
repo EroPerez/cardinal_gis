@@ -19,6 +19,7 @@ import org.oscim.core.GeoPoint;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.vector.VectorLayer;
+import org.oscim.layers.vector.geometries.CircleDrawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
 
@@ -81,6 +82,9 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         return NAME;
     }
 
+    private GPGeoPoint centerPoint(MapObject mapObject) {
+        return LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+    }
     public void reloadData() throws IOException {
         GPMapPosition mapPosition = mapView.getMapPosition();
         int zoom = mapPosition.getZoomLevel();
@@ -107,6 +111,11 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                                     points.add(((GeoPoint) point));
                                 }
                                 if (points.size() > 1) {
+//                                    CircleDrawable circle = new CircleDrawable(centerPoint(mo),1, Style.builder()
+//                                            .strokeColor(android.graphics.Color.YELLOW)
+//                                            .strokeWidth(2f)
+//                                            .cap(org.oscim.backend.canvas.Paint.Cap.ROUND)
+//                                            .build());
                                     GPPolygonDrawable drawable = new GPPolygonDrawable(points, lineStyle, mo.getId());
                                     add(drawable);
                                 }

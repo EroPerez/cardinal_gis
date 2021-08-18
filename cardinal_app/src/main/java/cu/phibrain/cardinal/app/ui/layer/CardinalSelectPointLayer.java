@@ -3,7 +3,11 @@ package cu.phibrain.cardinal.app.ui.layer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -19,6 +23,8 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
+import org.oscim.layers.vector.geometries.CircleDrawable;
+import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
 
@@ -124,24 +130,39 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
 
         MapObject currentMo = appContainer.getCurrentMapObject();
         removeAllItems();
+        List<MarkerItem> markerItems = new ArrayList<>();
         if(currentMo!=null) {
-            selectMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", centerPoint(currentMo));
+            selectMarker = new MarkerItem(1, "asdas", "22", centerPoint(currentMo));
             Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
             mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
             selectMarker.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
 
-            joinMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", centerPoint(currentMo));
-            Drawable imagesJoinDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
-            imagesDrawable.setBounds(0,0,200,200);
-            Bitmap joinBitmap = AndroidGraphics.drawableToBitmap(imagesJoinDrawable);
-            joinMarker.setMarker(new MarkerSymbol(joinBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
 
+            //joinMarker.setMarker(markerJoin);
             //probar esto
             //imagesDrawable.setLevel()
-            addItem(selectMarker);
-            addItem(joinMarker);
-            update();
+            ShapeDrawable joinCircle= new ShapeDrawable( new OvalShape());
+            joinCircle.setIntrinsicHeight( 200 );
+            joinCircle.setIntrinsicWidth( 200);
+            joinCircle.setBounds(new Rect(0, 0, 200, 200));
+            joinCircle.getPaint().setColor(Color.BLUE);
+            joinCircle.getPaint().setStyle(Paint.Style.STROKE);
+            joinCircle.getPaint().setStrokeWidth(2f);
+            joinCircle.getPaint().setStrokeCap(Paint.Cap.ROUND);
+
+//            CircleDrawable circle = new CircleDrawable(centerPoint(currentMo),1, Style.builder()
+//                    .strokeColor(android.graphics.Color.YELLOW)
+//                    .strokeWidth(2f)
+//                    .cap(org.oscim.backend.canvas.Paint.Cap.ROUND)
+//                    .build());
+            joinMarker = new MarkerItem(2, "", "", centerPoint(currentMo));
+            joinMarker.setMarker(new MarkerSymbol(AndroidGraphics.drawableToBitmap(joinCircle), MarkerSymbol.HotspotPlace.CENTER, false));
+            markerItems.add(selectMarker);
+            markerItems.add(joinMarker);
         }
+
+        addItems(markerItems);
+        update();
 
     }
 

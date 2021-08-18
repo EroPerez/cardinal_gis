@@ -4,29 +4,39 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
+import org.oscim.event.Event;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
+import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.vector.VectorLayer;
+import org.oscim.layers.vector.geometries.Drawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
+import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
@@ -35,7 +45,7 @@ import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPLineDrawable;
 
-public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLayer, ICardinalEdge {
+public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableLayer, ICardinalEdge {
 
     public static String NAME = null;
     private final SharedPreferences peferences;
@@ -97,6 +107,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
         update();
     }
 
+
     public void disable() {
         setEnabled(false);
     }
@@ -147,16 +158,26 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
 
     }
 
+    @Override
+    public void onMapEvent(Event e, MapPosition pos) {
+        super.onMapEvent(e, pos);
+    }
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
-
         if (g instanceof Gesture.Tap) {
-            if (tmpDrawables.size() > 0) {
-                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
+            GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+            Point point = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+            for (Drawable drawable : tmpDrawables) {
+                if (drawable.getGeometry().contains(point)){
+                    GPLineDrawable edge = (GPLineDrawable)drawable;
+                    RouteSegmentOperations.getInstance().delete(edge.getId());
+                    Toast.makeText(mapView.getContext(), Long.toString(edge.getId()), Toast.LENGTH_SHORT).show();
+                    remove(drawable);
+                    return true;
 
-                //  Toast.makeText(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT).show();
-                tmpDrawables.clear();
+                }
+
             }
         }
         return false;
@@ -196,5 +217,7 @@ public class EdgesLayer extends VectorLayer implements ISystemLayer, IEditableLa
     public EGeometryType getGeometryType() {
         return EGeometryType.LINESTRING;
     }
+
+
 }
 
