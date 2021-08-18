@@ -32,12 +32,14 @@ import java.util.Date;
                 @Index(value = "originId,destinyId", unique = true)
         }
 )
-public class RouteSegment implements Serializable, IEntity {
+public class RouteSegment implements Serializable, IExportable {
 
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("origin")
     @Expose
@@ -71,14 +73,31 @@ public class RouteSegment implements Serializable, IEntity {
      */
     @Generated(hash = 355299170)
     private transient RouteSegmentDao myDao;
+    private Date SyncDate;
 
 
-    @Generated(hash = 726462389)
-    public RouteSegment(Long id, long originId, long destinyId, Date createdAt) {
+    @Generated(hash = 1805773847)
+    public RouteSegment(Long id, Long remoteId, long originId, long destinyId, Date createdAt,
+                        Date SyncDate, Date updatedAt, Boolean isSync) {
         this.id = id;
+        this.remoteId = remoteId;
         this.originId = originId;
         this.destinyId = destinyId;
         this.createdAt = createdAt;
+        this.SyncDate = SyncDate;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
+    }
+
+    public RouteSegment(Long remoteId, long originId, long destinyId) {
+        this.id = null;
+        this.remoteId = remoteId;
+        this.originId = originId;
+        this.destinyId = destinyId;
+        this.createdAt = new Date();
+        this.SyncDate = null;
+        this.updatedAt = null;
+        this.isSync = false;
     }
 
 
@@ -117,12 +136,12 @@ public class RouteSegment implements Serializable, IEntity {
         this.destinyId = destinyId;
     }
 
-
+    @Override
     public Date getCreatedAt() {
         return this.createdAt;
     }
 
-
+    @Override
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
@@ -253,12 +272,79 @@ public class RouteSegment implements Serializable, IEntity {
     }
 
 
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
+
+
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+        this.SyncDate = SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+        MapObject origin = getOriginObj();
+        MapObject destiny = getDestinyObj();
+        return new RouteSegment(remoteId, origin.getRemoteId(), destiny.getRemoteId());
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+
+    public Date getSyncDate() {
+        return this.SyncDate;
+    }
+
+    @Override
+    public String toString() {
+        return "RouteSegment{" +
+                "origin=" + originId +
+                ", destiny=" + destinyId +
+                ", remoteId=" + remoteId +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1613250219)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getRouteSegmentDao() : null;
     }
-
-
 }

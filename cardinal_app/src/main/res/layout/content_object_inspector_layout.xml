@@ -44,6 +44,17 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/imvCompleted"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/ic_mapview_mot_parent_24dp"
+                        android:contentDescription="TODO"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_mo_incompled_24dp" />
+
                     <ImageButton
                         android:id="@+id/imgBtnEditCord"
                         android:layout_width="48dp"
@@ -53,8 +64,9 @@
                         android:layout_marginEnd="5dp"
                         android:layout_marginBottom="5dp"
                         android:background="@drawable/button_background_states"
+                        android:contentDescription="TODO"
                         app:srcCompat="@drawable/ic_marker_map_24dp"
-                        android:contentDescription="TODO" />
+                        tools:visibility="gone" />
 
                     <ImageButton
                         android:id="@+id/imgBtnDelete"

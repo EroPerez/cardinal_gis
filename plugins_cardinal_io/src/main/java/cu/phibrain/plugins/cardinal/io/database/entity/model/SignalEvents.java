@@ -30,11 +30,13 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.SignalTyp
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class SignalEvents implements Serializable, IEntity {
+public class SignalEvents implements Serializable, IExportable {
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("start_date")
     @Expose
@@ -47,6 +49,7 @@ public class SignalEvents implements Serializable, IEntity {
     @SerializedName("level")
     @Expose
     private long level;
+    private Date SyncDate;
 
     public enum SignalTypes {
         @SerializedName("0")
@@ -127,20 +130,30 @@ public class SignalEvents implements Serializable, IEntity {
         this.sessionId = sessionId;
         this.gpsLatitude = gpsLat;
         this.gpsLongitude = gpsLon;
+        this.remoteId = null;
+        this.updatedAt = null;
+        this.isSync = false;
+        this.createdAt = null;
     }
 
 
-    @Generated(hash = 345316263)
-    public SignalEvents(Long id, Date startDate, Date endDate, long level, SignalTypes types,
-                        long sessionId, double gpsLatitude, double gpsLongitude) {
+    @Generated(hash = 153900154)
+    public SignalEvents(Long id, Long remoteId, Date startDate, Date endDate, long level, Date SyncDate,
+                        SignalTypes types, long sessionId, double gpsLatitude, double gpsLongitude, Date updatedAt,
+                        Boolean isSync, Date createdAt) {
         this.id = id;
+        this.remoteId = remoteId;
         this.startDate = startDate;
         this.endDate = endDate;
         this.level = level;
+        this.SyncDate = SyncDate;
         this.types = types;
         this.sessionId = sessionId;
         this.gpsLatitude = gpsLatitude;
         this.gpsLongitude = gpsLongitude;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
+        this.createdAt = createdAt;
     }
 
 
@@ -304,6 +317,80 @@ public class SignalEvents implements Serializable, IEntity {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
+
+    @Expose(serialize = false, deserialize = false)
+    private Date createdAt;
+
+    @Override
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    @Override
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+        this.SyncDate = SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+
+        SignalEvents remoteObj = new SignalEvents(types, startDate, endDate, level, getSession().getRemoteId(),
+                gpsLatitude, gpsLongitude);
+        remoteObj.setRemoteId(remoteId);
+        return remoteObj;
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+
+    public Date getSyncDate() {
+        return this.SyncDate;
     }
 
 

@@ -31,17 +31,20 @@ import java.util.Objects;
                 @Index(value = "mapObjectId,mapObjectDefectId", unique = true)
         }
 )
-public class MapObjectHasDefect implements Serializable, IEntity {
+public class MapObjectHasDefect implements Serializable, IExportable {
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("map_object_barcode")
     @Expose
     private long mapObjectId;
 
     @ToOne(joinProperty = "mapObjectId")
+    @Expose(serialize = false, deserialize = false)
     private MapObject mapObject;
 
     @SerializedName("map_object_defect")
@@ -49,6 +52,7 @@ public class MapObjectHasDefect implements Serializable, IEntity {
     private long mapObjectDefectId;
 
     @ToOne(joinProperty = "mapObjectDefectId")
+    @Expose(serialize = false, deserialize = false)
     private MapObjecTypeDefect mapObjectDefect;
 
     @SerializedName("created_at")
@@ -57,7 +61,7 @@ public class MapObjectHasDefect implements Serializable, IEntity {
 
     @ToMany(referencedJoinProperty = "defectId")
     @SerializedName("images_defect")
-    @Expose
+    @Expose(serialize = false)
     public List<MapObjectHasDefectHasImages> images;
 
     private final static long serialVersionUID = -449987234149264098L;
@@ -73,14 +77,19 @@ public class MapObjectHasDefect implements Serializable, IEntity {
      */
     @Generated(hash = 674995576)
     private transient MapObjectHasDefectDao myDao;
+    private Date SyncDate;
 
-    @Generated(hash = 1895214310)
-    public MapObjectHasDefect(Long id, long mapObjectId, long mapObjectDefectId,
-                              Date createdAt) {
+    @Generated(hash = 1454088258)
+    public MapObjectHasDefect(Long id, Long remoteId, long mapObjectId, long mapObjectDefectId, Date createdAt,
+            Date SyncDate, Date updatedAt, Boolean isSync) {
         this.id = id;
+        this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.mapObjectDefectId = mapObjectDefectId;
         this.createdAt = createdAt;
+        this.SyncDate = SyncDate;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
     }
 
     @Generated(hash = 1575504526)
@@ -89,9 +98,23 @@ public class MapObjectHasDefect implements Serializable, IEntity {
 
     public MapObjectHasDefect(long mapObjectId, long mapObjectDefectId) {
         this.id = null;
+        this.remoteId = null;
         this.mapObjectId = mapObjectId;
         this.mapObjectDefectId = mapObjectDefectId;
         this.createdAt = new Date();
+        this.updatedAt = null;
+        this.isSync = false;
+        this.SyncDate = null;
+    }
+
+    private MapObjectHasDefect(Long remoteId, long mapObjectId, long mapObjectDefectId, Date createdAt) {
+        this.remoteId = remoteId;
+        this.mapObjectId = mapObjectId;
+        this.mapObjectDefectId = mapObjectDefectId;
+        this.createdAt = createdAt;
+        this.updatedAt = null;
+        this.isSync = false;
+        this.SyncDate = null;
     }
 
     public Long getId() {
@@ -118,10 +141,12 @@ public class MapObjectHasDefect implements Serializable, IEntity {
         this.mapObjectDefectId = mapObjectDefectId;
     }
 
+    @Override
     public Date getCreatedAt() {
         return this.createdAt;
     }
 
+    @Override
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
@@ -287,6 +312,61 @@ public class MapObjectHasDefect implements Serializable, IEntity {
     @Override
     public int hashCode() {
         return Objects.hash(mapObjectId, mapObjectDefectId);
+    }
+
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
+
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+        this.SyncDate = SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+        return new MapObjectHasDefect(remoteId, getMapObject().getRemoteId(), mapObjectDefectId, createdAt);
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+    public Date getSyncDate() {
+        return this.SyncDate;
     }
 
     /** called by internal mechanisms, do not call yourself. */

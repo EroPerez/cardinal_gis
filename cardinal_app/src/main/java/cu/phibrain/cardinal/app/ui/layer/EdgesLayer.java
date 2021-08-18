@@ -89,7 +89,9 @@ public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableL
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.BLACK)
-                        .strokeWidth(1.5f)
+                        .strokeWidth(3f)
+                        .stipple(25)
+                        .stippleColor(Color.RED)
                         .cap(Paint.Cap.ROUND)
                         .build();
             }
@@ -106,7 +108,6 @@ public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableL
         }
         update();
     }
-
 
     public void disable() {
         setEnabled(false);
@@ -217,7 +218,5 @@ public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableL
     public EGeometryType getGeometryType() {
         return EGeometryType.LINESTRING;
     }
-
-
 }
 

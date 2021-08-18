@@ -10,16 +10,27 @@ import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
-import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.ToOne;
+import org.greenrobot.greendao.annotation.Transient;
+import org.locationtech.jts.geom.Point;
+import org.oscim.core.GeoPoint;
+import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.GPGeoPointListConverter;
+import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.gpx.GpxRepresenter;
+import eu.geopaparazzi.library.gpx.GpxUtilities;
+import eu.geopaparazzi.library.kml.KmlRepresenter;
+import eu.geopaparazzi.library.util.TimeUtilities;
+import eu.geopaparazzi.library.util.Utilities;
 import eu.geopaparazzi.map.GPGeoPoint;
 
 /**
@@ -39,12 +50,14 @@ import eu.geopaparazzi.map.GPGeoPoint;
                 @Index(value = "sessionId,code", unique = true)
         }
 )
-public class MapObject implements Serializable, IEntity {
+public class MapObject implements Serializable, IExportable, KmlRepresenter, GpxRepresenter {
 
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("code")
     @Expose
@@ -52,9 +65,10 @@ public class MapObject implements Serializable, IEntity {
 
     @SerializedName("joined")
     @Expose
-    private long joinId;
+    private Long joinId;
 
     @ToOne(joinProperty = "joinId")
+    @Expose(serialize = false)
     private MapObject joinObj;
 
     @SerializedName("map_object_type")
@@ -62,6 +76,7 @@ public class MapObject implements Serializable, IEntity {
     private Long mapObjectTypeId;
 
     @ToOne(joinProperty = "mapObjectTypeId")
+    @Expose(serialize = false)
     private MapObjecType objectType;
 
     @Convert(converter = GPGeoPointListConverter.class, columnType = String.class)
@@ -71,15 +86,18 @@ public class MapObject implements Serializable, IEntity {
 
     @SerializedName("elevation")
     @Expose
-    double elevation ;
+    double elevation;
 
     @SerializedName("observation")
     @Expose
     private String observation;
 
     @SerializedName("created_at")
-    @Expose
+    @Expose(serialize = false)
     private Date createdAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
 
     @SerializedName("sincronized")
     @Expose
@@ -95,41 +113,43 @@ public class MapObject implements Serializable, IEntity {
 
     @ToMany(referencedJoinProperty = "originId")
     @SerializedName("edges")
-    @Expose
+    @Expose(serialize = false)
     private List<RouteSegment> routeSegments;
 
     @ToMany(referencedJoinProperty = "mapObjectId")
     @SerializedName("states")
-    @Expose
+    @Expose(serialize = false)
     private List<MapObjectHasState> states;
 
     @ToMany(referencedJoinProperty = "mapObjectId")
     @SerializedName("defects")
-    @Expose
+    @Expose(serialize = false)
     private List<MapObjectHasDefect> defects;
 
     @SerializedName("stock_code")
     @Expose
-    private long stockCodeId;
+    private Long stockCodeId;
 
     @ToOne(joinProperty = "stockCodeId")
+    @Expose(serialize = false)
     private Stock stockCode;
 
     @SerializedName("work_session")
     @Expose
-    private long sessionId;
+    private Long sessionId;
 
     @ToOne(joinProperty = "sessionId")
+    @Expose(serialize = false)
     private WorkSession session;
 
     @ToMany(referencedJoinProperty = "mapObjectId")
     @SerializedName("object_images")
-    @Expose
+    @Expose(serialize = false)
     private List<MapObjectImages> images;
 
     @ToMany(referencedJoinProperty = "mapObjectId")
     @SerializedName("metadata")
-    @Expose
+    @Expose(serialize = false)
     private List<MapObjectMetadata> metadata;
 
     @SerializedName("is_completed")
@@ -138,7 +158,7 @@ public class MapObject implements Serializable, IEntity {
 
 
     @ToMany(referencedJoinProperty = "joinId")
-    @Expose (serialize = false, deserialize = false)
+    @Expose(serialize = false, deserialize = false)
     private List<MapObject> joinedList;
 
     private final static long serialVersionUID = -4499872341492642530L;
@@ -155,11 +175,11 @@ public class MapObject implements Serializable, IEntity {
     private transient MapObjectDao myDao;
 
 
-    @Generated(hash = 987521458)
-    public MapObject(Long id, String code, long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord,
-            double elevation, String observation, Date createdAt, Boolean isSync, Date SyncDate,
-            long nodeGrade, long stockCodeId, long sessionId, Boolean isCompleted) {
+    @Generated(hash = 1866368811)
+    public MapObject(Long id, Long remoteId, String code, Long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord, double elevation, String observation,
+                     Date createdAt, Date updatedAt, Boolean isSync, Date SyncDate, long nodeGrade, Long stockCodeId, Long sessionId, Boolean isCompleted) {
         this.id = id;
+        this.remoteId = remoteId;
         this.code = code;
         this.joinId = joinId;
         this.mapObjectTypeId = mapObjectTypeId;
@@ -167,6 +187,7 @@ public class MapObject implements Serializable, IEntity {
         this.elevation = elevation;
         this.observation = observation;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.isSync = isSync;
         this.SyncDate = SyncDate;
         this.nodeGrade = nodeGrade;
@@ -180,6 +201,23 @@ public class MapObject implements Serializable, IEntity {
     public MapObject() {
     }
 
+    public MapObject(Long id, Long remoteId, String code, Long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord, double elevation, String observation,
+                     Boolean isSync, Date SyncDate, long nodeGrade, Long stockCodeId, Long sessionId, Boolean isCompleted) {
+        this.id = id;
+        this.remoteId = remoteId;
+        this.code = code;
+        this.joinId = joinId;
+        this.mapObjectTypeId = mapObjectTypeId;
+        this.coord = coord;
+        this.elevation = elevation;
+        this.observation = observation;
+        this.isSync = isSync;
+        this.SyncDate = SyncDate;
+        this.nodeGrade = nodeGrade;
+        this.stockCodeId = stockCodeId;
+        this.sessionId = sessionId;
+        this.isCompleted = isCompleted;
+    }
 
     public Long getId() {
         return this.id;
@@ -201,12 +239,12 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
-    public long getJoinId() {
+    public Long getJoinId() {
         return this.joinId;
     }
 
 
-    public void setJoinId(long joinId) {
+    public void setJoinId(Long joinId) {
         this.joinId = joinId;
     }
 
@@ -239,22 +277,22 @@ public class MapObject implements Serializable, IEntity {
         this.observation = observation;
     }
 
-
+    @Override
     public Date getCreatedAt() {
         return this.createdAt;
     }
 
-
+    @Override
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-
+    @Override
     public Boolean getIsSync() {
         return this.isSync;
     }
 
-
+    @Override
     public void setIsSync(Boolean isSync) {
         this.isSync = isSync;
     }
@@ -280,17 +318,17 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
-    public long getStockCodeId() {
+    public Long getStockCodeId() {
         return this.stockCodeId;
     }
 
 
-    public void setStockCodeId(long stockCodeId) {
+    public void setStockCodeId(Long stockCodeId) {
         this.stockCodeId = stockCodeId;
     }
 
 
-    public long getSessionId() {
+    public Long getSessionId() {
         return this.sessionId;
     }
 
@@ -307,9 +345,9 @@ public class MapObject implements Serializable, IEntity {
     /**
      * To-one relationship, resolved on first access.
      */
-    @Generated(hash = 1544046183)
+    @Generated(hash = 611248148)
     public MapObject getJoinObj() {
-        long __key = this.joinId;
+        Long __key = this.joinId;
         if (joinObj__resolvedKey == null || !joinObj__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
@@ -329,15 +367,11 @@ public class MapObject implements Serializable, IEntity {
     /**
      * called by internal mechanisms, do not call yourself.
      */
-    @Generated(hash = 1375760507)
-    public void setJoinObj(@NotNull MapObject joinObj) {
-        if (joinObj == null) {
-            throw new DaoException(
-                    "To-one property 'joinId' has not-null constraint; cannot set to-one to null");
-        }
+    @Generated(hash = 442678596)
+    public void setJoinObj(MapObject joinObj) {
         synchronized (this) {
             this.joinObj = joinObj;
-            joinId = joinObj.getId();
+            joinId = joinObj == null ? null : joinObj.getId();
             joinObj__resolvedKey = joinId;
         }
     }
@@ -389,9 +423,9 @@ public class MapObject implements Serializable, IEntity {
     /**
      * To-one relationship, resolved on first access.
      */
-    @Generated(hash = 242754685)
+    @Generated(hash = 94143268)
     public Stock getStockCode() {
-        long __key = this.stockCodeId;
+        Long __key = this.stockCodeId;
         if (stockCode__resolvedKey == null || !stockCode__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
@@ -411,15 +445,11 @@ public class MapObject implements Serializable, IEntity {
     /**
      * called by internal mechanisms, do not call yourself.
      */
-    @Generated(hash = 889399643)
-    public void setStockCode(@NotNull Stock stockCode) {
-        if (stockCode == null) {
-            throw new DaoException(
-                    "To-one property 'stockCodeId' has not-null constraint; cannot set to-one to null");
-        }
+    @Generated(hash = 1125524599)
+    public void setStockCode(Stock stockCode) {
         synchronized (this) {
             this.stockCode = stockCode;
-            stockCodeId = stockCode.getId();
+            stockCodeId = stockCode == null ? null : stockCode.getId();
             stockCode__resolvedKey = stockCodeId;
         }
     }
@@ -432,9 +462,9 @@ public class MapObject implements Serializable, IEntity {
     /**
      * To-one relationship, resolved on first access.
      */
-    @Generated(hash = 412766052)
+    @Generated(hash = 1649474943)
     public WorkSession getSession() {
-        long __key = this.sessionId;
+        Long __key = this.sessionId;
         if (session__resolvedKey == null || !session__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
@@ -454,15 +484,11 @@ public class MapObject implements Serializable, IEntity {
     /**
      * called by internal mechanisms, do not call yourself.
      */
-    @Generated(hash = 1329887016)
-    public void setSession(@NotNull WorkSession session) {
-        if (session == null) {
-            throw new DaoException(
-                    "To-one property 'sessionId' has not-null constraint; cannot set to-one to null");
-        }
+    @Generated(hash = 588104499)
+    public void setSession(WorkSession session) {
         synchronized (this) {
             this.session = session;
-            sessionId = session.getId();
+            sessionId = session == null ? null : session.getId();
             session__resolvedKey = sessionId;
         }
     }
@@ -677,8 +703,10 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
-    /** Get a map object type layer */
-    public Layer getLayer(){
+    /**
+     * Get a map object type layer
+     */
+    public Layer getLayer() {
         return this.getObjectType().getLayerObj();
     }
 
@@ -697,6 +725,7 @@ public class MapObject implements Serializable, IEntity {
     public String toString() {
         return "MapObject{" +
                 "id=" + id +
+                "remoteId=" + remoteId +
                 ", code='" + code + '\'' +
                 ", joinId=" + joinId +
                 ", mapObjectTypeId=" + mapObjectTypeId +
@@ -728,12 +757,12 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
-    public boolean isTerminal(){
+    public boolean isTerminal() {
         return this.getObjectType().getIsTerminal();
     }
 
 
-    public boolean belongToTopoLayer(){
+    public boolean belongToTopoLayer() {
         return this.getNodeGrade() > 0;
     }
 
@@ -761,10 +790,252 @@ public class MapObject implements Serializable, IEntity {
     }
 
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
     @Generated(hash = 93047367)
     public synchronized void resetJoinedList() {
         joinedList = null;
+    }
+
+
+    public MapObjecType.GeomType getGeomType() {
+
+        return this.getObjectType().getGeomType();
+
+    }
+
+    public GPGeoPoint getCentroid() {
+        GeomBuilder builder = new GeomBuilder();
+        for (GeoPoint point : this.getCoord()) {
+            builder.point(point.getLongitude(),
+                    point.getLatitude());
+        }
+        Point centroid = null;
+        MapObjecType.GeomType geomType = getGeomType();
+        if (geomType == MapObjecType.GeomType.POLYGON) {
+            centroid = builder.toPolygon().getCentroid();
+        } else if (geomType == MapObjecType.GeomType.POLYLINE) {
+            centroid = builder.toLineString().getCentroid();
+        } else if (geomType == MapObjecType.GeomType.POINT) {
+            centroid = builder.toPoint().getCentroid();
+        }
+        return centroid == null ? null : new GPGeoPoint(centroid.getY() + 0.000001, centroid.getX() + 0.000001);
+
+    }
+
+    /**
+     * @return min lat.
+     */
+    @Override
+    public double getMinLat() {
+
+        return coord.get(0).getLatitude();
+    }
+
+    /**
+     * @return min lon.
+     */
+    @Override
+    public double getMinLon() {
+        return coord.get(0).getLongitude();
+    }
+
+    /**
+     * @return max lat.
+     */
+    @Override
+    public double getMaxLat() {
+        return coord.get(coord.size() - 1).getLatitude();
+    }
+
+    /**
+     * @return max lon.
+     */
+    @Override
+    public double getMaxLon() {
+        return coord.get(coord.size() - 1).getLongitude();
+    }
+
+    /**
+     * Transforms the object in its gpx representation.
+     *
+     * @return the gpx representation.
+     * @throws Exception if something goes wrong.
+     */
+    @Override
+    public String toGpxString() throws Exception {
+        String description = Utilities.makeXmlSafe(this.observation);
+        description = description.replaceAll("\n", "; "); //$NON-NLS-1$//$NON-NLS-2$
+        String name = Utilities.makeXmlSafe(this.code);
+        name = name.replaceAll("\n", "; "); //$NON-NLS-1$//$NON-NLS-2$
+
+        long time = getCreatedAt().getTime();
+        String dateString = TimeUtilities.INSTANCE.TIME_FORMATTER_GPX_UTC.format(new Date(time));
+
+        GPGeoPoint point = this.getCentroid();
+
+        String wayPointString = GpxUtilities.getWayPointString(point.getLatitude(), point.getLongitude(), this.elevation, name, description, dateString);
+        return wayPointString;
+    }
+
+    /**
+     * Transforms the object in its kml representation.
+     *
+     * @return the kml representation.
+     * @throws Exception if something goes wrong.
+     */
+    @Override
+    public String toKmlString() throws Exception {
+        imageIds = new ArrayList<>();
+        String name = Utilities.makeXmlSafe(this.code);
+        StringBuilder sB = new StringBuilder();
+        sB.append("<Placemark>\n");
+        sB.append("<styleUrl>#info-icon</styleUrl>\n");
+        sB.append("<name>").append(name).append("</name>\n");
+        sB.append("<description>\n");
+
+        List<MapObjectImages> imagesList = getImages();
+
+        if (imagesList != null && imagesList.size() > 0) {
+
+            sB.append("<![CDATA[\n");
+            sB.append("<h1> Images </h1>\n");
+
+            for (MapObjectImages image : imagesList) {
+                sB.append("<h2> Image #").append(image.getId()).append("</h2>\n");
+
+                sB.append("<table style=\"text-align: left; width: 100%;\" border=\"1\" cellpadding=\"5\" cellspacing=\"2\">");
+                sB.append("<tbody>");
+
+                String imgName = image.getName();
+
+                sB.append("<tr>");
+                sB.append("<td colspan=\"2\" style=\"text-align: left; vertical-align: top; width: 100%;\">");
+                sB.append("<img src=\"").append(imgName).append("\" width=\"300\">");
+                sB.append("</td>");
+                sB.append("</tr>");
+
+                imageIds.add(String.valueOf(image.getId()));
+
+                sB.append("</tbody>");
+                sB.append("</table>");
+            }
+
+
+            sB.append("]]>\n");
+        } else {
+            String description = Utilities.makeXmlSafe(this.observation);
+            sB.append(description);
+            sB.append("\n");
+            sB.append(this.getCreatedAt());
+        }
+
+        sB.append("</description>\n");
+        sB.append("<gx:balloonVisibility>1</gx:balloonVisibility>\n");
+        sB.append("<Point>\n");
+        sB.append("<coordinates>").append(getCentroid().getLongitude()).append(",").append(getCentroid().getLatitude()).append(",0</coordinates>\n");
+        sB.append("</Point>\n");
+        sB.append("</Placemark>\n");
+
+        return sB.toString();
+    }
+
+    /**
+     * Getter for image flag.
+     *
+     * @return <code>true</code> if the object has also an image that needs to be embedded in the kmz.
+     */
+    @Override
+    public boolean hasImages() {
+        return !getImages().isEmpty();
+    }
+
+    @Transient
+    @Expose(serialize = false, deserialize = false)
+    private List<String> imageIds = null;
+
+    /**
+     * Get image ids list.
+     *
+     * @return the list of image ids.
+     */
+    @Override
+    public List<String> getImageIds() {
+
+        if (imageIds == null) {
+            try {
+                List<MapObjectImages> imagesList = getImages();
+                imageIds = new ArrayList<>();
+                for (MapObjectImages img :
+                        imagesList) {
+                    imageIds.add(String.valueOf(img.getId()));
+                }
+            } catch (Exception e) {
+                GPLog.error(this, null, e);
+            }
+        }
+        if (imageIds == null) {
+            return Collections.emptyList();
+        }
+        return imageIds;
+    }
+
+
+    // Region de los datos de ayuda en la syncronización
+    @Override
+    public Date getUpdatedAt() {
+        return this.updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+
+        MapObject join = getJoinObj();
+
+        if (join == null) {
+            return new MapObject(id, remoteId, code, null, mapObjectTypeId, coord, elevation, observation,
+                    isSync, SyncDate, nodeGrade, stockCodeId, sessionId, isCompleted);
+        } else {
+            return new MapObject(id, remoteId, code, join.getRemoteId(), mapObjectTypeId, coord, elevation, observation,
+                    isSync, SyncDate, nodeGrade, stockCodeId, sessionId, isCompleted);
+        }
+    }
+
+
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+
+    public void setRemoteId(long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+
+    public byte[] getIcon() {
+        return getObjectType().getIconAsByteArray();
     }
 
 

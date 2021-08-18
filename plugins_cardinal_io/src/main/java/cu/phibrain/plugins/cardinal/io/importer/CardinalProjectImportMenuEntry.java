@@ -43,8 +43,8 @@ public class CardinalProjectImportMenuEntry extends MenuEntry {
         this.clickActivityStarter = clickActivityStarter;
         Context context = clickActivityStarter.getContext();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final String user = preferences.getString(Constants.PREF_KEY_USER, "geopaparazziuser"); //$NON-NLS-1$
-        final String passwd = preferences.getString(Constants.PREF_KEY_PWD, "geopaparazzipwd"); //$NON-NLS-1$
+        final String user = preferences.getString(Constants.PREF_KEY_USER, "cardinal"); //$NON-NLS-1$
+        final String passwd = preferences.getString(Constants.PREF_KEY_PWD, "admin"); //$NON-NLS-1$
         final String server = preferences.getString(Constants.PREF_KEY_SERVER, ""); //$NON-NLS-1$
 
         if (processOnClick(user, passwd, server)) {

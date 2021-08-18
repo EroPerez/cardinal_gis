@@ -15,6 +15,7 @@ import org.greenrobot.greendao.annotation.ToOne;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(
         nameInDb = "MANAGER_WORK_SESSION",
@@ -25,12 +26,14 @@ import java.util.List;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class WorkSession implements Serializable, IEntity{
+public class WorkSession implements Serializable, IExportable {
 
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("start_date")
     @Expose
@@ -45,6 +48,7 @@ public class WorkSession implements Serializable, IEntity{
     private long zoneId;
 
     @ToOne(joinProperty = "zoneId")
+    @Expose(serialize = false)
     private Zone zoneObj;
 
     @SerializedName("active")
@@ -53,10 +57,11 @@ public class WorkSession implements Serializable, IEntity{
 
     @ToMany(referencedJoinProperty = "workerSessionId")
     @SerializedName("worker_route")
-    @Expose
+    @Expose(serialize = false, deserialize = false)
     private List<WorkerRoute> workerRoute;
 
     @ToOne(joinProperty = "contractId")
+    @Expose(serialize = false)
     private Contract contractObj;
 
     @SerializedName("contract")
@@ -65,23 +70,23 @@ public class WorkSession implements Serializable, IEntity{
 
     @ToMany(referencedJoinProperty = "sessionId")
     @SerializedName("map_objects")
-    @Expose
+    @Expose(serialize = false)
     private List<MapObject> mapObjects;
 
     @ToMany(referencedJoinProperty = "workerSessionId")
     @SerializedName("materials")
-    @Expose
+    @Expose(serialize = false)
     private List<Material> materials;
 
     @ToMany(referencedJoinProperty = "workerSessionId")
     @SerializedName("labels")
-    @Expose
+    @Expose(serialize = false)
     private List<LabelSubLot> labels;
 
 
     @ToMany(referencedJoinProperty = "sessionId")
     @SerializedName("events")
-    @Expose
+    @Expose(serialize = false)
     private List<SignalEvents> events;
 
     private final static long serialVersionUID = 2460962077263436904L;
@@ -97,16 +102,24 @@ public class WorkSession implements Serializable, IEntity{
      */
     @Generated(hash = 1675214157)
     private transient WorkSessionDao myDao;
+    private Date SyncDate;
 
-    @Generated(hash = 887378589)
-    public WorkSession(Long id, Date startDate, Date endDate, long zoneId, Boolean active,
-                       long contractId) {
+
+    @Generated(hash = 671601440)
+    public WorkSession(Long id, Long remoteId, Date startDate, Date endDate, long zoneId,
+            Boolean active, long contractId, Date SyncDate, Date updatedAt, Boolean isSync,
+            Date createdAt) {
         this.id = id;
+        this.remoteId = remoteId;
         this.startDate = startDate;
         this.endDate = endDate;
         this.zoneId = zoneId;
         this.active = active;
         this.contractId = contractId;
+        this.SyncDate = SyncDate;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
+        this.createdAt = createdAt;
     }
 
     @Generated(hash = 955645809)
@@ -437,6 +450,92 @@ public class WorkSession implements Serializable, IEntity{
                 ", active=" + active +
                 ", Worker=" + this.getContractObj().getTheWorker().getFullName() +
                 '}';
+    }
+
+
+    // Region de los datos de ayuda en la syncronización
+
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
+
+    @Expose(serialize = false, deserialize = false)
+    private Date createdAt;
+
+    @Override
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    @Override
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+        this.SyncDate = SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+        return this;
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+    public Date getSyncDate() {
+        return this.SyncDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WorkSession session = (WorkSession) o;
+        return contractId == session.contractId &&
+                id.equals(session.id) &&
+                startDate.equals(session.startDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, startDate, contractId);
     }
 
     /** called by internal mechanisms, do not call yourself. */

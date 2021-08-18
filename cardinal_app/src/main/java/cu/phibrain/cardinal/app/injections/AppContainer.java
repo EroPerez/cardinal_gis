@@ -98,6 +98,7 @@ public class AppContainer {
             refreshSession();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
 
         return workSessionActive;
@@ -118,6 +119,7 @@ public class AppContainer {
             refreshSession();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
         return currentWorker;
     }
@@ -143,6 +145,7 @@ public class AppContainer {
             refreshMOT();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
         return mapObjecTypeActive;
     }
@@ -173,6 +176,7 @@ public class AppContainer {
             refreshNetwork();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
         return networksActive;
     }
@@ -204,6 +208,7 @@ public class AppContainer {
             refreshCMO();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
 
         return mapObjectActive;
@@ -222,7 +227,6 @@ public class AppContainer {
                 this.mapObjectActive
         );
     }
-
 
 
     public Boolean IsCurrentActiveLayerTopological() {

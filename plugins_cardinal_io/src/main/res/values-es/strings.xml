@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Importador de proyectos Cardus</string>
+    <string name="app_name">Importador/Exportador de proyectos Cardus</string>
     <string name="available_only_with_network">Esta opción sólo está disponible cuando una conexión de red está disponible</string>
     <string name="error_set_cloud_settings_cardinal">Los parámetros de conexión a Cardus Cloud no se han establecido correctamente. Verifique la configuración</string>
     <string name="error_uploading_the_data">Error subiendo los datos</string>
@@ -14,4 +14,5 @@
     <string name="upload_and_finish">Subir y terminar</string>
     <string name="enter_a_name_for_downloaded_project">Entrar nombre para la base de datos del proyecto descargado</string>
     <string name="srid">ID:</string>
+    <string name="post_not_completed_properly">La sincronización no se completó con éxito, por favor reintentelo una vez más.</string>
 </resources>

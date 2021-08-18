@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cardus project importer</string>
+    <string name="app_name">Cardus project import/export</string>
     <string name="available_only_with_network">This option is only available when a network connection is available</string>
     <string name="error_set_cloud_settings_cardinal">User and password must be set on cloud settings to connect to Cardus Cloud.</string>
     <string name="cardinal_online" translatable="false">Cardus Cloud</string>
@@ -14,4 +14,5 @@
     <string name="geometry_type">Created At:</string>
     <string name="srid">ID: </string>
     <string name="enter_a_name_for_downloaded_project">Set name for downloaded project database</string>
+    <string name="post_not_completed_properly">Synchronization not completed properly, please try again.</string>
 </resources>

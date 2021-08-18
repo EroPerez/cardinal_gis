@@ -21,12 +21,14 @@ import java.util.Date;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class WorkerRoute implements Serializable, IEntity {
+public class WorkerRoute implements Serializable, IExportable {
 
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    Long remoteId;
 
     @SerializedName("worker_session")
     @Expose
@@ -52,27 +54,45 @@ public class WorkerRoute implements Serializable, IEntity {
     @Transient
     private Date createdAt;
 
-    @Expose (serialize = false, deserialize = false)
+    @Expose(serialize = false, deserialize = false)
     private Long gpsLogsTableId;
+
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
 
     private final static long serialVersionUID = 3887642485388034854L;
 
-    public WorkerRoute(Long id, Long workerSessionId,  Double latitude, Double longitude, Double altitude, Date createdAt) {
+    private Date SyncDate;
+
+    private long SyncPointCount;
+
+    public WorkerRoute(Long id, Long workerSessionId, Double latitude, Double longitude, Double altitude, Date createdAt) {
         this.id = id;
         this.workerSessionId = workerSessionId;
         this.altitude = altitude;
         this.longitude = longitude;
         this.latitude = latitude;
         this.createdAt = createdAt;
+        SyncPointCount = 0;
     }
 
 
-    @Generated(hash = 1759396744)
-    public WorkerRoute(Long id, Long workerSessionId, Long gpsLogsTableId) {
+    @Generated(hash = 1839833483)
+    public WorkerRoute(Long id, Long remoteId, Long workerSessionId, Long gpsLogsTableId, Date updatedAt, Boolean isSync,
+                       Date SyncDate, long SyncPointCount) {
         this.id = id;
+        this.remoteId = remoteId;
         this.workerSessionId = workerSessionId;
         this.gpsLogsTableId = gpsLogsTableId;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
+        this.SyncDate = SyncDate;
+        this.SyncPointCount = SyncPointCount;
     }
+
 
     @Generated(hash = 369035617)
     public WorkerRoute() {
@@ -135,4 +155,63 @@ public class WorkerRoute implements Serializable, IEntity {
     }
 
 
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+
+    }
+
+    @Override
+    public Date getSyncDate() {
+        return this.SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return true;
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+        return null;
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+
+    public long getSyncPointCount() {
+        return this.SyncPointCount;
+    }
+
+
+    public void setSyncPointCount(long SyncPointCount) {
+        this.SyncPointCount = SyncPointCount;
+    }
 }

@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Cardinal</string>
+    <string name="app_name">Cardus GIS</string>
 
     <string name="reset_route">Started a new branch.</string>
     <string name="layername_edges">Route segments layer</string>
     <string name="layername_mot">Point type map object layer</string>
-    <string name="not_project_active">You don\'t have an active project.</string>
+    <string name="not_project_active">You don\'t have an active project yet.</string>
     <string name="cardinal_line">Line type map object layer</string>
     <string name="cardinal_polygon">Polygon type map object layer</string>
     <string name="no_topology_layer">The selected map object it is not a topological item.</string>
@@ -12,14 +12,14 @@
     <string name="seleccione_un_objeto_de_mapa">Select a Map Object</string>
     <string name="panic">Panic button</string>
     <string name="work_session_not_active">Please, you must activate a work session</string>
-    <string name="worker_have_not_active">The worker %s seem to be inactive in cardinal cloud</string>
+    <string name="worker_have_not_active">The worker %s seem to be inactive in cardus cloud</string>
     <string name="work_session_view_label">Work sessions available </string>
     <string name="dashboard_worksession_action_description">Open work session list view</string>
     <string name="map_object_props_inspector_basic">Basic</string>
     <string name="map_object_props_inspector_defects">Defects</string>
     <string name="observation">Observation</string>
     <string name="map_object_props_inspector_states">States</string>
-    <string name="map_object_props_inspector_attribute">Inherited attributes</string>
+    <string name="map_object_props_inspector_attribute">Extra attributes</string>
     <string name="inspector_object_label_code">Code</string>
     <string name="inspector_object_grade">Grade</string>
     <string name="inspector_object_inventory">Inventory</string>
@@ -33,7 +33,7 @@
     <string name="do_you_want_to_delete_this_image">Do you what to delete this image?</string>
     <string name="active_work_session">Session:  %s</string>
     <string name="taake_picture">Take Picture button</string>
-    <string name="defect_icon_text">defect icon descriptor</string>
+    <string name="defect_icon_text">Defect icon descriptor</string>
     <string name="activity_defect_images_label">Photos to defect: %s</string>
     <string name="system_layers">System Layers</string>
     <string name="map_object_duplicate_code_messsage">Code %s its not available in this work session.</string>
@@ -49,7 +49,19 @@
     <string name="captured_points">Geolocated points: %d</string>
     <string name="map_object_incomplete_count">Incomplete: %d</string>
     <string name="gpslogging_stop_and_start_again">Could not start worker route logging. Stop the logging and restart it by checking the "Continue last logging" button.</string>
-    <string name="obj_destination_completed">El objeto destino esta completado según el grado definido, aumente el grado y reintente la operación.</string>
+    <string name="obj_destination_completed">The target object is complete according to the degree defined for the node, increase the degree and retry the operation.</string>
     <string name="max_distance_threshold_broken_message_jointo">The selected map object is more than %.2f meters away. Do you want to dock them anyway?</string>
     <string name="delete_edge">Esta seguro de eliminar esta conexión.</string>
+    <string name="title_activity_map_object_joined">%s Map Object Agregations</string>
+    <string name="do_you_want_to_undock_this_map_object">Do you want to un-dock this map object?</string>
+    <string name="map_object_already_docked_message">The selected map object is already docked to another map object.</string>
+    <string name="map_object_already_docked_to_that_mapobject_message" >The selected map object is already docked to this map object.</string>
+    <string name="layername_jointo">Candinal join to layer</string>
+    <string name="do_you_want_to_logout_this_work_session">Are you sure you want to logout? Please note that this process could not be undo.</string>
+    <string name="version">Version %s</string>
+    <string name="phibrainsoft">Phibrain Soft</string>
+    <string name="derechos">All rights reserved</string>
+    <string name="desarrollado_por">Developers:</string>
+    <string name="autores1">Erodis Pérez Michel (eperezm1986@nauta.cu)</string>
+    <string name="autores2">Daniel García Fernández (dgarciaf@nauta.cu)</string>
 </resources>

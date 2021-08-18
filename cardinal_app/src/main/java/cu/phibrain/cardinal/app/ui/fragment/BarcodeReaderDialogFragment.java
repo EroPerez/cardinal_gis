@@ -44,7 +44,6 @@ import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
-import eu.geopaparazzi.map.layers.interfaces.IGpLayer;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -107,8 +106,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         currentSession = appContainer.getWorkSessionActive();
 
         //View objects
-        buttonScan = (ImageButton) view.findViewById(R.id.scanBtn);
-        buttonSave = (ImageButton) view.findViewById(R.id.imgBtnSave);
+        buttonScan = view.findViewById(R.id.scanBtn);
+        buttonSave = view.findViewById(R.id.imgBtnSave);
         buttonSave.setVisibility(View.GONE);
         autoCompleteTextViewCode = view.findViewById(R.id.autoCompleteTextViewCode);
         labelAutoCompleteAdapter = new LabelAutoCompleteAdapter(
@@ -258,7 +257,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                 GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
                                         LatLongUtils.getMaxDistance()));
 
-                                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
                                 RouteSegmentOperations.getInstance().save(edge);
                                 try {
                                     mapView.reloadLayer(EdgesLayer.class);
@@ -271,7 +270,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     );
                 } else {
 
-                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId(), new Date());
+                    RouteSegment edge = new  RouteSegment(null, previousObj.getId(), currentObj.getId());
                     RouteSegmentOperations.getInstance().save(edge);
                     mapView.reloadLayer(EdgesLayer.class);
                     refreshUI(terminalFound);
@@ -293,9 +292,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
     void reloadLayer(Layer layer) throws Exception {
 
-        ((IGpLayer) EditManager.INSTANCE.getEditLayer()).reloadData();
+        EditManager.INSTANCE.getEditLayer().reloadData();
         ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
-        ((CardinalGPMapView) mapView).reloadLayer(CardinalSelectPointLayer.class);
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
+//        mapView.reloadLayer(CardinalJoinsLayer.class);
 
     }
 

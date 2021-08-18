@@ -12,6 +12,7 @@ import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToOne;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Entity(
         nameInDb = "CARDINAL_MAP_OBJECT_METADATA",
@@ -22,15 +23,21 @@ import java.io.Serializable;
         // Whether getters and setters for properties should be generated if missing.
         generateGettersSetters = true
 )
-public class MapObjectMetadata implements Serializable, IEntity{
+public class MapObjectMetadata implements Serializable, IExportable {
     @Id(autoincrement = true)
     @SerializedName("id")
-    @Expose
+    @Expose(serialize = false)
     private Long id;
+
+    private Long remoteId;
 
     @SerializedName("map_object")
     @Expose
     private long mapObjectId;
+
+    @ToOne(joinProperty = "mapObjectId")
+    @Expose(serialize = false, deserialize = false)
+    private MapObject mapObject;
 
     @SerializedName("value")
     @Expose
@@ -41,6 +48,7 @@ public class MapObjectMetadata implements Serializable, IEntity{
     private long objAttributeId;
 
     @ToOne(joinProperty = "objAttributeId")
+    @Expose(serialize = false, deserialize = false)
     private MapObjectTypeAttribute attribute;
 
     private final static long serialVersionUID = -4499234649201958L;
@@ -56,23 +64,35 @@ public class MapObjectMetadata implements Serializable, IEntity{
      */
     @Generated(hash = 726544085)
     private transient MapObjectMetadataDao myDao;
+    private Date SyncDate;
 
-    @Generated(hash = 182277423)
-    public MapObjectMetadata(Long id, long mapObjectId, String value, long objAttributeId) {
+    @Generated(hash = 2095977790)
+    public MapObjectMetadata(Long id, Long remoteId, long mapObjectId, String value, long objAttributeId,
+            Date SyncDate, Date updatedAt, Boolean isSync, Date createdAt) {
         this.id = id;
+        this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.value = value;
         this.objAttributeId = objAttributeId;
+        this.SyncDate = SyncDate;
+        this.updatedAt = updatedAt;
+        this.isSync = isSync;
+        this.createdAt = createdAt;
     }
 
     @Generated(hash = 571951489)
     public MapObjectMetadata() {
     }
 
-    public MapObjectMetadata( long mapObjectId, String value, long objAttributeId) {
+    public MapObjectMetadata(Long remoteId, long mapObjectId, String value, long objAttributeId) {
+        this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.value = value;
         this.objAttributeId = objAttributeId;
+        this.updatedAt = null;
+        this.isSync = false;
+        this.createdAt = new Date();
+        this.SyncDate = null;
     }
 
     public Long getId() {
@@ -181,6 +201,115 @@ public class MapObjectMetadata implements Serializable, IEntity{
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+    // Region de los datos de ayuda en la syncronización
+    @Expose(serialize = false, deserialize = false)
+    private Date updatedAt;
+
+    @Expose(serialize = false, deserialize = false)
+    private Boolean isSync;
+
+    @Expose(serialize = false, deserialize = false)
+    private Date createdAt;
+
+    @Generated(hash = 1028776990)
+    private transient Long mapObject__resolvedKey;
+
+    @Override
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    @Override
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public void setUpdatedAt(Date updated) {
+        this.updatedAt = updated;
+    }
+
+    @Override
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    @Override
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    @Override
+    public void setSyncDate(Date SyncDate) {
+        this.SyncDate = SyncDate;
+    }
+
+    @Override
+    public Boolean mustExport() {
+        return !isSync || (updatedAt != null && SyncDate.before(updatedAt));
+    }
+
+    @Override
+    public IExportable toRemoteObject() {
+        return new MapObjectMetadata(remoteId, getMapObject().getRemoteId(), value, objAttributeId);
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+    /**
+     * To-one relationship, resolved on first access.
+     */
+    @Generated(hash = 1863170507)
+    public MapObject getMapObject() {
+        long __key = this.mapObjectId;
+        if (mapObject__resolvedKey == null || !mapObject__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            MapObjectDao targetDao = daoSession.getMapObjectDao();
+            MapObject mapObjectNew = targetDao.load(__key);
+            synchronized (this) {
+                mapObject = mapObjectNew;
+                mapObject__resolvedKey = __key;
+            }
+        }
+        return mapObject;
+    }
+
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
+    @Generated(hash = 913991379)
+    public void setMapObject(@NotNull MapObject mapObject) {
+        if (mapObject == null) {
+            throw new DaoException(
+                    "To-one property 'mapObjectId' has not-null constraint; cannot set to-one to null");
+        }
+        synchronized (this) {
+            this.mapObject = mapObject;
+            mapObjectId = mapObject.getId();
+            mapObject__resolvedKey = mapObjectId;
+        }
+    }
+
+    public Date getSyncDate() {
+        return this.SyncDate;
     }
 
     /** called by internal mechanisms, do not call yourself. */

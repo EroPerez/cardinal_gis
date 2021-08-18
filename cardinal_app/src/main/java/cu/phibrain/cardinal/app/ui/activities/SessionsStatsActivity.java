@@ -36,6 +36,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
 import eu.geopaparazzi.core.database.DaoGpsLog;
+import eu.geopaparazzi.core.database.objects.Line;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.GPDialogs;
@@ -104,7 +105,8 @@ public class SessionsStatsActivity extends AppCompatActivity {
                     for (WorkerRoute log :
                             wsa.getWorkerRoute()) {
                         try {
-                            lengthm += DaoGpsLog.updateLogLength(log.getGpsLogsTableId());
+                            Line line = DaoGpsLog.getGpslogAsLine(log.getGpsLogsTableId(), -1);
+                            lengthm += line.getLength();
                         } catch (IOException e) {
                             GPLog.error(this, "ERROR", e);//NON-NLS
                         }

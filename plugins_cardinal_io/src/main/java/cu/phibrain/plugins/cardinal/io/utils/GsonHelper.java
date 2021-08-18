@@ -38,4 +38,14 @@ public class GsonHelper {
         return gson.toJson(data);
 
     }
+
+    public static boolean isJSONValid(String jsonInString) {
+        Gson gson = new Gson();
+        try {
+            gson.fromJson(jsonInString, Object.class);
+            return true;
+        } catch(com.google.gson.JsonSyntaxException ex) {
+            return false;
+        }
+    }
 }

@@ -67,7 +67,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,15 +78,18 @@ import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.cardinal.app.ui.activities.MapObjectJoinedActivity;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
@@ -215,7 +217,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private BroadcastReceiver storageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            long level = StorageUtilities.getAvailableExternalMemorySizeAsLong(context);
+            long level = StorageUtilities.getAvailableMemorySizeInMainStorageDir(context);
 
             //register signal event only when battery is low
             if (appContainer.getWorkSessionActive() != null) {
@@ -459,6 +461,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 mapView.reloadLayer(CardinalLineLayer.class);
                 mapView.reloadLayer(CardinalPolygonLayer.class);
                 mapView.reloadLayer(EdgesLayer.class);
+                mapView.reloadLayer(CardinalSelectPointLayer.class);
+                mapView.reloadLayer(CardinalJoinsLayer.class);
                 for (Layer layer :
                         LayerOperations.getInstance().getAll()) {
                     if (layer.getEnabled())
@@ -1120,13 +1124,18 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
             return true;
 
-        }else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
+        } else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
             MapObject currentMO = appContainer.getCurrentMapObject();
             //preguntar si tienen que ser topologico el mo
             if (currentMO != null && currentMO.belongToTopoLayer() && !currentMO.isTerminal()) {
-                currentMO.setNodeGrade(currentMO.getNodeGrade()+1);
+                currentMO.setNodeGrade(currentMO.getNodeGrade() + 1);
                 MapObjectOperations.getInstance().save(currentMO);
             }
+            return true;
+        } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) { // lista de mapobjects acoplados al mapobject selccionado
+
+            Intent intent = new Intent(getContext(), MapObjectJoinedActivity.class);
+            startActivity(intent);
             return true;
         }
         return false;
@@ -1171,7 +1180,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 setNewCenter(lastGpsPosition[0], lastGpsPosition[1]);
             }
 
-        }/* else if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {// generate screenshot in background in order to not freeze
+        }
+        /* else if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {// generate screenshot in background in order to not freeze
             try {
                 File tempDir = ResourcesManager.getInstance(MapviewActivity.this).getTempDir();
                 final File tmpImageFile = new File(tempDir, TMPPNGIMAGENAME);
@@ -1191,7 +1201,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 GPDialogs.errorDialog(this, e, null);
             }
 
-        }*/ else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
+        }*/
+        else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
             addBookmark();
         } else if (i == cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton) {
             if (!isInNonClickableMode) {
@@ -1230,6 +1241,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_toggle_labels_off_24dp));
                 EditManager.INSTANCE.setActiveTool(null);
                 mapView.releaseMapBlock();
+//
+//                // Hiding map object labels
+//                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
+//                SharedPreferences.Editor prefEditor = preferences.edit();
+//                prefEditor.putBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, false);
+//                prefEditor.commit();
             } else {
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_toggle_labels_on_24dp));
                 toggleMeasuremodeButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_measuremode_off_24dp));
@@ -1238,7 +1255,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 PanLabelsTool panLabelsTool = new PanLabelsTool(mapView);
                 EditManager.INSTANCE.setActiveTool(panLabelsTool);
                 mapView.blockMap();
+
+//                // showing map object labels
+//                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
+//                SharedPreferences.Editor prefEditor = preferences.edit();
+//                prefEditor.putBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, true);
+//                prefEditor.commit();
             }
+//            onUpdate(mapView.getMapPosition());
         } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
 
             onMenuMTO();
@@ -1247,6 +1271,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //Evento del Mot Selcecionado
             appContainer.setCurrentMapObject(null);
             appContainer.setMapObjecTypeActive(null);
+            try {
+                mapView.reloadLayer(CardinalSelectPointLayer.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             disableEditing();
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
@@ -1271,8 +1300,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
 
         } else if (i == cu.phibrain.cardinal.app.R.id.addroutesegmentbutton) {
+            MapObject mapObject = appContainer.getCurrentMapObject();
 
-            if (appContainer.getCurrentMapObject() != null && appContainer.IsCurrentActiveLayerTopological()) {
+            if (mapObject != null && appContainer.IsCurrentActiveLayerTopological() && !mapObject.isTerminal()) {
                 // toggle button
                 if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE)
                     appContainer.setMode(UserMode.NONE);
@@ -1283,32 +1313,32 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE) {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
-//                    appContainer.setAcctionJoinMo(false);
+
                 } else {
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 }
+
+                toggleEditing();
             }
         } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) {
-            //preguntar si tienen que ser topologico el mo
-            if (appContainer.getCurrentMapObject() != null) {
-                if (appContainer.getMode() == UserMode.OBJECT_JOINTO)
+
+            MapObject mapObject = appContainer.getCurrentMapObject();
+
+            if (mapObject != null) {
+                if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
                     appContainer.setMode(UserMode.NONE);
-                else {
+                } else {
                     appContainer.setMode(UserMode.OBJECT_JOINTO);
                 }
 
                 if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
-
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
-                    MapObject currentMO = appContainer.getCurrentMapObject();
-                    Layer layer = currentMO.getLayer();
-                    CardinalPointLayer map_layer = (CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, layer.getId());
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
-//                    appContainer.setAcctionAddEdge(false);
-
                 } else {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
                 }
+
+                toggleEditing();
             }
         }
     }
@@ -1380,7 +1410,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
             recyclerView.setAdapter(mtoAdapter);
             bottomSheetDialog.setContentView(bottomSheetView);
-            if (appContainer.getCurrentMapObject() == null) {
+
+            if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
                 filterNetworks.setVisibility(View.VISIBLE);
                 filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -1402,13 +1433,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 filterNetworks.setVisibility(View.GONE);
             }
             bottomSheetDialog.show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void updateSelectMapObj(MapObjecType mto) {
-        selectMo = findViewById(cu.phibrain.cardinal.app.R.id.selectMo);
         if (mto != null) {
             byte[] icon = mto.getIconAsByteArray();
             if (icon != null) {
@@ -1477,41 +1507,53 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
     private void setLeftButtoonsEnablement(boolean enable) {
 //        ImageButton addnotebytagButton = findViewById(cu.phibrain.cardinal.app.R.id.addnotebytagbutton);
-        //ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
-        //ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
 
         ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
         ImageButton toggleLoginfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
         ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
         if (enable) {
 //            addnotebytagButton.setVisibility(View.VISIBLE);
-
-
             addBookmarkButton.setVisibility(View.VISIBLE);
             toggleLoginfoButton.setVisibility(View.VISIBLE);
             toggleMeasuremodeButton.setVisibility(View.VISIBLE);
         } else {
 //            addnotebytagButton.setVisibility(View.GONE);
-            if (appContainer.getMode()== UserMode.OBJECT_ADDING_EDGE) {
-                addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
-
-            } else {
-                addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
-            }
-
-//            joinButton.setVisibility(View.VISIBLE);
-//            addRouteSegmentbutton.setVisibility(View.VISIBLE);
             addBookmarkButton.setVisibility(View.GONE);
             toggleLoginfoButton.setVisibility(View.GONE);
             toggleMeasuremodeButton.setVisibility(View.GONE);
+
+            MapObject mapObject = appContainer.getCurrentMapObject();
+
+            joinButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
+            addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
+            if (mapObject != null) {
+                if (appContainer.IsCurrentActiveLayerTopological() && !mapObject.getIsCompleted() && !mapObject.getObjectType().getIsTerminal()) {
+                    if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE) {
+                        addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_active_24dp));
+
+                    } else {
+                        addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+                    }
+                    addRouteSegmentbutton.setVisibility(View.VISIBLE);
+                } else {
+                    addRouteSegmentbutton.setVisibility(View.GONE);
+                }
+
+                if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
+                } else {
+                    joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
+                }
+                joinButton.setVisibility(View.VISIBLE);
+            } else {
+                addRouteSegmentbutton.setVisibility(View.GONE);
+                joinButton.setVisibility(View.GONE);
+            }
         }
     }
 
     private void setAllButtoonsEnablement(boolean enable) {
 //      ImageButton addnotebytagButton = findViewById(R.id.addnotebytagbutton);
-        //ImageButton jointobuttonButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
-        //ImageButton addroutesegmentButton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
-
         ImageButton addBookmarkButton = findViewById(cu.phibrain.cardinal.app.R.id.addbookmarkbutton);
         ImageButton toggleLoginfoButton = findViewById(cu.phibrain.cardinal.app.R.id.toggleloginfobutton);
         ImageButton toggleMeasuremodeButton = findViewById(cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton);
@@ -1525,9 +1567,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             visibility = View.GONE;
         }
 //      addnotebytagButton.setVisibility(visibility);
-//        joinButton.setVisibility(visibility);
-//        addRouteSegmentbutton.setVisibility(visibility);
-
         addBookmarkButton.setVisibility(visibility);
         toggleLoginfoButton.setVisibility(visibility);
         toggleMeasuremodeButton.setVisibility(visibility);
@@ -1612,8 +1651,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         joinButton = findViewById(cu.phibrain.cardinal.app.R.id.jointobutton);
         addRouteSegmentbutton = findViewById(cu.phibrain.cardinal.app.R.id.addroutesegmentbutton);
-        if (mapObject != null && !mapObject.getObjectType().getIsTerminal()) {
-            if (appContainer.IsCurrentActiveLayerTopological() && !mapObject.getIsCompleted()) {
+        if (mapObject != null) {
+
+            if (appContainer.IsCurrentActiveLayerTopological() && !mapObject.getIsCompleted() && !mapObject.getObjectType().getIsTerminal()) {
                 addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 addRouteSegmentbutton.setVisibility(View.VISIBLE);
             } else
