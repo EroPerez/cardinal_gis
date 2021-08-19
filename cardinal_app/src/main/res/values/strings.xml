@@ -51,6 +51,7 @@
     <string name="gpslogging_stop_and_start_again">Could not start worker route logging. Stop the logging and restart it by checking the "Continue last logging" button.</string>
     <string name="obj_destination_completed">The target object is complete according to the degree defined for the node, increase the degree and retry the operation.</string>
     <string name="max_distance_threshold_broken_message_jointo">The selected map object is more than %.2f meters away. Do you want to dock them anyway?</string>
+    <string name="delete_edge">Esta seguro de eliminar esta conexión.</string>
     <string name="title_activity_map_object_joined">%s Map Object Agregations</string>
     <string name="do_you_want_to_undock_this_map_object">Do you want to un-dock this map object?</string>
     <string name="map_object_already_docked_message">The selected map object is already docked to another map object.</string>

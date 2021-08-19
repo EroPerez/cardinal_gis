@@ -80,6 +80,9 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         return NAME;
     }
 
+    private GPGeoPoint centerPoint(MapObject mapObject) {
+        return LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+    }
     public void reloadData() throws IOException {
         GPMapPosition mapPosition = mapView.getMapPosition();
         int zoom = mapPosition.getZoomLevel();
@@ -106,6 +109,11 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                                     points.add(((GeoPoint) point));
                                 }
                                 if (points.size() > 1) {
+//                                    CircleDrawable circle = new CircleDrawable(centerPoint(mo),1, Style.builder()
+//                                            .strokeColor(android.graphics.Color.YELLOW)
+//                                            .strokeWidth(2f)
+//                                            .cap(org.oscim.backend.canvas.Paint.Cap.ROUND)
+//                                            .build());
                                     GPPolygonDrawable drawable = new GPPolygonDrawable(points, lineStyle, mo.getId());
                                     add(drawable);
                                 }
@@ -212,7 +220,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                     appContainer.setCurrentMapObject(null);
                     try {
                         this.reloadData();
-                        mapView.reloadLayer(EdgesLayer.class);
+                        mapView.reloadLayer(CardinalEdgesLayer.class);
                         //Reload current point layers
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
                         mapView.reloadLayer(CardinalSelectPointLayer.class);
@@ -278,7 +286,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         appContainer.setMode(UserMode.NONE);
         //Reload layers associated
         this.reloadData();
-        mapView.reloadLayer(EdgesLayer.class);
+        mapView.reloadLayer(CardinalEdgesLayer.class);
         //Reload current point layers
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());

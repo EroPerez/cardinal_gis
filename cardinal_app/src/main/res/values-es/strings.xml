@@ -57,4 +57,5 @@
     <string name="version">Versión %s</string>
     <string name="derechos"></string>
     <string name="desarrollado_por">Desarrolladores:</string>
+    <string name="delete_edge">Esta seguro de eliminar esta conexión.</string>
 </resources>
