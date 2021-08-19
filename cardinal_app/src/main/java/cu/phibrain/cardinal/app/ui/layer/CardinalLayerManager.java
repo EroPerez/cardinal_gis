@@ -160,8 +160,8 @@ public enum CardinalLayerManager {
 
         //Capa de segmento de rutas
         JSONObject jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
         jo.put(IGpLayer.LAYERENABLED_TAG, true);
         cardinalLayersDefinitions.add(jo);
 
@@ -333,8 +333,8 @@ public enum CardinalLayerManager {
                     CardinalPointLayer sysLayer = new CardinalPointLayer(mapView, activitySupporter, Id);
                     sysLayer.load();
                     sysLayer.setEnabled(layer.getIsActive());
-                } else if (layerClass.equals(EdgesLayer.class.getCanonicalName())) {
-                    EdgesLayer sysLayer = new EdgesLayer(mapView, activitySupporter);
+                } else if (layerClass.equals(CardinalEdgesLayer.class.getCanonicalName())) {
+                    CardinalEdgesLayer sysLayer = new CardinalEdgesLayer(mapView, activitySupporter);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
                 }
@@ -387,11 +387,11 @@ public enum CardinalLayerManager {
             cardinalPointLayer.load();
         }
 
-        EdgesLayer edgeLayer = new EdgesLayer(mapView, activitySupporter);
+        CardinalEdgesLayer edgeLayer = new CardinalEdgesLayer(mapView, activitySupporter);
         GPApplication context = GPApplication.getInstance();
         JSONObject jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
         cardinalLayersDefinitions.add(edgeLayer.toJson());
         edgeLayer.load();
 
@@ -615,8 +615,8 @@ public enum CardinalLayerManager {
 
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jo = new JSONObject();
-                            jo.put(IGpLayer.LAYERTYPE_TAG, EdgesLayer.class.getCanonicalName());
-                            jo.put(IGpLayer.LAYERNAME_TAG, EdgesLayer.getName(context));
+                            jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
+                            jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
@@ -948,7 +948,7 @@ public enum CardinalLayerManager {
             List<JSONObject> list = cardinalLayersDefinitions;
             JSONObject layerObj = list.get(position);
             layerObj.put(IGpLayer.LAYERENABLED_TAG, enabled);
-            if (!layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(EdgesLayer.class.getCanonicalName())
+            if (!layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalEdgesLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalLineLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalPolygonLayer.class.getCanonicalName())) {
                 Long layerId = layerObj.getLong("ID");

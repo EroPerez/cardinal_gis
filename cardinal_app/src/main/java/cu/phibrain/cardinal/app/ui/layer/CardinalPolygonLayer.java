@@ -18,7 +18,6 @@ import org.oscim.core.GeoPoint;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.vector.VectorLayer;
-import org.oscim.layers.vector.geometries.CircleDrawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
 
@@ -221,7 +220,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                     appContainer.setCurrentMapObject(null);
                     try {
                         this.reloadData();
-                        mapView.reloadLayer(EdgesLayer.class);
+                        mapView.reloadLayer(CardinalEdgesLayer.class);
                         //Reload current point layers
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
                         mapView.reloadLayer(CardinalSelectPointLayer.class);
@@ -287,7 +286,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         appContainer.setMode(UserMode.NONE);
         //Reload layers associated
         this.reloadData();
-        mapView.reloadLayer(EdgesLayer.class);
+        mapView.reloadLayer(CardinalEdgesLayer.class);
         //Reload current point layers
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());

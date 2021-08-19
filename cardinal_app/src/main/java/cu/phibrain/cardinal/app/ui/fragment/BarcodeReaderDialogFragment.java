@@ -28,8 +28,9 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
-import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -200,83 +201,105 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             FragmentActivity activity = getActivity();
             boolean terminalFound = false;
             try {
-                MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
-                MapObject previousObj = appContainer.getCurrentMapObject();
-                Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
+                if(appContainer.getRouteSegmentActive()==null) {
+                    MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
+                    MapObject previousObj = appContainer.getCurrentMapObject();
+                    Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
-                MapObject currentObj = new MapObject();
-                currentObj.setCode(label.toString());
-                currentObj.setCoord(this.coordinates);
-                currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
+                    MapObject currentObj = new MapObject();
+                    currentObj.setCode(label.toString());
+                    currentObj.setCoord(this.coordinates);
+                    currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
-                grade = currentSelectedObjectType.getIsTerminal() ? 1 : grade;
+                    grade = currentSelectedObjectType.getIsTerminal() ? 1 : grade;
 
-                currentObj.setNodeGrade(grade);
-                currentObj.setSessionId(currentSession.getId());
-                currentObj.setIsCompleted(false);
-                currentObj.setCreatedAt(new Date());
-                currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
+                    currentObj.setNodeGrade(grade);
+                    currentObj.setSessionId(currentSession.getId());
+                    currentObj.setIsCompleted(false);
+                    currentObj.setCreatedAt(new Date());
+                    currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
 
-                MapObjectOperations.getInstance().save(currentObj);
+                    MapObjectOperations.getInstance().save(currentObj);
 
-                if (!currentObj.isTerminal()) {
-                    appContainer.setCurrentMapObject(currentObj);
-                } else {
-                    appContainer.setCurrentMapObject(null);
-                    appContainer.setMapObjecTypeActive(null);
-                    appContainer.setNetworksActive(null);
-                    terminalFound = true;
-                }
-                appContainer.setMode(UserMode.NONE);
-                reloadLayer(currentSelectedObjectTypeLayer);
-                GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
+                    if (!currentObj.isTerminal()) {
+                        appContainer.setCurrentMapObject(currentObj);
+                    } else {
+                        appContainer.setCurrentMapObject(null);
+                        appContainer.setMapObjecTypeActive(null);
+                        appContainer.setNetworksActive(null);
+                        terminalFound = true;
+                    }
+                    appContainer.setMode(UserMode.NONE);
+                    reloadLayer(currentSelectedObjectTypeLayer);
+                    GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
 
 //                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
 
-                if (!currentObj.belongToTopoLayer() ||
-                        previousObj == null ||
-                        !previousObj.belongToTopoLayer() ||
-                        previousObj.getIsCompleted()) {
-                    refreshUI(terminalFound);
-                    return;
+                    if (!currentObj.belongToTopoLayer() ||
+                            previousObj == null ||
+                            !previousObj.belongToTopoLayer() ||
+                            previousObj.getIsCompleted()) {
+                        refreshUI(terminalFound);
+                        return;
+                    }
+
+
+                    if (LatLongUtils.soFar(previousObj, LatLongUtils.getMaxDistance(), currentObj)) {
+                        final boolean tf = terminalFound;
+                        GPDialogs.yesNoMessageDialog(activity,
+                                String.format(getString(R.string.max_distance_threshold_broken_message),
+                                        LatLongUtils.getMaxDistance()),
+                                () -> activity.runOnUiThread(() -> {
+                                    // yes
+                                    appContainer.setCurrentMapObject(null);
+                                    refreshUI(tf);
+
+                                }), () -> activity.runOnUiThread(() -> {
+                                    // no
+                                    GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
+                                            LatLongUtils.getMaxDistance()));
+
+                                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
+                                    RouteSegmentOperations.getInstance().save(edge);
+                                    try {
+                                        mapView.reloadLayer(CardinalEdgesLayer.class);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    refreshUI(tf);
+                                })
+                        );
+                    } else {
+
+                        RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
+                        RouteSegmentOperations.getInstance().save(edge);
+                        mapView.reloadLayer(CardinalEdgesLayer.class);
+                        refreshUI(terminalFound);
+                    }
+
                 }
+                else{
+                    MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
+                    MapObject currentObj = new MapObject();
+                    currentObj.setCode(label.toString());
+                    currentObj.setCoord(this.coordinates);
+                    currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
+                    grade = 0;
 
-                if (LatLongUtils.soFar(previousObj, LatLongUtils.getMaxDistance(), currentObj)) {
-                    final boolean tf = terminalFound;
-                    GPDialogs.yesNoMessageDialog(activity,
-                            String.format(getString(R.string.max_distance_threshold_broken_message),
-                                    LatLongUtils.getMaxDistance()),
-                            () -> activity.runOnUiThread(() -> {
-                                // yes
-                                appContainer.setCurrentMapObject(null);
-                                refreshUI(tf);
+                    currentObj.setNodeGrade(grade);
+                    currentObj.setSessionId(currentSession.getId());
+                    currentObj.setIsCompleted(false);
+                    currentObj.setCreatedAt(new Date());
+                    currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
 
-                            }), () -> activity.runOnUiThread(() -> {
-                                // no
-                                GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
-                                        LatLongUtils.getMaxDistance()));
+                    MapObjectOperations.getInstance().save(currentObj);
+                    appContainer.setRouteSegmentActive(null);
+                    mapView.reloadLayer(CardinalLineLayer.class);
+                    dismiss();
 
-                                RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
-                                RouteSegmentOperations.getInstance().save(edge);
-                                try {
-                                    mapView.reloadLayer(EdgesLayer.class);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                                refreshUI(tf);
-                            })
-                    );
-                } else {
-
-                    RouteSegment edge = new  RouteSegment(null, previousObj.getId(), currentObj.getId());
-                    RouteSegmentOperations.getInstance().save(edge);
-                    mapView.reloadLayer(EdgesLayer.class);
-                    refreshUI(terminalFound);
                 }
-
-
 
 
             } catch (Exception e) {
@@ -300,6 +323,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     }
 
     void refreshUI(boolean terminalFound) {
+
         //Update ui
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
         intent.putExtra("update_map_object_active", true);

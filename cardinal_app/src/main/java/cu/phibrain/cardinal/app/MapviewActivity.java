@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Objects;
 
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
+import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -82,6 +83,7 @@ import cu.phibrain.cardinal.app.ui.activities.MapObjectJoinedActivity;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
+import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
@@ -90,17 +92,19 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
-import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.NetworksOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.core.database.DaoGpsLog;
@@ -276,6 +280,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
             if (is_map_object_terminal) {
                 disableEditing();
+            }
+            Long create_map_object_by_select_edge = intent.getLongExtra("create_map_object_by_select_edge", -1L);
+            if(create_map_object_by_select_edge > 0){
+                RouteSegment edge = RouteSegmentOperations.getInstance().load(create_map_object_by_select_edge);
+                appContainer.setRouteSegmentActive(edge);
+                onMenuMTO();
+
             }
         }
 
@@ -460,7 +471,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             try {
                 mapView.reloadLayer(CardinalLineLayer.class);
                 mapView.reloadLayer(CardinalPolygonLayer.class);
-                mapView.reloadLayer(EdgesLayer.class);
+                mapView.reloadLayer(CardinalEdgesLayer.class);
                 mapView.reloadLayer(CardinalSelectPointLayer.class);
                 mapView.reloadLayer(CardinalJoinsLayer.class);
                 for (Layer layer :
@@ -1264,7 +1275,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
 //            onUpdate(mapView.getMapPosition());
         } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
-
+            appContainer.setRouteSegmentActive(null);
             onMenuMTO();
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
@@ -1368,6 +1379,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
 
     public void onMenuMTO() {
+
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(
                         cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
@@ -1398,13 +1410,16 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //update Network Select
             appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
             List<MapObjecType> mtoList;
-
-            if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
-                //Muestro todos por capas
-                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
-            } else {
-                //Muestro solo los aptos segun reglas topologicas
-                mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getCurrentMapObject().getObjectType(), null);
+            if(appContainer.getRouteSegmentActive()==null) {
+                if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
+                    //Muestro todos por capas
+                    mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
+                } else {
+                    //Muestro solo los aptos segun reglas topologicas
+                    mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getCurrentMapObject().getObjectType(), null);
+                }
+            }else{
+                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem(), MapObjecType.GeomType.POLYLINE);
             }
 
             MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
@@ -1599,52 +1614,70 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
     @Override
     public void selectedMto(MapObjecType _mtoModel) {
-        ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
-        boolean isEditing = activeToolGroup != null;
 
-        checkLabelButton();
+            ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
+            boolean isEditing = activeToolGroup != null;
 
-        if (isEditing && appContainer.getMode() == UserMode.NONE) {
-            disableEditing();
-            mapView.releaseMapBlock();
-        }
+            checkLabelButton();
+
+            if (isEditing && appContainer.getMode() == UserMode.NONE) {
+                disableEditing();
+                mapView.releaseMapBlock();
+            }
 
 
-        appContainer.setMapObjecTypeActive(_mtoModel);
-        if (appContainer.getMapObjecTypeActive() != null) {
+            appContainer.setMapObjecTypeActive(_mtoModel);
+            if (appContainer.getMapObjecTypeActive() != null) {
 
-            if (descriptorMto != null) //evitar exeption cuando se invoca este metodo en un lugar distinto del buttonshee
-                descriptorMto.setText(_mtoModel.getCaption());
+                if (descriptorMto != null) //evitar exeption cuando se invoca este metodo en un lugar distinto del buttonshee
+                    descriptorMto.setText(_mtoModel.getCaption());
 
-            byte[] icon = _mtoModel.getIconAsByteArray();
-            if (icon != null) {
-                selectMto.setImageBitmap(
-                        ImageUtil.getScaledBitmap(ImageUtilities.getImageFromImageData(icon),
-                                48,
-                                48, false));
+                byte[] icon = _mtoModel.getIconAsByteArray();
+                if (icon != null) {
+                    selectMto.setImageBitmap(
+                            ImageUtil.getScaledBitmap(ImageUtilities.getImageFromImageData(icon),
+                                    48,
+                                    48, false));
+                } else {
+                    Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
+                    selectMto.setImageBitmap(bitmap);
+                }
+                Layer editLayer = _mtoModel.getLayerObj();
+                switch (_mtoModel.getGeomType()) {
+                    case POLYLINE:
+                        EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
+                        break;
+                    case POLYGON:
+                        EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
+                        break;
+                    default:
+                        EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, editLayer.getId())));
+                        break;
+                }
+
+                setZoom(editLayer.getEditZoomLevel());
+                editByGeometry();
             } else {
                 Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
                 selectMto.setImageBitmap(bitmap);
             }
-            Layer editLayer = _mtoModel.getLayerObj();
-            switch (_mtoModel.getGeomType()) {
-                case POLYLINE:
-                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
-                    break;
-                case POLYGON:
-                    EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
-                    break;
-                default:
-                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, editLayer.getId())));
-                    break;
+
+            if(appContainer.getRouteSegmentActive()!=null && _mtoModel.getGeomType() == MapObjecType.GeomType.POLYLINE){
+                    AppCompatActivity activity = this;
+                    List<GPGeoPoint> points = new ArrayList<>();
+                    MapObject origin = appContainer.getRouteSegmentActive().getOriginObj();
+                    MapObject destiny = appContainer.getRouteSegmentActive().getDestinyObj();
+                    points.add(LatLongUtils.centerPoint(origin.getCoord(), origin.getGeomType()));
+                    points.add(LatLongUtils.centerPoint(destiny.getCoord(), origin.getGeomType()));
+                    BarcodeReaderDialogFragment.newInstance(
+                                    mapView, points, 0
+                            ).show(
+                                    activity.getSupportFragmentManager(),
+                                    "dialog"
+                            );
+
             }
 
-            setZoom(editLayer.getEditZoomLevel());
-            editByGeometry();
-        } else {
-            Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
-            selectMto.setImageBitmap(bitmap);
-        }
     }
 
     private void setToggleMapObjectTools(MapObject mapObject) {

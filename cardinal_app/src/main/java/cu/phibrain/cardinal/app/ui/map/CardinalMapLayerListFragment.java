@@ -56,7 +56,7 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
-import cu.phibrain.cardinal.app.ui.layer.EdgesLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.ICardinalLayer;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
@@ -362,7 +362,7 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
                 continue;
             }
             else
-            if (layerClass.equals(EdgesLayer.class.getCanonicalName()))
+            if (layerClass.equals(CardinalEdgesLayer.class.getCanonicalName()))
                 layerItem = getCardinalSimpleItem(index, layerDefinition);
             else if (layerClass.equals(CardinalJoinsLayer.class.getCanonicalName()))
                 layerItem = getCardinalSimpleItem(index, layerDefinition);

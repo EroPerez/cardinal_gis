@@ -1,17 +1,21 @@
 package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.util.LineStringExtracter;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
@@ -26,18 +30,22 @@ import org.oscim.map.Layers;
 import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
+import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
+import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
@@ -45,7 +53,7 @@ import eu.geopaparazzi.map.layers.interfaces.IEditableLayer;
 import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 import eu.geopaparazzi.map.layers.layerobjects.GPLineDrawable;
 
-public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableLayer, ICardinalEdge {
+public class CardinalEdgesLayer extends VectorLayer implements  ISystemLayer, IEditableLayer, ICardinalEdge {
 
     public static String NAME = null;
     private final SharedPreferences peferences;
@@ -54,9 +62,9 @@ public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableL
     private eu.geopaparazzi.library.style.Style gpStyle;
     private IActivitySupporter activitySupporter;
 
-    public EdgesLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
+    public CardinalEdgesLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
-        activitySupporter = activitySupporter;
+        this.activitySupporter = activitySupporter;
         peferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
         this.mapView = mapView;
         getName(mapView.getContext());
@@ -162,23 +170,92 @@ public class EdgesLayer extends VectorLayer implements  ISystemLayer, IEditableL
     @Override
     public void onMapEvent(Event e, MapPosition pos) {
         super.onMapEvent(e, pos);
+
+    }
+    //pendiente de la recta
+    private double m(Point a,Point b){
+        return (b.getY()-a.getY()) / (b.getX()-a.getX());
     }
 
-    @Override
-    public boolean onGesture(Gesture g, MotionEvent e) {
-        if (g instanceof Gesture.Tap) {
-            GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-            Point point = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
-            for (Drawable drawable : tmpDrawables) {
-                if (drawable.getGeometry().contains(point)){
-                    GPLineDrawable edge = (GPLineDrawable)drawable;
-                    RouteSegmentOperations.getInstance().delete(edge.getId());
-                    Toast.makeText(mapView.getContext(), Long.toString(edge.getId()), Toast.LENGTH_SHORT).show();
-                    remove(drawable);
-                    return true;
+    //funcion de la recta
+    private double y(Point a,Point b,Point c){
+        double _m = m(a,b);
+        return _m*c.getX() - _m*a.getX() + a.getY();
+    }
 
+   //Restringir a la distancia de la recta
+    private boolean restriction(Point a,Point b,Point c){
+        double max_x =0;
+        double maxy = 0;
+
+        double minx =0;
+        double miny = 0;
+        //max X
+        if(a.getX()>b.getX()){
+            max_x = a.getX();
+            minx = b.getX();
+        }else{
+            max_x = b.getX();
+            minx = a.getX();
+        }
+        //MaxY
+        if(a.getY()>b.getY()){
+            maxy = a.getY();
+            miny = b.getY();
+        }else{
+            maxy = b.getY();
+            miny = a.getY();
+        }
+        if((c.getX()<max_x && c.getX()>minx) && (c.getY()<maxy && c.getY()>miny))
+            return true;
+
+        return false;
+
+    }
+
+    private GPLineDrawable selectEdge(float cord_x ,float cord_y){
+        GeoPoint geoPoint = mMap.viewport().fromScreenPoint(cord_x,cord_y);
+        Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+        for (Drawable drawable : tmpDrawables) {
+            GPLineDrawable edge = (GPLineDrawable)drawable;
+            List lines = LineStringExtracter.getLines(edge.getGeometry());
+            for (Object geoLine: lines
+            ) {
+                Coordinate coordinateA = ((Geometry)geoLine).getCoordinates()[0];
+                Coordinate coordinateB = ((Geometry)geoLine).getCoordinates()[1];
+                Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                Point pointB = new GeomBuilder().point(coordinateB.x,coordinateB.y).toPoint();
+                DecimalFormat twoDForm = new DecimalFormat("#.####");
+                double _y = Double.valueOf(twoDForm.format(pointC.getY()));
+                double _yLine = Double.valueOf(twoDForm.format(y(pointA,pointB,pointC)));
+                double miny = _yLine - _y ;
+                if(((miny<= 0.0004 && miny>=0)  || (miny<= -0.0004 && miny<=0)) && restriction(pointA,pointB,pointC)){
+                    return edge;
                 }
 
+            }
+        }
+        return null;
+    }
+    @Override
+    public boolean onGesture(Gesture g, MotionEvent e) {
+
+        if (g == Gesture.LONG_PRESS) {
+            GPLineDrawable edge = selectEdge(e.getX(), e.getY());
+            if(edge!=null){
+                RouteSegmentOperations.getInstance().delete(edge.getId());
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+                appContainer.setRouteSegmentActive(null);
+                remove(edge);
+                update();
+                return true;
+            }
+        }else if(g == Gesture.PRESS){
+            GPLineDrawable edge = selectEdge(e.getX(), e.getY());
+            if(edge!=null) {
+                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                intent.putExtra("create_map_object_by_select_edge", edge.getId());
+                ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
             }
         }
         return false;
