@@ -153,7 +153,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
 
-        if (g instanceof Gesture.Tap) {
+        if (g instanceof Gesture.LongPress) {
             if (tmpDrawables.size() > 0) {
                 GPLineDrawable selectedJoint = null;
                 GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());

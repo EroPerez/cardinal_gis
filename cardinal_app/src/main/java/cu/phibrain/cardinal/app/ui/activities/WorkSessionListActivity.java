@@ -12,7 +12,6 @@ import android.widget.ListView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -64,7 +63,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         try {
             mContract = ContractOperations.getInstance().findOneBy(appContainer.getProjectActive().getId(), appContainer.getCurrentWorker().getId(), true);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

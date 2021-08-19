@@ -218,7 +218,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         if (selectMarker != null)
             removeItem(selectMarker);
 
-        if (item != null && Long.parseLong("" + item.getUid()) != -1L) {
+        if (item != null && Long.parseLong("" + item.getUid()) != CardinalPointLayer.SELECT_MARKER_UID) {
             MapObject objectSelected = MapObjectOperations.getInstance().load((Long) item.getUid());
             appContainer.setCurrentMapObject(objectSelected);
             appContainer.setMapObjecTypeActive(objectSelected.getObjectType());

@@ -95,7 +95,7 @@ public class LatLongUtils {
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return MAX_DISTANCE;
@@ -112,7 +112,7 @@ public class LatLongUtils {
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -130,7 +130,7 @@ public class LatLongUtils {
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

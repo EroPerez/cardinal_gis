@@ -214,17 +214,18 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
         View view = getView();
         try {
-            int notesCount = 0;
+            int sessionCount = 0;
             String username = getResources().getString(R.string.select_one);
 
-            if (((CardinalApplication) CardinalApplication.getInstance()).getContainer().getProjectActive() != null) {
-                notesCount = (int) WorkSessionOperations.getInstance().getDao().count();
-            }
+//            if (((CardinalApplication) CardinalApplication.getInstance()).getContainer().getProjectActive() != null) {
+//                notesCount = (int) WorkSessionOperations.getInstance().getDao().count();
+//            }
 
             Worker currentWorker = ((CardinalApplication) CardinalApplication.getInstance()).getContainer().getCurrentWorker();
 
             if (currentWorker != null) {
                 username = currentWorker.getUsername();
+                sessionCount = (int) WorkSessionOperations.getInstance().countByWorker(currentWorker);
             }
 
             int logsCount = DaoGpsLog.getGpslogsCount();
@@ -235,7 +236,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             TextView workSessionTextView = view.findViewById(R.id.dashboardTextWorkSession);
 
 
-            String notesText = String.format(getResources().getString(R.string.dashboard_msg_session), notesCount);
+            String notesText = String.format(getResources().getString(R.string.dashboard_msg_session), sessionCount);
 
             notesTextView.setText(notesText);
 
@@ -268,7 +269,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private void checkProfileColor(Profile activeProfile) {
         View view = getView();
         if (view != null) {
-            View dashboardView = view.findViewById(eu.geopaparazzi.core.R.id.dashboardLayout);
+            View dashboardView = view.findViewById(cu.phibrain.cardinal.app.R.id.dashboardLayout);
             if (dashboardView != null) {
                 if (activeProfile != null && activeProfile.profileProject != null && activeProfile.getFile(activeProfile.profileProject.getRelativePath()).exists()) {
                     String color = activeProfile.color;
@@ -337,7 +338,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             menu.findItem(eu.geopaparazzi.core.R.id.action_new).setEnabled(true);
         }
         menu.findItem(eu.geopaparazzi.core.R.id.action_profiles).setVisible(hasProfilesProvider);
-//        menu.findItem(eu.geopaparazzi.core.R.id.action_profiles).setVisible(false);
 
         MenuItem gpsItem = menu.findItem(eu.geopaparazzi.core.R.id.action_gps);
         checkGpsItemStatus(gpsItem);
@@ -527,7 +527,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                     Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
                     startActivity(importIntent);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -554,7 +554,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                     Intent importIntent = new Intent(getActivity(), WorkSessionListActivity.class);
                     startActivity(importIntent);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -565,7 +565,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
                     return;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             Intent exportIntent = new Intent(getActivity(), ExportActivity.class);
@@ -591,7 +591,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 } else {
                     handleGpsLogAction();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
