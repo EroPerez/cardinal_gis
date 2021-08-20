@@ -11,6 +11,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
@@ -30,6 +31,7 @@ public class AppContainer {
     protected Networks networksActive;
     protected MapObject mapObjectActive;
     protected Worker currentWorker;
+    private RouteSegment RouteSegmentActive;
 
     protected UserMode umode;
 
@@ -245,4 +247,11 @@ public class AppContainer {
         this.umode = umode;
     }
 
+    public RouteSegment getRouteSegmentActive() {
+        return RouteSegmentActive;
+    }
+
+    public void setRouteSegmentActive(RouteSegment routeSegmentActive) {
+        RouteSegmentActive = routeSegmentActive;
+    }
 }
