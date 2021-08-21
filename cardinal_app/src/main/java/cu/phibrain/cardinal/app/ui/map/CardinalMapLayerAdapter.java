@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -56,9 +55,11 @@ import java.util.Collections;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
+import cu.phibrain.cardinal.app.ui.layer.ICardinalJoint;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import eu.geopaparazzi.library.GPApplication;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.style.ColorUtilities;
 import eu.geopaparazzi.library.style.LabelObject;
 import eu.geopaparazzi.library.style.Style;
@@ -140,7 +141,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         holder.enableCheckbox.setChecked(item.enabled);
         holder.enableCheckbox.setOnCheckedChangeListener((e, i) -> {
             item.enabled = holder.enableCheckbox.isChecked();
-            if (item instanceof ICardinalItem || item instanceof ICardinalEdgeItem) {
+            if (item instanceof ICardinalItem || item instanceof ICardinalEdgeItem || item instanceof ICardinalJoint) {
                 CardinalLayerManager.INSTANCE.setEnabled(item.position, item.enabled);
             } else {
                 CardinalLayerManager.INSTANCE.setEnabled(item.isSystem, item.position, item.enabled);
@@ -576,9 +577,10 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
         }
 
         public void updateIcon(byte[] icon) {
-            Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-            moreButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 30,
-                    30, false));
+            Bitmap bmp = ImageUtilities.getImageFromImageData(icon);
+            moreButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 32,
+                    32, false));
+
         }
 
         @Override

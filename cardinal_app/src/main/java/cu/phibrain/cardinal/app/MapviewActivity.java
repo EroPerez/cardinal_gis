@@ -74,7 +74,6 @@ import java.util.List;
 import java.util.Objects;
 
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
-import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.helpers.SignalEventLogger;
 import cu.phibrain.cardinal.app.helpers.StorageUtilities;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -85,6 +84,7 @@ import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
@@ -92,7 +92,6 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
-import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.map.CardinalMapLayerListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -282,7 +281,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 disableEditing();
             }
             Long create_map_object_by_select_edge = intent.getLongExtra("create_map_object_by_select_edge", -1L);
-            if(create_map_object_by_select_edge > 0){
+            if (create_map_object_by_select_edge > 0) {
                 RouteSegment edge = RouteSegmentOperations.getInstance().load(create_map_object_by_select_edge);
                 appContainer.setRouteSegmentActive(edge);
                 onMenuMTO();
@@ -1192,27 +1191,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
 
         }
-        /* else if (i == cu.phibrain.cardinal.app.R.id.addnotebytagbutton) {// generate screenshot in background in order to not freeze
-            try {
-                File tempDir = ResourcesManager.getInstance(MapviewActivity.this).getTempDir();
-                final File tmpImageFile = new File(tempDir, TMPPNGIMAGENAME);
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            mapView.saveMapView(tmpImageFile);
-                        } catch (Exception e) {
-                            GPLog.error(this, null, e); //$NON-NLS-1$
-                        }
-                    }
-                }).start();
-                Intent mapTagsIntent = new Intent(MapviewActivity.this, AddNotesActivity.class);
-                startActivity(mapTagsIntent);
-            } catch (Exception e) {
-                GPLog.error(this, null, e);
-                GPDialogs.errorDialog(this, e, null);
-            }
-
-        }*/
         else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
             addBookmark();
         } else if (i == cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton) {
@@ -1336,13 +1314,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             MapObject mapObject = appContainer.getCurrentMapObject();
 
             if (mapObject != null) {
-                if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
+                if (appContainer.getMode() == UserMode.OBJECT_DOCK) {
                     appContainer.setMode(UserMode.NONE);
                 } else {
-                    appContainer.setMode(UserMode.OBJECT_JOINTO);
+                    appContainer.setMode(UserMode.OBJECT_DOCK);
                 }
 
-                if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
+                if (appContainer.getMode() == UserMode.OBJECT_DOCK) {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
                     addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
                 } else {
@@ -1410,7 +1388,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //update Network Select
             appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
             List<MapObjecType> mtoList;
-            if(appContainer.getRouteSegmentActive()==null) {
+            if (appContainer.getRouteSegmentActive() == null) {
                 if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
                     //Muestro todos por capas
                     mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
@@ -1418,7 +1396,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     //Muestro solo los aptos segun reglas topologicas
                     mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getCurrentMapObject().getObjectType(), null);
                 }
-            }else{
+            } else {
                 mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem(), MapObjecType.GeomType.POLYLINE);
             }
 
@@ -1554,7 +1532,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     addRouteSegmentbutton.setVisibility(View.GONE);
                 }
 
-                if (appContainer.getMode() == UserMode.OBJECT_JOINTO) {
+                if (appContainer.getMode() == UserMode.OBJECT_DOCK) {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_active_24dp));
                 } else {
                     joinButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_link_object_24dp));
@@ -1615,68 +1593,68 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     @Override
     public void selectedMto(MapObjecType _mtoModel) {
 
-            ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
-            boolean isEditing = activeToolGroup != null;
+        ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
+        boolean isEditing = activeToolGroup != null;
 
-            checkLabelButton();
+        checkLabelButton();
 
-            if (isEditing && appContainer.getMode() == UserMode.NONE) {
-                disableEditing();
-                mapView.releaseMapBlock();
-            }
+        if (isEditing && appContainer.getMode() == UserMode.NONE) {
+            disableEditing();
+            mapView.releaseMapBlock();
+        }
 
 
-            appContainer.setMapObjecTypeActive(_mtoModel);
-            if (appContainer.getMapObjecTypeActive() != null) {
+        appContainer.setMapObjecTypeActive(_mtoModel);
+        if (appContainer.getMapObjecTypeActive() != null) {
 
-                if (descriptorMto != null) //evitar exeption cuando se invoca este metodo en un lugar distinto del buttonshee
-                    descriptorMto.setText(_mtoModel.getCaption());
+            if (descriptorMto != null) //evitar exception cuando se invoca este método en un lugar distinto del buttonsheet
+                descriptorMto.setText(_mtoModel.getCaption());
 
-                byte[] icon = _mtoModel.getIconAsByteArray();
-                if (icon != null) {
-                    selectMto.setImageBitmap(
-                            ImageUtil.getScaledBitmap(ImageUtilities.getImageFromImageData(icon),
-                                    48,
-                                    48, false));
-                } else {
-                    Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
-                    selectMto.setImageBitmap(bitmap);
-                }
-                Layer editLayer = _mtoModel.getLayerObj();
-                switch (_mtoModel.getGeomType()) {
-                    case POLYLINE:
-                        EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
-                        break;
-                    case POLYGON:
-                        EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
-                        break;
-                    default:
-                        EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, editLayer.getId())));
-                        break;
-                }
-
-                setZoom(editLayer.getEditZoomLevel());
-                editByGeometry();
+            byte[] icon = _mtoModel.getIconAsByteArray();
+            if (icon != null) {
+                selectMto.setImageBitmap(
+                        ImageUtil.getScaledBitmap(ImageUtilities.getImageFromImageData(icon),
+                                48,
+                                48, false));
             } else {
                 Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
                 selectMto.setImageBitmap(bitmap);
             }
-
-            if(appContainer.getRouteSegmentActive()!=null && _mtoModel.getGeomType() == MapObjecType.GeomType.POLYLINE){
-                    AppCompatActivity activity = this;
-                    List<GPGeoPoint> points = new ArrayList<>();
-                    MapObject origin = appContainer.getRouteSegmentActive().getOriginObj();
-                    MapObject destiny = appContainer.getRouteSegmentActive().getDestinyObj();
-                    points.add(LatLongUtils.centerPoint(origin.getCoord(), origin.getGeomType()));
-                    points.add(LatLongUtils.centerPoint(destiny.getCoord(), origin.getGeomType()));
-                    BarcodeReaderDialogFragment.newInstance(
-                                    mapView, points, 0
-                            ).show(
-                                    activity.getSupportFragmentManager(),
-                                    "dialog"
-                            );
-
+            Layer editLayer = _mtoModel.getLayerObj();
+            switch (_mtoModel.getGeomType()) {
+                case POLYLINE:
+                    EditManager.INSTANCE.setEditLayer(((CardinalLineLayer) mapView.getLayer(CardinalLineLayer.class)));
+                    break;
+                case POLYGON:
+                    EditManager.INSTANCE.setEditLayer(((CardinalPolygonLayer) mapView.getLayer(CardinalPolygonLayer.class)));
+                    break;
+                default:
+                    EditManager.INSTANCE.setEditLayer(((CardinalPointLayer) mapView.getLayer(CardinalPointLayer.class, editLayer.getId())));
+                    break;
             }
+
+            setZoom(editLayer.getEditZoomLevel());
+            editByGeometry();
+        } else {
+            Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
+            selectMto.setImageBitmap(bitmap);
+        }
+
+        if (appContainer.getRouteSegmentActive() != null && _mtoModel.getGeomType() == MapObjecType.GeomType.POLYLINE) {
+            AppCompatActivity activity = this;
+            List<GPGeoPoint> points = new ArrayList<>();
+            MapObject origin = appContainer.getRouteSegmentActive().getOriginObj();
+            MapObject destiny = appContainer.getRouteSegmentActive().getDestinyObj();
+            points.add(origin.getCentroid());
+            points.add(destiny.getCentroid());
+            BarcodeReaderDialogFragment.newInstance(
+                    mapView, points, 0
+            ).show(
+                    activity.getSupportFragmentManager(),
+                    "dialog"
+            );
+
+        }
 
     }
 

@@ -934,7 +934,8 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         sB.append("</description>\n");
         sB.append("<gx:balloonVisibility>1</gx:balloonVisibility>\n");
         sB.append("<Point>\n");
-        sB.append("<coordinates>").append(getCentroid().getLongitude()).append(",").append(getCentroid().getLatitude()).append(",0</coordinates>\n");
+        GPGeoPoint point = this.getCentroid();
+        sB.append("<coordinates>").append(point.getLongitude()).append(",").append(point.getLatitude()).append(",0</coordinates>\n");
         sB.append("</Point>\n");
         sB.append("</Placemark>\n");
 

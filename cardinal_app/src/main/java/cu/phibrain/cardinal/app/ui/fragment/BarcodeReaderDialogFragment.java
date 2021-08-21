@@ -27,10 +27,10 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
-import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
@@ -129,7 +129,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
         //intializing scan object
         code128BarcodeScan = IntentIntegrator.forSupportFragment(this); // `this` is the current Fragment
-        code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.CODE_128);
+        code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES);
         code128BarcodeScan.setPrompt(getString(R.string.scan_map_object_barcode_message));
         code128BarcodeScan.setOrientationLocked(false);
 
@@ -286,8 +286,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     currentObj.setCoord(this.coordinates);
                     currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
-                    grade = 0;
-
                     currentObj.setNodeGrade(grade);
                     currentObj.setSessionId(currentSession.getId());
                     currentObj.setIsCompleted(false);
@@ -297,7 +295,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     MapObjectOperations.getInstance().save(currentObj);
                     appContainer.setRouteSegmentActive(null);
                     mapView.reloadLayer(CardinalLineLayer.class);
-                    dismiss();
+
+                    refreshUI(terminalFound);
 
                 }
 

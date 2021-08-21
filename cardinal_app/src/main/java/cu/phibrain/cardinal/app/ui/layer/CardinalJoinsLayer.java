@@ -1,14 +1,17 @@
 package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.util.LineStringExtracter;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
 import org.oscim.event.Gesture;
@@ -21,15 +24,18 @@ import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
@@ -43,11 +49,13 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
     private GPMapView mapView;
     private Style lineStyle = null;
+    private IActivitySupporter activitySupporter;
 
 
-    public CardinalJoinsLayer(GPMapView mapView) {
+    public CardinalJoinsLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
         this.mapView = mapView;
+        this.activitySupporter = activitySupporter;
         getName(mapView.getContext());
 
         try {
@@ -72,30 +80,30 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
             return;
         }
 
-            tmpDrawables.clear();
-            mDrawables.clear();
-            if ((double) zoom >= LatLongUtils.getLineAndPolygonViewZoom()) {
-                if (lineStyle == null) {
-                    lineStyle = Style.builder()
-                            .strokeColor(Color.GREEN)
-                            .strokeWidth(2.5f)
-                            .stipple(20)
-                            .stippleColor(Color.RED)
-                            .cap(Paint.Cap.ROUND)
-                            .build();
-                }
-                List<MapObject> mapObjectList = MapObjectOperations.getInstance().getAll();
-                for (MapObject jointTo : mapObjectList) {
-                    List<GeoPoint> list_GeoPoints = new ArrayList<>();
-                    for (MapObject joinFrom : jointTo.getJoinedList()) {
-                        list_GeoPoints.add(LatLongUtils.centerPoint(joinFrom.getCoord(), joinFrom.getGeomType()));
-                        list_GeoPoints.add(LatLongUtils.centerPoint(jointTo.getCoord(), jointTo.getGeomType()));
-                        GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, joinFrom.getId());
-                        add(drawable);
-                    }
+        tmpDrawables.clear();
+        mDrawables.clear();
+        if ((double) zoom >= LatLongUtils.getLineAndPolygonViewZoom()) {
+            if (lineStyle == null) {
+                lineStyle = Style.builder()
+                        .strokeColor(Color.GREEN)
+                        .strokeWidth(2.5f)
+                        .stipple(20)
+                        .stippleColor(Color.RED)
+                        .cap(Paint.Cap.ROUND)
+                        .build();
+            }
+            List<MapObject> mapObjectList = MapObjectOperations.getInstance().getAll();
+            for (MapObject jointTo : mapObjectList) {
+                List<GeoPoint> list_GeoPoints = new ArrayList<>();
+                for (MapObject joinFrom : jointTo.getJoinedList()) {
+                    list_GeoPoints.add(joinFrom.getCentroid());
+                    list_GeoPoints.add(jointTo.getCentroid());
+                    GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, jointTo.getId());
+                    add(drawable);
                 }
             }
-            update();
+        }
+        update();
 
     }
 
@@ -137,6 +145,13 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
     @Override
     public void dispose() {
 
+        for (Iterator<Drawable> it = tmpDrawables.iterator(); it.hasNext(); ) {
+            Drawable drawable = it.next();
+            if (drawable != null) {
+                it.remove();
+            }
+        }
+
     }
 
     @Override
@@ -152,22 +167,30 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
-
+        if (!isEnabled()) {
+            return false;
+        }
         if (g instanceof Gesture.LongPress) {
             if (tmpDrawables.size() > 0) {
-                GPLineDrawable selectedJoint = null;
+                GPLineDrawable selectedJoinObj = null;
                 GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-                Point point = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
-                for (Drawable drawable : tmpDrawables) {
-                    if (drawable.getGeometry().contains(point)) {
-                        selectedJoint = (GPLineDrawable) drawable;
-                        break;
+                Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+                for (int index = 0; index < tmpDrawables.size(); index++) {
+                    Drawable drawable = tmpDrawables.get(index);
+                    selectedJoinObj = (GPLineDrawable) drawable;
+
+                    List lines = LineStringExtracter.getLines(selectedJoinObj.getGeometry());
+                    for (Object geoLine : lines) {
+                        Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
+                        Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
+                        Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                        Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                        if (LatLongUtils.IsOnSegment(pointA, pointB, pointC)) {
+                            return onItemLongPress(index, selectedJoinObj);
+                        }
+
                     }
-                }
-                if (selectedJoint != null) {
-                    AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
-                    MapObject JointActive = MapObjectOperations.getInstance().load(selectedJoint.getId());
-                    appContainer.setCurrentMapObject(JointActive);
+
                 }
 
             }
@@ -175,9 +198,31 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         return false;
     }
 
+
+    public boolean onItemLongPress(int index, GPLineDrawable item) {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        appContainer.setRouteSegmentActive(null);
+
+        if (item != null) {
+            MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
+            appContainer.setCurrentMapObject(objectSelected);
+            appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
+
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("update_map_object_active", true);
+            intent.putExtra("update_map_object_type_active", true);
+            ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
+
+
+        }
+        return true;
+
+    }
+
     @Override
     public boolean isEditable() {
-        return false;
+        return true;
     }
 
     @Override

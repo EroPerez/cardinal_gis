@@ -289,15 +289,7 @@ public enum CardinalLayerManager {
                     BookmarkLayer sysLayer = new BookmarkLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
-                } /*else if (layerClass.equals(ImagesLayer.class.getCanonicalName())) {
-                    ImagesLayer sysLayer = new ImagesLayer(mapView);
-                    sysLayer.load();
-                    sysLayer.setEnabled(isEnabled);
-                } else if (layerClass.equals(NotesLayer.class.getCanonicalName())) {
-                    NotesLayer sysLayer = new NotesLayer(mapView, activitySupporter);
-                    sysLayer.load();
-                    sysLayer.setEnabled(isEnabled);
-                }*/ else if (layerClass.equals(GpsPositionLayer.class.getCanonicalName())) {
+                } else if (layerClass.equals(GpsPositionLayer.class.getCanonicalName())) {
                     GpsPositionLayer sysLayer = new GpsPositionLayer(mapView);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
@@ -348,11 +340,10 @@ public enum CardinalLayerManager {
 //                    sysLayer.setEnabled(isEnabled);
 //                }
                 else if (layerClass.equals(CardinalJoinsLayer.class.getCanonicalName())) {
-                    CardinalJoinsLayer sysLayer = new CardinalJoinsLayer(mapView);
+                    CardinalJoinsLayer sysLayer = new CardinalJoinsLayer(mapView, activitySupporter);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
                 }
-
 
 
             }
@@ -395,7 +386,7 @@ public enum CardinalLayerManager {
         cardinalLayersDefinitions.add(edgeLayer.toJson());
         edgeLayer.load();
 
-        CardinalJoinsLayer joinsLayer = new CardinalJoinsLayer(mapView);
+        CardinalJoinsLayer joinsLayer = new CardinalJoinsLayer(mapView, activitySupporter);
         jo = new JSONObject();
         jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
         jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
@@ -636,7 +627,7 @@ public enum CardinalLayerManager {
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
-                        } else if(layer instanceof  ICardinalJoint){
+                        } else if (layer instanceof ICardinalJoint) {
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jo = new JSONObject();
                             jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
@@ -644,7 +635,7 @@ public enum CardinalLayerManager {
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
-                        }else {
+                        } else {
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jsonObject = gpLayer.toJson();
                             systemLayersArray.put(jsonObject);
@@ -950,7 +941,9 @@ public enum CardinalLayerManager {
             layerObj.put(IGpLayer.LAYERENABLED_TAG, enabled);
             if (!layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalEdgesLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalLineLayer.class.getCanonicalName())
-                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalPolygonLayer.class.getCanonicalName())) {
+                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalPolygonLayer.class.getCanonicalName())
+                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalJoinsLayer.class.getCanonicalName()))
+            {
                 Long layerId = layerObj.getLong("ID");
                 cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(layerId);
                 layer.setIsActive(enabled);

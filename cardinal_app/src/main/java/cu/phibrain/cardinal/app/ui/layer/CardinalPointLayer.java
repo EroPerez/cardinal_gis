@@ -206,7 +206,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         MapObject currentObj = MapObjectOperations.getInstance().load((Long) item.getUid());
         if (appContainer.getMode() == UserMode.OBJECT_ADDING_EDGE)
             addEdge(item, currentObj, previousObj);
-        else if (appContainer.getMode() == UserMode.OBJECT_JOINTO)
+        else if (appContainer.getMode() == UserMode.OBJECT_DOCK)
             joinMo(item, currentObj, previousObj);
 
         return true;
@@ -354,7 +354,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
     @Override
     public boolean isEditable() {
-        return false;
+        return true;
     }
 
     @Override
@@ -542,7 +542,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         MapviewActivity activity = (MapviewActivity) this.activitySupporter;
         if (item != null &&
                 Long.parseLong("" + item.getUid()) != CardinalPointLayer.SELECT_MARKER_UID &&
-                appContainer.getMode() == UserMode.OBJECT_JOINTO &&
+                appContainer.getMode() == UserMode.OBJECT_DOCK &&
                 !previousObj.equals(currentObj) &&
                 currentObj.getJoinObj() == null
         ) {
