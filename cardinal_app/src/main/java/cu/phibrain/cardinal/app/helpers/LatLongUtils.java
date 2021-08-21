@@ -9,7 +9,6 @@ import org.locationtech.jts.geom.Point;
 import org.oscim.core.GeoPoint;
 import org.oscim.utils.geom.GeomBuilder;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +21,13 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.ProjectConfig;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.map.GPGeoPoint;
 
+import static java.lang.Math.abs;
+
 public class LatLongUtils {
     private static final double MAX_DISTANCE = 50.0f;
     private static final double LINE_AND_POLYGON_VIEW_ZOOM = 15;
     private static final double RADIUS_JOIN_MO = 100.0f;
+    public static final double EPSILON = 1e-8;
 
     public static double distance(MapObject mo1, MapObject mo2) {
         try {
@@ -88,14 +90,14 @@ public class LatLongUtils {
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         try {
             List<ProjectConfig> cfgs = appContainer.getProjectActive().getConfigurations();
-            for (ProjectConfig cfg:
-                 cfgs) {
-                if(cfg.getConfigType() == ProjectConfig.ConfigType.MAP_OBJECT_OFFSET ) {
+            for (ProjectConfig cfg :
+                    cfgs) {
+                if (cfg.getConfigType() == ProjectConfig.ConfigType.MAP_OBJECT_OFFSET) {
                     return NumberUtiles.parseStringToDouble(cfg.getValue(), MAX_DISTANCE);
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return MAX_DISTANCE;
@@ -105,14 +107,14 @@ public class LatLongUtils {
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         try {
             List<ProjectConfig> cfgs = appContainer.getProjectActive().getConfigurations();
-            for (ProjectConfig cfg:
+            for (ProjectConfig cfg :
                     cfgs) {
-                if(cfg.getConfigType() == ProjectConfig.ConfigType.LINE_AND_POLYGON_VIEW_ZOOM ) {
+                if (cfg.getConfigType() == ProjectConfig.ConfigType.LINE_AND_POLYGON_VIEW_ZOOM) {
                     return NumberUtiles.parseStringToDouble(cfg.getValue(), LINE_AND_POLYGON_VIEW_ZOOM);
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -123,18 +125,86 @@ public class LatLongUtils {
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         try {
             List<ProjectConfig> cfgs = appContainer.getProjectActive().getConfigurations();
-            for (ProjectConfig cfg:
+            for (ProjectConfig cfg :
                     cfgs) {
-                if(cfg.getConfigType() == ProjectConfig.ConfigType.MAP_OBJECT_JOINT_OFFSET ) {
+                if (cfg.getConfigType() == ProjectConfig.ConfigType.MAP_OBJECT_JOINT_OFFSET) {
                     return NumberUtiles.parseStringToDouble(cfg.getValue(), RADIUS_JOIN_MO);
                 }
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return RADIUS_JOIN_MO;
+    }
+
+    /**
+     * Given three colinear points a, b, c, the function checks if point c lies on line segment 'ab'
+     * Method:
+     * Check if the cross product of (b-a) and (c-a) is 0, as tells Darius Bacon, tells you if the points a, b and c are aligned.
+     * <p>
+     * But, as you want to know if c is between a and b, you also have to check that the dot product of (b-a) and (c-a) is positive and is less than the square of the distance between a and b.
+     * <p>
+     * In non-optimized pseudocode:
+     * <p>
+     * def isOnLine(a, b, c):
+     * crossproduct = (c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y)
+     * <p>
+     * # compare versus epsilon for floating point values, or != 0 if using integers
+     * if abs(crossproduct) > epsilon:
+     * return False
+     * <p>
+     * dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
+     * if dotproduct < 0:
+     * return False
+     * <p>
+     * squaredlengthba = (b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)
+     * if dotproduct > squaredlengthba:
+     * return False
+     * <p>
+     * return True
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return boolean
+     */
+
+    public static boolean IsOnSegment(Point a, Point b, Point c) {
+        double crossproduct = (c.getY() - a.getY()) * (b.getX() - a.getX())
+                - (c.getX() - a.getX()) * (b.getY() - a.getY());
+
+        // compare versus epsilon for floating point values, or != 0 if using integers
+        if (abs(crossproduct) > EPSILON)
+            return false;
+
+        double dotproduct = (c.getX() - a.getX()) * (b.getX() - a.getX()) + (c.getY() - a.getY()) * (b.getY() - a.getY());
+
+        if (dotproduct < 0)
+            return false;
+
+        double squaredlengthba = (b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY());
+        if (dotproduct > squaredlengthba)
+            return false;
+
+
+        return onSegment(a, c, b);
+    }
+
+    // Given three colinear points p, q, r,
+    // the function checks if point q lies
+    // on line segment 'pr'
+    public static boolean onSegment(Point p, Point q, Point r)
+    {
+        if (q.getX() <= Math.max(p.getX(), r.getX()) &&
+                q.getX() >= Math.min(p.getX(), r.getX()) &&
+                q.getY() <= Math.max(p.getY(), r.getY()) &&
+                q.getY() >= Math.min(p.getY(), r.getY()))
+        {
+            return true;
+        }
+        return false;
     }
 }
 

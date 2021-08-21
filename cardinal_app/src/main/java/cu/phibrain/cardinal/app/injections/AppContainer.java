@@ -32,7 +32,6 @@ public class AppContainer {
     protected MapObject mapObjectActive;
     protected Worker currentWorker;
     private RouteSegment RouteSegmentActive;
-    private Boolean isTopology = false;
 
     protected UserMode umode;
 
@@ -77,8 +76,13 @@ public class AppContainer {
     }
 
 
-    public Project getProjectActive() throws IOException {
-        refreshProject();
+    public Project getProjectActive() {
+        try {
+            refreshProject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         return projectActive;
     }
 
@@ -98,7 +102,7 @@ public class AppContainer {
     public WorkSession getWorkSessionActive() {
         try {
             refreshSession();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -119,7 +123,7 @@ public class AppContainer {
     public Worker getCurrentWorker() {
         try {
             refreshSession();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -145,7 +149,7 @@ public class AppContainer {
     public MapObjecType getMapObjecTypeActive() {
         try {
             refreshMOT();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -176,7 +180,7 @@ public class AppContainer {
     public Networks getNetworksActive() {
         try {
             refreshNetwork();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -208,7 +212,7 @@ public class AppContainer {
     public MapObject getCurrentMapObject() {
         try {
             refreshCMO();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -218,11 +222,6 @@ public class AppContainer {
 
     public void setCurrentMapObject(MapObject mapObjectActive) {
         this.mapObjectActive = mapObjectActive;
-        if (this.mapObjectActive != null) {
-            setTopology(mapObjectActive.belongToTopoLayer());
-        } else
-            setTopology(false);
-
 
         setValue(
                 CardinalMetadataTableDefaultValues.CURRENT_MAP_OBJECT_ID.getFieldName(),
@@ -232,12 +231,13 @@ public class AppContainer {
 
 
     public Boolean IsCurrentActiveLayerTopological() {
-        return isTopology;
+        if (this.mapObjectActive != null) {
+            return this.mapObjectActive.belongToTopoLayer();
+        }
+
+        return false;
     }
 
-    private void setTopology(Boolean topology) {
-        isTopology = topology;
-    }
 
     public UserMode getMode() {
         return umode;

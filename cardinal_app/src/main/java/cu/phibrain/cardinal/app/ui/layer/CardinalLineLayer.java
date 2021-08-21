@@ -11,15 +11,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.util.LineStringExtracter;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.vector.VectorLayer;
+import org.oscim.layers.vector.geometries.Drawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
+import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +47,6 @@ import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.library.util.TextRunnable;
-import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.Feature;
@@ -54,10 +58,10 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     public static String NAME = null;
     private final SharedPreferences peferences;
-    private GPMapView mapView;
+    private final GPMapView mapView;
     private Style lineStyle = null;
     private eu.geopaparazzi.library.style.Style gpStyle;
-    private IActivitySupporter activitySupporter;
+    private final IActivitySupporter activitySupporter;
 
     public CardinalLineLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
         super(mapView.map());
@@ -103,9 +107,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                             mto.resetMapObjects();
                             for (MapObject mo : mto.getMapObjects()) {
                                 List<GeoPoint> points = new ArrayList<>();
-                                for (GPGeoPoint point : mo.getCoord()) {
-                                    points.add(((GeoPoint) point));
-                                }
+                                points.addAll(mo.getCoord());
                                 if (points.size() > 1) {
                                     GPLineDrawable drawable = new GPLineDrawable(points, lineStyle, mo.getId());
                                     add(drawable);
@@ -172,22 +174,65 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
+        if (!isEnabled()) {
+            return false;
+        }
+        if (g instanceof Gesture.LongPress) {
+            if (tmpDrawables.size() > 0) {
+                GPLineDrawable selectedLine = null;
+                GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+                Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+                for (int index = 0; index < tmpDrawables.size(); index++) {
+                    Drawable drawable = tmpDrawables.get(index);
+                    selectedLine = (GPLineDrawable) drawable;
 
-        if (g instanceof Gesture.Tap) {
-//            if (tmpDrawables.size() > 0) {
-//                GPLineDrawable indexLine = (GPLineDrawable) tmpDrawables.get(tmpDrawables.size() - 1);
-//
-//                GPDialogs.toast(mapView.getContext(), Long.toString(indexLine.getId()), Toast.LENGTH_SHORT);
-//                tmpDrawables.clear();
-//
-//            }
+                    List lines = LineStringExtracter.getLines(selectedLine.getGeometry());
+                    for (Object geoLine : lines) {
+                        Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
+                        Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
+                        Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                        Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                        if (LatLongUtils.IsOnSegment(pointA,  pointB, pointC)) {
+                            return onItemLongPress(index, selectedLine);
+                        }
+
+                    }
+
+                }
+
+            }
         }
         return false;
     }
 
+    public boolean onItemLongPress(int index, GPLineDrawable item) {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        appContainer.setRouteSegmentActive(null);
+
+        if (item != null) {
+            MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
+            appContainer.setCurrentMapObject(objectSelected);
+            appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
+            try {
+                mapView.reloadLayer(CardinalSelectPointLayer.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("update_map_object_active", true);
+            intent.putExtra("update_map_object_type_active", true);
+            ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
+
+
+        }
+        return true;
+
+    }
+
     @Override
     public boolean isEditable() {
-        return false;
+        return true;
     }
 
     @Override
@@ -287,8 +332,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
         Layer editLayer = currentMO.getLayer();
         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
 
-        if(oldSelectedObjectType != null)
-        {
+        if (oldSelectedObjectType != null) {
             Layer layer = oldSelectedObjectType.getLayerObj();
             ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
         }
