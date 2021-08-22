@@ -91,7 +91,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.BLACK)
-                        .strokeWidth(3f)
+                        .strokeWidth((float) LatLongUtils.SELECTION_FUZZINESS)
                         .stipple(25)
                         .stippleColor(Color.RED)
                         .cap(Paint.Cap.ROUND)
@@ -228,7 +228,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
 //                }
 
                 //MI variante zet
-                if (LatLongUtils.IsOnSegment(pointA,  pointB, pointC)) {
+                if (LatLongUtils.CheckIsPointOnLineSegment(pointC, pointA, pointB)) {
                     return edge;
                 }
 
@@ -258,6 +258,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                 Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
                 intent.putExtra("create_map_object_by_select_edge", edge.getId());
                 ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
+                return true;
             }
         }
         return false;

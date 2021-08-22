@@ -95,7 +95,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
-                        .strokeWidth(2f)
+                        .strokeWidth((float) LatLongUtils.SELECTION_FUZZINESS)
                         .cap(Paint.Cap.ROUND)
                         .build();
             }
@@ -181,7 +181,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
             if (tmpDrawables.size() > 0) {
                 GPLineDrawable selectedLine = null;
                 GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-                Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+                Point targetPoint = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
                 for (int index = 0; index < tmpDrawables.size(); index++) {
                     Drawable drawable = tmpDrawables.get(index);
                     selectedLine = (GPLineDrawable) drawable;
@@ -190,9 +190,9 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                     for (Object geoLine : lines) {
                         Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
                         Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
-                        Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
-                        Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                        if (LatLongUtils.IsOnSegment(pointA,  pointB, pointC)) {
+                        Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                        Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint,  endLinePoint)) {
                             return onItemLongPress(index, selectedLine);
                         }
 

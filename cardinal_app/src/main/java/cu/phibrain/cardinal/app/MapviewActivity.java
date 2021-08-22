@@ -1190,8 +1190,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 setNewCenter(lastGpsPosition[0], lastGpsPosition[1]);
             }
 
-        }
-        else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
+        } else if (i == cu.phibrain.cardinal.app.R.id.addbookmarkbutton) {
             addBookmark();
         } else if (i == cu.phibrain.cardinal.app.R.id.togglemeasuremodebutton) {
             if (!isInNonClickableMode) {
@@ -1640,7 +1639,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             selectMto.setImageBitmap(bitmap);
         }
 
-        if (appContainer.getRouteSegmentActive() != null && _mtoModel.getGeomType() == MapObjecType.GeomType.POLYLINE) {
+        if (appContainer.getRouteSegmentActive() != null && _mtoModel != null && _mtoModel.getGeomType() == MapObjecType.GeomType.POLYLINE) {
             AppCompatActivity activity = this;
             List<GPGeoPoint> points = new ArrayList<>();
             MapObject origin = appContainer.getRouteSegmentActive().getOriginObj();

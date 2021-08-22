@@ -92,7 +92,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.YELLOW)
-                        .strokeWidth(2f)
+                        .strokeWidth((float) LatLongUtils.SELECTION_FUZZINESS)
                         .cap(Paint.Cap.ROUND)
                         .build();
             }
