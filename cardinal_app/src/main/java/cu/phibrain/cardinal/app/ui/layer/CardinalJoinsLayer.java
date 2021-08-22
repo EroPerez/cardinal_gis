@@ -86,7 +86,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
             if (lineStyle == null) {
                 lineStyle = Style.builder()
                         .strokeColor(Color.GREEN)
-                        .strokeWidth(2.5f)
+                        .strokeWidth((float) LatLongUtils.SELECTION_FUZZINESS)
                         .stipple(20)
                         .stippleColor(Color.RED)
                         .cap(Paint.Cap.ROUND)
@@ -174,7 +174,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
             if (tmpDrawables.size() > 0) {
                 GPLineDrawable selectedJoinObj = null;
                 GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-                Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+                Point targetPoint = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
                 for (int index = 0; index < tmpDrawables.size(); index++) {
                     Drawable drawable = tmpDrawables.get(index);
                     selectedJoinObj = (GPLineDrawable) drawable;
@@ -183,9 +183,9 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                     for (Object geoLine : lines) {
                         Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
                         Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
-                        Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
-                        Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                        if (LatLongUtils.IsOnSegment(pointA, pointB, pointC)) {
+                        Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                        Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint,  endLinePoint)) {
                             return onItemLongPress(index, selectedJoinObj);
                         }
 

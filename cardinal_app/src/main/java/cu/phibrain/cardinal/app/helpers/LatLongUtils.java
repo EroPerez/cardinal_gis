@@ -27,7 +27,9 @@ public class LatLongUtils {
     private static final double MAX_DISTANCE = 50.0f;
     private static final double LINE_AND_POLYGON_VIEW_ZOOM = 15;
     private static final double RADIUS_JOIN_MO = 100.0f;
-    public static final double EPSILON = 1e-8;
+    public static final double EPSILON = 9E-7;
+    public static final double SELECTION_FUZZINESS = 2.5f;
+
 
     public static double distance(MapObject mo1, MapObject mo2) {
         try {
@@ -195,16 +197,42 @@ public class LatLongUtils {
     // Given three colinear points p, q, r,
     // the function checks if point q lies
     // on line segment 'pr'
-    public static boolean onSegment(Point p, Point q, Point r)
-    {
+    private static boolean onSegment(Point p, Point q, Point r) {
         if (q.getX() <= Math.max(p.getX(), r.getX()) &&
                 q.getX() >= Math.min(p.getX(), r.getX()) &&
                 q.getY() <= Math.max(p.getY(), r.getY()) &&
-                q.getY() >= Math.min(p.getY(), r.getY()))
-        {
+                q.getY() >= Math.min(p.getY(), r.getY())) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Tests whether a point lies on the line defined by a list of
+     * coordinates.
+     *
+     * The best way to determine if a point R = (rx, ry) lies on the line connecting points P = (px, py)
+     * and Q = (qx, qy) is to check whether the determinant of the matrix
+     * <p>
+     * {{qx - px, qy - py}, {rx - px, ry - py}},
+     * <p>
+     * namely (qx - px) * (ry - py) - (qy - py) * (rx - px) is close to 0. This solution has several
+     * related advantages over the others posted: first, it requires no special case for vertical lines,
+     * second, it doesn't divide (usually a slow operation), third, it doesn't trigger bad
+     * floating-point behavior when the line is almost, but not quite vertical.
+     *
+     * @param r    the point to test
+     * @param p the line coordinate
+     * @param q the other line coordinate
+     * @return true if the point is a vertex of the line or lies in the interior
+     * of a line segment in the line
+     */
+    public static boolean CheckIsPointOnLineSegment(Point r, Point p, Point q) {
+
+        double det = Math.abs((q.getX() - p.getX()) * (r.getY() - p.getY()) - (q.getY() - p.getY()) * (r.getX() - p.getX()));
+
+        return det <= EPSILON && onSegment(p, r, q);
+
     }
 }
 
