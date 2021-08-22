@@ -3,6 +3,7 @@ package cu.phibrain.cardinal.app.helpers;
 import android.content.Context;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -173,7 +174,7 @@ public class LatLongUtils {
      * @return boolean
      */
 
-    public static boolean IsOnSegment(Point a, Point b, Point c) {
+    public static boolean IsOnSegment(@NotNull Point a, @NotNull Point b, @NotNull Point c) {
         double crossproduct = (c.getY() - a.getY()) * (b.getX() - a.getX())
                 - (c.getX() - a.getX()) * (b.getY() - a.getY());
 
@@ -197,7 +198,7 @@ public class LatLongUtils {
     // Given three colinear points p, q, r,
     // the function checks if point q lies
     // on line segment 'pr'
-    private static boolean onSegment(Point p, Point q, Point r) {
+    private static boolean onSegment(@NotNull Point p, @NotNull Point q, @NotNull Point r) {
         if (q.getX() <= Math.max(p.getX(), r.getX()) &&
                 q.getX() >= Math.min(p.getX(), r.getX()) &&
                 q.getY() <= Math.max(p.getY(), r.getY()) &&
@@ -227,7 +228,7 @@ public class LatLongUtils {
      * @return true if the point is a vertex of the line or lies in the interior
      * of a line segment in the line
      */
-    public static boolean CheckIsPointOnLineSegment(Point r, Point p, Point q) {
+    public static boolean CheckIsPointOnLineSegment(@NotNull Point r, @NotNull Point p, @NotNull Point q) {
 
         double det = Math.abs((q.getX() - p.getX()) * (r.getY() - p.getY()) - (q.getY() - p.getY()) * (r.getX() - p.getX()));
 
