@@ -158,7 +158,9 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
 
     @Override
     public void dispose() {
-
+        tmpDrawables.clear();
+        mDrawables.clear();
+        update();
     }
 
     @Override
