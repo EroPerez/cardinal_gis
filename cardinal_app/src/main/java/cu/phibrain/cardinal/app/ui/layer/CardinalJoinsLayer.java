@@ -32,6 +32,7 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import eu.geopaparazzi.library.database.GPLog;
@@ -167,7 +168,8 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
-        if (!isEnabled()) {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
         if (g instanceof Gesture.LongPress) {
@@ -185,7 +187,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                         Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
                         Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
                         Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint,  endLinePoint)) {
+                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint, endLinePoint)) {
                             return onItemLongPress(index, selectedJoinObj);
                         }
 

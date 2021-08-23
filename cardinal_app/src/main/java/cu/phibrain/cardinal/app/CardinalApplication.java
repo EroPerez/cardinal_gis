@@ -73,42 +73,7 @@ public class CardinalApplication extends GeopaparazziApplication {
         super.onCreate();
         context = this;
         try {
-            DaoSessionManager.getInstance().setContext(context);
-            DaoSessionManager.getInstance().setDatabaseName(this.getDatabase().getPath());
-            daoSession = DaoSessionManager.getInstance().getDaoSession();
-
-            //Attach observer to subject
-            ProjectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            WorkerOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            ContractOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            StockOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            ZoneOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            NetworksOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            LayerOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjecTypeOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectTypeAttributeOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjecTypeDefectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjecTypeStateOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            LabelBatchesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            LabelMaterialOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            LabelSubLotOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectHasDefectHasImagesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectHasDefectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectHasStateOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectImagesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectMetadataOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MapObjectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            MaterialOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            RouteSegmentOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            SignalEventsOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            SupplierOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            TopologicalRuleOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            WorkerRouteOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            LabelOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-            ProjectConfigOperations.getInstance().attachTo(DaoSessionManager.getInstance());
-
-            appContainer = new AppContainer();
+            reconstructContainer();
             ResourcesManager.resetManager();
             ProfilesHandler.INSTANCE.checkActiveProfile(getContentResolver());
             if (appContainer.getProjectActive() != null)
@@ -171,7 +136,42 @@ public class CardinalApplication extends GeopaparazziApplication {
         return this.appContainer;
     }
 
-    public void resetContainer() {
+    public void reconstructContainer() throws IOException {
+        DaoSessionManager.getInstance().setContext(context);
+        DaoSessionManager.getInstance().setDatabaseName(this.getDatabase().getPath());
+        daoSession = DaoSessionManager.getInstance().getDaoSession();
+
+        //Attach observer to subject
+        ProjectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        WorkerOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        ContractOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        StockOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        ZoneOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        NetworksOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        LayerOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjecTypeOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectTypeAttributeOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjecTypeDefectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjecTypeStateOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        LabelBatchesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        LabelMaterialOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        LabelSubLotOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectHasDefectHasImagesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectHasDefectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectHasStateOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectImagesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectMetadataOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MapObjectOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        MaterialOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        RouteSegmentOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        SignalEventsOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        SupplierOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        TopologicalRuleOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        WorkerRouteOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        LabelOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        ProjectConfigOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+
         this.appContainer = new AppContainer();
     }
 }

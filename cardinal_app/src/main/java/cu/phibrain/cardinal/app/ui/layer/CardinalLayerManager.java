@@ -309,6 +309,16 @@ public enum CardinalLayerManager {
 
 
         //Cardinal Load Layers
+        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
+        lineLayer.load();
+
+        CardinalPolygonLayer polygonLayer = new CardinalPolygonLayer(mapView, activitySupporter);
+        polygonLayer.load();
+
+        //Select
+        CardinalSelectPointLayer selectPointLayer = new CardinalSelectPointLayer(mapView, activitySupporter);
+        selectPointLayer.load();
+
         if (cardinalLayersDefinitions.size() > 0) {
             for (JSONObject layerDefinition : cardinalLayersDefinitions) {
                 String layerClass = layerDefinition.getString(IGpLayer.LAYERTYPE_TAG);
@@ -351,15 +361,6 @@ public enum CardinalLayerManager {
             loadCardinalLayers(mapView, activitySupporter, cardinalLayersDefinitions);
         }
 
-        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
-        lineLayer.load();
-
-        CardinalPolygonLayer polygonLayer = new CardinalPolygonLayer(mapView, activitySupporter);
-        polygonLayer.load();
-
-        //Select
-        CardinalSelectPointLayer selectPointLayer = new CardinalSelectPointLayer(mapView, activitySupporter);
-        selectPointLayer.load();
     }
 
     private void loadCardinalLayers(GPMapView mapView, IActivitySupporter activitySupporter, List<JSONObject> cardinalLayersDefinitions) throws JSONException, IOException {
@@ -944,7 +945,7 @@ public enum CardinalLayerManager {
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalPolygonLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalJoinsLayer.class.getCanonicalName()))
             {
-                Long layerId = layerObj.getLong("ID");
+                Long layerId = layerObj.getLong(ICardinalLayer.LAYERID_TAG);
                 cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(layerId);
                 layer.setIsActive(enabled);
                 LayerOperations.getInstance().update(layer);
@@ -968,13 +969,13 @@ public enum CardinalLayerManager {
     public void changeLayerPosition(int layer, int fromRow, int toRow) {
         List<JSONObject> list = null;
         switch (layer) {
-            case 0:
+            case 2:
                 list = userLayersDefinitions;
                 break;
             case 1:
                 list = systemLayersDefinitions;
                 break;
-            case 2:
+            case 0:
                 list = cardinalLayersDefinitions;
                 break;
             default:

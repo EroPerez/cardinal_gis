@@ -82,8 +82,6 @@ import eu.geopaparazzi.map.layers.utils.SpatialiteConnectionsHandler;
 import eu.geopaparazzi.map.layers.utils.SpatialiteLabelDialogFragment;
 import eu.geopaparazzi.map.utils.MapUtilities;
 
-import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_NOTES_TEXT_VISIBLE;
-
 class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.cardinal.app.ui.map.CardinalMapLayerAdapter.ViewHolder> {
 
     private CardinalMapLayerListFragment mapLayerListFragment;
@@ -275,11 +273,7 @@ class CardinalMapLayerAdapter extends DragItemAdapter<MapLayerItem, cu.phibrain.
                                     } else {
                                         jsonObject.put(IGpLayer.LAYERDOLABELS_TAG, doLabels);
                                     }
-                                    // Hiding mapobject labels
-                                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
-                                    SharedPreferences.Editor prefEditor = preferences.edit();
-                                    prefEditor.putBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, doLabels);
-                                    prefEditor.commit();
+
                                 } else if (actionName.equals(zoomTo)) {
                                     List<JSONObject> userLayersDefinitions = CardinalLayerManager.INSTANCE.getUserLayersDefinitions();
                                     JSONObject jsonObject = userLayersDefinitions.get(finalSelIndex);

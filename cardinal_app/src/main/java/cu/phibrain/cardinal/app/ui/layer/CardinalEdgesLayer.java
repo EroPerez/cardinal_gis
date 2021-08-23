@@ -36,6 +36,7 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
+import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
@@ -148,7 +149,9 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
 
     @Override
     public void dispose() {
-
+        tmpDrawables.clear();
+        mDrawables.clear();
+        update();
     }
 
     @Override
@@ -239,14 +242,15 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
-        if (!isEnabled()) {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
         if (g == Gesture.LONG_PRESS) {
             GPLineDrawable edge = selectEdge(e.getX(), e.getY());
             if (edge != null) {
                 RouteSegmentOperations.getInstance().delete(edge.getId());
-                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+
                 appContainer.setRouteSegmentActive(null);
                 remove(edge);
                 update();
