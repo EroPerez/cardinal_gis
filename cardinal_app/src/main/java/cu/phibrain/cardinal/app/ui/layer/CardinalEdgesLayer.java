@@ -38,8 +38,10 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
@@ -243,6 +245,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        MapviewActivity activity = (MapviewActivity) this.activitySupporter;
         if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
@@ -252,8 +255,22 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                 RouteSegmentOperations.getInstance().delete(edge.getId());
 
                 appContainer.setRouteSegmentActive(null);
-                remove(edge);
-                update();
+                GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
+                        String.format(activity.getString(cu.phibrain.cardinal.app.R.string.delete_edge),
+                                LatLongUtils.getRadiusJoinMo()),
+                        () -> activity.runOnUiThread(() -> {
+                            // yes
+                            remove(edge);
+                            update();
+
+
+                        }), () -> activity.runOnUiThread(() -> {
+                            // no
+
+
+                        })
+                );
+
                 return true;
             }
         } else if (g == Gesture.PRESS) {
@@ -265,7 +282,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
     @Override
