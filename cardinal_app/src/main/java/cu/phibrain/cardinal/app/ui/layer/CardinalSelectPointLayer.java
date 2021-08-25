@@ -18,8 +18,6 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
-import org.oscim.layers.vector.geometries.CircleDrawable;
-import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
 
@@ -55,8 +53,8 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
     public static final long SELECT_MARKER_UID = -1L;
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
-    private  MarkerItem selectMarker = null;
-    private  MarkerItem joinMarker =null;
+    private MarkerItem selectMarker = null;
+    private MarkerItem joinMarker = null;
     //    List<MapObject> mapObjectsList;
     private AppContainer appContainer;
 
@@ -111,7 +109,7 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
 
         MapObject currentMo = appContainer.getCurrentMapObject();
         removeAllItems();
-        if(currentMo!=null) {
+        if (currentMo != null) {
             Layer cardinalLayer = LayerOperations.getInstance().load(currentMo.getLayer().getId());
 
             if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
@@ -124,7 +122,7 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
                 ShapeDrawable joinCircle= new ShapeDrawable( new OvalShape());
                 joinCircle.setIntrinsicHeight(radio);
                 joinCircle.setIntrinsicWidth(radio);
-                joinCircle.setBounds(new Rect(0, 0,  radio,  radio));
+                joinCircle.setBounds(new Rect(0, 0, radio, radio));
                 joinCircle.getPaint().setColor(Color.BLUE);
                 joinCircle.getPaint().setStyle(Paint.Style.STROKE);
                 joinCircle.getPaint().setStrokeWidth((float) LatLongUtils.SELECTION_FUZZINESS);

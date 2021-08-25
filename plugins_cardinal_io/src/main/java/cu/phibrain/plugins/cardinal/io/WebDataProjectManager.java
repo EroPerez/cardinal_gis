@@ -2,6 +2,7 @@ package cu.phibrain.plugins.cardinal.io;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Html;
 import android.util.Log;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Devices;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Label;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelBatches;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
@@ -36,6 +38,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.DevicesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelMaterialOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelOperations;
@@ -122,8 +125,37 @@ public enum WebDataProjectManager {
             List<RouteSegment> routeSegments = new ArrayList<>();
             // Collect all session in project
             for (Contract contract : contractList) {
+                Worker worker = contract.getTheWorker();
 
                 // export to server from here
+                for (Devices device : worker.getDevices()) {
+                    // Synchronize worker device
+                    if (device.mustExport()) {
+                        if (device.getIsSync()) {
+                            if (!NetworkUtilitiesCardinalOl.sendPutWorkerDevice(server, token, (Devices) device.toRemoteObject())) {
+                                interrupted = true;
+                                break;
+                            } else {
+                                device.setSyncDate(new Date());
+                                device.update();
+                            }
+                        } else {
+                            Devices remoteDevice = NetworkUtilitiesCardinalOl.sendPostWorkerDevice(server, token, (Devices) device.toRemoteObject());
+                            if (remoteDevice != null) {
+                                device.setIsSync(true);
+                                Date now = new Date();
+                                device.setUpdatedAt(now);
+                                device.setSyncDate(now);
+                                device.update();
+                            } else {
+                                interrupted = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
                 // Get and save all objects in worksessions
                 for (WorkSession session : contract.getWorkSessions()) {
 
@@ -420,7 +452,7 @@ public enum WebDataProjectManager {
                 APIError error = GsonHelper.createPojoFromString(e.getMessage(), APIError.class);
                 return NetworkUtilities.getMessageForCode(context, error.status(), error.message());
             } else
-                return  e.getLocalizedMessage();
+                return e.getLocalizedMessage();
         }
 
     }
@@ -532,7 +564,7 @@ public enum WebDataProjectManager {
             // create table
             DaoMetadata.createTables(db);
             String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
-            DaoMetadata.initProjectMetadata(db, project.getName(), project.getDescription(), null, user, uniqueDeviceId);
+            DaoMetadata.initProjectMetadata(db, project.getName(), Html.fromHtml(project.getDescription()).toString(), null, user, uniqueDeviceId);
             DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldName(), CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldLabel(), "");
@@ -542,6 +574,8 @@ public enum WebDataProjectManager {
 
             //Inserts Operations
             WorkerOperations.getInstance().insertAll(workerList);
+            Worker currentWorker = WorkerOperations.getInstance().findOneBy(user);
+            DevicesOperations.getInstance().insert(new Devices(null, uniqueDeviceId, String.format("%s Mobile", currentWorker.getFirstName()), cu.phibrain.plugins.cardinal.io.utils.Utilities.getOSVersion(), new Date(), currentWorker.getId()));
             ContractOperations.getInstance().insertAll(contractList);
             StockOperations.getInstance().insertAll(stockList);
             ZoneOperations.getInstance().insertAll(zoneList);

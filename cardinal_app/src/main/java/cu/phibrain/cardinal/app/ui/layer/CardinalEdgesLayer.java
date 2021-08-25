@@ -38,7 +38,6 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
@@ -282,7 +281,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                 return true;
             }
         }
-        return true;
+        return false;
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Devices;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LoginModel;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -467,6 +468,35 @@ public class NetworkUtilitiesCardinalOl {
         try {
 
             Response<MapObjectHasDefectHasImages> response = ApiClient.getApiService(server).updateMapObjectHasDefectHasImages(token.toString(), images.getRemoteId(), images).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static Devices sendPostWorkerDevice(String server, AuthToken token, Devices device) {
+        try {
+
+            Response<Devices> response = ApiClient.getApiService(server).createWorkerDevices(token.toString(), device).execute();
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean sendPutWorkerDevice(String server, AuthToken token, Devices device) {
+        try {
+
+            Response<Devices> response = ApiClient.getApiService(server).updateWorkerDevices(token.toString(), device.getDeviceId(), device).execute();
             if (response.isSuccessful()) {
                 return true;
             }

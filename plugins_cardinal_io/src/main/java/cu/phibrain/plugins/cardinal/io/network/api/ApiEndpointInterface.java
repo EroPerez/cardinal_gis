@@ -3,6 +3,7 @@ package cu.phibrain.plugins.cardinal.io.network.api;
 import java.util.List;
 import java.util.Map;
 
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Devices;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LoginModel;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -195,4 +196,17 @@ public interface ApiEndpointInterface {
     })
     @POST("map-object-defect-image/")
     Call<MapObjectHasDefectHasImages> createMapObjectHasDefectHasImages(@Header("Authorization") String authorization,  @Body MapObjectHasDefectHasImages images);
+
+    @Headers({
+            "Accept: application/json"
+    })
+    @POST("devices/")
+    Call<Devices> createWorkerDevices(@Header("Authorization") String authorization, @Body Devices device);
+
+
+    @Headers({
+            "Accept: application/json"
+    })
+    @PUT("devices/{id}/")
+    Call<Devices> updateWorkerDevices(@Header("Authorization") String authorization, @Path("id") String id, @Body Devices device);
 }
