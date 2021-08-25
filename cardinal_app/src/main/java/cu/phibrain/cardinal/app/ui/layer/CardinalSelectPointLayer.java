@@ -22,12 +22,14 @@ import org.oscim.layers.vector.geometries.CircleDrawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
+import org.oscim.utils.FastMath;
 
 import java.io.IOException;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
+import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
@@ -48,9 +50,12 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
     private static final int FG_COLOR = 0xFF000000; // 100 percent black. AARRGGBB
     private static final int BG_COLOR = 0x80FF69B4; // 50 percent pink. AARRGGBB
     private static final int TRANSP_WHITE = 0x80FFFFFF; // 50 percent white. AARRGGBB
+    private static final double PIXEL_TO_METETS = 3779.5f; // 50 percent white. AARRGGBB
+    protected static final double UNSCALE_COORD = 4;
     private static String NAME = null;
     private static Bitmap mtoBitmap;
     private static int textSize;
+    public static int SIZE = 512;
     private static String colorStr;
     public static final long SELECT_MARKER_UID = -1L;
     private GPMapView mapView;
@@ -107,8 +112,8 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
     @Override
     public void reloadData() throws IOException {
         GPMapPosition mapPosition = mapView.getMapPosition();
-        int zoom = mapPosition.getZoomLevel();
-
+        double zoom = mapPosition.getZoomLevel();
+        double scale = (Math.pow(2, zoom) / UNSCALE_COORD)*0.0001;
         MapObject currentMo = appContainer.getCurrentMapObject();
         removeAllItems();
         if(currentMo!=null) {
@@ -120,18 +125,20 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
                 mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
                 selectMarker.setMarker(new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.CENTER, false));
 
-                int radio = (int)Math.round(LatLongUtils.getRadiusJoinMo());
+                double bbox = LatLongUtils.getRadiusJoinMo() * PIXEL_TO_METETS;
+
+                int radius = NumberUtiles.roundUp((bbox * 0.01)/(zoom/scale));
                 ShapeDrawable joinCircle= new ShapeDrawable( new OvalShape());
-                joinCircle.setIntrinsicHeight(radio);
-                joinCircle.setIntrinsicWidth(radio);
-                joinCircle.setBounds(new Rect(0, 0,  radio,  radio));
+                joinCircle.setIntrinsicHeight(radius);
+                joinCircle.setIntrinsicWidth(radius);
+                joinCircle.setBounds(new Rect(0, 0,  radius,  radius));
                 joinCircle.getPaint().setColor(Color.BLUE);
                 joinCircle.getPaint().setStyle(Paint.Style.STROKE);
                 joinCircle.getPaint().setStrokeWidth((float) LatLongUtils.SELECTION_FUZZINESS);
                 joinCircle.getPaint().setStrokeCap(Paint.Cap.ROUND);
-//
 
-//                    CircleDrawable circle = new CircleDrawable(centerPoint(currentMo),1, Style.builder()
+
+//              CircleDrawable circle = new CircleDrawable(centerPoint(currentMo),1, Style.builder()
 //                            .strokeColor(android.graphics.Color.YELLOW)
 //                            .strokeWidth(2f)
 //                            .cap(org.oscim.backend.canvas.Paint.Cap.ROUND)
