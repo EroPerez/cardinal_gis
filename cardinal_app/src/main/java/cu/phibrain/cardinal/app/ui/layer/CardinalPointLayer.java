@@ -157,7 +157,6 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         GPMapPosition mapPosition = mapView.getMapPosition();
         int zoom = mapPosition.getZoomLevel();
 
-
         List<MarkerItem> markerItems = new ArrayList<>();
         removeAllItems();
         if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
@@ -181,13 +180,10 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                     mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
                     markerItems.add(mi);
                 }
-
             }
-
         }
         addItems(markerItems);
         update();
-
     }
 
     public void disable() {
@@ -234,7 +230,6 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             intent.putExtra("update_map_object_active", true);
             intent.putExtra("update_map_object_type_active", true);
             ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
-
 
         }
         return true;
@@ -414,7 +409,6 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
             }
         });
 
-
     }
 
     @Override
@@ -503,6 +497,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                             RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
                             RouteSegmentOperations.getInstance().save(edge);
                             appContainer.setMode(UserMode.NONE);
+                            mapView.releaseMapBlock();
                             try {
                                 mapView.reloadLayer(CardinalEdgesLayer.class);
                             } catch (Exception e) {
@@ -521,6 +516,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
                 RouteSegmentOperations.getInstance().save(edge);
                 appContainer.setMode(UserMode.NONE);
+                mapView.releaseMapBlock();
                 try {
                     mapView.reloadLayer(CardinalEdgesLayer.class);
                 } catch (Exception e) {
@@ -563,6 +559,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                             currentObj.setJoinObj(previousObj);
                             MapObjectOperations.getInstance().save(currentObj);
                             appContainer.setMode(UserMode.NONE);
+                            mapView.releaseMapBlock();
                             try {
                                 mapView.reloadLayer(CardinalJoinsLayer.class);
                             } catch (Exception e) {
@@ -580,14 +577,13 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 currentObj.setJoinObj(previousObj);
                 MapObjectOperations.getInstance().save(currentObj);
                 appContainer.setMode(UserMode.NONE);
+                mapView.releaseMapBlock();
                 try {
                     mapView.reloadLayer(CardinalJoinsLayer.class);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
-
 
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
