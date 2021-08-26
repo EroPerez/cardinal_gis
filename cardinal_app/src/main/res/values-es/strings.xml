@@ -57,5 +57,6 @@
     <string name="version">Versión %s</string>
     <string name="derechos"></string>
     <string name="desarrollado_por">Desarrolladores:</string>
-    <string name="delete_edge">Esta seguro de eliminar esta conexión.</string>
+    <string name="delete_edge">¿Está seguro de eliminar esta conexión.</string>
+    <string name="delete_join">¿Está seguro de eliminar esta union?</string>
 </resources>

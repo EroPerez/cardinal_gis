@@ -64,4 +64,5 @@
     <string name="desarrollado_por">Developers:</string>
     <string name="autores1">Erodis Pérez Michel (eperezm1986@nauta.cu)</string>
     <string name="autores2">Daniel García Fernández (dgarciaf@nauta.cu)</string>
+    <string name="delete_join">Está seguro de eliminar esta union?</string>
 </resources>

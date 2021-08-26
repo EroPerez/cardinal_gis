@@ -23,6 +23,7 @@ import org.oscim.map.Layers;
 import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +36,9 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
 import eu.geopaparazzi.map.GPMapPosition;
 import eu.geopaparazzi.map.GPMapView;
@@ -99,7 +102,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                 for (MapObject joinFrom : jointTo.getJoinedList()) {
                     list_GeoPoints.add(joinFrom.getCentroid());
                     list_GeoPoints.add(jointTo.getCentroid());
-                    GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, jointTo.getId());
+                    GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, joinFrom.getId());
                     add(drawable);
                 }
             }
@@ -165,62 +168,65 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
     }
 
-
-    @Override
-    public boolean onGesture(Gesture g, MotionEvent e) {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
-        if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
-            return false;
-        }
-        if (g instanceof Gesture.LongPress) {
-            if (tmpDrawables.size() > 0) {
-                GPLineDrawable selectedJoinObj = null;
-                GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-                Point targetPoint = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
-                for (int index = 0; index < tmpDrawables.size(); index++) {
-                    Drawable drawable = tmpDrawables.get(index);
-                    selectedJoinObj = (GPLineDrawable) drawable;
-
-                    List lines = LineStringExtracter.getLines(selectedJoinObj.getGeometry());
-                    for (Object geoLine : lines) {
-                        Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
-                        Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
-                        Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
-                        Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint, endLinePoint)) {
-                            return onItemLongPress(index, selectedJoinObj);
-                        }
-
-                    }
-
+    private GPLineDrawable selectJoin(float cord_x, float cord_y) {
+        GeoPoint geoPoint = mMap.viewport().fromScreenPoint(cord_x, cord_y);
+        Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+        for (Drawable drawable : tmpDrawables) {
+            GPLineDrawable join = (GPLineDrawable) drawable;
+            List lines = LineStringExtracter.getLines(join.getGeometry());
+            for (Object geoLine : lines) {
+                Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
+                Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
+                Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                if (LatLongUtils.CheckIsPointOnLineSegment(pointC, pointA, pointB)) {
+                    return join;
                 }
 
             }
         }
+        return null;
+    }
+
+    @Override
+    public boolean onGesture(Gesture g, MotionEvent e) {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        MapviewActivity activity = (MapviewActivity) this.activitySupporter;
+        if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
+            return false;
+        }
+       if(g instanceof Gesture.LongPress) {
+            GPLineDrawable join = selectJoin(e.getX(), e.getY());
+            if (join != null) {
+
+                MapObject joinObj = MapObjectOperations.getInstance().load(join.getId());
+                if(joinObj !=null) {
+                    GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
+                            String.format(activity.getString(cu.phibrain.cardinal.app.R.string.delete_join)),
+                            () -> activity.runOnUiThread(() -> {
+                                // yes
+                                joinObj.setJoinObj(null);
+                                MapObjectOperations.getInstance().save(joinObj);
+                                joinObj.resetJoinedList();
+                                remove(join);
+                                update();
+
+
+                            }), () -> activity.runOnUiThread(() -> {
+                                // no
+
+
+                            })
+                    );
+                    return true;
+                }
+
+            }
+       }
         return false;
     }
 
 
-    public boolean onItemLongPress(int index, GPLineDrawable item) {
-        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
-        appContainer.setRouteSegmentActive(null);
-
-        if (item != null) {
-            MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
-            appContainer.setCurrentMapObject(objectSelected);
-            appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
-
-            //Update ui
-            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-            intent.putExtra("update_map_object_active", true);
-            intent.putExtra("update_map_object_type_active", true);
-            ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
-
-
-        }
-        return true;
-
-    }
 
     @Override
     public boolean isEditable() {
