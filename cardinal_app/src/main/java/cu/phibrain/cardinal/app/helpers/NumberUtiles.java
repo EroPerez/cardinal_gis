@@ -21,7 +21,6 @@ public class NumberUtiles {
         return null;
     }
 
-
     public static int roundUp(double n) {
 
         return Integer.parseInt(Long.toString(Math.round(n + 0.5f)));

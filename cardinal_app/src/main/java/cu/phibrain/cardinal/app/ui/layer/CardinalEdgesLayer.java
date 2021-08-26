@@ -248,20 +248,18 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
         if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
-        if (g == Gesture.LONG_PRESS) {
+        if (g instanceof Gesture.LongPress) {
             GPLineDrawable edge = selectEdge(e.getX(), e.getY());
             if (edge != null) {
-                RouteSegmentOperations.getInstance().delete(edge.getId());
 
-                appContainer.setRouteSegmentActive(null);
                 GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
-                        String.format(activity.getString(cu.phibrain.cardinal.app.R.string.delete_edge),
-                                LatLongUtils.getRadiusJoinMo()),
+                        String.format(activity.getString(cu.phibrain.cardinal.app.R.string.delete_edge)),
                         () -> activity.runOnUiThread(() -> {
                             // yes
+                            RouteSegmentOperations.getInstance().delete(edge.getId());
+                            appContainer.setRouteSegmentActive(null);
                             remove(edge);
                             update();
-
 
                         }), () -> activity.runOnUiThread(() -> {
                             // no
@@ -269,10 +267,10 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
 
                         })
                 );
-
                 return true;
+
             }
-        } else if (g == Gesture.PRESS) {
+        } else if (g instanceof Gesture.Press) {
             GPLineDrawable edge = selectEdge(e.getX(), e.getY());
             if (edge != null) {
                 Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
