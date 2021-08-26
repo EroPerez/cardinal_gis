@@ -137,7 +137,6 @@ public enum WebDataProjectManager {
                                 break;
                             } else {
                                 device.setSyncDate(new Date());
-                                device.update();
                             }
                         } else {
                             Devices remoteDevice = NetworkUtilitiesCardinalOl.sendPostWorkerDevice(server, token, (Devices) device.toRemoteObject());
@@ -146,12 +145,12 @@ public enum WebDataProjectManager {
                                 Date now = new Date();
                                 device.setUpdatedAt(now);
                                 device.setSyncDate(now);
-                                device.update();
                             } else {
                                 interrupted = true;
                                 break;
                             }
                         }
+                        device.update();
                     }
                 }
 
@@ -181,7 +180,6 @@ public enum WebDataProjectManager {
                                     break;
                                 } else {
                                     event.setSyncDate(new Date());
-                                    event.update();
                                 }
                             } else {
                                 SignalEvents remoteEvent = NetworkUtilitiesCardinalOl.sendPostSignalEvents(server, token, (SignalEvents) event.toRemoteObject());
@@ -189,12 +187,12 @@ public enum WebDataProjectManager {
                                     event.setIsSync(true);
                                     event.setSyncDate(new Date());
                                     event.setRemoteId(remoteEvent.getId());
-                                    event.update();
                                 } else {
                                     interrupted = true;
                                     break;
                                 }
                             }
+                            event.update();
                         }
 
                     }
@@ -257,7 +255,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                mapObject.update();
+                                if (mapObject.getDeleted())
+                                    mapObject.delete();
+                                else
+                                    mapObject.update();
                             } else {
                                 interrupted = true;
                                 break;
@@ -294,7 +295,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                state.update();
+                                if (state.getDeleted())
+                                    state.delete();
+                                else
+                                    state.update();
                             }
                         }
                         // Sync MapObjectImages
@@ -320,7 +324,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                objectImages.update();
+                                if (objectImages.getDeleted())
+                                    objectImages.delete();
+                                else
+                                    objectImages.update();
                             }
                         }
 
@@ -342,12 +349,15 @@ public enum WebDataProjectManager {
                                         objectMetadata.setIsSync(true);
                                         objectMetadata.setSyncDate(new Date());
                                         remoteMeta.setRemoteId(remoteMeta.getId());
-                                        objectMetadata.update();
                                     } else {
                                         interrupted = true;
                                         break;
                                     }
                                 }
+                                if (objectMetadata.getDeleted())
+                                    objectMetadata.delete();
+                                else
+                                    objectMetadata.update();
                             }
                         }
 
@@ -374,7 +384,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                defect.update();
+                                if (defect.getDeleted())
+                                    defect.delete();
+                                else
+                                    defect.update();
                             }
 
                             // Sync images in defect
@@ -401,7 +414,10 @@ public enum WebDataProjectManager {
                                             break;
                                         }
                                     }
-                                    images.update();
+                                    if (images.getDeleted())
+                                        images.delete();
+                                    else
+                                        images.update();
                                 }
 
                             }
@@ -416,11 +432,11 @@ public enum WebDataProjectManager {
 
                 Log.d("RouteSegmenTag", route.toString());
                 if (route.getIsSync()) {
-                    if (!NetworkUtilitiesCardinalOl.sendPut2RouteSegment(server, token, (RouteSegment) route.toRemoteObject())) {
+                    if (NetworkUtilitiesCardinalOl.sendPut2RouteSegment(server, token, (RouteSegment) route.toRemoteObject())) {
+                        route.setSyncDate(new Date());
+                    } else {
                         interrupted = true;
                         break;
-                    } else {
-                        route.setSyncDate(new Date());
                     }
                 } else {
                     RouteSegment routeSegmentRemote = NetworkUtilitiesCardinalOl.sendPostRouteSegment(server, token, (RouteSegment) route.toRemoteObject());
@@ -434,7 +450,11 @@ public enum WebDataProjectManager {
                         break;
                     }
                 }
-                route.update();
+
+                if (route.getDeleted())
+                    route.delete();
+                else
+                    route.update();
 
             }
 
@@ -646,7 +666,7 @@ public enum WebDataProjectManager {
                     }
 
                     //save current log
-                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, new Date(now), true, new Date(now), (long) gpslogs.size()));
+                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, new Date(now), true, new Date(now), (long) gpslogs.size(), false));
                 }
             }
 

@@ -78,16 +78,18 @@ public class MapObjectHasDefect implements Serializable, IExportable {
     @Generated(hash = 674995576)
     private transient MapObjectHasDefectDao myDao;
     private Date SyncDate;
+    private Boolean deleted;
 
-    @Generated(hash = 1454088258)
+    @Generated(hash = 261260541)
     public MapObjectHasDefect(Long id, Long remoteId, long mapObjectId, long mapObjectDefectId, Date createdAt,
-            Date SyncDate, Date updatedAt, Boolean isSync) {
+            Date SyncDate, Boolean deleted, Date updatedAt, Boolean isSync) {
         this.id = id;
         this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.mapObjectDefectId = mapObjectDefectId;
         this.createdAt = createdAt;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
         this.updatedAt = updatedAt;
         this.isSync = isSync;
     }
@@ -139,6 +141,15 @@ public class MapObjectHasDefect implements Serializable, IExportable {
 
     public void setMapObjectDefectId(long mapObjectDefectId) {
         this.mapObjectDefectId = mapObjectDefectId;
+    }
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted ;
     }
 
     @Override
@@ -352,7 +363,9 @@ public class MapObjectHasDefect implements Serializable, IExportable {
 
     @Override
     public IExportable toRemoteObject() {
-        return new MapObjectHasDefect(remoteId, getMapObject().getRemoteId(), mapObjectDefectId, createdAt);
+        MapObjectHasDefect defect = new MapObjectHasDefect(remoteId, getMapObject().getRemoteId(), mapObjectDefectId, createdAt);
+        defect.setDeleted(deleted);
+        return defect;
     }
 
     @Override

@@ -34,12 +34,16 @@ public class MapObjectImagesOperations extends BaseOperations<MapObjectImages, M
         synchronized (this) {
             if (mapObject_ImagesQuery == null) {
                 QueryBuilder<MapObjectImages> queryBuilder = queryBuilder();
-                queryBuilder.where(MapObjectImagesDao.Properties.MapObjectId.eq(null));
+                queryBuilder.where(
+                        MapObjectImagesDao.Properties.MapObjectId.eq(null),
+                        MapObjectImagesDao.Properties.Deleted.eq(null)
+                        );
                 mapObject_ImagesQuery = queryBuilder.build();
             }
         }
         Query<MapObjectImages> query = mapObject_ImagesQuery.forCurrentThread();
         query.setParameter(0, mapObjectId);
+        query.setParameter(1, false);
         return query.list();
     }
 }

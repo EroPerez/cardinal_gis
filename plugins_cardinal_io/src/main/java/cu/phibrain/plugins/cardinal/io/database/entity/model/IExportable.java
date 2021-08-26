@@ -26,4 +26,8 @@ public interface IExportable extends IEntity {
     Long getRemoteId();
 
     void setRemoteId(Long remoteId);
+
+    void setDeleted(Boolean deleted);
+
+    Boolean getDeleted();
 }

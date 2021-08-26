@@ -68,6 +68,7 @@ public class WorkerRoute implements Serializable, IExportable {
     private Date SyncDate;
 
     private long SyncPointCount;
+    private Boolean deleted;
 
     public WorkerRoute(Long id, Long workerSessionId, Double latitude, Double longitude, Double altitude, Date createdAt) {
         this.id = id;
@@ -80,9 +81,9 @@ public class WorkerRoute implements Serializable, IExportable {
     }
 
 
-    @Generated(hash = 1839833483)
+    @Generated(hash = 1791361921)
     public WorkerRoute(Long id, Long remoteId, Long workerSessionId, Long gpsLogsTableId, Date updatedAt, Boolean isSync,
-                       Date SyncDate, long SyncPointCount) {
+            Date SyncDate, long SyncPointCount, Boolean deleted) {
         this.id = id;
         this.remoteId = remoteId;
         this.workerSessionId = workerSessionId;
@@ -91,6 +92,7 @@ public class WorkerRoute implements Serializable, IExportable {
         this.isSync = isSync;
         this.SyncDate = SyncDate;
         this.SyncPointCount = SyncPointCount;
+        this.deleted = deleted;
     }
 
 
@@ -213,5 +215,15 @@ public class WorkerRoute implements Serializable, IExportable {
 
     public void setSyncPointCount(long SyncPointCount) {
         this.SyncPointCount = SyncPointCount;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted ;
     }
 }

@@ -83,10 +83,11 @@ public class Devices implements Serializable, IEntity, IExportable {
      */
     @Generated(hash = 1904195395)
     private transient DevicesDao myDao;
+    private Boolean deleted;
 
-    @Generated(hash = 1892083988)
+    @Generated(hash = 1242947508)
     public Devices(Long id, String deviceId, String name, String osVersion, Date createdAt,
-                   long workerId, Date updatedAt, Boolean isSync, Date SyncDate) {
+            long workerId, Date updatedAt, Boolean isSync, Date SyncDate, Boolean deleted) {
         this.id = id;
         this.deviceId = deviceId;
         this.name = name;
@@ -96,6 +97,7 @@ public class Devices implements Serializable, IEntity, IExportable {
         this.updatedAt = updatedAt;
         this.isSync = isSync;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
     }
 
     public Devices(Long id, String deviceId, String name, String osVersion, Date createdAt,
@@ -207,6 +209,16 @@ public class Devices implements Serializable, IEntity, IExportable {
     @Override
     public void setRemoteId(Long remoteId) {
 
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
     }
 
     public long getWorkerId() {

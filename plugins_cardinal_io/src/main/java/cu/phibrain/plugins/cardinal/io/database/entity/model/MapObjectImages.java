@@ -83,6 +83,7 @@ public class MapObjectImages implements Serializable, IExportable, KmlRepresente
     @Generated(hash = 1028776990)
     private transient Long mapObject__resolvedKey;
     private Date SyncDate;
+    private Boolean deleted;
 
     public MapObjectImages(Long remoteId, long mapObjectId, byte[] image, Date createdAt, double lon,
                            double lat, double elevation, double azimuth) {
@@ -99,9 +100,9 @@ public class MapObjectImages implements Serializable, IExportable, KmlRepresente
         this.isSync = false;
     }
 
-    @Generated(hash = 1283955147)
-    public MapObjectImages(Long id, Long remoteId, long mapObjectId, byte[] image, Date createdAt, double lon,
-            double lat, double elevation, double azimuth, Date SyncDate, Date updatedAt, Boolean isSync) {
+    @Generated(hash = 370399734)
+    public MapObjectImages(Long id, Long remoteId, long mapObjectId, byte[] image, Date createdAt, double lon, double lat,
+                           double elevation, double azimuth, Date SyncDate, Boolean deleted, Date updatedAt, Boolean isSync) {
         this.id = id;
         this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
@@ -112,6 +113,7 @@ public class MapObjectImages implements Serializable, IExportable, KmlRepresente
         this.elevation = elevation;
         this.azimuth = azimuth;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
         this.updatedAt = updatedAt;
         this.isSync = isSync;
     }
@@ -366,7 +368,9 @@ public class MapObjectImages implements Serializable, IExportable, KmlRepresente
 
     @Override
     public IExportable toRemoteObject() {
-        return new MapObjectImages(remoteId, getMapObject().getRemoteId(), image, createdAt, lon, lat, elevation, azimuth);
+        MapObjectImages imageObj = new MapObjectImages(remoteId, getMapObject().getRemoteId(), image, createdAt, lon, lat, elevation, azimuth);
+        imageObj.setDeleted(deleted);
+        return imageObj;
     }
 
     @Override
@@ -381,6 +385,16 @@ public class MapObjectImages implements Serializable, IExportable, KmlRepresente
 
     public Date getSyncDate() {
         return this.SyncDate;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
     }
 
     /** called by internal mechanisms, do not call yourself. */

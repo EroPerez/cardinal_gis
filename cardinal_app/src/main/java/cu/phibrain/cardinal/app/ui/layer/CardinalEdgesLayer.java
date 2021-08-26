@@ -102,7 +102,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
             List<RouteSegment> routeSegments = RouteSegmentOperations.getInstance().getAll();
             for (RouteSegment route : routeSegments) {
                 List<GeoPoint> list_GeoPoints = new ArrayList<>();
-                if (route.getOriginObj() != null && route.getDestinyObj() != null) {
+                if (!route.getDeleted() && (route.getOriginObj() != null && route.getDestinyObj() != null)) {
                     list_GeoPoints.add(LatLongUtils.centerPoint(route.getOriginObj().getCoord(), route.getOriginObj().getObjectType().getGeomType()));
                     list_GeoPoints.add(LatLongUtils.centerPoint(route.getDestinyObj().getCoord(), route.getDestinyObj().getObjectType().getGeomType()));
                     GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, route.getId());

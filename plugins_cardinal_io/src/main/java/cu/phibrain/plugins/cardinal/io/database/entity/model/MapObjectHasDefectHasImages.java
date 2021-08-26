@@ -63,10 +63,11 @@ public class MapObjectHasDefectHasImages implements Serializable, IExportable {
 
     private final static long serialVersionUID = -4499872341492642958L;
     private Date SyncDate;
+    private Boolean deleted;
 
-    @Generated(hash = 1814808325)
+    @Generated(hash = 1553364861)
     public MapObjectHasDefectHasImages(Long id, Long remoteId, long defectId, byte[] image, Date createdAt, double lon, double lat,
-                                       double elevation, double azimuth, Date SyncDate, Date updatedAt, Boolean isSync) {
+            double elevation, double azimuth, Date SyncDate, Boolean deleted, Date updatedAt, Boolean isSync) {
         this.id = id;
         this.remoteId = remoteId;
         this.defectId = defectId;
@@ -77,6 +78,7 @@ public class MapObjectHasDefectHasImages implements Serializable, IExportable {
         this.elevation = elevation;
         this.azimuth = azimuth;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
         this.updatedAt = updatedAt;
         this.isSync = isSync;
     }
@@ -216,7 +218,9 @@ public class MapObjectHasDefectHasImages implements Serializable, IExportable {
 
     @Override
     public IExportable toRemoteObject() {
-        return new MapObjectHasDefectHasImages(remoteId, getDefectObj().getRemoteId(), image, createdAt, lon, lat, elevation, azimuth);
+        MapObjectHasDefectHasImages imageObj = new MapObjectHasDefectHasImages(remoteId, getDefectObj().getRemoteId(), image, createdAt, lon, lat, elevation, azimuth);
+        imageObj.setDeleted(deleted);
+        return imageObj;
     }
 
     @Override
@@ -227,6 +231,16 @@ public class MapObjectHasDefectHasImages implements Serializable, IExportable {
     @Override
     public void setRemoteId(Long remoteId) {
         this.remoteId = remoteId;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted ;
     }
 
     /**

@@ -524,6 +524,16 @@ public class WorkSession implements Serializable, IExportable {
     }
 
     @Override
+    public void setDeleted(Boolean deleted) {
+
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return false;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

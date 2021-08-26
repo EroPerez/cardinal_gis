@@ -21,6 +21,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -103,6 +104,13 @@ public interface ApiEndpointInterface {
             "Accept: application/json",
             "Content-Type: application/json"
     })
+    @DELETE("map-object/{id}/")
+    Call<Object> deleteMapObject(@Header("Authorization") String authorization, @Path("id") long id);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
     @PUT("signal-events/{id}/")
     Call<SignalEvents> updateSignalEvents(@Header("Authorization") String authorization, @Path("id") long id, @Body SignalEvents event);
 
@@ -141,31 +149,55 @@ public interface ApiEndpointInterface {
             "Accept: application/json",
             "Content-Type: application/json"
     })
+    @DELETE("route-segment/{id}/")
+    Call<Object> deleteRouteSegment(@Header("Authorization") String authorization, @Path("id") Long id);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
     @PUT("state-vertex/{id}/")
-    Call<MapObjectHasState> updateMapObjectHasState(@Header("Authorization") String authorization, @Path("id") long id,   @Body MapObjectHasState state);
+    Call<MapObjectHasState> updateMapObjectHasState(@Header("Authorization") String authorization, @Path("id") long id, @Body MapObjectHasState state);
+
     @Headers({
             "Accept: application/json"
     })
     @POST("state-vertex/")
-    Call<MapObjectHasState> createMapObjectHasState(@Header("Authorization") String authorization,  @Body MapObjectHasState state);
+    Call<MapObjectHasState> createMapObjectHasState(@Header("Authorization") String authorization, @Body MapObjectHasState state);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @DELETE("state-vertex/{id}/")
+    Call<Object> deleteMapObjectHasState(@Header("Authorization") String authorization, @Path("id") long id);
 
     @Headers({
             "Accept: application/json",
             "Content-Type: application/json"
     })
     @PUT("map-object-image/{id}/")
-    Call<MapObjectImages> updateMapObjectImages(@Header("Authorization") String authorization,   @Path("id") long id,  @Body MapObjectImages objectImages);
+    Call<MapObjectImages> updateMapObjectImages(@Header("Authorization") String authorization, @Path("id") long id, @Body MapObjectImages objectImages);
+
     @Headers({
             "Accept: application/json"
     })
     @POST("map-object-image/")
-    Call<MapObjectImages> createMapObjectImages(@Header("Authorization") String authorization,  @Body MapObjectImages objectImages);
+    Call<MapObjectImages> createMapObjectImages(@Header("Authorization") String authorization, @Body MapObjectImages objectImages);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @DELETE("map-object-image/{id}/")
+    Call<Object> deleteMapObjectImages(@Header("Authorization") String authorization, @Path("id") long id);
 
     @Headers({
             "Accept: application/json"
     })
     @POST("map-object-metadata/")
-    Call<MapObjectMetadata> createMapObjectMetadata(@Header("Authorization") String authorization,  @Body MapObjectMetadata objectMetadata);
+    Call<MapObjectMetadata> createMapObjectMetadata(@Header("Authorization") String authorization, @Body MapObjectMetadata objectMetadata);
+
     @Headers({
             "Accept: application/json",
             "Content-Type: application/json"
@@ -177,25 +209,49 @@ public interface ApiEndpointInterface {
             "Accept: application/json",
             "Content-Type: application/json"
     })
+    @DELETE("map-object-metadata/{id}/")
+    Call<Object> deleteMapObjectMetadata(@Header("Authorization") String authorization, @Path("id") Long id);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
     @PUT("defect-vertex/{id}/")
     Call<MapObjectHasDefect> updateMapObjectHasDefect(@Header("Authorization") String authorization, @Path("id") Long id, @Body MapObjectHasDefect defect);
+
     @Headers({
             "Accept: application/json"
     })
     @POST("defect-vertex/")
     Call<MapObjectHasDefect> createMapObjectHasDefect(@Header("Authorization") String authorization, @Body MapObjectHasDefect defect);
 
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @DELETE("defect-vertex/{id}/")
+    Call<Object> deleteMapObjectHasDefect(@Header("Authorization") String authorization, @Path("id") Long id);
+
     @Headers({
             "Accept: application/json",
             "Content-Type: application/json"
     })
     @PUT("map-object-defect-image/{id}/")
-    Call<MapObjectHasDefectHasImages> updateMapObjectHasDefectHasImages(@Header("Authorization") String authorization, @Path("id") Long id,  @Body MapObjectHasDefectHasImages images);
+    Call<MapObjectHasDefectHasImages> updateMapObjectHasDefectHasImages(@Header("Authorization") String authorization, @Path("id") Long id, @Body MapObjectHasDefectHasImages images);
+
     @Headers({
             "Accept: application/json"
     })
     @POST("map-object-defect-image/")
-    Call<MapObjectHasDefectHasImages> createMapObjectHasDefectHasImages(@Header("Authorization") String authorization,  @Body MapObjectHasDefectHasImages images);
+    Call<MapObjectHasDefectHasImages> createMapObjectHasDefectHasImages(@Header("Authorization") String authorization, @Body MapObjectHasDefectHasImages images);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @DELETE("map-object-defect-image/{id}/")
+    Call<Object> deleteMapObjectHasDefectHasImage(@Header("Authorization") String authorization, @Path("id") Long id);
 
     @Headers({
             "Accept: application/json"

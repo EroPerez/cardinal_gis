@@ -99,9 +99,8 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
         if (GPLog.LOG_HEAVY)
             GPLog.addLogEntry(this, "refreshing map objects list"); //$NON-NLS-1$
 
-        currentMOA.resetJoinedList();
 
-        List<MapObject> mapObjectList = currentMOA.getJoinedList();
+        List<MapObject> mapObjectList = MapObjectOperations.getInstance().getJoinedList(currentMOA.getId());
 
         Collections.sort(mapObjectList, mapObjectComparator);
         mapobjectsCodes = new String[mapObjectList.size()];
@@ -122,9 +121,7 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
         if (GPLog.LOG_HEAVY)
             GPLog.addLogEntry(this, "filter a map objects list"); //$NON-NLS-1$
 
-//        currentMOA.resetJoinedList();
-
-        List<MapObject> mapObjectList = currentMOA.getJoinedList();
+        List<MapObject> mapObjectList = MapObjectOperations.getInstance().getJoinedList(currentMOA.getId());
 
         Collections.sort(mapObjectList, mapObjectComparator);
 

@@ -1,7 +1,5 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.events;
 
-import android.util.Log;
-
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
@@ -80,9 +78,9 @@ public class MapObjectEntityEventListener implements EntityEventListener<MapObje
     public void onBeforeEntityUpdate(MapObject mapObject, MapObjectOperations entityManager) {
         entityManager.detach(mapObject);
 
-        MapObject oldMapObject = entityManager.load(mapObject.getId());
-       Log.d("MOBEntityI", "mapObject: " + mapObject.toString());
-       Log.d("MOBEntityI", "oldMapObject: " + oldMapObject.toString());
+        MapObject oldMapObject = entityManager.load(mapObject.getId(), true);
+//        Log.d("MOBEntityI", "mapObject: " + mapObject.toString());
+//        Log.d("MOBEntityI", "oldMapObject: " + oldMapObject.toString());
 
         if (oldMapObject.getCode() != mapObject.getCode()) {
             //update the state of old label assigned

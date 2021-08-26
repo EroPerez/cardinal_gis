@@ -214,7 +214,12 @@ public class NetworkUtilitiesCardinalOl {
 
     public static boolean sendPut2MapObject(String server, AuthToken token, MapObject mapObject) {
         try {
-            Response<MapObject> response = ApiClient.getApiService(server).updateMapObject(token.toString(), mapObject.getRemoteId(), mapObject).execute();
+            Response response;
+            if (mapObject.getDeleted())
+                response = ApiClient.getApiService(server).deleteMapObject(token.toString(), mapObject.getRemoteId()).execute();
+            else
+                response = ApiClient.getApiService(server).updateMapObject(token.toString(), mapObject.getRemoteId(), mapObject).execute();
+
             if (response.isSuccessful()) {
                 return true;
             }
@@ -308,8 +313,13 @@ public class NetworkUtilitiesCardinalOl {
 
     public static boolean sendPut2RouteSegment(String server, AuthToken token, RouteSegment route) {
         try {
+            Response response;
+            if (route.getDeleted()) {
+                response = ApiClient.getApiService(server).deleteRouteSegment(token.toString(), route.getRemoteId()).execute();
+            } else {
+                response = ApiClient.getApiService(server).updateRouteSegment(token.toString(), route.getRemoteId(), route).execute();
+            }
 
-            Response<RouteSegment> response = ApiClient.getApiService(server).updateRouteSegment(token.toString(), route.getRemoteId(), route).execute();
             if (response.isSuccessful()) {
                 return true;
             }
@@ -338,7 +348,12 @@ public class NetworkUtilitiesCardinalOl {
     public static boolean sendPut2MapObjectHasState(String server, AuthToken token, MapObjectHasState state) {
         try {
 
-            Response<MapObjectHasState> response = ApiClient.getApiService(server).updateMapObjectHasState(token.toString(), state.getRemoteId(), state).execute();
+            Response response;
+            if (state.getDeleted())
+                response = ApiClient.getApiService(server).deleteMapObjectHasState(token.toString(), state.getRemoteId()).execute();
+            else
+                response = ApiClient.getApiService(server).updateMapObjectHasState(token.toString(), state.getRemoteId(), state).execute();
+
             if (response.isSuccessful()) {
                 return true;
             }
@@ -367,7 +382,12 @@ public class NetworkUtilitiesCardinalOl {
     public static boolean sendPut2MapObjectImages(String server, AuthToken token, MapObjectImages objectImages) {
         try {
 
-            Response<MapObjectImages> response = ApiClient.getApiService(server).updateMapObjectImages(token.toString(), objectImages.getRemoteId(), objectImages).execute();
+            Response response;
+            if (objectImages.getDeleted())
+                response = ApiClient.getApiService(server).deleteMapObjectImages(token.toString(), objectImages.getRemoteId()).execute();
+            else
+                response = ApiClient.getApiService(server).updateMapObjectImages(token.toString(), objectImages.getRemoteId(), objectImages).execute();
+
             if (response.isSuccessful()) {
                 return true;
             }
@@ -396,7 +416,12 @@ public class NetworkUtilitiesCardinalOl {
     public static boolean sendPut2MapObjectMetadata(String server, AuthToken token, MapObjectMetadata objectMetadata) {
         try {
 
-            Response<MapObjectMetadata> response = ApiClient.getApiService(server).updateMapObjectMetadata(token.toString(), objectMetadata.getRemoteId(), objectMetadata).execute();
+            Response response;
+            if (objectMetadata.getDeleted())
+                response = ApiClient.getApiService(server).deleteMapObjectMetadata(token.toString(), objectMetadata.getRemoteId()).execute();
+            else
+                response = ApiClient.getApiService(server).updateMapObjectMetadata(token.toString(), objectMetadata.getRemoteId(), objectMetadata).execute();
+
             if (response.isSuccessful()) {
                 return true;
             }
@@ -424,8 +449,12 @@ public class NetworkUtilitiesCardinalOl {
 
     public static boolean sendPut2MapObjectHasDefect(String server, AuthToken token, MapObjectHasDefect defect) {
         try {
+            Response response;
+            if (defect.getDeleted())
+                response = ApiClient.getApiService(server).deleteMapObjectHasDefect(token.toString(), defect.getRemoteId()).execute();
+            else
+                response = ApiClient.getApiService(server).updateMapObjectHasDefect(token.toString(), defect.getRemoteId(), defect).execute();
 
-            Response<MapObjectHasDefect> response = ApiClient.getApiService(server).updateMapObjectHasDefect(token.toString(), defect.getRemoteId(), defect).execute();
             if (response.isSuccessful()) {
                 return true;
             }
@@ -466,8 +495,12 @@ public class NetworkUtilitiesCardinalOl {
 
     public static boolean sendPut2MapObjectHasDefectHasImages(String server, AuthToken token, MapObjectHasDefectHasImages images) {
         try {
+            Response response;
+            if (images.getDeleted())
+                response = ApiClient.getApiService(server).deleteMapObjectHasDefectHasImage(token.toString(), images.getRemoteId()).execute();
+            else
+                response = ApiClient.getApiService(server).updateMapObjectHasDefectHasImages(token.toString(), images.getRemoteId(), images).execute();
 
-            Response<MapObjectHasDefectHasImages> response = ApiClient.getApiService(server).updateMapObjectHasDefectHasImages(token.toString(), images.getRemoteId(), images).execute();
             if (response.isSuccessful()) {
                 return true;
             }

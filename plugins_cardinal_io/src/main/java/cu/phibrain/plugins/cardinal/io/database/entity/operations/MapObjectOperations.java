@@ -3,9 +3,11 @@ package cu.phibrain.plugins.cardinal.io.database.entity.operations;
 import org.greenrobot.greendao.query.Query;
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.Iterator;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.events.MapObjectEntityEventListener;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.IExportable;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeState;
@@ -47,14 +49,17 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
             if (mapObject_RouteSegmentsQuery == null) {
                 RouteSegmentDao targetDao = daoSession.getRouteSegmentDao();
                 QueryBuilder<RouteSegment> queryBuilder = targetDao.queryBuilder();
-                queryBuilder.whereOr(RouteSegmentDao.Properties.OriginId.eq(null),
-                        RouteSegmentDao.Properties.DestinyId.eq(null));
+                queryBuilder.where(
+                        RouteSegmentDao.Properties.Deleted.eq(false),
+                        queryBuilder.or(RouteSegmentDao.Properties.OriginId.eq(Id),
+                                RouteSegmentDao.Properties.DestinyId.eq(Id))
+                );
+
                 mapObject_RouteSegmentsQuery = queryBuilder.build();
             }
         }
         Query<RouteSegment> query = mapObject_RouteSegmentsQuery.forCurrentThread();
-        query.setParameter(0, Id);
-        query.setParameter(1, Id);
+
         return query.list();
     }
 
@@ -76,7 +81,7 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
         for (MapObjectTypeAttribute attr : attributes) {
             for (MapObjectMetadata metadata : other.getMetadata()) {
 
-                if (!attr.equals(metadata.getAttribute())) {
+                if (!metadata.getDeleted() && !attr.equals(metadata.getAttribute())) {
                     String value = "" + attr.getDefaultValue();
                     if (value.isEmpty()) value = " ";
 
@@ -101,6 +106,22 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
                 MapObjectHasDefectOperations.getInstance().delete(defect);
         }
         save(other);
+    }
+
+
+    public List<MapObject> getJoinedList(long id) {
+
+        List<MapObject> entities = getDao()._queryMapObject_JoinedList(id);
+
+        for (Iterator<MapObject> it = entities.iterator(); it.hasNext(); ) {
+            MapObject entity = it.next();
+            if (entity instanceof IExportable && ((IExportable) entity).getDeleted()) {
+                it.remove();
+            }
+        }
+
+        return entities;
+
     }
 
 }

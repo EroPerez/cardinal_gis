@@ -74,17 +74,19 @@ public class RouteSegment implements Serializable, IExportable {
     @Generated(hash = 355299170)
     private transient RouteSegmentDao myDao;
     private Date SyncDate;
+    private Boolean deleted;
 
 
-    @Generated(hash = 1805773847)
+    @Generated(hash = 387422645)
     public RouteSegment(Long id, Long remoteId, long originId, long destinyId, Date createdAt,
-                        Date SyncDate, Date updatedAt, Boolean isSync) {
+                        Date SyncDate, Boolean deleted, Date updatedAt, Boolean isSync) {
         this.id = id;
         this.remoteId = remoteId;
         this.originId = originId;
         this.destinyId = destinyId;
         this.createdAt = createdAt;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
         this.updatedAt = updatedAt;
         this.isSync = isSync;
     }
@@ -311,9 +313,16 @@ public class RouteSegment implements Serializable, IExportable {
 
     @Override
     public IExportable toRemoteObject() {
-        MapObject origin = getOriginObj();
-        MapObject destiny = getDestinyObj();
-        return new RouteSegment(remoteId, origin.getRemoteId(), destiny.getRemoteId());
+        try {
+            MapObject origin = getOriginObj();
+            MapObject destiny = getDestinyObj();
+            RouteSegment route = new RouteSegment(remoteId, origin.getRemoteId(), destiny.getRemoteId());
+            route.setDeleted(deleted);
+            return route;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return this;
     }
 
     @Override
@@ -324,6 +333,16 @@ public class RouteSegment implements Serializable, IExportable {
     @Override
     public void setRemoteId(Long remoteId) {
         this.remoteId = remoteId;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
     }
 
 
