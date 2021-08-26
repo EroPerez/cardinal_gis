@@ -36,7 +36,8 @@ public class MapObjectHasDefectOperations extends BaseOperations<MapObjectHasDef
                 QueryBuilder<MapObjectHasDefect> queryBuilder = queryBuilder();
                 queryBuilder.where(
                         MapObjectHasDefectDao.Properties.MapObjectId.eq(null),
-                        MapObjectHasDefectDao.Properties.MapObjectDefectId.eq(null)
+                        MapObjectHasDefectDao.Properties.MapObjectDefectId.eq(null),
+                        MapObjectHasDefectDao.Properties.Deleted.eq(null)
                 );
                 mapObject_DefectsQuery = queryBuilder.build();
             }
@@ -44,6 +45,7 @@ public class MapObjectHasDefectOperations extends BaseOperations<MapObjectHasDef
         Query<MapObjectHasDefect> query = mapObject_DefectsQuery.forCurrentThread();
         query.setParameter(0, mapObjectId);
         query.setParameter(1, mapObjectDefectId);
+        query.setParameter(2, false);
         return query.unique();
     }
 

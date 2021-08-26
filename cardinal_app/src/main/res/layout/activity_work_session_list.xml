@@ -25,39 +25,36 @@
                 app:popupTheme="@style/GeopapTheme.PopupOverlay" />
 
         </com.google.android.material.appbar.AppBarLayout>
-        <ScrollView
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-                <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="15dp">
+            <com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_horizontal"
+                android:layout_marginTop="10dp">
+
+                <EditText
+                    android:id="@+id/search_box"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_marginTop="15dp">
-                    <com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="fill_horizontal"
-                        android:layout_marginTop="10dp">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/type_to_filter"
+                    android:inputType="text"
+                    android:singleLine="true" />
 
-                        <EditText
-                            android:id="@+id/search_box"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/type_to_filter"
-                            android:inputType="text"
-                            android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    </com.google.android.material.textfield.TextInputLayout>
+            <ListView
+                android:id="@+id/sessionList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                tools:listitem="@layout/activity_work_session_list_row"
+                />
 
-                    <ListView
-                        android:id="@+id/sessionList"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        tools:listitem="@layout/activity_work_session_list_row" />
-
-                </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -9,7 +9,6 @@ import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Transient;
@@ -44,11 +43,11 @@ import eu.geopaparazzi.map.GPGeoPoint;
         generateConstructors = true,
 
         // Whether getters and setters for properties should be generated if missing.
-        generateGettersSetters = true,
+        generateGettersSetters = true
 
-        indexes = {
-                @Index(value = "sessionId,code", unique = true)
-        }
+//        indexes = {
+//                @Index(value = "sessionId,code", unique = true)
+//        }
 )
 public class MapObject implements Serializable, IExportable, KmlRepresenter, GpxRepresenter {
 
@@ -173,11 +172,12 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
      */
     @Generated(hash = 48110761)
     private transient MapObjectDao myDao;
+    private Boolean deleted;
 
 
-    @Generated(hash = 1866368811)
+    @Generated(hash = 226692444)
     public MapObject(Long id, Long remoteId, String code, Long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord, double elevation, String observation,
-                     Date createdAt, Date updatedAt, Boolean isSync, Date SyncDate, long nodeGrade, Long stockCodeId, Long sessionId, Boolean isCompleted) {
+                     Date createdAt, Date updatedAt, Boolean isSync, Date SyncDate, long nodeGrade, Long stockCodeId, Long sessionId, Boolean isCompleted, Boolean deleted) {
         this.id = id;
         this.remoteId = remoteId;
         this.code = code;
@@ -194,6 +194,7 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         this.stockCodeId = stockCodeId;
         this.sessionId = sessionId;
         this.isCompleted = isCompleted;
+        this.deleted = deleted;
     }
 
 
@@ -1004,13 +1005,18 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
 
         MapObject join = getJoinObj();
 
+        MapObject obj;
         if (join == null) {
-            return new MapObject(id, remoteId, code, null, mapObjectTypeId, coord, elevation, observation,
+            obj = new MapObject(id, remoteId, code, null, mapObjectTypeId, coord, elevation, observation,
                     isSync, SyncDate, nodeGrade, stockCodeId, sessionId, isCompleted);
         } else {
-            return new MapObject(id, remoteId, code, join.getRemoteId(), mapObjectTypeId, coord, elevation, observation,
+            obj = new MapObject(id, remoteId, code, join.getRemoteId(), mapObjectTypeId, coord, elevation, observation,
                     isSync, SyncDate, nodeGrade, stockCodeId, sessionId, isCompleted);
         }
+
+        obj.setDeleted(deleted);
+
+        return obj;
     }
 
 
@@ -1032,6 +1038,16 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
 
     public void setRemoteId(long remoteId) {
         this.remoteId = remoteId;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
     }
 
 

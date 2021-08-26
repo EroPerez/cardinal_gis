@@ -277,6 +277,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
 
         dataListToLoad.clear();
         for (WebDataProjectModel webDataLayer : projectList) {
+            webDataLayer.isSelected = false;
             if (webDataLayer.matches(filterText)) {
                 dataListToLoad.add(webDataLayer);
             }
@@ -306,10 +307,11 @@ public class CardinalProjectImporterActivity extends ListActivity {
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         projectModel.isSelected = selectedBox.isChecked();
                         for (WebDataProjectModel dl : dataListToLoad) {
-                            if (projectModel.id != dl.id)
+                            if (!projectModel.id.equals(dl.id))
                                 dl.isSelected = false;
 
                         }
+                        notifyDataSetChanged();
                     }
                 });
 

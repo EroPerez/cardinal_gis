@@ -52,10 +52,10 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPointLayer;
-import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeDefect;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecTypeState;
@@ -67,6 +67,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectMetadataOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
@@ -461,7 +462,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
     }
 
-    private void updateCompleteness(View view, MapObject object){
+    private void updateCompleteness(View view, MapObject object) {
         ImageView imvCompleted = view.findViewById(R.id.imvCompleted);
 //        byte[] icon = object.getIcon();
         if (!object.getIsCompleted()) {
@@ -570,7 +571,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
         FragmentActivity activity = getActivity();
 
-        List<MapObjectMetadata> metadata = object.getMetadata();
+        List<MapObjectMetadata> metadata = MapObjectMetadataOperations.getInstance().getAll(object.getId());
 
         if (metadata.size() > 0) {
             RecyclerView recyclerView = view.findViewById(R.id.rvObjectAttributes);

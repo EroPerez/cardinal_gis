@@ -18,8 +18,6 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
-import org.oscim.layers.vector.geometries.CircleDrawable;
-import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
 import org.oscim.utils.FastMath;
@@ -60,8 +58,8 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
     public static final long SELECT_MARKER_UID = -1L;
     private GPMapView mapView;
     private IActivitySupporter activitySupporter;
-    private  MarkerItem selectMarker = null;
-    private  MarkerItem joinMarker =null;
+    private MarkerItem selectMarker = null;
+    private MarkerItem joinMarker = null;
     //    List<MapObject> mapObjectsList;
     private AppContainer appContainer;
 
@@ -116,7 +114,7 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
         double scale = (Math.pow(2, zoom) / UNSCALE_COORD)*0.0001;
         MapObject currentMo = appContainer.getCurrentMapObject();
         removeAllItems();
-        if(currentMo!=null) {
+        if (currentMo != null) {
             Layer cardinalLayer = LayerOperations.getInstance().load(currentMo.getLayer().getId());
 
             if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {

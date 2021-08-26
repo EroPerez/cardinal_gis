@@ -4,6 +4,7 @@ import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
@@ -76,15 +77,46 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
     }
 
     public Entity load(Long key) {
-        return getDao().load(key);
+        Entity entity = getDao().load(key);
+        if (entity instanceof IExportable && ((IExportable) entity).getDeleted()) {
+            detach(entity);
+            return null;
+        }
+        return entity;
+    }
+
+    /**
+     * Load entity even it is marked as deleted, Exportable entity are mark as deleted if they are remote(shared to cloud)
+     *
+     * @param key
+     * @param ifIsDeleted
+     * @return Entity
+     */
+    public Entity load(Long key, boolean ifIsDeleted) {
+        Entity entity = getDao().load(key);
+        if (!ifIsDeleted && entity instanceof IExportable && ((IExportable) entity).getDeleted()) {
+            detach(entity);
+            return null;
+        }
+        return entity;
     }
 
     /**
      * @return list of user entity from the table name Entity in the database
      */
     public List<Entity> getAll() {
-        return getDao().queryBuilder()
+        List<Entity> entities = getDao().queryBuilder()
                 .list();
+
+        for (Iterator<Entity> it = entities.iterator(); it.hasNext(); ) {
+            Entity entity = it.next();
+            if (entity instanceof IExportable && ((IExportable) entity).getDeleted()) {
+                it.remove();
+                detach(entity);
+            }
+        }
+
+        return entities;
     }
 
     /**
@@ -94,8 +126,7 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
      */
     public void insertAll(List<Entity> entityList) {
         if (entityList != null && !entityList.isEmpty())
-            for (Entity entity :
-                    entityList) {
+            for (Entity entity : entityList) {
                 insert(entity);
             }
 
@@ -106,6 +137,8 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
 
             //update field value if Exportable
             if (entity instanceof IExportable) {
+
+                ((IExportable) entity).setDeleted(false);
 
                 if (((IExportable) entity).getCreatedAt() == null)
                     ((IExportable) entity).setCreatedAt(new Date());
@@ -139,13 +172,20 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
 
         Entity entity = this.load(Id);
         if (entity != null) {
-            //Dispatch pre insert event
+
+            //Dispatch pre delete event
             if (this.dispatcher != null)
                 this.dispatcher.onBeforeEntityDelete(entity, this);
 
-            getDao().deleteByKey(Id);
+            if (entity instanceof IExportable && ((IExportable) entity).getIsSync()) {
+                ((IExportable) entity).setDeleted(true);
+                ((IExportable) entity).setUpdatedAt(new Date());
+                getDao().updateInTx(entity);
+                this.detach(entity);
+            } else
+                getDao().deleteByKey(Id);
 
-            //Dispatch post insert event
+            //Dispatch post delete event
             if (this.dispatcher != null)
                 this.dispatcher.onAfterEntityDelete(entity, this);
         }
@@ -153,13 +193,19 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
 
     public void delete(Entity entity) {
         if (entity != null) {
-            //Dispatch pre insert event
+            //Dispatch pre delete event
             if (this.dispatcher != null)
                 this.dispatcher.onBeforeEntityDelete(entity, this);
 
-            getDao().delete(entity);
+            if (entity instanceof IExportable && ((IExportable) entity).getIsSync()) {
+                ((IExportable) entity).setDeleted(true);
+                ((IExportable) entity).setUpdatedAt(new Date());
+                getDao().updateInTx(entity);
+                this.detach(entity);
+            } else
+                getDao().delete(entity);
 
-            //Dispatch post insert event
+            //Dispatch post delete event
             if (this.dispatcher != null)
                 this.dispatcher.onAfterEntityDelete(entity, this);
         }
@@ -172,8 +218,7 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
      */
     public void deleteAll(List<Entity> entityList) {
         if (entityList != null && !entityList.isEmpty())
-            for (Entity entity :
-                    entityList) {
+            for (Entity entity : entityList) {
                 delete(entity);
             }
 
@@ -200,7 +245,8 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
     }
 
     /**
-     *  Update entity without tracking updateAt parameter
+     * Update entity without tracking updateAt parameter
+     *
      * @param entity
      */
     public void update2(Entity entity) {

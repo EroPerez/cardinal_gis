@@ -2,8 +2,14 @@ package cu.phibrain.plugins.cardinal.io.database.entity.operations;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.Iterator;
+import java.util.List;
+
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.ContractDao;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.IExportable;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectDao;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSessionDao;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
@@ -38,6 +44,20 @@ public class WorkSessionOperations extends BaseOperations<WorkSession, WorkSessi
         );
 
         return queryBuilder.count();
+    }
+
+    public List<MapObject> getMapObjects(long workSessionId) {
+        MapObjectDao targetDao = daoSession.getMapObjectDao();
+        List<MapObject> entities = targetDao._queryWorkSession_MapObjects(workSessionId);
+
+        for (Iterator<MapObject> it = entities.iterator(); it.hasNext(); ) {
+            MapObject entity = it.next();
+            if (entity instanceof IExportable && ((IExportable) entity).getDeleted()) {
+                it.remove();
+            }
+        }
+
+        return entities;
     }
 
 }

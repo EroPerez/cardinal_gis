@@ -18,6 +18,7 @@ import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.DaoSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.DevicesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelMaterialOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelOperations;
@@ -171,6 +172,7 @@ public class CardinalApplication extends GeopaparazziApplication {
         WorkSessionOperations.getInstance().attachTo(DaoSessionManager.getInstance());
         LabelOperations.getInstance().attachTo(DaoSessionManager.getInstance());
         ProjectConfigOperations.getInstance().attachTo(DaoSessionManager.getInstance());
+        DevicesOperations.getInstance().attachTo(DaoSessionManager.getInstance());
 
         this.appContainer = new AppContainer();
     }

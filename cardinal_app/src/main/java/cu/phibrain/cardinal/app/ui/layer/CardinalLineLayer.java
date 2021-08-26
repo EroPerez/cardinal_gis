@@ -106,11 +106,13 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                         if (mto.getGeomType() == MapObjecType.GeomType.POLYLINE) {
                             mto.resetMapObjects();
                             for (MapObject mo : mto.getMapObjects()) {
-                                List<GeoPoint> points = new ArrayList<>();
-                                points.addAll(mo.getCoord());
-                                if (points.size() > 1) {
-                                    GPLineDrawable drawable = new GPLineDrawable(points, lineStyle, mo.getId());
-                                    add(drawable);
+                                if (!mo.getDeleted()) {
+                                    List<GeoPoint> points = new ArrayList<>();
+                                    points.addAll(mo.getCoord());
+                                    if (points.size() > 1) {
+                                        GPLineDrawable drawable = new GPLineDrawable(points, lineStyle, mo.getId());
+                                        add(drawable);
+                                    }
                                 }
                             }
                         }
@@ -194,7 +196,7 @@ public class CardinalLineLayer extends VectorLayer implements ISystemLayer, IEdi
                         Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
                         Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
                         Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint,  endLinePoint)) {
+                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint, endLinePoint)) {
                             return onItemLongPress(index, selectedLine);
                         }
 

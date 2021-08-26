@@ -34,6 +34,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.objects.Line;
@@ -155,10 +156,9 @@ public class SessionsStatsActivity extends AppCompatActivity {
         if (GPLog.LOG_HEAVY)
             GPLog.addLogEntry(this, "refreshing map objects list"); //$NON-NLS-1$
 
-        wsa.resetMapObjects();
         incompledCounter = 0;
 
-        List<MapObject> mapObjectList = wsa.getMapObjects();
+        List<MapObject> mapObjectList = WorkSessionOperations.getInstance().getMapObjects(wsa.getId());
 
         Collections.sort(mapObjectList, mapObjectComparator);
         mapobjectsCodes = new String[mapObjectList.size()];
@@ -184,9 +184,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
         if (GPLog.LOG_HEAVY)
             GPLog.addLogEntry(this, "filter a map objects list"); //$NON-NLS-1$
 
-        wsa.resetMapObjects();
-
-        List<MapObject> mapObjectList = wsa.getMapObjects();
+        List<MapObject> mapObjectList = WorkSessionOperations.getInstance().getMapObjects(wsa.getId());
 
         Collections.sort(mapObjectList, mapObjectComparator);
 
@@ -250,7 +248,7 @@ public class SessionsStatsActivity extends AppCompatActivity {
                     final MapObject mapObject2 = mapObjectMap.get(mapObjectText.getText().toString());
                     if (mapObject2 != null) {
 
-                        GPGeoPoint centerPoint = LatLongUtils.centerPoint(mapObject2.getCoord(), mapObject2.getObjectType().getGeomType());
+                        GPGeoPoint centerPoint = mapObject2.getCentroid();
 
                         Intent intent = new Intent(getContext(), MapsSupportService.class);
                         intent.putExtra(MapsSupportService.CENTER_ON_POSITION_REQUEST, true);

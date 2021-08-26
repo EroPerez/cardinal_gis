@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +94,7 @@ public class MapObjectDefectsAdapter extends RecyclerView.Adapter<MapObjectDefec
     private boolean contains(MapObjecTypeDefect defect) {
         for (MapObjectHasDefect hasDefect :
                 defectList) {
-            if (hasDefect.getMapObjectDefectId() == defect.getId())
+            if (!hasDefect.getDeleted() && hasDefect.getMapObjectDefectId() == defect.getId())
                 return true;
         }
 
@@ -105,7 +104,7 @@ public class MapObjectDefectsAdapter extends RecyclerView.Adapter<MapObjectDefec
     private MapObjectHasDefect load(MapObjecTypeDefect defect) {
         for (MapObjectHasDefect hasDefect :
                 defectList) {
-            if (hasDefect.getMapObjectDefectId() == defect.getId())
+            if (!hasDefect.getDeleted() && hasDefect.getMapObjectDefectId() == defect.getId())
                 return hasDefect;
         }
 
@@ -148,7 +147,7 @@ public class MapObjectDefectsAdapter extends RecyclerView.Adapter<MapObjectDefec
                         notifyDataSetChanged();
                     }
                 }
-                Log.d("Defect", "isClicked: " + position);
+//                Log.d("Defect", "isClicked: " + position);
 
 
             });

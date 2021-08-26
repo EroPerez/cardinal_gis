@@ -76,17 +76,19 @@ public class MapObjectHasState implements Serializable, IExportable {
     private transient MapObjectHasStateDao myDao;
 
     private Date SyncDate;
+    private Boolean deleted;
 
 
-    @Generated(hash = 860696342)
+    @Generated(hash = 86137076)
     public MapObjectHasState(Long id, Long remoteId, long mapObjectId, long mapObjectStateId, Date createdAt,
-            Date SyncDate, Date updatedAt, Boolean isSync) {
+            Date SyncDate, Boolean deleted, Date updatedAt, Boolean isSync) {
         this.id = id;
         this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.mapObjectStateId = mapObjectStateId;
         this.createdAt = createdAt;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
         this.updatedAt = updatedAt;
         this.isSync = isSync;
     }
@@ -190,7 +192,19 @@ public class MapObjectHasState implements Serializable, IExportable {
 
     @Override
     public IExportable toRemoteObject() {
-        return new MapObjectHasState(remoteId, getMapObject().getRemoteId(), mapObjectStateId, createdAt);
+        MapObjectHasState state = new MapObjectHasState(remoteId, getMapObject().getRemoteId(), mapObjectStateId, createdAt);
+        state.setDeleted(deleted);
+        return state;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted ;
     }
 
     @Override

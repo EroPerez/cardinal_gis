@@ -393,6 +393,16 @@ public class SignalEvents implements Serializable, IExportable {
         return this.SyncDate;
     }
 
+    @Override
+    public void setDeleted(Boolean deleted) {
+
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return false;
+    }
+
 
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 961848201)

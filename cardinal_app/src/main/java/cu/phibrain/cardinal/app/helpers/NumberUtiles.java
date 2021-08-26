@@ -2,6 +2,8 @@ package cu.phibrain.cardinal.app.helpers;
 
 public class NumberUtiles {
 
+    public static double METERS_PER_PIXELS = 3779.5280352161F;
+
     public static Double parseStringToDouble(String value, double defaultValue) {
         return value == null || value.trim().isEmpty() ? defaultValue : Double.parseDouble(value);
     }
@@ -23,4 +25,9 @@ public class NumberUtiles {
 
         return Integer.parseInt(Long.toString(Math.round(n + 0.5f)));
     }
+
+    public static double toPixels(double meters){
+        return meters * METERS_PER_PIXELS;
+    }
+
 }

@@ -174,11 +174,13 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 List<MapObject> mapObjects = mtoMapObjcType.getMapObjects();
 
                 for (MapObject mapObject : mapObjects) {
-                    String text = mtoMapObjcType.getCaption();
-                    GPGeoPoint ct = centerPoint(mapObject);
-                    MarkerItem mi = new MarkerItem(mapObject.getId(), mapObject.getCode(), text, ct);
-                    mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
-                    markerItems.add(mi);
+                    if (!mapObject.getDeleted()) {
+                        String text = mtoMapObjcType.getCaption();
+                        GPGeoPoint ct = centerPoint(mapObject);
+                        MarkerItem mi = new MarkerItem(mapObject.getId(), mapObject.getCode(), text, ct);
+                        mi.setMarker(createAdvancedSymbol(mi, _mtoBitmap));
+                        markerItems.add(mi);
+                    }
                 }
             }
         }

@@ -63,7 +63,7 @@ public class MapObjectStatesAdapter extends RecyclerView.Adapter<MapObjectStates
     private boolean contains(MapObjecTypeState defect) {
         for (MapObjectHasState hasDefect :
                 stateList) {
-            if (hasDefect.getMapObjectStateId() == defect.getId())
+            if (!hasDefect.getDeleted() && hasDefect.getMapObjectStateId() == defect.getId())
                 return true;
         }
 
@@ -73,7 +73,7 @@ public class MapObjectStatesAdapter extends RecyclerView.Adapter<MapObjectStates
     private MapObjectHasState load(MapObjecTypeState defect) {
         for (MapObjectHasState hasDefect :
                 stateList) {
-            if (hasDefect.getMapObjectStateId() == defect.getId())
+            if (!hasDefect.getDeleted() && hasDefect.getMapObjectStateId() == defect.getId())
                 return hasDefect;
         }
 

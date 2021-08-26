@@ -65,16 +65,18 @@ public class MapObjectMetadata implements Serializable, IExportable {
     @Generated(hash = 726544085)
     private transient MapObjectMetadataDao myDao;
     private Date SyncDate;
+    private Boolean deleted;
 
-    @Generated(hash = 2095977790)
+    @Generated(hash = 1780108763)
     public MapObjectMetadata(Long id, Long remoteId, long mapObjectId, String value, long objAttributeId,
-            Date SyncDate, Date updatedAt, Boolean isSync, Date createdAt) {
+            Date SyncDate, Boolean deleted, Date updatedAt, Boolean isSync, Date createdAt) {
         this.id = id;
         this.remoteId = remoteId;
         this.mapObjectId = mapObjectId;
         this.value = value;
         this.objAttributeId = objAttributeId;
         this.SyncDate = SyncDate;
+        this.deleted = deleted;
         this.updatedAt = updatedAt;
         this.isSync = isSync;
         this.createdAt = createdAt;
@@ -258,7 +260,9 @@ public class MapObjectMetadata implements Serializable, IExportable {
 
     @Override
     public IExportable toRemoteObject() {
-        return new MapObjectMetadata(remoteId, getMapObject().getRemoteId(), value, objAttributeId);
+        MapObjectMetadata meta = new MapObjectMetadata(remoteId, getMapObject().getRemoteId(), value, objAttributeId);
+        meta.setDeleted(deleted);
+        return meta;
     }
 
     @Override
@@ -269,6 +273,16 @@ public class MapObjectMetadata implements Serializable, IExportable {
     @Override
     public void setRemoteId(Long remoteId) {
         this.remoteId = remoteId;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted ;
     }
 
     /**

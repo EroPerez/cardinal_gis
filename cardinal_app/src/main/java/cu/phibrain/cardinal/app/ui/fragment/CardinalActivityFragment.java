@@ -850,7 +850,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
             WorkSession session = appContainer.getWorkSessionActive();
             if (WorkerRouteOperations.getInstance().load(session.getId(), gpsLogId) == null)
-                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, null, false, null, 0));
+                WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, null, false, null, 0, false));
 
 
         } catch (IllegalAccessException e) {

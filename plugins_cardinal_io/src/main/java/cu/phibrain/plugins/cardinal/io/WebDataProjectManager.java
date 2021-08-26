@@ -2,6 +2,7 @@ package cu.phibrain.plugins.cardinal.io;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Html;
 import android.util.Log;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.base.DaoSessionManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Devices;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Label;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelBatches;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelMaterial;
@@ -36,6 +38,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.DevicesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelBatchesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelMaterialOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelOperations;
@@ -122,8 +125,36 @@ public enum WebDataProjectManager {
             List<RouteSegment> routeSegments = new ArrayList<>();
             // Collect all session in project
             for (Contract contract : contractList) {
+                Worker worker = contract.getTheWorker();
 
                 // export to server from here
+                for (Devices device : worker.getDevices()) {
+                    // Synchronize worker device
+                    if (device.mustExport()) {
+                        if (device.getIsSync()) {
+                            if (!NetworkUtilitiesCardinalOl.sendPutWorkerDevice(server, token, (Devices) device.toRemoteObject())) {
+                                interrupted = true;
+                                break;
+                            } else {
+                                device.setSyncDate(new Date());
+                            }
+                        } else {
+                            Devices remoteDevice = NetworkUtilitiesCardinalOl.sendPostWorkerDevice(server, token, (Devices) device.toRemoteObject());
+                            if (remoteDevice != null) {
+                                device.setIsSync(true);
+                                Date now = new Date();
+                                device.setUpdatedAt(now);
+                                device.setSyncDate(now);
+                            } else {
+                                interrupted = true;
+                                break;
+                            }
+                        }
+                        device.update();
+                    }
+                }
+
+
                 // Get and save all objects in worksessions
                 for (WorkSession session : contract.getWorkSessions()) {
 
@@ -149,7 +180,6 @@ public enum WebDataProjectManager {
                                     break;
                                 } else {
                                     event.setSyncDate(new Date());
-                                    event.update();
                                 }
                             } else {
                                 SignalEvents remoteEvent = NetworkUtilitiesCardinalOl.sendPostSignalEvents(server, token, (SignalEvents) event.toRemoteObject());
@@ -157,12 +187,12 @@ public enum WebDataProjectManager {
                                     event.setIsSync(true);
                                     event.setSyncDate(new Date());
                                     event.setRemoteId(remoteEvent.getId());
-                                    event.update();
                                 } else {
                                     interrupted = true;
                                     break;
                                 }
                             }
+                            event.update();
                         }
 
                     }
@@ -225,7 +255,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                mapObject.update();
+                                if (mapObject.getDeleted())
+                                    mapObject.delete();
+                                else
+                                    mapObject.update();
                             } else {
                                 interrupted = true;
                                 break;
@@ -262,7 +295,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                state.update();
+                                if (state.getDeleted())
+                                    state.delete();
+                                else
+                                    state.update();
                             }
                         }
                         // Sync MapObjectImages
@@ -288,7 +324,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                objectImages.update();
+                                if (objectImages.getDeleted())
+                                    objectImages.delete();
+                                else
+                                    objectImages.update();
                             }
                         }
 
@@ -310,12 +349,15 @@ public enum WebDataProjectManager {
                                         objectMetadata.setIsSync(true);
                                         objectMetadata.setSyncDate(new Date());
                                         remoteMeta.setRemoteId(remoteMeta.getId());
-                                        objectMetadata.update();
                                     } else {
                                         interrupted = true;
                                         break;
                                     }
                                 }
+                                if (objectMetadata.getDeleted())
+                                    objectMetadata.delete();
+                                else
+                                    objectMetadata.update();
                             }
                         }
 
@@ -342,7 +384,10 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                defect.update();
+                                if (defect.getDeleted())
+                                    defect.delete();
+                                else
+                                    defect.update();
                             }
 
                             // Sync images in defect
@@ -369,7 +414,10 @@ public enum WebDataProjectManager {
                                             break;
                                         }
                                     }
-                                    images.update();
+                                    if (images.getDeleted())
+                                        images.delete();
+                                    else
+                                        images.update();
                                 }
 
                             }
@@ -384,11 +432,11 @@ public enum WebDataProjectManager {
 
                 Log.d("RouteSegmenTag", route.toString());
                 if (route.getIsSync()) {
-                    if (!NetworkUtilitiesCardinalOl.sendPut2RouteSegment(server, token, (RouteSegment) route.toRemoteObject())) {
+                    if (NetworkUtilitiesCardinalOl.sendPut2RouteSegment(server, token, (RouteSegment) route.toRemoteObject())) {
+                        route.setSyncDate(new Date());
+                    } else {
                         interrupted = true;
                         break;
-                    } else {
-                        route.setSyncDate(new Date());
                     }
                 } else {
                     RouteSegment routeSegmentRemote = NetworkUtilitiesCardinalOl.sendPostRouteSegment(server, token, (RouteSegment) route.toRemoteObject());
@@ -402,7 +450,11 @@ public enum WebDataProjectManager {
                         break;
                     }
                 }
-                route.update();
+
+                if (route.getDeleted())
+                    route.delete();
+                else
+                    route.update();
 
             }
 
@@ -420,7 +472,7 @@ public enum WebDataProjectManager {
                 APIError error = GsonHelper.createPojoFromString(e.getMessage(), APIError.class);
                 return NetworkUtilities.getMessageForCode(context, error.status(), error.message());
             } else
-                return  e.getLocalizedMessage();
+                return e.getLocalizedMessage();
         }
 
     }
@@ -532,7 +584,7 @@ public enum WebDataProjectManager {
             // create table
             DaoMetadata.createTables(db);
             String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
-            DaoMetadata.initProjectMetadata(db, project.getName(), project.getDescription(), null, user, uniqueDeviceId);
+            DaoMetadata.initProjectMetadata(db, project.getName(), Html.fromHtml(project.getDescription()).toString(), null, user, uniqueDeviceId);
             DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldName(), CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldLabel(), "");
@@ -542,6 +594,8 @@ public enum WebDataProjectManager {
 
             //Inserts Operations
             WorkerOperations.getInstance().insertAll(workerList);
+            Worker currentWorker = WorkerOperations.getInstance().findOneBy(user);
+            DevicesOperations.getInstance().insert(new Devices(null, uniqueDeviceId, String.format("%s Mobile", currentWorker.getFirstName()), cu.phibrain.plugins.cardinal.io.utils.Utilities.getOSVersion(), new Date(), currentWorker.getId()));
             ContractOperations.getInstance().insertAll(contractList);
             StockOperations.getInstance().insertAll(stockList);
             ZoneOperations.getInstance().insertAll(zoneList);
@@ -612,7 +666,7 @@ public enum WebDataProjectManager {
                     }
 
                     //save current log
-                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, new Date(now), true, new Date(now), (long) gpslogs.size()));
+                    WorkerRouteOperations.getInstance().save(new WorkerRoute(null, null, session.getId(), gpsLogId, new Date(now), true, new Date(now), (long) gpslogs.size(), false));
                 }
             }
 
