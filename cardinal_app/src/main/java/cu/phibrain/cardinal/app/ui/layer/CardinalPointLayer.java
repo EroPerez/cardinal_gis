@@ -438,16 +438,17 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
         appContainer.setMode(UserMode.NONE);
         //Reload layers associated
         this.reloadData();
-        mapView.reloadLayer(CardinalEdgesLayer.class);
-        mapView.reloadLayer(CardinalSelectPointLayer.class);
-        mapView.reloadLayer(CardinalLineLayer.class);
-        mapView.reloadLayer(CardinalPolygonLayer.class);
-        mapView.reloadLayer(CardinalJoinsLayer.class);
         //Reload current point layers
         if (oldSelectedObjectType != null) {
             Layer layer = oldSelectedObjectType.getLayerObj();
             ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
         }
+        mapView.reloadLayer(CardinalEdgesLayer.class);
+        mapView.reloadLayer(CardinalSelectPointLayer.class);
+        mapView.reloadLayer(CardinalLineLayer.class);
+        mapView.reloadLayer(CardinalPolygonLayer.class);
+        mapView.reloadLayer(CardinalJoinsLayer.class);
+
 
         GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
 
