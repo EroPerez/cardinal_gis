@@ -44,7 +44,7 @@ public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObje
         List<TopologicalRule> rulers = mto.getTopoRule();
         for (TopologicalRule rule : rulers) {
             Layer layer_mto = LayerOperations.getInstance().load(rule.getTargetObj().getLayerId());
-            if (!rule.getTargetObj().getIsAbstract() && layer_mto.getIsActive())
+            if (!rule.getTargetObj().getIsAbstract() && layer_mto.getIsActive() && !objcTypeList.contains(rule.getTargetObj()))
                 objcTypeList.add(rule.getTargetObj());
         }
 

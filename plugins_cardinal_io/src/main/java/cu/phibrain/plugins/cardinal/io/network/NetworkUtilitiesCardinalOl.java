@@ -214,11 +214,24 @@ public class NetworkUtilitiesCardinalOl {
 
     public static boolean sendPut2MapObject(String server, AuthToken token, MapObject mapObject) {
         try {
-            Response response;
-            if (mapObject.getDeleted())
-                response = ApiClient.getApiService(server).deleteMapObject(token.toString(), mapObject.getRemoteId()).execute();
-            else
-                response = ApiClient.getApiService(server).updateMapObject(token.toString(), mapObject.getRemoteId(), mapObject).execute();
+            Response response = ApiClient.getApiService(server).updateMapObject(token.toString(), mapObject.getRemoteId(), mapObject).execute();
+
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean sendDelete2MapObject(String server, AuthToken token, MapObject mapObject) {
+        try {
+            Response response = ApiClient.getApiService(server).deleteMapObject(token.toString(), mapObject.getRemoteId()).execute();
 
             if (response.isSuccessful()) {
                 return true;
@@ -454,6 +467,23 @@ public class NetworkUtilitiesCardinalOl {
                 response = ApiClient.getApiService(server).deleteMapObjectHasDefect(token.toString(), defect.getRemoteId()).execute();
             else
                 response = ApiClient.getApiService(server).updateMapObjectHasDefect(token.toString(), defect.getRemoteId(), defect).execute();
+
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean sendDelete2MapObjectHasDefect(String server, AuthToken token, MapObjectHasDefect defect) {
+        try {
+            Response response = ApiClient.getApiService(server).deleteMapObjectHasDefect(token.toString(), defect.getRemoteId()).execute();
+
 
             if (response.isSuccessful()) {
                 return true;

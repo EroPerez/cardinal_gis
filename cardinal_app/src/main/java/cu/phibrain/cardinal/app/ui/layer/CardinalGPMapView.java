@@ -31,27 +31,11 @@ public class CardinalGPMapView extends GPMapView {
         return null;
     }
 
-//    public void reloadLayer(MapObjecType objecType) throws Exception {
-//
-//        switch (objecType.getGeomType())
-//        {
-//            case POLYLINE:
-//                reloadLayer(CardinalLineLayer.class);
-//                break;
-//            case POLYGON:
-//                reloadLayer(CardinalPolygonLayer.class);
-//                break;
-//            default:
-//                reloadLayer(CardinalPointLayer.class);
-//                break;
-//        }
-//    }
 
     public void reloadLayer( Long id) throws Exception {
         for (Layer layer : map().layers()) {
             if (layer.getClass().isAssignableFrom(CardinalPointLayer.class) && ((ICardinalLayer) layer).getLayerId().equals(id)) {
                 ((CardinalPointLayer) layer).reloadData();
-//                Log.d("RL", ((IGpLayer) layer).getId());
                 break;
             }
         }
