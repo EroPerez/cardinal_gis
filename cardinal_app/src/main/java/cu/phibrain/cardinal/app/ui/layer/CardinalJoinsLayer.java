@@ -195,7 +195,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
-       if(g instanceof Gesture.LongPress) {
+       if(g instanceof Gesture.DoubleTap) {
             GPLineDrawable join = selectJoin(e.getX(), e.getY());
             if (join != null) {
 
@@ -211,19 +211,63 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                                 remove(join);
                                 update();
 
-
                             }), () -> activity.runOnUiThread(() -> {
                                 // no
 
-
                             })
                     );
-                    return true;
+
+                }
+            }
+           return true;
+       }if (g instanceof Gesture.LongPress) {
+            if (tmpDrawables.size() > 0) {
+                GPLineDrawable selectedJoinObj = null;
+                GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+                Point targetPoint = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+                for (int index = 0; index < tmpDrawables.size(); index++) {
+                    Drawable drawable = tmpDrawables.get(index);
+                    selectedJoinObj = (GPLineDrawable) drawable;
+
+                    List lines = LineStringExtracter.getLines(selectedJoinObj.getGeometry());
+                    for (Object geoLine : lines) {
+                        Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
+                        Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
+                        Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                        Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint, endLinePoint)) {
+                            return onItemLongPress(index, selectedJoinObj);
+                        }
+
+                    }
+
                 }
 
             }
-       }
+        }
         return false;
+    }
+
+
+    public boolean onItemLongPress(int index, GPLineDrawable item) {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        appContainer.setRouteSegmentActive(null);
+
+        if (item != null) {
+            MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
+            appContainer.setCurrentMapObject(objectSelected.getJoinObj());
+            appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
+
+            //Update ui
+            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+            intent.putExtra("update_map_object_active", true);
+            intent.putExtra("update_map_object_type_active", true);
+            ((MapviewActivity) this.activitySupporter).sendBroadcast(intent);
+
+
+        }
+        return true;
+
     }
 
 
