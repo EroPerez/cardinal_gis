@@ -194,14 +194,59 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
     }
 
+    private GPLineDrawable selectJoin(float cord_x, float cord_y) {
+        GeoPoint geoPoint = mMap.viewport().fromScreenPoint(cord_x, cord_y);
+        Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
+        for (Drawable drawable : tmpDrawables) {
+            GPLineDrawable join = (GPLineDrawable) drawable;
+            List lines = LineStringExtracter.getLines(join.getGeometry());
+            for (Object geoLine : lines) {
+                Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
+                Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
+                Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
+                Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
+                if (LatLongUtils.CheckIsPointOnLineSegment(pointC, pointA, pointB)) {
+                    return join;
+                }
+
+            }
+        }
+        return null;
+    }
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        MapviewActivity activity = (MapviewActivity) this.activitySupporter;
         if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
-        if (g instanceof Gesture.LongPress) {
+       if(g instanceof Gesture.DoubleTap) {
+            GPLineDrawable join = selectJoin(e.getX(), e.getY());
+            if (join != null) {
+
+                MapObject joinObj = MapObjectOperations.getInstance().load(join.getId());
+                if(joinObj !=null) {
+                    GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
+                            String.format(activity.getString(cu.phibrain.cardinal.app.R.string.delete_join)),
+                            () -> activity.runOnUiThread(() -> {
+                                // yes
+                                joinObj.setJoinObj(null);
+                                MapObjectOperations.getInstance().save(joinObj);
+                                joinObj.resetJoinedList();
+                                remove(join);
+                                update();
+
+                            }), () -> activity.runOnUiThread(() -> {
+                                // no
+
+                            })
+                    );
+
+                }
+            }
+           return true;
+       }if (g instanceof Gesture.LongPress) {
             if (tmpDrawables.size() > 0) {
                 GPLineDrawable selectedJoinObj = null;
                 GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
@@ -225,7 +270,7 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                 }
 
             }
-        }
+       }
         return false;
     }
 
