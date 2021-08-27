@@ -27,7 +27,6 @@ import org.oscim.map.Layers;
 import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -223,7 +222,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                 Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
                 Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
                 Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                DecimalFormat twoDForm = new DecimalFormat("#.####");
+//                DecimalFormat twoDForm = new DecimalFormat("#.####");
 //                double _y = Double.valueOf(twoDForm.format(pointC.getY()));
 //                double _yLine = Double.valueOf(twoDForm.format(y(pointA, pointB, pointC)));
 //                double miny = _yLine - _y;

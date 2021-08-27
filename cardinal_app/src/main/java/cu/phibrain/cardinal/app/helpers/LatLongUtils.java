@@ -30,6 +30,7 @@ public class LatLongUtils {
     private static final double RADIUS_JOIN_MO = 100.0f;
     public static final double EPSILON = 9E-7;
     public static final double SELECTION_FUZZINESS = 3.9f;
+    public static double originShift = 2.0037508342789244E7D;
 
 
     public static double distance(MapObject mo1, MapObject mo2) {

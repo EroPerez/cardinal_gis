@@ -2,7 +2,9 @@ package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
@@ -51,6 +53,12 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
     private GPMapView mapView;
     private Style lineStyle = null;
     private IActivitySupporter activitySupporter;
+    private final SharedPreferences preferences;
+
+    /*
+     * Join visibility
+     */
+    public static String PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE = "PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE";
 
 
     public CardinalJoinsLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
@@ -58,6 +66,11 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         this.mapView = mapView;
         this.activitySupporter = activitySupporter;
         getName(mapView.getContext());
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
+        SharedPreferences.Editor prefEditor = preferences.edit();
+        prefEditor.putBoolean(PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE, isEnabled());
+        prefEditor.commit();
 
         try {
             reloadData();
@@ -99,12 +112,26 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                 for (MapObject joinFrom : jointTo.getJoinedList()) {
                     list_GeoPoints.add(joinFrom.getCentroid());
                     list_GeoPoints.add(jointTo.getCentroid());
-                    GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, jointTo.getId());
+                    GPLineDrawable drawable = new GPLineDrawable(list_GeoPoints, lineStyle, joinFrom.getId());
                     add(drawable);
                 }
             }
         }
         update();
+
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled == isEnabled())
+            return;
+
+        super.setEnabled(enabled);
+
+        // update preferences to show/hide blue circle
+        SharedPreferences.Editor prefEditor = preferences.edit();
+        prefEditor.putBoolean(PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE, isEnabled());
+        prefEditor.commit();
 
     }
 
@@ -207,8 +234,9 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
         if (item != null) {
             MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
-            appContainer.setCurrentMapObject(objectSelected);
-            appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
+            MapObject JoinObj = objectSelected.getJoinObj();
+            appContainer.setCurrentMapObject(JoinObj);
+            appContainer.setMapObjecTypeActive(JoinObj.getObjectType());
 
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
