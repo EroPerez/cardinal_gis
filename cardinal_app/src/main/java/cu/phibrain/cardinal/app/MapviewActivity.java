@@ -1449,6 +1449,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
         try {
             mapView.reloadLayer(CardinalSelectPointLayer.class);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
