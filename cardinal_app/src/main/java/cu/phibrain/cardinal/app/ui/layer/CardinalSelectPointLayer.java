@@ -125,7 +125,7 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
                     ShapeDrawable joinCircle = new ShapeDrawable(new OvalShape());
                     joinCircle.setIntrinsicHeight(radius);
                     joinCircle.setIntrinsicWidth(radius);
-                    joinCircle.setBounds(new Rect(0, 0, radius, radius));
+                    joinCircle.setBounds(new Rect(0, 0, radius , radius ));
                     joinCircle.getPaint().setColor(Color.BLUE);
                     joinCircle.getPaint().setStyle(Paint.Style.STROKE);
                     joinCircle.getPaint().setStrokeWidth((float) LatLongUtils.SELECTION_FUZZINESS);

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.utils.geom.GeomBuilder;
 
@@ -19,6 +20,7 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.ProjectConfig;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.map.GPGeoPoint;
 
@@ -69,6 +71,19 @@ public class LatLongUtils {
             coords.add(new GPGeoPoint(cord.y, cord.x));
         }
         return coords;
+    }
+
+
+    public static BoundingBox toBoundingBox(Zone zone) {
+        if (zone == null)
+            return null;
+
+        List<GPGeoPoint> coords = zone.getBoundingBox();
+
+        if (coords.isEmpty() || coords.size() < 4)
+            return null;
+
+        return new BoundingBox(new ArrayList<>(coords));
     }
 
 
@@ -212,7 +227,7 @@ public class LatLongUtils {
     /**
      * Tests whether a point lies on the line defined by a list of
      * coordinates.
-     *
+     * <p>
      * The best way to determine if a point R = (rx, ry) lies on the line connecting points P = (px, py)
      * and Q = (qx, qy) is to check whether the determinant of the matrix
      * <p>
@@ -223,7 +238,7 @@ public class LatLongUtils {
      * second, it doesn't divide (usually a slow operation), third, it doesn't trigger bad
      * floating-point behavior when the line is almost, but not quite vertical.
      *
-     * @param r    the point to test
+     * @param r the point to test
      * @param p the line coordinate
      * @param q the other line coordinate
      * @return true if the point is a vertex of the line or lies in the interior

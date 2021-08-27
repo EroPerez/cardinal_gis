@@ -66,6 +66,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
+import org.oscim.core.BoundingBox;
+import org.oscim.core.MapPosition;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -99,6 +101,8 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Networks;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.SignalEvents;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Zone;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LayerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjecTypeOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
@@ -291,6 +295,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
     };
 
+
+    private BoundingBox sessionBBox;
+
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(cu.phibrain.cardinal.app.R.layout.activity_mapview);
@@ -459,6 +466,18 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         registerReceiver(mMessageUiUpdateReceiver, new IntentFilter(MapviewActivity.ACTION_UPDATE_UI));
 
 
+        //Fit map to session Bounding box
+        WorkSession session = appContainer.getWorkSessionActive();
+        Zone zone = session.getZoneObj();
+        sessionBBox = LatLongUtils.toBoundingBox(zone);
+        if (sessionBBox != null) {
+            MapPosition mapPosition = mapView.map().getMapPosition();
+            mapPosition.setByBoundingBox(sessionBBox, mapView.getViewportWidth(), mapView.getViewportHeight());
+            mapPosition.setZoomLevel(12);
+            mapView.setMapPosition(new GPMapPosition(mapPosition));
+        }
+
+
     }
 
     @Override
@@ -483,6 +502,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             }
 
         }
+
+//        if (!sessionBBox.contains(new GeoPoint(mapPosition.getLatitude(), mapPosition.getLongitude())))
+//            setNewCenterAtZoom(sessionBBox.getCenterPoint().getLatitude(), sessionBBox.getCenterPoint().getLongitude(), currentZoomLevel);
     }
 
     /**

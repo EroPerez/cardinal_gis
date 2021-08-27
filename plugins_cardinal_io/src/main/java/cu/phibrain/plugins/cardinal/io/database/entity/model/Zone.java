@@ -10,6 +10,7 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.GPGeoPointListConverter;
@@ -92,6 +93,9 @@ public class Zone implements Serializable, IEntity {
     }
 
     public List<GPGeoPoint> getBoundingBox() {
+        if (this.boundingBox == null)
+            this.boundingBox = new ArrayList<>();
+
         return this.boundingBox;
     }
 
