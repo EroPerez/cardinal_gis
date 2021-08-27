@@ -160,15 +160,15 @@ public enum CardinalLayerManager {
 
         //Capa de segmento de rutas
         JSONObject jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
         jo.put(IGpLayer.LAYERENABLED_TAG, true);
         cardinalLayersDefinitions.add(jo);
 
         //Capa de Agregaciones
         jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
         jo.put(IGpLayer.LAYERENABLED_TAG, true);
         cardinalLayersDefinitions.add(jo);
 
@@ -379,20 +379,21 @@ public enum CardinalLayerManager {
             cardinalPointLayer.load();
         }
 
-        CardinalEdgesLayer edgeLayer = new CardinalEdgesLayer(mapView, activitySupporter);
-        GPApplication context = GPApplication.getInstance();
-        JSONObject jo = new JSONObject();
-        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
-        jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
-        cardinalLayersDefinitions.add(edgeLayer.toJson());
-        edgeLayer.load();
 
         CardinalJoinsLayer joinsLayer = new CardinalJoinsLayer(mapView, activitySupporter);
-        jo = new JSONObject();
+        GPApplication context = GPApplication.getInstance();
+        JSONObject jo = new JSONObject();
         jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
         jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
         cardinalLayersDefinitions.add(joinsLayer.toJson());
         joinsLayer.load();
+
+        CardinalEdgesLayer edgeLayer = new CardinalEdgesLayer(mapView, activitySupporter);
+        jo = new JSONObject();
+        jo.put(IGpLayer.LAYERTYPE_TAG, CardinalEdgesLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
+        cardinalLayersDefinitions.add(edgeLayer.toJson());
+        edgeLayer.load();
 
 //        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
 //        jo = new JSONObject();
@@ -536,14 +537,6 @@ public enum CardinalLayerManager {
         BookmarkLayer bookmarkLayer = new BookmarkLayer(mapView);
         bookmarkLayer.load();
         systemLayersDefinitions.add(bookmarkLayer.toJson());
-//
-//        ImagesLayer imagesLayer = new ImagesLayer(mapView);
-//        imagesLayer.load();
-//        systemLayersDefinitions.add(imagesLayer.toJson());
-//
-//        NotesLayer notesLayer = new NotesLayer(mapView, activitySupporter);
-//        notesLayer.load();
-//        systemLayersDefinitions.add(notesLayer.toJson());
 
         GpsPositionLayer gpsPositionLayer = new GpsPositionLayer(mapView);
         gpsPositionLayer.load();
@@ -552,6 +545,10 @@ public enum CardinalLayerManager {
         GpsPositionTextLayer gpsPositionTextLayer = new GpsPositionTextLayer(mapView);
         gpsPositionTextLayer.load();
         systemLayersDefinitions.add(gpsPositionTextLayer.toJson());
+
+        GPMapScaleBarLayer sysLayer = new GPMapScaleBarLayer(mapView);
+        sysLayer.load();
+        systemLayersDefinitions.add(sysLayer.toJson());
     }
 
 
@@ -636,7 +633,7 @@ public enum CardinalLayerManager {
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
-                        } else {
+                        } else if (!(layer instanceof ICardinalDecorator)) {
                             IGpLayer gpLayer = (IGpLayer) layer;
                             JSONObject jsonObject = gpLayer.toJson();
                             systemLayersArray.put(jsonObject);
@@ -943,8 +940,7 @@ public enum CardinalLayerManager {
             if (!layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalEdgesLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalLineLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalPolygonLayer.class.getCanonicalName())
-                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalJoinsLayer.class.getCanonicalName()))
-            {
+                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalJoinsLayer.class.getCanonicalName())) {
                 Long layerId = layerObj.getLong(ICardinalLayer.LAYERID_TAG);
                 cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(layerId);
                 layer.setIsActive(enabled);

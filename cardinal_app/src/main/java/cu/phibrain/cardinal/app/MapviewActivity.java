@@ -1150,7 +1150,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMo) {
             MapObject mapObject = appContainer.getCurrentMapObject();
             if (mapObject != null) {
-                GPGeoPoint point = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+                GPGeoPoint point = mapObject.getCentroid();
                 setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), mapObject.getLayer().getViewZoomLevel());
 
             }
@@ -1162,6 +1162,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             if (currentMO != null && currentMO.belongToTopoLayer() && !currentMO.isTerminal()) {
                 currentMO.setNodeGrade(currentMO.getNodeGrade() + 1);
                 MapObjectOperations.getInstance().save(currentMO);
+
+                GPDialogs.quickInfo(mapView, getString(R.string.inspector_object_grade) + ": " + currentMO.getNodeGrade());
             }
             return true;
         } else if (i == cu.phibrain.cardinal.app.R.id.jointobutton) { // lista de mapobjects acoplados al mapobject selccionado
@@ -1281,6 +1283,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             //Evento del Mot Selcecionado
             appContainer.setCurrentMapObject(null);
             appContainer.setMapObjecTypeActive(null);
+            appContainer.setRouteSegmentActive(null);
             try {
                 mapView.reloadLayer(CardinalSelectPointLayer.class);
             } catch (Exception e) {

@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.oscim.android.canvas.AndroidGraphics;
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
@@ -43,7 +42,7 @@ import eu.geopaparazzi.map.layers.interfaces.ISystemLayer;
 
 import static cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer.PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE;
 
-public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer {
+public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implements ItemizedLayer.OnItemGestureListener<MarkerItem>, ISystemLayer, ICardinalDecorator {
 
     private static String NAME = null;
     private static Bitmap mtoBitmap;
@@ -166,37 +165,6 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
 
     }
 
-
-    /**
-     * Creates a transparent symbol with text and description.
-     * PREFS_KEY_IMAGES_TEXT_VISIBLE
-     *
-     * @param item      -> the MarkerItem to process, containing title and description
-     *                  if description starts with a '#' the first line of the description is drawn.
-     * @param poiBitmap -> poi bitmap for the center
-     * @return MarkerSymbol with title, description and symbol
-     */
-
-
-    private MarkerSymbol createAdvancedSymbol(MarkerItem item, Bitmap poiBitmap) {
-        int bitmapHeight = poiBitmap.getHeight();
-        int margin = 3;
-        int dist2symbol = (int) Math.round(bitmapHeight / 2.0);
-
-        int symbolWidth = poiBitmap.getWidth();
-
-        int xSize = symbolWidth;
-        int ySize = symbolWidth + dist2symbol;
-
-        // markerCanvas, the drawing area for all: title, description and symbol
-        Bitmap markerBitmap = CanvasAdapter.newBitmap(xSize, ySize, 0);
-        org.oscim.backend.canvas.Canvas markerCanvas = CanvasAdapter.newCanvas();
-        markerCanvas.setBitmap(markerBitmap);
-
-        markerCanvas.drawBitmap(poiBitmap, xSize * 0.5f - (symbolWidth * 0.25f), ySize * 0.5f - (symbolWidth * 0.25f));
-
-        return (new MarkerSymbol(markerBitmap, MarkerSymbol.HotspotPlace.CENTER, true));
-    }
 
     @Override
     public String getId() {

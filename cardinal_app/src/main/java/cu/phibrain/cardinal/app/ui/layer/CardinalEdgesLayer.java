@@ -170,46 +170,6 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
 
     }
 
-    //pendiente de la recta
-    private double m(Point a, Point b) {
-        return (b.getY() - a.getY()) / (b.getX() - a.getX());
-    }
-
-    //funcion de la recta
-    private double y(Point a, Point b, Point c) {
-        double _m = m(a, b);
-        return _m * c.getX() - _m * a.getX() + a.getY();
-    }
-
-    //Restringir a la distancia de la recta
-    private boolean restriction(Point a, Point b, Point c) {
-        double max_x = 0;
-        double maxy = 0;
-
-        double minx = 0;
-        double miny = 0;
-        //max X
-        if (a.getX() > b.getX()) {
-            max_x = a.getX();
-            minx = b.getX();
-        } else {
-            max_x = b.getX();
-            minx = a.getX();
-        }
-        //MaxY
-        if (a.getY() > b.getY()) {
-            maxy = a.getY();
-            miny = b.getY();
-        } else {
-            maxy = b.getY();
-            miny = a.getY();
-        }
-        if ((c.getX() < max_x && c.getX() > minx) && (c.getY() < maxy && c.getY() > miny))
-            return true;
-
-        return false;
-
-    }
 
     private GPLineDrawable selectEdge(float cord_x, float cord_y) {
         GeoPoint geoPoint = mMap.viewport().fromScreenPoint(cord_x, cord_y);
@@ -222,15 +182,6 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                 Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
                 Point pointA = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
                 Point pointB = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-//                DecimalFormat twoDForm = new DecimalFormat("#.####");
-//                double _y = Double.valueOf(twoDForm.format(pointC.getY()));
-//                double _yLine = Double.valueOf(twoDForm.format(y(pointA, pointB, pointC)));
-//                double miny = _yLine - _y;
-//                if (((miny <= 0.0004 && miny >= 0) || (miny <= -0.0004 && miny <= 0)) && restriction(pointA, pointB, pointC)) {
-//                    return edge;
-//                }
-
-                //MI variante zet
                 if (LatLongUtils.CheckIsPointOnLineSegment(pointC, pointA, pointB)) {
                     return edge;
                 }
@@ -247,7 +198,7 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
         if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
-        if (g instanceof Gesture.LongPress) {
+        if (g instanceof Gesture.DoubleTap) {
             GPLineDrawable edge = selectEdge(e.getX(), e.getY());
             if (edge != null) {
 
@@ -260,16 +211,12 @@ public class CardinalEdgesLayer extends VectorLayer implements ISystemLayer, IEd
                             remove(edge);
                             update();
 
-                        }), () -> activity.runOnUiThread(() -> {
-                            // no
-
-
-                        })
+                        }), null
                 );
                 return true;
 
             }
-        } else if (g instanceof Gesture.Press) {
+        } else if (g instanceof Gesture.LongPress) {
             GPLineDrawable edge = selectEdge(e.getX(), e.getY());
             if (edge != null) {
                 Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
