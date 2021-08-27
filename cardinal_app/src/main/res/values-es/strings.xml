@@ -52,7 +52,7 @@
     <string name="do_you_want_to_undock_this_map_object">¿Esta seguro que desea desacoplar este objeto?</string>
     <string name="map_object_already_docked_message">El objeto de mapa seleccionado ya esta acoplado a otro objeto de mapa</string>
     <string name="map_object_already_docked_to_that_mapobject_message" >El objeto de mapa seleccionado ya esta acoplado a este objeto de mapa.</string>
-    <string name="layername_jointo">Capa de objectos tipo Agregación</string>
+    <string name="layername_jointo">Capa de objetos tipo Agregación</string>
     <string name="do_you_want_to_logout_this_work_session">¿Está seguro de que desea cerrar la sesión? Tenga en cuenta que este proceso no se puede deshacer.</string>
     <string name="version">Versión %s</string>
     <string name="derechos">Todos los derechos reservados</string>
