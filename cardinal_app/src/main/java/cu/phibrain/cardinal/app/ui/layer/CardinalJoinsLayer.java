@@ -2,7 +2,9 @@ package cu.phibrain.cardinal.app.ui.layer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 
 import org.hortonmachine.dbs.datatypes.EGeometryType;
 import org.json.JSONException;
@@ -23,7 +25,6 @@ import org.oscim.map.Layers;
 import org.oscim.utils.geom.GeomBuilder;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +37,6 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.IActivitySupporter;
@@ -54,6 +54,12 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
     private GPMapView mapView;
     private Style lineStyle = null;
     private IActivitySupporter activitySupporter;
+    private final SharedPreferences preferences;
+
+    /*
+     * Join visibility
+     */
+    public static String PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE = "PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE";
 
 
     public CardinalJoinsLayer(GPMapView mapView, IActivitySupporter activitySupporter) {
@@ -61,6 +67,11 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         this.mapView = mapView;
         this.activitySupporter = activitySupporter;
         getName(mapView.getContext());
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(mapView.getContext());
+        SharedPreferences.Editor prefEditor = preferences.edit();
+        prefEditor.putBoolean(PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE, isEnabled());
+        prefEditor.commit();
 
         try {
             reloadData();
@@ -108,6 +119,20 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
             }
         }
         update();
+
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled == isEnabled())
+            return;
+
+        super.setEnabled(enabled);
+
+        // update preferences to show/hide blue circle
+        SharedPreferences.Editor prefEditor = preferences.edit();
+        prefEditor.putBoolean(PREFS_KEY_MAP_OBJECT_JOIN_VISIBLE, isEnabled());
+        prefEditor.commit();
 
     }
 
@@ -168,10 +193,11 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
     }
 
-    private GPLineDrawable selectJoin(float cord_x, float cord_y) {
+    private GPLineDrawable selectJoin(float cord_x, float cord_y, Integer index) {
         GeoPoint geoPoint = mMap.viewport().fromScreenPoint(cord_x, cord_y);
         Point pointC = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
-        for (Drawable drawable : tmpDrawables) {
+        for (; index < tmpDrawables.size(); index++) {
+            Drawable drawable = tmpDrawables.get(index);
             GPLineDrawable join = (GPLineDrawable) drawable;
             List lines = LineStringExtracter.getLines(join.getGeometry());
             for (Object geoLine : lines) {
@@ -195,55 +221,36 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         if (!isEnabled() || appContainer.getMode() != UserMode.NONE) {
             return false;
         }
-       if(g instanceof Gesture.DoubleTap) {
-            GPLineDrawable join = selectJoin(e.getX(), e.getY());
-            if (join != null) {
+        Integer index = 0;
+        if (g instanceof Gesture.DoubleTap) {
+            GPLineDrawable selectedJoinObj = selectJoin(e.getX(), e.getY(), index);
+            if (selectedJoinObj != null) {
 
-                MapObject joinObj = MapObjectOperations.getInstance().load(join.getId());
-                if(joinObj !=null) {
+                MapObject joinObj = MapObjectOperations.getInstance().load(selectedJoinObj.getId());
+                if (joinObj != null) {
                     GPDialogs.yesNoMessageDialog((MapviewActivity) this.activitySupporter,
-                            String.format(activity.getString(cu.phibrain.cardinal.app.R.string.delete_join)),
+                            String.format(activity.getString(cu.phibrain.cardinal.app.R.string.do_you_want_to_undock_this_map_object)),
                             () -> activity.runOnUiThread(() -> {
                                 // yes
                                 joinObj.setJoinObj(null);
                                 MapObjectOperations.getInstance().save(joinObj);
                                 joinObj.resetJoinedList();
-                                remove(join);
+                                remove(selectedJoinObj);
                                 update();
 
-                            }), () -> activity.runOnUiThread(() -> {
-                                // no
-
-                            })
+                            }), null
                     );
 
                 }
             }
-           return true;
-       }if (g instanceof Gesture.LongPress) {
-            if (tmpDrawables.size() > 0) {
-                GPLineDrawable selectedJoinObj = null;
-                GeoPoint geoPoint = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-                Point targetPoint = new GeomBuilder().point(geoPoint.getLongitude(), geoPoint.getLatitude()).toPoint();
-                for (int index = 0; index < tmpDrawables.size(); index++) {
-                    Drawable drawable = tmpDrawables.get(index);
-                    selectedJoinObj = (GPLineDrawable) drawable;
-
-                    List lines = LineStringExtracter.getLines(selectedJoinObj.getGeometry());
-                    for (Object geoLine : lines) {
-                        Coordinate coordinateA = ((Geometry) geoLine).getCoordinates()[0];
-                        Coordinate coordinateB = ((Geometry) geoLine).getCoordinates()[1];
-                        Point startLinePoint = new GeomBuilder().point(coordinateA.x, coordinateA.y).toPoint();
-                        Point endLinePoint = new GeomBuilder().point(coordinateB.x, coordinateB.y).toPoint();
-                        if (LatLongUtils.CheckIsPointOnLineSegment(targetPoint, startLinePoint, endLinePoint)) {
-                            return onItemLongPress(index, selectedJoinObj);
-                        }
-
-                    }
-
-                }
-
+            return true;
+        } else if (g instanceof Gesture.LongPress) {
+            GPLineDrawable selectedJoinObj = selectJoin(e.getX(), e.getY(), index);
+            if (selectedJoinObj != null) {
+                return onItemLongPress(index, selectedJoinObj);
             }
+
+
         }
         return false;
     }
@@ -255,8 +262,9 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
         if (item != null) {
             MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
-            appContainer.setCurrentMapObject(objectSelected.getJoinObj());
-            appContainer.setMapObjecTypeActive(objectSelected.getObjectType());
+            MapObject JoinObj = objectSelected.getJoinObj();
+            appContainer.setCurrentMapObject(JoinObj);
+            appContainer.setMapObjecTypeActive(JoinObj.getObjectType());
 
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
@@ -269,8 +277,6 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
         return true;
 
     }
-
-
 
     @Override
     public boolean isEditable() {

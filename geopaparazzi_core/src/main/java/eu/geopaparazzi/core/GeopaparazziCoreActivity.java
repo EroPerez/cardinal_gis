@@ -12,7 +12,6 @@ import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 import java.io.IOException;
@@ -26,8 +25,6 @@ import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.forms.TagsManager;
 import eu.geopaparazzi.library.gps.GpsServiceUtilities;
 import eu.geopaparazzi.library.permissions.AChainedPermissionHelper;
-import eu.geopaparazzi.library.permissions.PermissionFineLocation;
-import eu.geopaparazzi.library.permissions.PermissionForegroundService;
 import eu.geopaparazzi.library.permissions.PermissionWriteStorage;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
@@ -51,23 +48,23 @@ public class GeopaparazziCoreActivity extends AppCompatActivity implements IAppl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        permissionHelper = new PermissionWriteStorage();
-        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService());
-
-        // PERMISSIONS START
-        if (permissionHelper.hasPermission(this) && permissionHelper.getNextWithoutPermission(this) == null) {
-            completeInit();
-        } else {
-            if (permissionHelper.hasPermission(this)) {
-                permissionHelper = permissionHelper.getNextWithoutPermission(this);
-            }
-            permissionHelper.requestPermission(this);
-        }
-        // PERMISSIONS STOP
-
-        setContentView(R.layout.activity_geopaparazzi);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        permissionHelper = new PermissionWriteStorage();
+//        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService());
+//
+//        // PERMISSIONS START
+//        if (permissionHelper.hasPermission(this) && permissionHelper.getNextWithoutPermission(this) == null) {
+//            completeInit();
+//        } else {
+//            if (permissionHelper.hasPermission(this)) {
+//                permissionHelper = permissionHelper.getNextWithoutPermission(this);
+//            }
+//            permissionHelper.requestPermission(this);
+//        }
+//        // PERMISSIONS STOP
+//
+//        setContentView(R.layout.activity_geopaparazzi);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
     }
 

@@ -1,8 +1,13 @@
 package cu.phibrain.cardinal.app.helpers;
 
+import org.oscim.core.MapPosition;
+import org.oscim.core.MercatorProjection;
+
+import eu.geopaparazzi.map.GPMapView;
+
 public class NumberUtiles {
 
-    public static double METERS_PER_PIXELS = 3779.5280352161F;
+    protected static final double UNSCALE_COORD = 4;
 
     public static Double parseStringToDouble(String value, double defaultValue) {
         return value == null || value.trim().isEmpty() ? defaultValue : Double.parseDouble(value);
@@ -23,11 +28,16 @@ public class NumberUtiles {
 
     public static int roundUp(double n) {
 
-        return Integer.parseInt(Long.toString(Math.round(n + 0.5f)));
+        return Integer.parseInt(Long.toString(Math.round(n + 0.1f)));
     }
 
-    public static double toPixels(double meters){
-        return meters * METERS_PER_PIXELS;
+
+    public static float metersToPixels(float meters, GPMapView mapView) {
+        MapPosition mapPosition = mapView.map().getMapPosition();
+        double zoom = mapPosition.getZoomLevel();
+        double scale = (Math.pow(2, zoom) / UNSCALE_COORD) * (1 / Math.pow(2, zoom));
+        double groundResolution = MercatorProjection.groundResolution(mapPosition);
+        return (float) ((meters * (1 / groundResolution)) / scale);
     }
 
 }

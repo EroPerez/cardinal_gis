@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment;
+import cu.phibrain.cardinal.app.ui.permissions.PermissionCamera;
 import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -43,7 +44,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         super.onCreate(savedInstanceState);
 
         permissionHelper = new PermissionWriteStorage();
-        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService());
+        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService()).add(new PermissionCamera());
 
         // PERMISSIONS START
         if (permissionHelper.hasPermission(this) && permissionHelper.getNextWithoutPermission(this) == null) {
@@ -177,7 +178,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             CardinalApplication.getInstance().closeDatabase();
             ResourcesManager.resetManager();
             try {
-                ((CardinalApplication)CardinalApplication.getInstance()).reconstructContainer();
+                ((CardinalApplication) CardinalApplication.getInstance()).reconstructContainer();
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -123,6 +123,7 @@ public enum WebDataProjectManager {
 
             List<Contract> contractList = ContractOperations.getInstance().findAllBy(projectId);
             List<RouteSegment> routeSegments = new ArrayList<>();
+            List<MapObject> mapObjectListToDelete = new ArrayList<>();
             // Collect all session in project
             for (Contract contract : contractList) {
                 Worker worker = contract.getTheWorker();
@@ -241,9 +242,11 @@ public enum WebDataProjectManager {
                                 mapObject.refresh();
                                 mapObject.setSyncDate(new Date());
                                 if (mapObject.getIsSync()) {
-                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObject(server, token, (MapObject) mapObject.toRemoteObject())) {
-                                        interrupted = true;
-                                        break;
+                                    if (!mapObject.getDeleted()) {
+                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObject(server, token, (MapObject) mapObject.toRemoteObject())) {
+                                            interrupted = true;
+                                            break;
+                                        }
                                     }
                                 } else {
                                     mapObject.setIsSync(true);
@@ -256,7 +259,7 @@ public enum WebDataProjectManager {
                                     }
                                 }
                                 if (mapObject.getDeleted())
-                                    mapObject.delete();
+                                    mapObjectListToDelete.add(mapObject);
                                 else
                                     mapObject.update();
                             } else {
@@ -367,11 +370,13 @@ public enum WebDataProjectManager {
                         for (MapObjectHasDefect defect : mapObjectHasDefectList) {
                             if (defect.mustExport()) {
                                 if (defect.getIsSync()) {
-                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject())) {
-                                        interrupted = true;
-                                        break;
-                                    } else {
-                                        defect.setSyncDate(new Date());
+                                    if (!defect.getDeleted()) {
+                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject())) {
+                                            interrupted = true;
+                                            break;
+                                        } else {
+                                            defect.setSyncDate(new Date());
+                                        }
                                     }
                                 } else {
                                     MapObjectHasDefect defectRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject());
@@ -384,10 +389,8 @@ public enum WebDataProjectManager {
                                         break;
                                     }
                                 }
-                                if (defect.getDeleted())
-                                    defect.delete();
-                                else
-                                    defect.update();
+
+                                defect.update();
                             }
 
                             // Sync images in defect
@@ -421,7 +424,12 @@ public enum WebDataProjectManager {
                                 }
 
                             }
+
+                            if (defect.getDeleted() && !interrupted)
+                                if (NetworkUtilitiesCardinalOl.sendDelete2MapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject()))
+                                    defect.delete();
                         }
+
                     }
                 }
 
@@ -430,7 +438,7 @@ public enum WebDataProjectManager {
             //Finally sync al rout segment to server
             for (RouteSegment route : routeSegments) {
 
-                Log.d("RouteSegmenTag", route.toString());
+//                Log.d("RouteSegmenTag", route.toString());
                 if (route.getIsSync()) {
                     if (NetworkUtilitiesCardinalOl.sendPut2RouteSegment(server, token, (RouteSegment) route.toRemoteObject())) {
                         route.setSyncDate(new Date());
@@ -459,6 +467,10 @@ public enum WebDataProjectManager {
             }
 
             if (!interrupted) {
+                for (MapObject mapObject : mapObjectListToDelete) {
+                    if (NetworkUtilitiesCardinalOl.sendDelete2MapObject(server, token, (MapObject) mapObject.toRemoteObject()))
+                        mapObject.delete();
+                }
                 return NetworkUtilities.getMessageForCode(context, 200,
                         context.getResources().getString(R.string.post_completed_properly));
             }

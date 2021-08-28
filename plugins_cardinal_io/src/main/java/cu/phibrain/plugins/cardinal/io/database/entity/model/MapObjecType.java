@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.converter.GeomTypeConverter;
 
@@ -518,13 +519,23 @@ public class MapObjecType implements Serializable, IEntity {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapObjecType that = (MapObjecType) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1500504985)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getMapObjecTypeDao() : null;
     }
-
-
-
 }
