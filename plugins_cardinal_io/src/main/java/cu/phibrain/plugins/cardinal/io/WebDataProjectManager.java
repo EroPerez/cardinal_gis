@@ -665,7 +665,7 @@ public enum WebDataProjectManager {
                     final String logName = "log_" + TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date()); //$NON-NLS-1$
                     long now = System.currentTimeMillis();
 
-                    long gpsLogId = dbHelper.addGpsLog(now, now, 0, logName, DEFAULT_LOG_WIDTH, ColorUtilities.BLUE.getHex(), true); //$NON-NLS-1$
+                    long gpsLogId = cu.phibrain.plugins.cardinal.io.utils.Utilities.addGpsLog(db, now, now, 0, logName, DEFAULT_LOG_WIDTH, ColorUtilities.RED.getHex(), true); //$NON-NLS-1$
                     db.beginTransaction();
                     try {
                         for (WorkerRoute log :

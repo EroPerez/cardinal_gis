@@ -10,8 +10,8 @@ import java.util.List;
  */
 @SuppressWarnings("ALL")
 public enum EOnlineTileSources {
-    Google_Maps("Cardinal", "", "", "Google", "http://165.22.151.221:3333/{Z}/{Y}/{X}.png", "", "17", "0"), //
-    Google_Satellite("Google Satellite", "", "", "Google", "https://mt1.google.com/vt/lyrs=s&x={X}&y={Y}&z={Z}", "", "19", "0"), //
+//    Google_Maps("Cardinal", "", "", "Google", "http://165.22.151.221:3333/{Z}/{Y}/{X}.png", "", "17", "0"), //
+//    Google_Satellite("Google Satellite", "", "", "Google", "https://mt1.google.com/vt/lyrs=s&x={X}&y={Y}&z={Z}", "", "19", "0"), //
 //    Google_Terrain("Google Terrain", "", "", "Google", "https://mt1.google.com/vt/lyrs=t&x={X}&y={Y}&z={Z}", "", "19", "0"), //
 //    Google_Terrain_Hybrid("Google Terrain Hybrid", "", "", "Google", "https://mt1.google.com/vt/lyrs=p&x={X}&y={Y}&z={Z}", "",
 //            "19", "0"), //

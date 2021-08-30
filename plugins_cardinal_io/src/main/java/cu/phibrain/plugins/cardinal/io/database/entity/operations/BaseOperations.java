@@ -201,7 +201,6 @@ public class BaseOperations<Entity extends IEntity, Dao extends AbstractDao<Enti
                 ((IExportable) entity).setDeleted(true);
                 ((IExportable) entity).setUpdatedAt(new Date());
                 getDao().updateInTx(entity);
-                this.detach(entity);
             } else
                 getDao().delete(entity);
 

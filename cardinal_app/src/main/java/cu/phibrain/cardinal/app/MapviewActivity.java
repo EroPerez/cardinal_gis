@@ -214,7 +214,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             updateBatteryCondition(chargedPct);
 
             //register signal event only when battery is low
-            boolean isBatteryLow = intent.getBooleanExtra(BatteryManager.EXTRA_BATTERY_LOW, false);
+            boolean isBatteryLow = chargedPct <= 20; //intent.getBooleanExtra(BatteryManager.EXTRA_BATTERY_LOW, false);
             if (isBatteryLow && appContainer.getWorkSessionActive() != null) {
                 SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.POWER, appContainer.getWorkSessionActive().getId(), chargedPct, new Date(), lastGpsPosition);
             }
@@ -242,8 +242,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 setToggleMapObjectTools(moa);
                 if (moa != null) {
                     updateSelectMapObj(moa.getObjectType());
-                    GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
-                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+                    GPGeoPoint point = moa.getCentroid();
+                    GPMapPosition mapPosition = mapView.getMapPosition();
+                    int zoomLevel = mapPosition.getZoomLevel();
+                    zoomLevel = (moa.getLayer().getEditZoomLevel() < zoomLevel) ? zoomLevel : moa.getLayer().getEditZoomLevel();
+                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), zoomLevel);
                 } else {
                     updateSelectMapObj(null);
                 }
@@ -268,8 +271,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             if (edit_map_object_active_coord) {
                 MapObject moa = appContainer.getCurrentMapObject();
                 if (moa != null) {
-                    GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
-                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
+                    GPGeoPoint point = moa.getCentroid();
+                    GPMapPosition mapPosition = mapView.getMapPosition();
+                    int zoomLevel = mapPosition.getZoomLevel();
+
+                    zoomLevel = (moa.getLayer().getEditZoomLevel() < zoomLevel) ? zoomLevel : moa.getLayer().getEditZoomLevel();
+
+                    setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), zoomLevel);
 
                     MapObjecType mot = moa.getObjectType();
                     if (mot != null) {
@@ -576,7 +584,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         setToggleMapObjectTools(moa);
         if (moa != null) {
             updateSelectMapObj(moa.getObjectType());
-            GPGeoPoint point = LatLongUtils.centerPoint(moa.getCoord(), moa.getObjectType().getGeomType());
+            GPGeoPoint point = moa.getCentroid();
             setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), moa.getLayer().getEditZoomLevel());
         } else {
             updateSelectMapObj(null);
@@ -1058,12 +1066,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             Intent bookmarksListIntent = new Intent(MapviewActivity.this, BookmarksListActivity.class);
             startActivityForResult(bookmarksListIntent, ZOOM_RETURN_CODE);
         } else if (i == cu.phibrain.cardinal.app.R.id.menu_map_button) {
-            boolean areButtonsVisible = mPeferences.getBoolean(ARE_BUTTONSVISIBLE_OPEN, false);
-            setAllButtoonsEnablement(!areButtonsVisible);
-            batteryText.setVisibility(!areButtonsVisible ? View.VISIBLE : View.INVISIBLE);
-            Editor edit = mPeferences.edit();
-            edit.putBoolean(ARE_BUTTONSVISIBLE_OPEN, !areButtonsVisible);
-            edit.apply();
+//            boolean areButtonsVisible = mPeferences.getBoolean(ARE_BUTTONSVISIBLE_OPEN, false);
+//           setAllButtoonsEnablement(!areButtonsVisible);
+//            batteryText.setVisibility(!areButtonsVisible ? View.VISIBLE : View.INVISIBLE);
+//            Editor edit = mPeferences.edit();
+//            edit.putBoolean(ARE_BUTTONSVISIBLE_OPEN, !areButtonsVisible);
+//            edit.apply();
             return true;
         } else if (i == cu.phibrain.cardinal.app.R.id.zoomin) {
             float scaleX1 = mapView.getScaleX() * 2;
@@ -1137,6 +1145,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             dialog.show();
         } else if (i == cu.phibrain.cardinal.app.R.id.frameLayout) {
             //temporal test, setando a null el map object activo en mapa
+            return true;
 
         } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
 
@@ -1145,7 +1154,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             return true;
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
-            toggleEditing();
+            if (appContainer.getMapObjecTypeActive() != null)
+                toggleEditing();
             return true;
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMo) {
             MapObject mapObject = appContainer.getCurrentMapObject();
@@ -1253,12 +1263,6 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_toggle_labels_off_24dp));
                 EditManager.INSTANCE.setActiveTool(null);
                 mapView.releaseMapBlock();
-//
-//                // Hiding map object labels
-//                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
-//                SharedPreferences.Editor prefEditor = preferences.edit();
-//                prefEditor.putBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, false);
-//                prefEditor.commit();
             } else {
                 toggleLabelsButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_toggle_labels_on_24dp));
                 toggleMeasuremodeButton.setImageDrawable(Compat.getDrawable(this, eu.geopaparazzi.core.R.drawable.ic_mapview_measuremode_off_24dp));
@@ -1267,43 +1271,36 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 PanLabelsTool panLabelsTool = new PanLabelsTool(mapView);
                 EditManager.INSTANCE.setActiveTool(panLabelsTool);
                 mapView.blockMap();
-
-//                // showing map object labels
-//                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GPApplication.getInstance());
-//                SharedPreferences.Editor prefEditor = preferences.edit();
-//                prefEditor.putBoolean(PREFS_KEY_NOTES_TEXT_VISIBLE, true);
-//                prefEditor.commit();
             }
-//            onUpdate(mapView.getMapPosition());
         } else if (i == cu.phibrain.cardinal.app.R.id.buttom_sheet_background) {
             appContainer.setRouteSegmentActive(null);
             onMenuMTO();
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMto) {
             //Evento del Mot Selcecionado
-            appContainer.setCurrentMapObject(null);
-            appContainer.setMapObjecTypeActive(null);
-            appContainer.setRouteSegmentActive(null);
-            try {
-                mapView.reloadLayer(CardinalSelectPointLayer.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            disableEditing();
-            //Update ui
-            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
-            intent.putExtra("update_map_object_active", true);
-            intent.putExtra("update_map_object_type_active", true);
-            sendBroadcast(intent);
+            if (appContainer.getMapObjecTypeActive() != null) {
+                appContainer.setCurrentMapObject(null);
+                appContainer.setMapObjecTypeActive(null);
+                appContainer.setRouteSegmentActive(null);
+                try {
+                    mapView.reloadLayer(CardinalSelectPointLayer.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                disableEditing();
+                //Update ui
+                Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                intent.putExtra("update_map_object_active", true);
+                intent.putExtra("update_map_object_type_active", true);
+                sendBroadcast(intent);
 
-            //EdgesLayer edgesLayer = new EdgesLayer(mapView);
-            //EditManager.INSTANCE.setEditLayer(edgesLayer);
-            GPDialogs.toast(this, getString(R.string.reset_route), Toast.LENGTH_SHORT);
+                GPDialogs.toast(this, getString(R.string.reset_route), Toast.LENGTH_SHORT);
+            }
 
         } else if (i == cu.phibrain.cardinal.app.R.id.selectMo) {
             MapObject mapObject = appContainer.getCurrentMapObject();
             if (mapObject != null) {
-                GPGeoPoint point = LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
+                GPGeoPoint point = mapObject.getCentroid();
                 setNewCenterAtZoom(point.getLongitude(), point.getLatitude(), mapObject.getLayer().getEditZoomLevel());
 
                 ObjectInspectorDialogFragment.newInstance(mapView, mapObject.getId()).show(
@@ -1359,19 +1356,16 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
     private void editByGeometry() {
         ToolGroup activeToolGroup = EditManager.INSTANCE.getActiveToolGroup();
 
-//        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
         IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
         if (editLayer == null) {
             // if not layer is
             activeToolGroup = new NoEditableLayerToolGroup(mapView);
-//                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
-//                return;
         } else if (editLayer.getGeometryType().isPolygon())
-            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView, this);
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPolygonMainEditingToolGroup(mapView, MapviewActivity.this);
         else if (editLayer.getGeometryType().isLine())
-            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView, this);
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalLineMainEditingToolGroup(mapView, MapviewActivity.this);
         else if (editLayer.getGeometryType().isPoint())
-            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPointMainEditingToolGroup(mapView, this);
+            activeToolGroup = new cu.phibrain.cardinal.app.ui.map.tools.CardinalPointMainEditingToolGroup(mapView, MapviewActivity.this);
 
         EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
         setLeftButtoonsEnablement(false);
@@ -1488,31 +1482,13 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         if (isEditing) {
             disableEditing();
             mapView.releaseMapBlock();
-        } else {
-//            toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_on_24dp));
-//            IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
-//            if (editLayer == null) {
-//                // if not layer is
-//                activeToolGroup = new NoEditableLayerToolGroup(mapView);
-////                GPDialogs.warningDialog(this, getString(R.string.no_editable_layer_set), null);
-////                return;
-//            } else if (editLayer.getGeometryType().isPolygon())
-//                activeToolGroup = new PolygonMainEditingToolGroup(mapView);
-//            else if (editLayer.getGeometryType().isLine())
-//                activeToolGroup = new LineMainEditingToolGroup(mapView);
-//            else if (editLayer.getGeometryType().isPoint())
-//                activeToolGroup = new PointMainEditingToolGroup(mapView);
-//            EditManager.INSTANCE.setActiveToolGroup(activeToolGroup);
-//            setLeftButtoonsEnablement(false);
-//
-//            mapView.blockMap();
+        } else if (appContainer.getMode() != UserMode.OBJECT_DOCK && appContainer.getMode() != UserMode.OBJECT_ADDING_EDGE) {
             editByGeometry();
         }
 
     }
 
     private void disableEditing() {
-//        toggleEditingButton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_mapview_toggle_editing_off_24dp));
         Tool activeTool = EditManager.INSTANCE.getActiveTool();
         if (activeTool != null) {
             activeTool.disable();

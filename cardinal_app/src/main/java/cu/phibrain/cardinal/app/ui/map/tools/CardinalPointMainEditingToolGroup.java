@@ -1,7 +1,10 @@
 package cu.phibrain.cardinal.app.ui.map.tools;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -14,10 +17,14 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.library.GPApplication;
+import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.IActivitySupporter;
+import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.R;
 import eu.geopaparazzi.map.features.editing.EditManager;
@@ -47,6 +54,8 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
     private ImageButton deleteButton;
 
     private ImageButton editButton;
+
+    private ImageButton cameraButton;
 
     private AppContainer appContainer;
 
@@ -131,6 +140,17 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
 
 
         if (editLayer != null && appContainer.getCurrentMapObject() != null) {
+
+            //camera
+            cameraButton = new ImageButton(context);
+            cameraButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+            cameraButton.setImageBitmap(ImageUtil.getBitmap(context, eu.geopaparazzi.core.R.drawable.ic_add_a_photo_24dp));
+            cameraButton.setBackground(Compat.getDrawable(context, cu.phibrain.cardinal.app.R.drawable.button_background_states));
+            cameraButton.setPadding(0, padding, 0, padding);
+            cameraButton.setOnTouchListener(this);
+            cameraButton.setOnClickListener(this);
+            parent.addView(cameraButton);
+
             //edit
             editButton = new ImageButton(context);
             editButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
@@ -149,7 +169,7 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
             parent.addView(editButton);
 
             //edit coord
-            editCoordButton= new ImageButton(context);
+            editCoordButton = new ImageButton(context);
             editCoordButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
             editCoordButton.setImageBitmap(ImageUtil.getBitmap(context, cu.phibrain.cardinal.app.R.drawable.ic_marker_map_24dp));
             editCoordButton
@@ -157,8 +177,6 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
             editCoordButton.setPadding(0, padding, 0, padding);
             editCoordButton.setOnTouchListener(this);
             editCoordButton.setOnClickListener(this);
-            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
-                editCoordButton.setVisibility(View.GONE);
             parent.addView(editCoordButton);
 
             //delete
@@ -170,9 +188,13 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
             deleteButton.setPadding(0, padding, 0, padding);
             deleteButton.setOnTouchListener(this);
             deleteButton.setOnClickListener(this);
-            if (appContainer.getMode() == UserMode.OBJECT_EDITION)
-                deleteButton.setVisibility(View.GONE);
             parent.addView(deleteButton);
+
+            if (appContainer.getMode() == UserMode.OBJECT_EDITION) {
+                editCoordButton.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.GONE);
+                cameraButton.setVisibility(View.GONE);
+            }
 
         }
     }
@@ -186,14 +208,15 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
 
     public void onClick(View v) {
         if (v == createFeatureButton) {
-            if(appContainer.getMode()== UserMode.NONE)
+            if (appContainer.getMode() == UserMode.NONE || appContainer.getMode() != UserMode.OBJECT_EDITION)
                 appContainer.setMode(UserMode.OBJECT_ADDITION);
             ToolGroup createFeatureToolGroup = new CardinalPointCreateFeatureToolGroup(mapView, appContainer.getMode());
             EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
         } else if (v == undoButton) {
             editCoordButton.setVisibility(View.VISIBLE);
             deleteButton.setVisibility(View.VISIBLE);
-          //  appContainer.setMode(UserMode.NONE);
+            cameraButton.setVisibility(View.VISIBLE);
+            //  appContainer.setMode(UserMode.NONE);
         } else if (v == editButton) {
             if (appContainer.getMode() == UserMode.NONE) {
                 appContainer.setMode(UserMode.OBJECT_EDITION);
@@ -201,18 +224,21 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
                     ((MapviewActivity) activitySupporter).onMenuMTO();
                     deleteButton.setVisibility(View.GONE);
                     editCoordButton.setVisibility(View.GONE);
-                }catch (Exception e){
+                    cameraButton.setVisibility(View.GONE);
+                } catch (Exception e) {
                     e.printStackTrace();
                     appContainer.setMode(UserMode.NONE);
                     editCoordButton.setVisibility(View.VISIBLE);
                     deleteButton.setVisibility(View.VISIBLE);
+                    cameraButton.setVisibility(View.VISIBLE);
                 }
             } else {
                 appContainer.setMode(UserMode.NONE);
                 editCoordButton.setVisibility(View.VISIBLE);
                 deleteButton.setVisibility(View.VISIBLE);
+                cameraButton.setVisibility(View.VISIBLE);
             }
-        } else if(v == deleteButton){
+        } else if (v == deleteButton) {
             IEditableLayer editLayer = EditManager.INSTANCE.getEditLayer();
             appContainer.setMode(UserMode.OBJECT_DELETION);
             try {
@@ -221,10 +247,28 @@ public class CardinalPointMainEditingToolGroup implements ToolGroup, OnClickList
                 e.printStackTrace();
                 appContainer.setMode(UserMode.NONE);
             }
-        } else if(v == editCoordButton){
+        } else if (v == editCoordButton) {
             appContainer.setMode(UserMode.OBJECT_COORD_EDITION);
-            ToolGroup createFeatureToolGroup = new CardinalPointCreateFeatureToolGroup(mapView, UserMode.OBJECT_COORD_EDITION);
+            ToolGroup createFeatureToolGroup = new CardinalPointCreateFeatureToolGroup(mapView, appContainer.getMode());
             EditManager.INSTANCE.setActiveToolGroup(createFeatureToolGroup);
+        } else if (v == cameraButton) {
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activitySupporter.getContext());
+            double[] gpsLocation = PositionUtilities.getGpsLocationFromPreferences(preferences);
+
+            String imageName = ImageUtilities.getCameraImageName(null);
+            Intent cameraIntent = new Intent(activitySupporter.getContext(), CameraMapObjectActivity.class);
+            cameraIntent.putExtra(LibraryConstants.PREFS_KEY_CAMERA_IMAGENAME, imageName);
+            cameraIntent.putExtra(LibraryConstants.DATABASE_ID, appContainer.getCurrentMapObject().getId());
+
+            if (gpsLocation != null) {
+                cameraIntent.putExtra(LibraryConstants.LATITUDE, gpsLocation[1]);
+                cameraIntent.putExtra(LibraryConstants.LONGITUDE, gpsLocation[0]);
+                cameraIntent.putExtra(LibraryConstants.ELEVATION, gpsLocation[2]);
+            }
+
+            activitySupporter.startActivity(cameraIntent);
+
         }
 
         handleToolIcons(v);
