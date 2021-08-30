@@ -57,8 +57,8 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         }
         // PERMISSIONS STOP
 
-        setContentView(eu.geopaparazzi.core.R.layout.activity_geopaparazzi);
-        Toolbar toolbar = findViewById(eu.geopaparazzi.core.R.id.toolbar);
+        setContentView(R.layout.activity_cardinal);
+        Toolbar toolbar = findViewById(cu.phibrain.cardinal.app.R.id.toolbar);
         setSupportActionBar(toolbar);
 
         try {
@@ -80,7 +80,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         cardinalActivityFragment = new CardinalActivityFragment();
         FragmentTransaction transaction =
                 getSupportFragmentManager().beginTransaction();
-        transaction.replace(eu.geopaparazzi.core.R.id.fragmentContainer, cardinalActivityFragment);
+        transaction.replace(cu.phibrain.cardinal.app.R.id.cardinalFragmentContainer, cardinalActivityFragment);
         transaction.commitAllowingStateLoss();
     }
 

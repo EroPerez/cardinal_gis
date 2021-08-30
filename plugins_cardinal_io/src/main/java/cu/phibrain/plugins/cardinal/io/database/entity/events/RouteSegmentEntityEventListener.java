@@ -63,12 +63,16 @@ public class RouteSegmentEntityEventListener implements EntityEventListener<Rout
     public void onAfterEntityDelete(RouteSegment routeSegment, RouteSegmentOperations entityManager) {
         try {
             MapObject origin = MapObjectOperations.getInstance().load(routeSegment.getOriginId(), true);
-            origin.setIsCompleted(false);
-            MapObjectOperations.getInstance().update(origin);
+            if(origin != null) {
+                origin.setIsCompleted(false);
+                MapObjectOperations.getInstance().update(origin);
+            }
 
             MapObject destiny = MapObjectOperations.getInstance().load(routeSegment.getDestinyId(), true);
-            destiny.setIsCompleted(false);
-            MapObjectOperations.getInstance().update(destiny);
+            if(destiny != null) {
+                destiny.setIsCompleted(false);
+                MapObjectOperations.getInstance().update(destiny);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

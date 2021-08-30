@@ -97,6 +97,7 @@ import eu.geopaparazzi.library.util.TextAndBooleanRunnable;
 import eu.geopaparazzi.library.util.TimeUtilities;
 import eu.geopaparazzi.library.util.Utilities;
 
+import static eu.geopaparazzi.library.util.LibraryConstants.DEFAULT_LOG_WIDTH;
 import static eu.geopaparazzi.library.util.LibraryConstants.MAPSFORGE_EXTRACTED_DB_NAME;
 
 /**
@@ -811,15 +812,18 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                                         newName = defaultLogName;
                                     }
 
-                                    mGpslogButton.setBackgroundColor(ColorUtilities.getAccentColor(activity));
-                                    GpsServiceUtilities.startDatabaseLogging(appContext, newName, theBooleanToRunOn,
-                                            DefaultHelperClasses.GPSLOG_HELPER_CLASS);
-                                    GpsServiceUtilities.triggerBroadcast(getActivity());
-
                                     //start logging worker route
-                                    if (!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging(DefaultHelperClasses.GPSLOG_HELPER_CLASS))) {
+                                    if (startWorkerRouteLogging(DefaultHelperClasses.GPSLOG_HELPER_CLASS, newName, theBooleanToRunOn)) {
+                                        if (!theBooleanToRunOn)
+                                            theBooleanToRunOn = true;
+
+                                        mGpslogButton.setBackgroundColor(ColorUtilities.getAccentColor(activity));
+                                        GpsServiceUtilities.startDatabaseLogging(appContext, newName, theBooleanToRunOn,
+                                                DefaultHelperClasses.GPSLOG_HELPER_CLASS);
+                                        GpsServiceUtilities.triggerBroadcast(getActivity());
+                                    } else
                                         GPDialogs.warningDialog(getActivity(), getString(R.string.gpslogging_stop_and_start_again), null);
-                                    }
+
                                 });
                             }
                         }
@@ -836,14 +840,19 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         return mGpsServiceBroadcastReceiver;
     }
 
-    protected boolean startWorkerRouteLogging(String GPSLOG_HELPER_CLASS) {
+    protected boolean startWorkerRouteLogging(String GPSLOG_HELPER_CLASS, String newName, boolean continueLastLogging) {
 
         IGpsLogDbHelper dbHelper = null;
         try {
             Class<?> logHelper = Class.forName(GPSLOG_HELPER_CLASS);
             dbHelper = (IGpsLogDbHelper) logHelper.newInstance();
+            long gpsLogId = -1;
+            if (!continueLastLogging) {
+                long now = System.currentTimeMillis();
+                gpsLogId = dbHelper.addGpsLog(now, now, 0, newName, DEFAULT_LOG_WIDTH, ColorUtilities.RED.getHex(), true);
+            } else
+                gpsLogId = dbHelper.getLastLogId();
 
-            long gpsLogId = dbHelper.getLastLogId();
             Log.d("WorkerRouteLogging", "...with gps log id: " + gpsLogId);
             if (gpsLogId < 0) return false;
             //save current log
@@ -884,7 +893,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } catch (InterruptedException e) {
             String msg = getResources().getString(eu.geopaparazzi.library.R.string.cantwrite_gpslog);
             GPLog.error(this, msg, e);
-            return true;
+            return false;
         }
 
     }

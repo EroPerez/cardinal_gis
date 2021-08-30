@@ -94,9 +94,6 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
         return new MarkerSymbol(mtoBitmap, MarkerSymbol.HotspotPlace.UPPER_LEFT_CORNER, false);
     }
 
-    private GPGeoPoint centerPoint(MapObject mapObject) {
-        return LatLongUtils.centerPoint(mapObject.getCoord(), mapObject.getObjectType().getGeomType());
-    }
 
     @Override
     public void reloadData() throws IOException {
@@ -108,7 +105,7 @@ public class CardinalSelectPointLayer extends ItemizedLayer<MarkerItem> implemen
             Layer cardinalLayer = LayerOperations.getInstance().load(currentMo.getLayer().getId());
 
             if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
-                GPGeoPoint pointRef = centerPoint(currentMo);
+                GPGeoPoint pointRef = currentMo.getCentroid();
                 selectMarker = new MarkerItem(CardinalSelectPointLayer.SELECT_MARKER_UID, "", "", pointRef);
                 Drawable imagesDrawable = Compat.getDrawable(mapView.getContext(), R.drawable.long_select_mto);
                 mtoBitmap = AndroidGraphics.drawableToBitmap(imagesDrawable);
