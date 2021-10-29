@@ -172,12 +172,37 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
      */
     @Generated(hash = 48110761)
     private transient MapObjectDao myDao;
+
+    /**
+     * Used to mark as deleted
+     */
     private Boolean deleted;
+
+    /**
+     * Used set and active object when object has coupled object.
+     */
+    private transient MapObject activeObject;
 
 
     @Generated(hash = 226692444)
-    public MapObject(Long id, Long remoteId, String code, Long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord, double elevation, String observation,
-                     Date createdAt, Date updatedAt, Boolean isSync, Date SyncDate, long nodeGrade, Long stockCodeId, Long sessionId, Boolean isCompleted, Boolean deleted) {
+    public MapObject(
+            Long id,
+            Long remoteId,
+            String code,
+            Long joinId,
+            Long mapObjectTypeId,
+            List<GPGeoPoint> coord,
+            double elevation,
+            String observation,
+            Date createdAt,
+            Date updatedAt,
+            Boolean isSync,
+            Date SyncDate,
+            long nodeGrade,
+            Long stockCodeId,
+            Long sessionId,
+            Boolean isCompleted,
+            Boolean deleted) {
         this.id = id;
         this.remoteId = remoteId;
         this.code = code;
@@ -197,13 +222,25 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         this.deleted = deleted;
     }
 
-
     @Generated(hash = 705302497)
     public MapObject() {
     }
 
-    public MapObject(Long id, Long remoteId, String code, Long joinId, Long mapObjectTypeId, List<GPGeoPoint> coord, double elevation, String observation,
-                     Boolean isSync, Date SyncDate, long nodeGrade, Long stockCodeId, Long sessionId, Boolean isCompleted) {
+    public MapObject(
+            Long id,
+            Long remoteId,
+            String code,
+            Long joinId,
+            Long mapObjectTypeId,
+            List<GPGeoPoint> coord,
+            double elevation,
+            String observation,
+            Boolean isSync,
+            Date SyncDate,
+            long nodeGrade,
+            Long stockCodeId,
+            Long sessionId,
+            Boolean isCompleted) {
         this.id = id;
         this.remoteId = remoteId;
         this.code = code;
@@ -224,41 +261,33 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return this.id;
     }
 
-
     public void setId(Long id) {
         this.id = id;
     }
-
 
     public String getCode() {
         return this.code;
     }
 
-
     public void setCode(String code) {
         this.code = code;
     }
-
 
     public Long getJoinId() {
         return this.joinId;
     }
 
-
     public void setJoinId(Long joinId) {
         this.joinId = joinId;
     }
-
 
     public Long getMapObjectTypeId() {
         return this.mapObjectTypeId;
     }
 
-
     public void setMapObjectTypeId(Long mapObjectTypeId) {
         this.mapObjectTypeId = mapObjectTypeId;
     }
-
 
     public List<GPGeoPoint> getCoord() {
         return this.coord;
@@ -268,11 +297,9 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         this.coord = coord;
     }
 
-
     public String getObservation() {
         return this.observation;
     }
-
 
     public void setObservation(String observation) {
         this.observation = observation;
@@ -298,50 +325,40 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         this.isSync = isSync;
     }
 
-
     public Date getSyncDate() {
         return this.SyncDate;
     }
-
 
     public void setSyncDate(Date SyncDate) {
         this.SyncDate = SyncDate;
     }
 
-
     public long getNodeGrade() {
         return this.nodeGrade;
     }
-
 
     public void setNodeGrade(long nodeGrade) {
         this.nodeGrade = nodeGrade;
     }
 
-
     public Long getStockCodeId() {
         return this.stockCodeId;
     }
-
 
     public void setStockCodeId(Long stockCodeId) {
         this.stockCodeId = stockCodeId;
     }
 
-
     public Long getSessionId() {
         return this.sessionId;
     }
-
 
     public void setSessionId(long sessionId) {
         this.sessionId = sessionId;
     }
 
-
     @Generated(hash = 979072575)
     private transient Long joinObj__resolvedKey;
-
 
     /**
      * To-one relationship, resolved on first access.
@@ -364,7 +381,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return joinObj;
     }
 
-
     /**
      * called by internal mechanisms, do not call yourself.
      */
@@ -377,10 +393,8 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         }
     }
 
-
     @Generated(hash = 1904019615)
     private transient Long objectType__resolvedKey;
-
 
     /**
      * To-one relationship, resolved on first access.
@@ -403,7 +417,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return objectType;
     }
 
-
     /**
      * called by internal mechanisms, do not call yourself.
      */
@@ -416,10 +429,8 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         }
     }
 
-
     @Generated(hash = 1857934689)
     private transient Long stockCode__resolvedKey;
-
 
     /**
      * To-one relationship, resolved on first access.
@@ -442,7 +453,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return stockCode;
     }
 
-
     /**
      * called by internal mechanisms, do not call yourself.
      */
@@ -455,10 +465,8 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         }
     }
 
-
     @Generated(hash = 274049648)
     private transient Long session__resolvedKey;
-
 
     /**
      * To-one relationship, resolved on first access.
@@ -481,7 +489,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return session;
     }
 
-
     /**
      * called by internal mechanisms, do not call yourself.
      */
@@ -493,7 +500,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
             session__resolvedKey = sessionId;
         }
     }
-
 
     /**
      * To-many relationship, resolved on first access (and after reset).
@@ -516,7 +522,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         }
         return routeSegments;
     }
-
 
     /**
      * Resets a to-many relationship, making the next get call to query for a fresh result.
@@ -983,7 +988,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return imageIds;
     }
 
-
     // Region de los datos de ayuda en la syncronización
     @Override
     public Date getUpdatedAt() {
@@ -1019,11 +1023,9 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return obj;
     }
 
-
     public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
     }
-
 
     @Override
     public Long getRemoteId() {
@@ -1034,7 +1036,6 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
     public void setRemoteId(Long remoteId) {
         this.remoteId = remoteId;
     }
-
 
     public void setRemoteId(long remoteId) {
         this.remoteId = remoteId;
@@ -1050,9 +1051,20 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
         return this.deleted;
     }
 
-
     public byte[] getIcon() {
         return getObjectType().getIconAsByteArray();
+    }
+
+    public MapObject getActiveObject() {
+        if (this.activeObject == null) {
+            return this;
+        }
+
+        return this.activeObject;
+    }
+
+    public void setActiveObject(MapObject activeObject) {
+        this.activeObject = activeObject;
     }
 
 

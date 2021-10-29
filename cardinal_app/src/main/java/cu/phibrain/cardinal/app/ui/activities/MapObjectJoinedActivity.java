@@ -99,7 +99,6 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
         if (GPLog.LOG_HEAVY)
             GPLog.addLogEntry(this, "refreshing map objects list"); //$NON-NLS-1$
 
-
         List<MapObject> mapObjectList = MapObjectOperations.getInstance().getJoinedList(currentMOA.getId());
 
         Collections.sort(mapObjectList, mapObjectComparator);
@@ -112,7 +111,6 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
             mapobjectsCodes[index] = code;
             index++;
         }
-
 
         redoAdapter();
     }
@@ -182,6 +180,7 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
                 goButton.setOnClickListener(v -> {
                     final MapObject mapObject2 = mapObjectMap.get(mapObjectText.getText().toString());
                     if (mapObject2 != null) {
+                        currentMOA.setActiveObject(mapObject2);
 
                         GPGeoPoint centerPoint = LatLongUtils.centerPoint(mapObject2.getCoord(), mapObject2.getObjectType().getGeomType());
 

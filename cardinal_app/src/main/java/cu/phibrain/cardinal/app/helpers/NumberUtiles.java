@@ -40,4 +40,49 @@ public class NumberUtiles {
         return (float) ((meters * (1 / groundResolution)) / scale);
     }
 
+    /**
+     * Pad number with left zero
+     *
+     * @param in   The integer value
+     * @param fill The number of digits to fill
+     * @return The given value left padded with the given number of digits
+     */
+    public static String lPadZero(int in, int fill) {
+
+        boolean negative = false;
+        int value, len = 0;
+
+        if (in >= 0) {
+            value = in;
+        } else {
+            negative = true;
+            value = -in;
+            in = -in;
+            len++;
+        }
+
+        if (value == 0) {
+            len = 1;
+        } else {
+            while (value != 0) {
+                value /= 10;
+                len++;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (negative) {
+            sb.append('-');
+        }
+
+        for (int i = fill; i > len; i--) {
+            sb.append('0');
+        }
+
+        sb.append(in);
+
+        return sb.toString();
+    }
+
 }

@@ -9,5 +9,4 @@ public enum UserMode {
     OBJECT_DOCK,
     OBJECT_ADDING_EDGE,
     OBJECT_UNDOCK,
-
 }

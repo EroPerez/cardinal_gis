@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -24,11 +26,13 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
+import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
+import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalSelectPointLayer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
@@ -53,7 +57,7 @@ import eu.geopaparazzi.map.features.editing.EditManager;
  *     BarcodeReaderDialogFragment.newInstance(mapView, points).show(getSupportFragmentManager(), "dialog");
  * </pre>
  */
-public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener {
+public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     // TODO: Customize parameter argument names
 
@@ -65,6 +69,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     private ImageButton buttonScan;
     private ImageButton buttonSave;
     private AutoCompleteTextView autoCompleteTextViewCode;
+    private CheckBox checkBoxNoLabel;
     //qr code scanner object
     private IntentIntegrator code128BarcodeScan;
 
@@ -75,6 +80,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     private LabelSubLot label;
     private WorkSession currentSession;
     private long grade;
+    private boolean compositeMode;
 
     public BarcodeReaderDialogFragment() {
     }
@@ -84,6 +90,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         this.mapView = mapView;
         this.coordinates = points;
         this.grade = grade;
+        this.compositeMode = false;
     }
 
     // TODO: Customize parameters
@@ -101,7 +108,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         BottomSheetDialog dialog = new ObjectInspectorDialogFragment.MyBottomSheetDialog(this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme);
 
         View view = View.inflate(getContext(), R.layout.fragment_barcode_reader_dialog_list_dialog, null);
-
 
         appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
         currentSession = appContainer.getWorkSessionActive();
@@ -132,11 +138,15 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES);
         code128BarcodeScan.setPrompt(getString(R.string.scan_map_object_barcode_message));
         code128BarcodeScan.setOrientationLocked(false);
-
+        //no label checkbox
+        checkBoxNoLabel = view.findViewById(R.id.checkBoxWithoutTag);
+        if (appContainer.getCurrentMapObject() == null) {
+            checkBoxNoLabel.setVisibility(View.GONE);
+        }
         //attaching onclick listener
         buttonScan.setOnClickListener(this);
         buttonSave.setOnClickListener(this);
-
+        checkBoxNoLabel.setOnCheckedChangeListener(this);
 
         dialog.setContentView(view);
         mBehavior = BottomSheetBehavior.from((View) view.getParent());
@@ -152,11 +162,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
     @Override
     public void dismiss() {
-
         super.dismiss();
-
     }
-
 
     //Getting the scan results
     @Override
@@ -200,14 +207,15 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         } else if (i == R.id.imgBtnSave) {
             FragmentActivity activity = getActivity();
             boolean terminalFound = false;
+            String mapObjectCode = this.getMapObjectCode();
             try {
-                if(appContainer.getRouteSegmentActive()==null) {
+                if (appContainer.getRouteSegmentActive() == null) {
                     MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
                     MapObject previousObj = appContainer.getCurrentMapObject();
                     Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
                     MapObject currentObj = new MapObject();
-                    currentObj.setCode(label.toString());
+                    currentObj.setCode(mapObjectCode);
                     currentObj.setCoord(this.coordinates);
                     currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
@@ -218,12 +226,14 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     currentObj.setIsCompleted(false);
                     currentObj.setCreatedAt(new Date());
                     currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
-
+                    if (compositeMode && previousObj != null) {
+                        currentObj.setJoinId(previousObj.getId());
+                    }
                     MapObjectOperations.getInstance().save(currentObj);
 
-                    if (!currentObj.isTerminal()) {
+                    if (!currentObj.isTerminal() && !compositeMode) {
                         appContainer.setCurrentMapObject(currentObj);
-                    } else {
+                    } else if (currentObj.isTerminal()) {
                         appContainer.setCurrentMapObject(null);
                         appContainer.setMapObjecTypeActive(null);
                         appContainer.setNetworksActive(null);
@@ -235,14 +245,16 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
 //                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
 
-                    if (!currentObj.belongToTopoLayer() ||
-                            previousObj == null ||
-                            !previousObj.belongToTopoLayer() ||
-                            previousObj.getIsCompleted()) {
+                    if (
+                            !currentObj.belongToTopoLayer()
+                                    || previousObj == null
+                                    || !previousObj.belongToTopoLayer()
+                                    || previousObj.getIsCompleted()
+                                    || this.compositeMode
+                    ) {
                         refreshUI(terminalFound);
                         return;
                     }
-
 
                     if (LatLongUtils.soFar(previousObj, LatLongUtils.getMaxDistance(), currentObj)) {
                         final boolean tf = terminalFound;
@@ -271,18 +283,17 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                 })
                         );
                     } else {
-
                         RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
                         RouteSegmentOperations.getInstance().save(edge);
                         mapView.reloadLayer(CardinalEdgesLayer.class);
                         refreshUI(terminalFound);
                     }
 
-                }
-                else{
+                } else {
                     MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
+                    MapObject previousObj = appContainer.getCurrentMapObject();
                     MapObject currentObj = new MapObject();
-                    currentObj.setCode(label.toString());
+                    currentObj.setCode(mapObjectCode);
                     currentObj.setCoord(this.coordinates);
                     currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
@@ -291,6 +302,9 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     currentObj.setIsCompleted(false);
                     currentObj.setCreatedAt(new Date());
                     currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
+                    if (compositeMode && previousObj != null) {
+                        currentObj.setJoinId(previousObj.getId());
+                    }
 
                     MapObjectOperations.getInstance().save(currentObj);
                     appContainer.setRouteSegmentActive(null);
@@ -312,13 +326,30 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         }
     }
 
+    private String getMapObjectCode() {
+        String code = "";
+        if (this.compositeMode) {
+            MapObject mapObject = appContainer.getCurrentMapObject();
+            int subIndex = mapObject.getJoinedList().size();
+            code = String.format("%s-%s",
+                    mapObject.getCode(),
+                    NumberUtiles.lPadZero(subIndex + 1, 2)
+            );
+        } else {
+            code = label.toString();
+        }
+
+        return code;
+    }
+
     void reloadLayer(Layer layer) throws Exception {
 
         EditManager.INSTANCE.getEditLayer().reloadData();
         ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
         mapView.reloadLayer(CardinalSelectPointLayer.class);
-//        mapView.reloadLayer(CardinalJoinsLayer.class);
-
+        if (compositeMode) {
+            mapView.reloadLayer(CardinalJoinsLayer.class);
+        }
     }
 
     void refreshUI(boolean terminalFound) {
@@ -334,5 +365,32 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         dismiss();
     }
 
+    /**
+     * Called when the checked state of a compound button has changed.
+     *
+     * @param buttonView The compound button view whose state has changed.
+     * @param isChecked  The new checked state of buttonView.
+     */
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        FragmentActivity activity = getActivity();
+        if (isChecked == true) {
+            autoCompleteTextViewCode.setVisibility(View.GONE);
+            buttonScan.setVisibility(View.GONE);
+            buttonSave.setVisibility(View.VISIBLE);
+            compositeMode = true;
+            GPDialogs.toast(activity,
+                    String.format(activity.getString(R.string.map_object_aggregation_mode_actived_message)),
+                    Toast.LENGTH_LONG);
+        } else {
+            autoCompleteTextViewCode.setVisibility(View.VISIBLE);
+            buttonScan.setVisibility(View.VISIBLE);
+            buttonSave.setVisibility(View.GONE);
+            compositeMode = false;
+            GPDialogs.toast(activity,
+                    String.format(activity.getString(R.string.map_object_aggregation_mode_disabled_message)),
+                    Toast.LENGTH_LONG);
+        }
+    }
 }
 
