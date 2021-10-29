@@ -12,6 +12,13 @@
     tools:context=".ui.fragment.BarcodeReaderDialogFragment">
 
 
+    <CheckBox
+        android:id="@+id/checkBoxWithoutTag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/map_object_without_tag_mesagge" />
+
     <AutoCompleteTextView
         android:id="@+id/autoCompleteTextViewCode"
         android:layout_width="wrap_content"

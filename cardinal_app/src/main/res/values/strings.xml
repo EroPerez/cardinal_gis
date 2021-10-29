@@ -65,4 +65,7 @@
     <string name="autores1">Erodis Pérez Michel (eperezm1986@nauta.cu)</string>
     <string name="autores2">Daniel García Fernández (dgarciaf@nauta.cu)</string>
     <string name="select_layer">Candinal selection layer</string>
+    <string name="map_object_without_tag_mesagge">Composite mode?</string>
+    <string name="map_object_aggregation_mode_actived_message">Component aggregation mode enabled</string>
+    <string name="map_object_aggregation_mode_disabled_message">Component aggregation mode disabled</string>
 </resources>

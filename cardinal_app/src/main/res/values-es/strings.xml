@@ -58,4 +58,7 @@
     <string name="derechos">Todos los derechos reservados</string>
     <string name="desarrollado_por">Desarrolladores:</string>
     <string name="delete_edge">¿Está seguro que desea eliminar este segmento de ruta?</string>
+    <string name="map_object_without_tag_mesagge">¿Modo componete?</string>
+    <string name="map_object_aggregation_mode_actived_message">Modo agregación de componete habilitado</string>
+    <string name="map_object_aggregation_mode_disabled_message">Modo agregación de componete desactivado</string>
 </resources>

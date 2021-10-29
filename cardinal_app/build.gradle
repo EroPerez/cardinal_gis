@@ -24,6 +24,10 @@ android {
         config {
             Properties props = new Properties()
             def propFile = new File('cardinalpaparazzi.app/ant.properties')
+            storeFile file('/media/michel/DATA/Proyectos/New/Cardinal_Captador/geopaparazzi/key.jks')
+            storePassword 'Elmaskentona2021'
+            keyAlias 'cardus'
+            keyPassword 'Elmaskentona2021'
             if (propFile.canRead()) {
                 props.load(new FileInputStream(propFile))
                 if (props != null && props.containsKey('key.store') && props.containsKey('key.store.password') &&
@@ -46,12 +50,18 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.config
+            applicationIdSuffix myApplicationId
+            versionNameSuffix myVersionName
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             applicationVariants.all { variant ->
                 variant.outputs.each { output ->
                     output.outputFileName = "CardusGIS_" + android.defaultConfig.versionName + ".apk"
                 }
             }
+        }
+        debug {
+            applicationIdSuffix myApplicationId
+            versionNameSuffix myVersionName
         }
     }
     lintOptions {

@@ -559,6 +559,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                             GPLog.addLogEntry(String.format(activity.getString(cu.phibrain.cardinal.app.R.string.max_distance_threshold_broken_message_jointo),
                                     LatLongUtils.getRadiusJoinMo()));
 
+                            currentObj.setCode(getMapObjectCode(previousObj));
                             currentObj.setJoinObj(previousObj);
                             MapObjectOperations.getInstance().save(currentObj);
                             appContainer.setMode(UserMode.NONE);
@@ -577,6 +578,7 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                         })
                 );
             } else {
+                currentObj.setCode(getMapObjectCode(previousObj));
                 currentObj.setJoinObj(previousObj);
                 MapObjectOperations.getInstance().save(currentObj);
                 appContainer.setMode(UserMode.NONE);
@@ -606,5 +608,15 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
                 return item;
         }
         return null;
+    }
+
+    private String getMapObjectCode(MapObject mapObject) {
+
+        int subIndex = mapObject.getJoinedList().size();
+        return String.format("%s-%s",
+                mapObject.getCode(),
+                NumberUtiles.lPadZero(subIndex + 1, 2)
+        );
+
     }
 }
