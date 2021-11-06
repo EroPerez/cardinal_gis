@@ -330,11 +330,22 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         String code = "";
         if (this.compositeMode) {
             MapObject mapObject = appContainer.getCurrentMapObject();
-            int subIndex = mapObject.getJoinedList().size();
+            int subIndex = mapObject.getJoinedList().size() + 1;
             code = String.format("%s-%s",
                     mapObject.getCode(),
-                    NumberUtiles.lPadZero(subIndex + 1, 2)
+                    NumberUtiles.lPadZero(subIndex, 2)
             );
+            for (MapObject mapObjectJoin :
+                    mapObject.getJoinedList()) {
+                if (mapObjectJoin.getCode().equals(code)) {
+                    subIndex++;
+                    code = String.format("%s-%s",
+                            mapObjectJoin.getCode(),
+                            NumberUtiles.lPadZero(subIndex, 2)
+                    );
+                }
+
+            }
         } else {
             code = label.toString();
         }
