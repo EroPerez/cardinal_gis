@@ -337,8 +337,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             );
             for (MapObject mapObjectJoin :
                     mapObject.getJoinedList()) {
+                subIndex++;
                 if (mapObjectJoin.getCode().equals(code)) {
-                    subIndex++;
                     code = String.format("%s-%s",
                             mapObjectJoin.getCode(),
                             NumberUtiles.lPadZero(subIndex, 2)
