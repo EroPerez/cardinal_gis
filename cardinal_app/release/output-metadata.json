@@ -4,14 +4,14 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "cu.phibrain.cardinalpaparazzi",
+  "applicationId": "cu.phibrain.cardinalpaparazzi.cu.phibrain.cardinalpaparazzi",
   "variantName": "processReleaseResources",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "versionCode": 100,
-      "versionName": "6.0.3",
+      "versionName": "6.0.36.0.3",
       "outputFile": "CardusGIS_6.0.3.apk"
     }
   ]

@@ -101,7 +101,7 @@ import static eu.geopaparazzi.library.util.LibraryConstants.DEFAULT_LOG_WIDTH;
 import static eu.geopaparazzi.library.util.LibraryConstants.MAPSFORGE_EXTRACTED_DB_NAME;
 
 /**
- * The fragment of the main geopap view.
+ * The fragment of the main geopapp view.
  *
  * @author Andrea Antonello (www.hydrologis.com)
  */
@@ -217,10 +217,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         try {
             int sessionCount = 0;
             String username = getResources().getString(R.string.select_one);
-
-//            if (((CardinalApplication) CardinalApplication.getInstance()).getContainer().getProjectActive() != null) {
-//                notesCount = (int) WorkSessionOperations.getInstance().getDao().count();
-//            }
 
             Worker currentWorker = ((CardinalApplication) CardinalApplication.getInstance()).getContainer().getCurrentWorker();
 
@@ -390,8 +386,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             startActivityForResult(profilesIntent, RETURNCODE_PROFILES);
             return true;
         } else if (i == eu.geopaparazzi.core.R.id.action_about) {
-//            Intent intent = new Intent(getActivity(), AboutActivity.class);
-//            startActivity(intent);
             showAboutUs();
             return true;
         } else if (i == eu.geopaparazzi.core.R.id.action_exit) {
@@ -544,9 +538,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             String user = preferences.getString(Constants.PREF_KEY_USER, "cardinal"); //$NON-NLS-1$
 
             try {
-                if (appContainer.getProjectActive() != null)
+                if (appContainer.getProjectActive() != null) {
                     appContainer.setCurrentWorker(WorkerOperations.getInstance().findOneBy(user));
-
+                }
                 if (appContainer.getProjectActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
                 } else if (appContainer.getCurrentWorker() == null) {
