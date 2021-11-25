@@ -596,7 +596,11 @@ public enum WebDataProjectManager {
             // create table
             DaoMetadata.createTables(db);
             String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
-            DaoMetadata.initProjectMetadata(db, project.getName(), Html.fromHtml(project.getDescription()).toString(), null, user, uniqueDeviceId);
+            String description = "Cloud project";
+            if(project.getDescription() != null) {
+                description = Html.fromHtml(project.getDescription()).toString();
+            }
+            DaoMetadata.initProjectMetadata(db, project.getName(), description, null, user, uniqueDeviceId);
             DaoMetadata.setValue(db, TableDescriptions.MetadataTableDefaultValues.KEY_CREATIONTS.getFieldName(), String.valueOf(project.getCreatedAt().getTime()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldName(), CardinalMetadataTableDefaultValues.PROJECT_ID.getFieldLabel(), String.valueOf(project.getId()));
             DaoMetadata.insertNewItem(db, CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldName(), CardinalMetadataTableDefaultValues.WORK_SESSION_ID.getFieldLabel(), "");

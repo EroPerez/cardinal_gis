@@ -33,6 +33,7 @@ public class LatLongUtils {
     public static final double EPSILON = 9E-7;
     public static final double SELECTION_FUZZINESS = 3.9f;
     public static double originShift = 2.0037508342789244E7D;
+    private static final long MIN_IMAGE_TAKEN = 1;
 
 
     public static double distance(MapObject mo1, MapObject mo2) {
@@ -158,6 +159,23 @@ public class LatLongUtils {
         return RADIUS_JOIN_MO;
     }
 
+    public static Long getMinImageToTake() {
+        AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        try {
+            List<ProjectConfig> cfgs = appContainer.getProjectActive().getConfigurations();
+            for (ProjectConfig cfg :
+                    cfgs) {
+                if (cfg.getConfigType() == ProjectConfig.ConfigType.MAP_OBJECT_MIN_IMAGE_TAKEN) {
+                    return NumberUtiles.parseStringToLong(cfg.getValue(), MIN_IMAGE_TAKEN);
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return MIN_IMAGE_TAKEN;
+    }
+
     /**
      * Given three colinear points a, b, c, the function checks if point c lies on line segment 'ab'
      * Method:
@@ -251,5 +269,7 @@ public class LatLongUtils {
         return det <= EPSILON && onSegment(p, r, q);
 
     }
+
+
 }
 

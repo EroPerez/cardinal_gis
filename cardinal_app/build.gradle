@@ -24,7 +24,7 @@ android {
         config {
             Properties props = new Properties()
             def propFile = new File('cardinalpaparazzi.app/ant.properties')
-            storeFile file('/media/michel/DATA/Proyectos/New/Cardinal_Captador/geopaparazzi/key.jks')
+            storeFile file('/media/michel/Data/Proyectos/New/Cardinal_Captador/geopaparazzi/key.jks')
             storePassword 'Elmaskentona2021'
             keyAlias 'cardus'
             keyPassword 'Elmaskentona2021'

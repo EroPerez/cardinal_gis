@@ -316,7 +316,11 @@ public class CardinalProjectImporterActivity extends ListActivity {
                 });
 
                 nameText.setText(projectModel.name);
-                descriptionText.setText(android.text.Html.fromHtml(projectModel.description).toString().trim());
+                if(projectModel.description != null){
+                    descriptionText.setText( android.text.Html.fromHtml(projectModel.description).toString().trim());
+                } else{
+                    descriptionText.setText("");
+                }
                 createdAtText.setText(getString(R.string.geometry_type) + JodaTimeHelper.calculateAge(DateTime.parse(projectModel.created_at)));
                 idText.setText(getString(R.string.srid) + projectModel.id);
                 return rowView;

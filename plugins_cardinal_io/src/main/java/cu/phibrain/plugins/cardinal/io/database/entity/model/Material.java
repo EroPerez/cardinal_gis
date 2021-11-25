@@ -29,9 +29,9 @@ public class Material implements Serializable, IEntity{
     @Expose
     public Long workerSessionId;
 
-    @SerializedName("name")
+    @SerializedName("material_type")
     @Expose
-    private String name;
+    private long materialType;
 
     @SerializedName("unit")
     @Expose
@@ -67,13 +67,13 @@ public class Material implements Serializable, IEntity{
 
     private final static long serialVersionUID = -94600434386243L;
 
-    @Generated(hash = 1276089886)
-    public Material(Long id, Long workerSessionId, String name, String unit,
-                    int deliveryQuantity, Date deliveryDate, int pickBackQuantity, Date pickBackDate,
-                    double norm, String description, Boolean use) {
+    @Generated(hash = 954670284)
+    public Material(Long id, Long workerSessionId, long materialType, String unit, int deliveryQuantity,
+            Date deliveryDate, int pickBackQuantity, Date pickBackDate, double norm, String description,
+            Boolean use) {
         this.id = id;
         this.workerSessionId = workerSessionId;
-        this.name = name;
+        this.materialType = materialType;
         this.unit = unit;
         this.deliveryQuantity = deliveryQuantity;
         this.deliveryDate = deliveryDate;
@@ -102,14 +102,6 @@ public class Material implements Serializable, IEntity{
 
     public void setWorkerSessionId(Long workerSessionId) {
         this.workerSessionId = workerSessionId;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getUnit() {
@@ -174,6 +166,14 @@ public class Material implements Serializable, IEntity{
 
     public void setUse(Boolean use) {
         this.use = use;
+    }
+
+    public long getMaterialType() {
+        return this.materialType;
+    }
+
+    public void setMaterialType(long materialType) {
+        this.materialType = materialType;
     }
 
 }

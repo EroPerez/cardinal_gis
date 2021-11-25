@@ -138,6 +138,10 @@ public class MapObjecType implements Serializable, IEntity {
     @Expose
     private Boolean isTerminal;
 
+    @SerializedName("adhesive_method")
+    @Expose
+    private long adhesiveMethod;
+
     private final static long serialVersionUID = -5405345251211056739L;
 
     /**
@@ -164,10 +168,10 @@ public class MapObjecType implements Serializable, IEntity {
     public MapObjecType() {
     }
 
-    @Generated(hash = 570045238)
+    @Generated(hash = 1770540522)
     public MapObjecType(Long id, long parentId, String icon, String caption, String description,
-            Long layerId, GeomType geomType, boolean isAbstract, Boolean isGeneric,
-            Boolean isTerminal) {
+            Long layerId, GeomType geomType, boolean isAbstract, Boolean isGeneric, Boolean isTerminal,
+            long adhesiveMethod) {
         this.id = id;
         this.parentId = parentId;
         this.icon = icon;
@@ -178,6 +182,7 @@ public class MapObjecType implements Serializable, IEntity {
         this.isAbstract = isAbstract;
         this.isGeneric = isGeneric;
         this.isTerminal = isTerminal;
+        this.adhesiveMethod = adhesiveMethod;
     }
 
     public Long getId() {
@@ -530,6 +535,14 @@ public class MapObjecType implements Serializable, IEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public long getAdhesiveMethod() {
+        return this.adhesiveMethod;
+    }
+
+    public void setAdhesiveMethod(long adhesiveMethod) {
+        this.adhesiveMethod = adhesiveMethod;
     }
 
     /** called by internal mechanisms, do not call yourself. */
