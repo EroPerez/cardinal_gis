@@ -209,9 +209,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             boolean terminalFound = false;
             String mapObjectCode = this.getMapObjectCode();
             try {
+                MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
+                MapObject previousObj = appContainer.getCurrentMapObject();
+
                 if (appContainer.getRouteSegmentActive() == null) {
-                    MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
-                    MapObject previousObj = appContainer.getCurrentMapObject();
                     Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
                     MapObject currentObj = new MapObject();
@@ -290,8 +291,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     }
 
                 } else {
-                    MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
-                    MapObject previousObj = appContainer.getCurrentMapObject();
                     MapObject currentObj = new MapObject();
                     currentObj.setCode(mapObjectCode);
                     currentObj.setCoord(this.coordinates);
@@ -330,11 +329,22 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         String code = "";
         if (this.compositeMode) {
             MapObject mapObject = appContainer.getCurrentMapObject();
-            int subIndex = mapObject.getJoinedList().size();
+            int subIndex = mapObject.getJoinedList().size() + 1;
             code = String.format("%s-%s",
                     mapObject.getCode(),
-                    NumberUtiles.lPadZero(subIndex + 1, 2)
+                    NumberUtiles.lPadZero(subIndex, 2)
             );
+            for (MapObject mapObjectJoin :
+                    mapObject.getJoinedList()) {
+                subIndex++;
+                if (mapObjectJoin.getCode().equals(code)) {
+                    code = String.format("%s-%s",
+                            mapObjectJoin.getCode(),
+                            NumberUtiles.lPadZero(subIndex, 2)
+                    );
+                }
+
+            }
         } else {
             code = label.toString();
         }
@@ -353,6 +363,15 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     }
 
     void refreshUI(boolean terminalFound) {
+        FragmentActivity activity = getActivity();
+
+        GPDialogs.warningDialog(
+                activity,
+                String.format(
+                        activity.getString(R.string.map_object_must_have_a_image_number_taken),
+                        LatLongUtils.getMinImageToTake()),
+                null
+        );
 
         //Update ui
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);

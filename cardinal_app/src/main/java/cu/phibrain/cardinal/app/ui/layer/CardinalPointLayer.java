@@ -159,7 +159,9 @@ public class CardinalPointLayer extends ItemizedLayer<MarkerItem> implements Ite
 
         List<MarkerItem> markerItems = new ArrayList<>();
         removeAllItems();
-        if (cardinalLayer.getEnabled() && zoom >= cardinalLayer.getViewZoomLevel()) {
+        if (cardinalLayer != null
+                && cardinalLayer.getEnabled()
+                && zoom >= cardinalLayer.getViewZoomLevel()) {
 
             for (MapObjecType mtoMapObjcType : cardinalLayer.getMapobjectypes()) {
                 byte[] icon = ImageUtil.getScaledBitmapAsByteArray(

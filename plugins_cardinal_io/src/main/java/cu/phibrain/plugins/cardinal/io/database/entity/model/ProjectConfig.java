@@ -79,7 +79,9 @@ public class ProjectConfig implements Serializable, IEntity {
         @SerializedName("1")
         MAP_OBJECT_JOINT_OFFSET(1),
         @SerializedName("2")
-        LINE_AND_POLYGON_VIEW_ZOOM(2);
+        LINE_AND_POLYGON_VIEW_ZOOM(2),
+        @SerializedName("3")
+        MAP_OBJECT_MIN_IMAGE_TAKEN(3);
 
         private final int id;
 

@@ -373,7 +373,12 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         /*
          * create main mapview
          */
-        mapView = new CardinalGPMapView(this);
+        try {
+            mapView = new CardinalGPMapView(this);
+        } catch (Exception ex){
+            mapView = new CardinalGPMapView(this);
+        }
+
         mapView.setClickable(true);
         mapView.setOnTouchListener(this);
 
