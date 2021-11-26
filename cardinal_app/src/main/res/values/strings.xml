@@ -68,5 +68,7 @@
     <string name="map_object_without_tag_mesagge">Composite mode?</string>
     <string name="map_object_aggregation_mode_actived_message">Component aggregation mode enabled</string>
     <string name="map_object_aggregation_mode_disabled_message">Component aggregation mode disabled</string>
-    <string name="map_object_must_have_a_image_number_taken">Remember to take at least %d photos for the newly picked up coordinate.</string>
+    <string name="map_object_must_have_a_image_number_taken">Remember to take at least %d photos for the newly picked up coordinate</string>
+    <string name="map_object_must_have_a_image_number_taken_exit_confirm">Are you sure you want to continue? Remember to take at least %d photos for the newly picked up coordinate</string>
+    <string name="scanner">Scan</string>
 </resources>

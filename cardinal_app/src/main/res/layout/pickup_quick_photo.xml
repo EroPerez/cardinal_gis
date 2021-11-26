@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/square_background"
+    android:paddingStart="5dp">
+
+    <LinearLayout
+        android:id="@+id/llWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageButtonWarning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/take_picture"
+            android:scaleType="fitXY"
+            android:tint="@color/main_decorations"
+            app:srcCompat="@drawable/ic_warning_24dp" />
+
+        <TextView
+            android:id="@+id/tvalertPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/map_object_must_have_a_image_number_taken"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/llWarning"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/launchButton"
+            style="@style/GPMediumButton"
+            android:layout_weight="1"
+            android:contentDescription="@string/take_picture"
+            android:tint="@color/main_decorations"
+            app:srcCompat="@drawable/ic_camera_24dp" />
+
+        <Button
+            android:id="@+id/cancelbutton"
+            style="@style/GPMediumButton"
+            android:layout_weight="1"
+            android:text="@string/continue_fuck" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

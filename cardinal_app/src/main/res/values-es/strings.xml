@@ -61,5 +61,8 @@
     <string name="map_object_without_tag_mesagge">¿Modo componete?</string>
     <string name="map_object_aggregation_mode_actived_message">Modo agregación de componete habilitado</string>
     <string name="map_object_aggregation_mode_disabled_message">Modo agregación de componete desactivado</string>
-    <string name="map_object_must_have_a_image_number_taken">Recuerde tomar %d fotos como mínimo para la coordenada recien levantada.</string>
+    <string name="map_object_must_have_a_image_number_taken">Recuerde tomar %d fotos como mínimo para la coordenada recien levantada</string>
+    <string name="map_object_must_have_a_image_number_taken_exit_confirm">¿Está seguro de desea continuar? Recuerde tomar %d fotos como mínimo para la coordenada recien levantada</string>
+    <string name="continue_fuck">Continuar</string>
+
 </resources>
