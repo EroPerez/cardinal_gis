@@ -1,13 +1,18 @@
 package cu.phibrain.cardinal.app.ui.fragment;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +34,7 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
@@ -45,7 +51,10 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOpe
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.GPDialogs;
+import eu.geopaparazzi.library.util.LibraryConstants;
+import eu.geopaparazzi.library.util.PositionUtilities;
 import eu.geopaparazzi.map.GPGeoPoint;
 import eu.geopaparazzi.map.GPMapView;
 import eu.geopaparazzi.map.features.editing.EditManager;
@@ -97,7 +106,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     public static BarcodeReaderDialogFragment newInstance(GPMapView mapView, List<GPGeoPoint> points, long grade) {
         final BarcodeReaderDialogFragment fragment = new BarcodeReaderDialogFragment(mapView, points, grade);
         final Bundle args = new Bundle();
-//        args.putLong(ARG_ITEM_COUNT, itemCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -363,15 +371,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     }
 
     void refreshUI(boolean terminalFound) {
-        FragmentActivity activity = getActivity();
-
-        GPDialogs.warningDialog(
-                activity,
-                String.format(
-                        activity.getString(R.string.map_object_must_have_a_image_number_taken),
-                        LatLongUtils.getMinImageToTake()),
-                null
-        );
+        launchPickupPhoto();
 
         //Update ui
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
@@ -410,6 +410,68 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     String.format(activity.getString(R.string.map_object_aggregation_mode_disabled_message)),
                     Toast.LENGTH_LONG);
         }
+    }
+
+
+    private void launchPickupPhoto() {
+        FragmentActivity activity = getActivity();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        View v = getLayoutInflater().inflate(R.layout.pickup_quick_photo, null);
+        builder.setView(v);
+        AlertDialog ad = builder.create();
+        ad.setCancelable(false);
+
+        ((TextView) v.findViewById(R.id.tvalertPhoto)).setText(
+                String.format(
+                        activity.getString(R.string.map_object_must_have_a_image_number_taken),
+                        LatLongUtils.getMinImageToTake()
+                )
+        );
+
+        ImageButton cameraButton = v.findViewById(R.id.launchButton);
+        cameraButton.setOnClickListener(v1 -> {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+            double[] gpsLocation = PositionUtilities.getGpsLocationFromPreferences(preferences);
+
+            String imageName = ImageUtilities.getCameraImageName(null);
+            Intent cameraIntent = new Intent(activity, CameraMapObjectActivity.class);
+            cameraIntent.putExtra(LibraryConstants.PREFS_KEY_CAMERA_IMAGENAME, imageName);
+            cameraIntent.putExtra(LibraryConstants.DATABASE_ID, appContainer.getCurrentMapObject().getId());
+
+            if (gpsLocation != null) {
+                cameraIntent.putExtra(LibraryConstants.LATITUDE, gpsLocation[1]);
+                cameraIntent.putExtra(LibraryConstants.LONGITUDE, gpsLocation[0]);
+                cameraIntent.putExtra(LibraryConstants.ELEVATION, gpsLocation[2]);
+            }
+
+            activity.startActivity(cameraIntent);
+        });
+
+        Button continueButton = v.findViewById(R.id.cancelbutton);
+        continueButton.setOnClickListener(v1 -> {
+            appContainer.getCurrentMapObject().resetImages();
+            if (appContainer.getCurrentMapObject().getImages().size() < LatLongUtils.getMinImageToTake()) {
+                GPDialogs.yesNoMessageDialog(activity,
+                        String.format(
+                                activity.getString(R.string.map_object_must_have_a_image_number_taken_exit_confirm),
+                                LatLongUtils.getMinImageToTake()
+                        ),
+                        () -> activity.runOnUiThread(() -> {
+                            // yes
+                            ad.cancel();
+
+                        }),
+                        null
+                );
+            } else{
+                ad.cancel();
+            }
+
+        });
+
+
+        ad.show();
     }
 }
 

@@ -5,7 +5,7 @@
     android:background="@drawable/background_start">
 
     <TextView
-        android:id="@+id/tvappname"
+        android:id="@+id/tvalertPhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -20,7 +20,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tvappname"
+        android:layout_below="@id/tvalertPhoto"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="25dp"
         android:layout_marginStart="4dp"

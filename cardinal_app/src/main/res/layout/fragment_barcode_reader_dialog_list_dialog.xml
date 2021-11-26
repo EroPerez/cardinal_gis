@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="2dp"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="32dp"
     android:background="@drawable/inspector_background"
     android:gravity="center"
     android:orientation="horizontal"
@@ -14,48 +14,49 @@
 
     <CheckBox
         android:id="@+id/checkBoxWithoutTag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:text="@string/map_object_without_tag_mesagge" />
+        android:text="@string/map_object_without_tag_mesagge"
+        android:textAlignment="gravity"
+        android:textSize="14sp" />
 
     <AutoCompleteTextView
         android:id="@+id/autoCompleteTextViewCode"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
         android:background="@drawable/spinner_material"
         android:completionThreshold="1"
         android:ems="10"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
+        android:focusable="auto"
         android:hint="@string/select_one"
         android:imeOptions="actionDone"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:text=""
-        android:textSize="14sp" />
+        android:textAlignment="center"
+        android:textSize="12sp"
+        tools:ignore="RtlCompat" />
 
     <ImageButton
         android:id="@+id/scanBtn"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_centerVertical="true"
         android:layout_gravity="center_horizontal|center_vertical"
         android:layout_margin="8dp"
         android:background="@drawable/button_background_states"
-        android:text="Scan"
-        app:srcCompat="@drawable/ic_barcode_code_scan_scanning_icon" />
+        android:text="@string/scanner"
+        app:srcCompat="@drawable/ic_barcode_code_scan_scanning_icon"
+        android:contentDescription="@string/scanner" />
 
     <ImageButton
         android:id="@+id/imgBtnSave"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_centerVertical="true"
         android:layout_margin="8dp"
         android:background="@drawable/button_background_states"
-        android:contentDescription="@string/taake_picture"
+        android:contentDescription="@string/save"
         app:srcCompat="@drawable/ic_save_24dp" />
 
 
