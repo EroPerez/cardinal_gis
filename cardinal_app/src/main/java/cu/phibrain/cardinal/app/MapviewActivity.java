@@ -214,7 +214,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             updateBatteryCondition(chargedPct);
 
             //register signal event only when battery is low
-            boolean isBatteryLow = intent.getBooleanExtra(BatteryManager.EXTRA_BATTERY_LOW, false);
+            boolean isBatteryLow = chargedPct <= 20;//intent.getBooleanExtra(BatteryManager.EXTRA_BATTERY_LOW, false);
             if (isBatteryLow && appContainer.getWorkSessionActive() != null) {
                 SignalEventLogger.addEventLogEntry(SignalEvents.SignalTypes.POWER, appContainer.getWorkSessionActive().getId(), chargedPct, new Date(), lastGpsPosition);
             }

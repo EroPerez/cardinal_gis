@@ -817,7 +817,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                                     GpsServiceUtilities.triggerBroadcast(getActivity());
 
                                     //start logging worker route
-                                    if (!(holdABitForLoggingStartMillis(600) && startWorkerRouteLogging(DefaultHelperClasses.GPSLOG_HELPER_CLASS))) {
+                                    if (!(holdABitForLoggingStartMillis(900) && !startWorkerRouteLogging(DefaultHelperClasses.GPSLOG_HELPER_CLASS))) {
                                         GPDialogs.warningDialog(getActivity(), getString(R.string.gpslogging_stop_and_start_again), null);
                                     }
                                 });
