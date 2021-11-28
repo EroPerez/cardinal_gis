@@ -11,29 +11,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/imageButtonWarning"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/take_picture"
-            android:scaleType="fitXY"
-            android:tint="@color/main_decorations"
-            app:srcCompat="@drawable/ic_warning_24dp" />
+<!--        <ImageView-->
+<!--            android:id="@+id/imageButtonWarning"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_vertical"-->
+<!--            android:contentDescription="@string/take_picture"-->
+<!--            android:scaleType="fitXY"-->
+<!--            android:tint="@color/main_decorations"-->
+<!--            app:srcCompat="@drawable/ic_warning_24dp" />-->
 
-        <TextView
-            android:id="@+id/tvalertPhoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_marginBottom="4dp"
-            android:text="@string/map_object_must_have_a_image_number_taken"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textColor="@color/colorAccent"
-            android:textStyle="bold" />
+<!--&lt;!&ndash;        <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/tvalertPhoto"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_marginStart="4dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_marginTop="4dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_marginEnd="4dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_marginBottom="4dp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:text="@string/map_object_must_have_a_image_number_taken"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:textAlignment="center"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:textSize="24sp"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:textColor="@color/colorAccent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:textStyle="bold" />&ndash;&gt;-->
     </LinearLayout>
 
     <LinearLayout

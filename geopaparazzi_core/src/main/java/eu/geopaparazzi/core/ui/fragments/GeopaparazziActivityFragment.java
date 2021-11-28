@@ -604,7 +604,9 @@ public class GeopaparazziActivityFragment extends Fragment implements View.OnLon
     private void enablePanic(boolean enable) {
         if (enable) {
             mPanicFAB.show();
+            //mMapviewButton.setEnabled(true);
         } else {
+            //mMapviewButton.setEnabled(false);
             mPanicFAB.hide();
         }
     }

@@ -415,21 +415,25 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
     private void launchPickupPhoto() {
         FragmentActivity activity = getActivity();
-
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View v = getLayoutInflater().inflate(R.layout.pickup_quick_photo, null);
         builder.setView(v);
         AlertDialog ad = builder.create();
         ad.setCancelable(false);
-
-        ((TextView) v.findViewById(R.id.tvalertPhoto)).setText(
-                String.format(
-                        activity.getString(R.string.map_object_must_have_a_image_number_taken),
-                        LatLongUtils.getMinImageToTake()
-                )
-        );
+//        ((TextView) v.findViewById(R.id.tvalertPhoto)).setText(
+//                String.format(
+//                        activity.getString(R.string.map_object_must_have_a_image_number_taken),
+//                        LatLongUtils.getMinImageToTake()
+//                )
+//        );
 
         ImageButton cameraButton = v.findViewById(R.id.launchButton);
+        Button continueButton = v.findViewById(R.id.cancelbutton);
+        if (appContainer.getCurrentMapObject().getImages().size() < LatLongUtils.getMinImageToTake()){
+            continueButton.setEnabled(false);
+            continueButton.setVisibility(View.GONE);
+        }
+
         cameraButton.setOnClickListener(v1 -> {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
             double[] gpsLocation = PositionUtilities.getGpsLocationFromPreferences(preferences);
@@ -446,27 +450,37 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             }
 
             activity.startActivity(cameraIntent);
+            if (appContainer.getCurrentMapObject().getImages().size() >= LatLongUtils.getMinImageToTake()-1) {
+                continueButton.setEnabled(true);
+                continueButton.setVisibility(View.VISIBLE);
+            }else{
+                continueButton.setEnabled(false);
+                continueButton.setVisibility(View.GONE);
+            }
         });
 
-        Button continueButton = v.findViewById(R.id.cancelbutton);
+
+
         continueButton.setOnClickListener(v1 -> {
             appContainer.getCurrentMapObject().resetImages();
-            if (appContainer.getCurrentMapObject().getImages().size() < LatLongUtils.getMinImageToTake()) {
-                GPDialogs.yesNoMessageDialog(activity,
-                        String.format(
-                                activity.getString(R.string.map_object_must_have_a_image_number_taken_exit_confirm),
-                                LatLongUtils.getMinImageToTake()
-                        ),
-                        () -> activity.runOnUiThread(() -> {
-                            // yes
-                            ad.cancel();
+           if (appContainer.getCurrentMapObject().getImages().size() >= LatLongUtils.getMinImageToTake()) {
+               ad.cancel();
+           }
+//                GPDialogs.yesNoMessageDialog(activity,
+//                        String.format(
+//                                activity.getString(R.string.map_object_must_have_a_image_number_taken_exit_confirm),
+//                                LatLongUtils.getMinImageToTake()
+//                        ),
+//                        () -> activity.runOnUiThread(() -> {
+//                            // yes
+//                            ad.cancel();
+//
+//                        }),
+//                        null
+//                );
+//            } else{
 
-                        }),
-                        null
-                );
-            } else{
-                ad.cancel();
-            }
+//            }
 
         });
 

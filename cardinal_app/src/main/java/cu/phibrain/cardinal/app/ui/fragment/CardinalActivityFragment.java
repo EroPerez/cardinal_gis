@@ -650,8 +650,10 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private void enablePanic(boolean enable) {
         if (enable) {
             mPanicFAB.show();
+            mMapviewButton.setEnabled(true);
         } else {
             mPanicFAB.hide();
+            mMapviewButton.setEnabled(false);
         }
     }
 
