@@ -1,11 +1,13 @@
 package cu.phibrain.cardinal.app.ui.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -45,9 +47,11 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
+import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
@@ -69,7 +73,7 @@ import eu.geopaparazzi.map.features.editing.EditManager;
 public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     // TODO: Customize parameter argument names
-
+    private final int RETURNCODE_FOR_TAKE_PICTURE = 666;
 
     LabelAutoCompleteAdapter labelAutoCompleteAdapter;
     private BottomSheetBehavior mBehavior;
@@ -90,6 +94,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     private WorkSession currentSession;
     private long grade;
     private boolean compositeMode;
+    private Button continueButton;
+    private MapObject currentObj;
 
     public BarcodeReaderDialogFragment() {
     }
@@ -148,9 +154,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         code128BarcodeScan.setOrientationLocked(false);
         //no label checkbox
         checkBoxNoLabel = view.findViewById(R.id.checkBoxWithoutTag);
-        if (appContainer.getCurrentMapObject() == null) {
-            checkBoxNoLabel.setVisibility(View.GONE);
-        }
+        checkBoxNoLabel.setEnabled(appContainer.getCurrentMapObject() != null);
+
         //attaching onclick listener
         buttonScan.setOnClickListener(this);
         buttonSave.setOnClickListener(this);
@@ -196,6 +201,24 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
+            FragmentActivity activity = getActivity();
+            if (activity == null) return;
+            switch (requestCode) {
+                case (RETURNCODE_FOR_TAKE_PICTURE):
+                    if (resultCode == Activity.RESULT_OK) {
+                        currentObj.resetImages();
+                        if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
+                            continueButton.setEnabled(true);
+                            continueButton.setVisibility(View.VISIBLE);
+                        }else{
+                            continueButton.setEnabled(false);
+                            continueButton.setVisibility(View.GONE);
+                        }
+                        Log.d("Cardus", "aqui");
+                    }
+                    break;
+
+            }
         }
 
     }
@@ -223,7 +246,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 if (appContainer.getRouteSegmentActive() == null) {
                     Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
-                    MapObject currentObj = new MapObject();
+                    currentObj = new MapObject();
                     currentObj.setCode(mapObjectCode);
                     currentObj.setCoord(this.coordinates);
                     currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
@@ -239,6 +262,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         currentObj.setJoinId(previousObj.getId());
                     }
                     MapObjectOperations.getInstance().save(currentObj);
+                    launchPickupPhoto(currentObj);
 
                     if (!currentObj.isTerminal() && !compositeMode) {
                         appContainer.setCurrentMapObject(currentObj);
@@ -298,8 +322,8 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         refreshUI(terminalFound);
                     }
 
-                } else {
-                    MapObject currentObj = new MapObject();
+                } else { // convertir segmento de ruta a objeto
+                    currentObj = new MapObject();
                     currentObj.setCode(mapObjectCode);
                     currentObj.setCoord(this.coordinates);
                     currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
@@ -314,6 +338,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                     }
 
                     MapObjectOperations.getInstance().save(currentObj);
+                    launchPickupPhoto(currentObj);
                     appContainer.setRouteSegmentActive(null);
                     mapView.reloadLayer(CardinalLineLayer.class);
 
@@ -371,7 +396,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     }
 
     void refreshUI(boolean terminalFound) {
-        launchPickupPhoto();
 
         //Update ui
         Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
@@ -379,7 +403,6 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         intent.putExtra("update_map_object_type_active", true);
         intent.putExtra("is_map_object_terminal", terminalFound);
         getActivity().sendBroadcast(intent);
-
 
         dismiss();
     }
@@ -413,7 +436,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     }
 
 
-    private void launchPickupPhoto() {
+    private void launchPickupPhoto(MapObject currentObj) {
         FragmentActivity activity = getActivity();
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View v = getLayoutInflater().inflate(R.layout.pickup_quick_photo, null);
@@ -427,21 +450,32 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 //                )
 //        );
 
-        ImageButton cameraButton = v.findViewById(R.id.launchButton);
-        Button continueButton = v.findViewById(R.id.cancelbutton);
-        if (appContainer.getCurrentMapObject().getImages().size() < LatLongUtils.getMinImageToTake()){
+
+        continueButton = v.findViewById(R.id.cancelbutton);
+        if (currentObj.getImages().size() < LatLongUtils.getMinImageToTake()){
             continueButton.setEnabled(false);
             continueButton.setVisibility(View.GONE);
         }
 
+        ImageButton cameraButton = v.findViewById(R.id.launchButton);
         cameraButton.setOnClickListener(v1 -> {
+
+            currentObj.resetImages();
+            if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake() - 1) {
+                continueButton.setEnabled(true);
+                continueButton.setVisibility(View.VISIBLE);
+            } else {
+                continueButton.setEnabled(false);
+                continueButton.setVisibility(View.GONE);
+            }
+
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
             double[] gpsLocation = PositionUtilities.getGpsLocationFromPreferences(preferences);
 
             String imageName = ImageUtilities.getCameraImageName(null);
             Intent cameraIntent = new Intent(activity, CameraMapObjectActivity.class);
             cameraIntent.putExtra(LibraryConstants.PREFS_KEY_CAMERA_IMAGENAME, imageName);
-            cameraIntent.putExtra(LibraryConstants.DATABASE_ID, appContainer.getCurrentMapObject().getId());
+            cameraIntent.putExtra(LibraryConstants.DATABASE_ID, currentObj.getId());
 
             if (gpsLocation != null) {
                 cameraIntent.putExtra(LibraryConstants.LATITUDE, gpsLocation[1]);
@@ -449,21 +483,15 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 cameraIntent.putExtra(LibraryConstants.ELEVATION, gpsLocation[2]);
             }
 
-            activity.startActivity(cameraIntent);
-            if (appContainer.getCurrentMapObject().getImages().size() >= LatLongUtils.getMinImageToTake()-1) {
-                continueButton.setEnabled(true);
-                continueButton.setVisibility(View.VISIBLE);
-            }else{
-                continueButton.setEnabled(false);
-                continueButton.setVisibility(View.GONE);
-            }
+            //Investigarbcomo notificar al frame
+            activity.startActivityForResult(cameraIntent, RETURNCODE_FOR_TAKE_PICTURE);
+
         });
 
 
-
         continueButton.setOnClickListener(v1 -> {
-            appContainer.getCurrentMapObject().resetImages();
-           if (appContainer.getCurrentMapObject().getImages().size() >= LatLongUtils.getMinImageToTake()) {
+           currentObj.resetImages();
+           if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
                ad.cancel();
            }
 //                GPDialogs.yesNoMessageDialog(activity,

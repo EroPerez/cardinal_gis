@@ -8,56 +8,68 @@
     android:layout_marginBottom="32dp"
     android:background="@drawable/inspector_background"
     android:gravity="center"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context=".ui.fragment.BarcodeReaderDialogFragment">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
 
-    <CheckBox
-        android:id="@+id/checkBoxWithoutTag"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:text="@string/map_object_without_tag_mesagge"
-        android:textAlignment="gravity"
-        android:textSize="14sp" />
+        <CheckBox
+            android:id="@+id/checkBoxWithoutTag"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/map_object_without_tag_mesagge"
+            android:textAlignment="gravity"
+            android:textSize="14sp" />
 
-    <AutoCompleteTextView
-        android:id="@+id/autoCompleteTextViewCode"
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteTextViewCode"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/spinner_material"
+            android:completionThreshold="1"
+            android:dropDownHeight="match_parent"
+            android:ems="10"
+            android:focusable="auto"
+            android:hint="@string/select_one"
+            android:imeOptions="actionDone"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:text=""
+            android:textAlignment="center"
+            android:textSize="12sp"
+            tools:ignore="RtlCompat" />
+
+        <ImageButton
+            android:id="@+id/scanBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:layout_margin="8dp"
+            android:background="@drawable/button_background_states"
+            android:contentDescription="@string/scanner"
+            android:text="@string/scanner"
+            app:srcCompat="@drawable/ic_barcode_code_scan_scanning_icon" />
+
+        <ImageButton
+            android:id="@+id/imgBtnSave"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:layout_margin="8dp"
+            android:background="@drawable/button_background_states"
+            android:contentDescription="@string/save"
+            app:srcCompat="@drawable/ic_save_24dp" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view2"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:background="@drawable/spinner_material"
-        android:completionThreshold="1"
-        android:ems="10"
-        android:focusable="auto"
-        android:hint="@string/select_one"
-        android:imeOptions="actionDone"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:text=""
-        android:textAlignment="center"
-        android:textSize="12sp"
-        tools:ignore="RtlCompat" />
-
-    <ImageButton
-        android:id="@+id/scanBtn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:layout_margin="8dp"
-        android:background="@drawable/button_background_states"
-        android:text="@string/scanner"
-        app:srcCompat="@drawable/ic_barcode_code_scan_scanning_icon"
-        android:contentDescription="@string/scanner" />
-
-    <ImageButton
-        android:id="@+id/imgBtnSave"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="8dp"
-        android:background="@drawable/button_background_states"
-        android:contentDescription="@string/save"
-        app:srcCompat="@drawable/ic_save_24dp" />
-
+        android:layout_height="50dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

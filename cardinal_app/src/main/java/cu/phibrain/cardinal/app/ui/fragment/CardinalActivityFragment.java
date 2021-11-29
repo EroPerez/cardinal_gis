@@ -513,15 +513,19 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } else if (v == mMapviewButton) {
 
             try {
-                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
-                if (appContainer.getProjectActive() == null) {
-                    GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
-                } else if (appContainer.getWorkSessionActive() == null) {
-                    GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
-                } else {
-                    Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
-                    startActivity(importIntent);
-                }
+               // if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
+                    AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+                    if (appContainer.getProjectActive() == null) {
+                        GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+                    } else if (appContainer.getWorkSessionActive() == null) {
+                        GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
+                    } else {
+                        Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
+                        startActivity(importIntent);
+                    }
+                //} else {
+                  //  GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
+               // }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -650,10 +654,8 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private void enablePanic(boolean enable) {
         if (enable) {
             mPanicFAB.show();
-            mMapviewButton.setEnabled(true);
         } else {
             mPanicFAB.hide();
-            mMapviewButton.setEnabled(false);
         }
     }
 
