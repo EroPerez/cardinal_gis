@@ -396,7 +396,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 activity.finish();
             }
             return true;
-        }else if (i == eu.geopaparazzi.core.R.id.action_sync_settings) {
+        } else if (i == eu.geopaparazzi.core.R.id.action_sync_settings) {
             Intent preferencesIntent = new Intent(this.getActivity(), SyncSettingActivity.class);
             startActivity(preferencesIntent);
             return true;
@@ -518,7 +518,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } else if (v == mMapviewButton) {
 
             try {
-               // if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
+                if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
                     AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
                     if (appContainer.getProjectActive() == null) {
                         GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
@@ -528,9 +528,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                         Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
                         startActivity(importIntent);
                     }
-                //} else {
-                  //  GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
-               // }
+                } else {
+                    GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

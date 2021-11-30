@@ -9,14 +9,15 @@
             app:key="REFS_KEY_DOWNLOAD_CLOUD_IMAGES"
             app:summaryOff="@string/images_download_summary_off"
             app:summaryOn="@string/images_download_summary_on"
-            app:title="@string/images_download_title" />/>
+            app:title="@string/images_download_title" />
 
         <SwitchPreferenceCompat
             app:icon="@drawable/ic_cloud_upload"
             app:key="REFS_KEY_UPLOAD_CLOUD_IMAGES"
             app:summaryOff="@string/images_upload_summary_off"
             app:summaryOn="@string/images_upload_summary_on"
-            app:title="@string/images_upload_title" />
+            app:title="@string/images_upload_title"
+            app:defaultValue="true"/>
 
     </PreferenceCategory>
 

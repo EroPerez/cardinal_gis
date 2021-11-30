@@ -119,8 +119,8 @@ public class ProjectExportDialogFragment extends DialogFragment {
     }
 
     private void startExport() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean uploadImages = preferences.getBoolean("REFS_KEY_UPLOAD_CLOUD_IMAGES", false);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        boolean uploadImages = preferences.getBoolean("REFS_KEY_UPLOAD_CLOUD_IMAGES", true);
 
         new AsyncTask<String, Void, String>() {
             protected String doInBackground(String... params) {

@@ -130,16 +130,22 @@ public class NetworkUtilitiesCardinalOl {
     /**
      * Send via HTTP GET a request to obtain a project data
      *
-     * @param server the base url to which to send to.
-     * @param token  the auth token login credential
-     * @param id     the selected project ID
+     * @param server         the base url to which to send to.
+     * @param token          the auth token login credential
+     * @param id             the selected project ID
+     * @param downloadImages
      * @return Project   A current remote selected projects to import
      * @throws Exception if something goes wrong.
      */
 
-    public static Project sendGetProjectData(String server, AuthToken token, int id) throws Exception {
+    public static Project sendGetProjectData(String server, AuthToken token, int id, boolean downloadImages) throws Exception {
         try {
-            Response<Project> response = ApiClient.getApiService(server).getProject(token.toString(), id).execute();
+            Response<Project> response;
+            if (downloadImages) {
+                response = ApiClient.getApiService(server).getProject(token.toString(), id).execute();
+            } else {
+                response = ApiClient.getApiService(server).getProjectWithoutImages(token.toString(), id).execute();
+            }
 
             if (response.isSuccessful()) {
                 return response.body();

@@ -62,6 +62,13 @@ public interface ApiEndpointInterface {
             "Accept: application/json",
             "Content-Type: application/json"
     })
+    @GET("projects/export/{id}/no-image")
+    Call<Project> getProjectWithoutImages(@Header("Authorization") String authorization, @Path("id") int id);
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
     @GET("supplier/")
     Call<Envolve<List<Supplier>>> getSupplierList(@Header("Authorization") String authorization, @QueryMap Map<String, String> filters);
 

@@ -80,7 +80,7 @@
     <string name="images_download_summary_off">Only download images when manually requested</string>
 
     <string name="images_upload_title">Upload images</string>
-    <string name="images_upload_summary_on">Automatically upload images for outgoing project</string>
+    <string name="images_upload_summary_on">Automatically upload images for outgoing project. Disable if you know what you are doing</string>
     <string name="images_upload_summary_off">Only upload images when manually requested</string>
     <string name="continue_fuck">Continue</string>
 </resources>
