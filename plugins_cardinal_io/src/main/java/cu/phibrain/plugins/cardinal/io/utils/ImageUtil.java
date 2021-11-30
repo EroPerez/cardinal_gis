@@ -37,11 +37,11 @@ public class ImageUtil {
 
     public static String convertToBase64(Bitmap bitmap, String ext) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
 
         String header = String.format("data:image/%s;base64,", ext);
 
-        return header + Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+        return header + Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
     }
 
     public static Bitmap getThumbnail(Bitmap image) {

@@ -60,9 +60,9 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             android:foregroundGravity="center_horizontal"
-            android:src="@drawable/package_download"
+            android:src="@drawable/ic_download_from_cloud"
             android:contentDescription="@string/download_icon_description"
             android:clickable="true"
-            app:srcCompat="@drawable/package_download" />
+            app:srcCompat="@drawable/ic_download_from_cloud" />
     </FrameLayout>
 </RelativeLayout>

@@ -8,6 +8,8 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Type;
 
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
@@ -56,5 +58,15 @@ public class Base64ImageTypeAdapter extends TypeAdapter<byte[]> {
         String recordInBase64 = in.nextString();
 
         return ImageUtil.convertToBytesFromBase64(recordInBase64);
+    }
+
+    public static void copyStream(Reader istream, Writer ostream) throws IOException {
+        char buffer[] = new char[2048];
+        while (true) {
+            int len = istream.read(buffer);
+            if (len == -1)
+                return;
+            ostream.write(buffer, 0, len);
+        }
     }
 }

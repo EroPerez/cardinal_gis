@@ -6,6 +6,7 @@
     <string name="label_blue">blue</string>
     <string name="label_alpha">alpha</string>
     <string name="label_red">red</string>
+    <string name="action_sync_images">Sync settings</string>
 
     <!-- old gpap -->
     <string name="yes">yes</string>

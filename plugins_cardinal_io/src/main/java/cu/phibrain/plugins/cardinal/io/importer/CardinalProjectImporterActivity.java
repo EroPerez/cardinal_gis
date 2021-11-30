@@ -4,8 +4,10 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -136,6 +138,8 @@ public class CardinalProjectImporterActivity extends ListActivity {
                     }
 
                     private void downloadProject(final WebDataProjectModel projectModel) {
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this);
+                        boolean downloadImages = preferences.getBoolean("REFS_KEY_DOWNLOAD_CLOUD_IMAGES", false);
 
                         stringAsyncTask = new StringAsyncTask(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this) {
                             protected String dbFile;
@@ -144,7 +148,7 @@ public class CardinalProjectImporterActivity extends ListActivity {
                             protected String doBackgroundWork() {
                                 cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity context = cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this;
                                 try {
-                                    dbFile = WebDataProjectManager.INSTANCE.downloadProject(cu.phibrain.plugins.cardinal.io.importer.CardinalProjectImporterActivity.this, url, user, pwd, projectModel, theTextToRunOn);
+                                    dbFile = WebDataProjectManager.INSTANCE.downloadProject(context, url, user, pwd, projectModel, theTextToRunOn, downloadImages);
                                    // DatabaseUtilities.setNewDatabase(context, GeopaparazziApplication.getInstance(), dbFile);
 
                                     return ASYNC_OK; //$NON-NLS-1$

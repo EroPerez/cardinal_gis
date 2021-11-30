@@ -64,5 +64,14 @@
     <string name="map_object_must_have_a_image_number_taken">Recuerde tomar %d fotos como mínimo para la coordenada recien levantada</string>
     <string name="map_object_must_have_a_image_number_taken_exit_confirm">¿Está seguro de desea continuar? Recuerde tomar %d fotos como mínimo para la coordenada recien levantada</string>
     <string name="continue_fuck">Continuar</string>
+    <string name="images_upload_summary_off">Subir imágenes sólo cuando se solicite manualmente</string>
+    <string name="images_upload_summary_on">Subida automática de imágenes para el proyecto saliente. Deshabilitar si sabe lo que esta haciendo</string>
+    <string name="images_upload_title">Subir imágenes</string>
+    <string name="images_download_summary_off">Sólo se descargan las imágenes cuando se solicitan manualmente</string>
+    <string name="images_download_summary_on">Descarga automática de imágenes para el proyecto entrante</string>
+    <string name="images_download_title">Descargar imágenes</string>
+    <string name="sync_header">Sincronización de imágenes</string>
+    <string name="scanner">Escanear</string>
+    <string name="select_layer">Capa de selección</string>
 
 </resources>

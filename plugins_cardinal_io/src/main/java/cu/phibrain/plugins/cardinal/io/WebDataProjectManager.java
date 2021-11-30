@@ -114,7 +114,7 @@ public enum WebDataProjectManager {
      * @param projectId the project id to upload
      * @return the return message.
      */
-    public String uploadProject(Context context, String server, String user, String passwd, long projectId) {
+    public String uploadProject(Context context, String server, String user, String passwd, long projectId, boolean uploadImages) {
         boolean interrupted = false;
         try {
             server = addActionPath(server, "");
@@ -305,32 +305,34 @@ public enum WebDataProjectManager {
                             }
                         }
                         // Sync MapObjectImages
-                        mapObject.resetImages();
-                        List<MapObjectImages> imageList = mapObject.getImages();
-                        for (MapObjectImages objectImages : imageList) {
-                            if (objectImages.mustExport()) {
-                                if (objectImages.getIsSync()) {
-                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject())) {
-                                        interrupted = true;
-                                        break;
+                        if (uploadImages) {
+                            mapObject.resetImages();
+                            List<MapObjectImages> imageList = mapObject.getImages();
+                            for (MapObjectImages objectImages : imageList) {
+                                if (objectImages.mustExport()) {
+                                    if (objectImages.getIsSync()) {
+                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject())) {
+                                            interrupted = true;
+                                            break;
+                                        } else {
+                                            objectImages.setSyncDate(new Date());
+                                        }
                                     } else {
-                                        objectImages.setSyncDate(new Date());
+                                        MapObjectImages remoteImage = NetworkUtilitiesCardinalOl.sendPostMapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject());
+                                        if (remoteImage != null) {
+                                            objectImages.setIsSync(true);
+                                            objectImages.setSyncDate(new Date());
+                                            objectImages.setRemoteId(remoteImage.getId());
+                                        } else {
+                                            interrupted = true;
+                                            break;
+                                        }
                                     }
-                                } else {
-                                    MapObjectImages remoteImage = NetworkUtilitiesCardinalOl.sendPostMapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject());
-                                    if (remoteImage != null) {
-                                        objectImages.setIsSync(true);
-                                        objectImages.setSyncDate(new Date());
-                                        objectImages.setRemoteId(remoteImage.getId());
-                                    } else {
-                                        interrupted = true;
-                                        break;
-                                    }
+                                    if (objectImages.getDeleted())
+                                        objectImages.delete();
+                                    else
+                                        objectImages.update();
                                 }
-                                if (objectImages.getDeleted())
-                                    objectImages.delete();
-                                else
-                                    objectImages.update();
                             }
                         }
 
@@ -394,40 +396,44 @@ public enum WebDataProjectManager {
                             }
 
                             // Sync images in defect
-                            defect.resetImages();
-                            List<MapObjectHasDefectHasImages> hasDefectHasImages = defect.getImages();
-                            for (MapObjectHasDefectHasImages images : hasDefectHasImages) {
-                                if (images.mustExport()) {
-                                    if (images.getIsSync()) {
-                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject())) {
-                                            interrupted = true;
-                                            break;
+                            if (uploadImages) {
+                                defect.resetImages();
+                                List<MapObjectHasDefectHasImages> hasDefectHasImages = defect.getImages();
+                                for (MapObjectHasDefectHasImages images : hasDefectHasImages) {
+                                    if (images.mustExport()) {
+                                        if (images.getIsSync()) {
+                                            if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject())) {
+                                                interrupted = true;
+                                                break;
+                                            } else {
+                                                defect.setSyncDate(new Date());
+                                            }
                                         } else {
-                                            defect.setSyncDate(new Date());
-                                        }
-                                    } else {
-                                        MapObjectHasDefectHasImages defectImageRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject());
-                                        if (defectImageRemote != null) {
-                                            images.setIsSync(true);
-                                            images.setSyncDate(new Date());
-                                            images.setRemoteId(defectImageRemote.getId());
+                                            MapObjectHasDefectHasImages defectImageRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject());
+                                            if (defectImageRemote != null) {
+                                                images.setIsSync(true);
+                                                images.setSyncDate(new Date());
+                                                images.setRemoteId(defectImageRemote.getId());
 
-                                        } else {
-                                            interrupted = true;
-                                            break;
+                                            } else {
+                                                interrupted = true;
+                                                break;
+                                            }
                                         }
+                                        if (images.getDeleted())
+                                            images.delete();
+                                        else
+                                            images.update();
                                     }
-                                    if (images.getDeleted())
-                                        images.delete();
-                                    else
-                                        images.update();
-                                }
 
+                                }
                             }
 
-                            if (defect.getDeleted() && !interrupted)
-                                if (NetworkUtilitiesCardinalOl.sendDelete2MapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject()))
+                            if (defect.getDeleted() && !interrupted) {
+                                if (NetworkUtilitiesCardinalOl.sendDelete2MapObjectHasDefect(server, token, (MapObjectHasDefect) defect.toRemoteObject())) {
                                     defect.delete();
+                                }
+                            }
                         }
 
                     }
@@ -468,8 +474,9 @@ public enum WebDataProjectManager {
 
             if (!interrupted) {
                 for (MapObject mapObject : mapObjectListToDelete) {
-                    if (NetworkUtilitiesCardinalOl.sendDelete2MapObject(server, token, (MapObject) mapObject.toRemoteObject()))
+                    if (NetworkUtilitiesCardinalOl.sendDelete2MapObject(server, token, (MapObject) mapObject.toRemoteObject())) {
                         mapObject.delete();
+                    }
                 }
                 return NetworkUtilities.getMessageForCode(context, 200,
                         context.getResources().getString(R.string.post_completed_properly));
@@ -477,14 +484,13 @@ public enum WebDataProjectManager {
 
             return NetworkUtilities.getMessageForCode(context, 200,
                     context.getResources().getString(cu.phibrain.plugins.cardinal.io.R.string.post_not_completed_properly));
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             GPLog.error(this, null, e);
             if (GsonHelper.isJSONValid(e.getMessage())) {
                 APIError error = GsonHelper.createPojoFromString(e.getMessage(), APIError.class);
                 return NetworkUtilities.getMessageForCode(context, error.status(), error.message());
             } else
-                return e.getLocalizedMessage();
+                return NetworkUtilities.getMessageForCode(context, 500, e.getLocalizedMessage());
         }
 
     }
@@ -528,14 +534,15 @@ public enum WebDataProjectManager {
     /**
      * Downloads a project from the given server via GET.
      *
-     * @param context    the {@link Context} to use.
-     * @param server     the server from which to download.
-     * @param user       the username for authentication.
-     * @param passwd     the password for authentication.
-     * @param webproject the project to download.
+     * @param context        the {@link Context} to use.
+     * @param server         the server from which to download.
+     * @param user           the username for authentication.
+     * @param passwd         the password for authentication.
+     * @param webproject     the project to download.
+     * @param downloadImages
      * @return The path to the downloaded file
      */
-    public String downloadProject(Context context, String server, String user, String passwd, WebDataProjectModel webproject, String outputFileName) throws DownloadError {
+    public String downloadProject(Context context, String server, String user, String passwd, WebDataProjectModel webproject, String outputFileName, boolean downloadImages) throws DownloadError {
         try {
             File outputDir = ResourcesManager.getInstance(context).getMainStorageDir();
             File downloadedProjectFile = new File(outputDir, outputFileName);
@@ -557,7 +564,7 @@ public enum WebDataProjectManager {
 
 
             //download a project referenced to id
-            Project project = NetworkUtilitiesCardinalOl.sendGetProjectData(server, token, webproject.id);
+            Project project = NetworkUtilitiesCardinalOl.sendGetProjectData(server, token, webproject.id, downloadImages);
 
             //Extract all worker and sessions from project contracts
             List<Contract> contractList = project.getContracts();
@@ -597,7 +604,7 @@ public enum WebDataProjectManager {
             DaoMetadata.createTables(db);
             String uniqueDeviceId = Utilities.getUniqueDeviceId(context);
             String description = "Cloud project";
-            if(project.getDescription() != null) {
+            if (project.getDescription() != null) {
                 description = Html.fromHtml(project.getDescription()).toString();
             }
             DaoMetadata.initProjectMetadata(db, project.getName(), description, null, user, uniqueDeviceId);
@@ -693,15 +700,19 @@ public enum WebDataProjectManager {
             for (MapObject mapObject : mapObjectList) {
                 RouteSegmentOperations.getInstance().insertAll(mapObject.getRouteSegments());
                 MapObjectHasStateOperations.getInstance().insertAll(mapObject.getStates());
-                MapObjectImagesOperations.getInstance().insertAll(mapObject.getImages());
+                if (downloadImages) {
+                    MapObjectImagesOperations.getInstance().insertAll(mapObject.getImages());
+                }
                 MapObjectMetadataOperations.getInstance().insertAll(mapObject.getMetadata());
                 mapObjectHasDefectList.addAll(mapObject.getDefects());
 
             }
             MapObjectHasDefectOperations.getInstance().insertAll(mapObjectHasDefectList);
 
-            for (MapObjectHasDefect mapObjectdefect : mapObjectHasDefectList) {
-                MapObjectHasDefectHasImagesOperations.getInstance().insertAll(mapObjectdefect.getImages());
+            if (downloadImages) {
+                for (MapObjectHasDefect mapObjectdefect : mapObjectHasDefectList) {
+                    MapObjectHasDefectHasImagesOperations.getInstance().insertAll(mapObjectdefect.getImages());
+                }
             }
 
             long fileLength = downloadedProjectFile.length();
@@ -710,9 +721,6 @@ public enum WebDataProjectManager {
             }
 
             return downloadedProjectFile.getCanonicalPath();
-        } catch (DownloadError e) {
-            GPLog.error(this, null, e);
-            throw e;
         } catch (Exception e) {
             GPLog.error(this, null, e);
             APIError error = null;
@@ -722,7 +730,7 @@ public enum WebDataProjectManager {
 
             } else {
                 error = new APIError(500, e.getMessage());
-                throw new DownloadError(error.message());
+                throw new DownloadError(NetworkUtilities.getMessageForCode(context, error.status(), null));
             }
         }
     }

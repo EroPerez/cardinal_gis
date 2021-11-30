@@ -32,10 +32,10 @@
     <string name="done">Done</string>
     <string name="do_you_want_to_delete_this_image">Do you what to delete this image?</string>
     <string name="active_work_session">Session:  %s</string>
-    <string name="taake_picture">Take Picture button</string>
-    <string name="defect_icon_text">Defect icon descriptor</string>
+    <string name="taake_picture" translatable="false">Take Picture button</string>
+    <string name="defect_icon_text" translatable="false">Defect icon descriptor</string>
     <string name="activity_defect_images_label">Photos to defect: %s</string>
-    <string name="system_layers">System Layers</string>
+    <string name="system_layers" translatable="false">System Layers</string>
     <string name="map_object_duplicate_code_messsage">Code %s its not available in this work session.</string>
     <string name="scan_map_object_barcode_message">Scan a map object barcode</string>
     <string name="barcode_notavailable_message">The code %s you scanned is not available or was already assigned in this work session.</string>
@@ -55,15 +55,15 @@
     <string name="title_activity_map_object_joined">%s Map Object Agregations</string>
     <string name="do_you_want_to_undock_this_map_object">Do you want to un-dock this map object?</string>
     <string name="map_object_already_docked_message">The selected map object is already docked to another map object.</string>
-    <string name="map_object_already_docked_to_that_mapobject_message" >The selected map object is already docked to this map object.</string>
+    <string name="map_object_already_docked_to_that_mapobject_message">The selected map object is already docked to this map object.</string>
     <string name="layername_jointo">Candinal join to layer</string>
     <string name="do_you_want_to_logout_this_work_session">Are you sure you want to logout? Please note that this process could not be undo.</string>
     <string name="version">Version %s</string>
-    <string name="phibrainsoft">Phibrain Soft</string>
+    <string name="phibrainsoft" translatable="false">Phibrain Soft</string>
     <string name="derechos">All rights reserved</string>
     <string name="desarrollado_por">Developers:</string>
-    <string name="autores1">Erodis Pérez Michel (eperezm1986@nauta.cu)</string>
-    <string name="autores2">Daniel García Fernández (dgarciaf@nauta.cu)</string>
+    <string name="autores1" translatable="false">Erodis Pérez Michel (eperezm1986@nauta.cu)</string>
+    <string name="autores2" translatable="false">Daniel García Fernández (dgarciaf@nauta.cu)</string>
     <string name="select_layer">Candinal selection layer</string>
     <string name="map_object_without_tag_mesagge">Composite mode?</string>
     <string name="map_object_aggregation_mode_actived_message">Component aggregation mode enabled</string>
@@ -71,4 +71,16 @@
     <string name="map_object_must_have_a_image_number_taken">Remember to take at least %d photos for the newly picked up coordinate</string>
     <string name="map_object_must_have_a_image_number_taken_exit_confirm">Are you sure you want to continue? Remember to take at least %d photos for the newly picked up coordinate</string>
     <string name="scanner">Scan</string>
+    <!-- Preference Titles -->
+    <string name="sync_header">Image synchronization</string>
+
+    <!-- Sync Preferences -->
+    <string name="images_download_title">Download images</string>
+    <string name="images_download_summary_on">Automatically download images for incoming project</string>
+    <string name="images_download_summary_off">Only download images when manually requested</string>
+
+    <string name="images_upload_title">Upload images</string>
+    <string name="images_upload_summary_on">Automatically upload images for outgoing project. Disable if you know what you are doing</string>
+    <string name="images_upload_summary_off">Only upload images when manually requested</string>
+    <string name="continue_fuck">Continue</string>
 </resources>

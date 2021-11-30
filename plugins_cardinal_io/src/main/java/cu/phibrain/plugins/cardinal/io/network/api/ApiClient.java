@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cu.phibrain.plugins.cardinal.io.network.api.adapter.Base64ImageTypeAdapter;
 import cu.phibrain.plugins.cardinal.io.network.api.adapter.GPGeoPointTypeAdapter;
@@ -41,6 +42,7 @@ public class ApiClient {
 
         // Asociamos el interceptor a las peticiones
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.connectTimeout(60, TimeUnit.SECONDS);
         httpClient.addInterceptor(logging).
                 addInterceptor(new Interceptor() {
                     @Override

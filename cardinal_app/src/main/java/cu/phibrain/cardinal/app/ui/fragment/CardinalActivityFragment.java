@@ -48,6 +48,7 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
+import cu.phibrain.cardinal.app.ui.activities.SyncSettingActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
@@ -339,7 +340,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         MenuItem gpsItem = menu.findItem(eu.geopaparazzi.core.R.id.action_gps);
         checkGpsItemStatus(gpsItem);
 
-        menu.findItem(eu.geopaparazzi.core.R.id.action_advanced_settings).setVisible(false);
+        menu.findItem(eu.geopaparazzi.core.R.id.action_advanced_settings).setVisible(true);
 
         super.onPrepareOptionsMenu(menu);
     }
@@ -394,6 +395,10 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             if (activity != null) {
                 activity.finish();
             }
+            return true;
+        } else if (i == eu.geopaparazzi.core.R.id.action_sync_settings) {
+            Intent preferencesIntent = new Intent(this.getActivity(), SyncSettingActivity.class);
+            startActivity(preferencesIntent);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -513,7 +518,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } else if (v == mMapviewButton) {
 
             try {
-               // if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
+                if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
                     AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
                     if (appContainer.getProjectActive() == null) {
                         GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
@@ -523,9 +528,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                         Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
                         startActivity(importIntent);
                     }
-                //} else {
-                  //  GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
-               // }
+                } else {
+                    GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
