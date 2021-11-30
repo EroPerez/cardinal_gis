@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="cu.phibrain.cardinal.app">
 
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
     <!-- NORMAL PERMISSIONS -->
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -13,16 +14,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.NFC" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- <uses-permission -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- <uses-permission -->
     <!-- android:name="android.permission.ACCESS_MOCK_LOCATION" -->
     <!-- tools:ignore="MockLocation" /> -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 
     <application
         android:name=".CardinalApplication"
@@ -34,10 +32,14 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:theme,android:label,android:name,android:icon">
         <activity
+            android:name=".ui.activities.SyncSettingActivity"
+            android:label="@string/action_sync_images"
+            android:parentActivityName=".CardinalActivity"/>
+        <activity
             android:name=".ui.activities.MapObjectJoinedActivity"
-            android:parentActivityName=".MapviewActivity"
             android:label="@string/title_activity_map_object_joined"
-            android:theme="@style/GeopapTheme.NoActionBar"></activity>
+            android:parentActivityName=".MapviewActivity"
+            android:theme="@style/GeopapTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.SessionsStatsActivity"
             android:label="@string/stats_session_view_label"
@@ -131,10 +133,11 @@
         </provider>
 
         <service
-            android:name="cu.phibrain.cardinal.app.plugins.CardinalProjectExportMenuProvider"
+            android:name=".plugins.CardinalProjectExportMenuProvider"
             android:exported="false">
             <intent-filter>
                 <action android:name="eu.geopaparazzi.core.extension.ep.exporter.MENU_PROVIDER" />
+
                 <category android:name="androidsrc.intent.category.MENU_PROVIDER" />
             </intent-filter>
         </service>

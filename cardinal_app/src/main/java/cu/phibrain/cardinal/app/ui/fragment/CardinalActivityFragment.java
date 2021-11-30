@@ -48,6 +48,7 @@ import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
+import cu.phibrain.cardinal.app.ui.activities.SyncSettingActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
@@ -339,7 +340,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         MenuItem gpsItem = menu.findItem(eu.geopaparazzi.core.R.id.action_gps);
         checkGpsItemStatus(gpsItem);
 
-        menu.findItem(eu.geopaparazzi.core.R.id.action_advanced_settings).setVisible(false);
+        menu.findItem(eu.geopaparazzi.core.R.id.action_advanced_settings).setVisible(true);
 
         super.onPrepareOptionsMenu(menu);
     }
@@ -394,6 +395,10 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             if (activity != null) {
                 activity.finish();
             }
+            return true;
+        }else if (i == eu.geopaparazzi.core.R.id.action_sync_settings) {
+            Intent preferencesIntent = new Intent(this.getActivity(), SyncSettingActivity.class);
+            startActivity(preferencesIntent);
             return true;
         }
         return super.onOptionsItemSelected(item);

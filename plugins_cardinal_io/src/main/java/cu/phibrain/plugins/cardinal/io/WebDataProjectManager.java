@@ -114,7 +114,7 @@ public enum WebDataProjectManager {
      * @param projectId the project id to upload
      * @return the return message.
      */
-    public String uploadProject(Context context, String server, String user, String passwd, long projectId) {
+    public String uploadProject(Context context, String server, String user, String passwd, long projectId, boolean uploadImages) {
         boolean interrupted = false;
         try {
             server = addActionPath(server, "");
@@ -305,32 +305,34 @@ public enum WebDataProjectManager {
                             }
                         }
                         // Sync MapObjectImages
-                        mapObject.resetImages();
-                        List<MapObjectImages> imageList = mapObject.getImages();
-                        for (MapObjectImages objectImages : imageList) {
-                            if (objectImages.mustExport()) {
-                                if (objectImages.getIsSync()) {
-                                    if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject())) {
-                                        interrupted = true;
-                                        break;
+                        if(uploadImages) {
+                            mapObject.resetImages();
+                            List<MapObjectImages> imageList = mapObject.getImages();
+                            for (MapObjectImages objectImages : imageList) {
+                                if (objectImages.mustExport()) {
+                                    if (objectImages.getIsSync()) {
+                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject())) {
+                                            interrupted = true;
+                                            break;
+                                        } else {
+                                            objectImages.setSyncDate(new Date());
+                                        }
                                     } else {
-                                        objectImages.setSyncDate(new Date());
+                                        MapObjectImages remoteImage = NetworkUtilitiesCardinalOl.sendPostMapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject());
+                                        if (remoteImage != null) {
+                                            objectImages.setIsSync(true);
+                                            objectImages.setSyncDate(new Date());
+                                            objectImages.setRemoteId(remoteImage.getId());
+                                        } else {
+                                            interrupted = true;
+                                            break;
+                                        }
                                     }
-                                } else {
-                                    MapObjectImages remoteImage = NetworkUtilitiesCardinalOl.sendPostMapObjectImages(server, token, (MapObjectImages) objectImages.toRemoteObject());
-                                    if (remoteImage != null) {
-                                        objectImages.setIsSync(true);
-                                        objectImages.setSyncDate(new Date());
-                                        objectImages.setRemoteId(remoteImage.getId());
-                                    } else {
-                                        interrupted = true;
-                                        break;
-                                    }
+                                    if (objectImages.getDeleted())
+                                        objectImages.delete();
+                                    else
+                                        objectImages.update();
                                 }
-                                if (objectImages.getDeleted())
-                                    objectImages.delete();
-                                else
-                                    objectImages.update();
                             }
                         }
 
@@ -394,35 +396,37 @@ public enum WebDataProjectManager {
                             }
 
                             // Sync images in defect
-                            defect.resetImages();
-                            List<MapObjectHasDefectHasImages> hasDefectHasImages = defect.getImages();
-                            for (MapObjectHasDefectHasImages images : hasDefectHasImages) {
-                                if (images.mustExport()) {
-                                    if (images.getIsSync()) {
-                                        if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject())) {
-                                            interrupted = true;
-                                            break;
+                            if(uploadImages) {
+                                defect.resetImages();
+                                List<MapObjectHasDefectHasImages> hasDefectHasImages = defect.getImages();
+                                for (MapObjectHasDefectHasImages images : hasDefectHasImages) {
+                                    if (images.mustExport()) {
+                                        if (images.getIsSync()) {
+                                            if (!NetworkUtilitiesCardinalOl.sendPut2MapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject())) {
+                                                interrupted = true;
+                                                break;
+                                            } else {
+                                                defect.setSyncDate(new Date());
+                                            }
                                         } else {
-                                            defect.setSyncDate(new Date());
-                                        }
-                                    } else {
-                                        MapObjectHasDefectHasImages defectImageRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject());
-                                        if (defectImageRemote != null) {
-                                            images.setIsSync(true);
-                                            images.setSyncDate(new Date());
-                                            images.setRemoteId(defectImageRemote.getId());
+                                            MapObjectHasDefectHasImages defectImageRemote = NetworkUtilitiesCardinalOl.sendPostMapObjectHasDefectHasImages(server, token, (MapObjectHasDefectHasImages) images.toRemoteObject());
+                                            if (defectImageRemote != null) {
+                                                images.setIsSync(true);
+                                                images.setSyncDate(new Date());
+                                                images.setRemoteId(defectImageRemote.getId());
 
-                                        } else {
-                                            interrupted = true;
-                                            break;
+                                            } else {
+                                                interrupted = true;
+                                                break;
+                                            }
                                         }
+                                        if (images.getDeleted())
+                                            images.delete();
+                                        else
+                                            images.update();
                                     }
-                                    if (images.getDeleted())
-                                        images.delete();
-                                    else
-                                        images.update();
-                                }
 
+                                }
                             }
 
                             if (defect.getDeleted() && !interrupted)
@@ -533,9 +537,10 @@ public enum WebDataProjectManager {
      * @param user       the username for authentication.
      * @param passwd     the password for authentication.
      * @param webproject the project to download.
+     * @param downloadImages
      * @return The path to the downloaded file
      */
-    public String downloadProject(Context context, String server, String user, String passwd, WebDataProjectModel webproject, String outputFileName) throws DownloadError {
+    public String downloadProject(Context context, String server, String user, String passwd, WebDataProjectModel webproject, String outputFileName, boolean downloadImages) throws DownloadError {
         try {
             File outputDir = ResourcesManager.getInstance(context).getMainStorageDir();
             File downloadedProjectFile = new File(outputDir, outputFileName);
@@ -693,15 +698,19 @@ public enum WebDataProjectManager {
             for (MapObject mapObject : mapObjectList) {
                 RouteSegmentOperations.getInstance().insertAll(mapObject.getRouteSegments());
                 MapObjectHasStateOperations.getInstance().insertAll(mapObject.getStates());
-                MapObjectImagesOperations.getInstance().insertAll(mapObject.getImages());
+                if(downloadImages) {
+                    MapObjectImagesOperations.getInstance().insertAll(mapObject.getImages());
+                }
                 MapObjectMetadataOperations.getInstance().insertAll(mapObject.getMetadata());
                 mapObjectHasDefectList.addAll(mapObject.getDefects());
 
             }
             MapObjectHasDefectOperations.getInstance().insertAll(mapObjectHasDefectList);
 
-            for (MapObjectHasDefect mapObjectdefect : mapObjectHasDefectList) {
-                MapObjectHasDefectHasImagesOperations.getInstance().insertAll(mapObjectdefect.getImages());
+            if(downloadImages) {
+                for (MapObjectHasDefect mapObjectdefect : mapObjectHasDefectList) {
+                    MapObjectHasDefectHasImagesOperations.getInstance().insertAll(mapObjectdefect.getImages());
+                }
             }
 
             long fileLength = downloadedProjectFile.length();

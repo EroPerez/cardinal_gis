@@ -53,6 +53,13 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_sync_settings"
+        android:icon="@drawable/ic_cloud_upload"
+        android:orderInCategory="109"
+        android:title="@string/action_sync_images"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_about"
         android:icon="@drawable/actionbar_about"
         android:orderInCategory="110"

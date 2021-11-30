@@ -22,8 +22,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -117,10 +119,13 @@ public class ProjectExportDialogFragment extends DialogFragment {
     }
 
     private void startExport() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean uploadImages = preferences.getBoolean("REFS_KEY_UPLOAD_CLOUD_IMAGES", false);
+
         new AsyncTask<String, Void, String>() {
             protected String doInBackground(String... params) {
                 try {
-                    String message = WebDataProjectManager.INSTANCE.uploadProject(getActivity(), serverUrl, user, pwd, projectId);
+                    String message = WebDataProjectManager.INSTANCE.uploadProject(getActivity(), serverUrl, user, pwd, projectId, uploadImages);
                     return message;
                 } catch (Exception e) {
                     GPLog.error(this, e.getLocalizedMessage(), e);

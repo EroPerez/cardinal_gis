@@ -112,7 +112,7 @@ public abstract class AbstractCameraActivity extends Activity {
 
 
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            cameraIntent.putExtra("android.intent.extra.quickCapture", true);
+            cameraIntent.putExtra("android.intent.extra.quickCapture", false);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
 
             lastImageMediastoreId = getLastImageMediaId();

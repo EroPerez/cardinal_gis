@@ -37,7 +37,7 @@ public class ImageUtil {
 
     public static String convertToBase64(Bitmap bitmap, String ext) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
 
         String header = String.format("data:image/%s;base64,", ext);
 
