@@ -62,7 +62,7 @@ public interface ApiEndpointInterface {
             "Accept: application/json",
             "Content-Type: application/json"
     })
-    @GET("projects/export/{id}/no-image")
+    @GET("projects/export/{id}/no-images")
     Call<Project> getProjectWithoutImages(@Header("Authorization") String authorization, @Path("id") int id);
 
     @Headers({
