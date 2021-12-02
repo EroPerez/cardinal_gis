@@ -42,7 +42,7 @@ public class ApiClient {
 
         // Asociamos el interceptor a las peticiones
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        httpClient.connectTimeout(60, TimeUnit.SECONDS);
+        httpClient.connectTimeout(240, TimeUnit.SECONDS);
         httpClient.addInterceptor(logging).
                 addInterceptor(new Interceptor() {
                     @Override
