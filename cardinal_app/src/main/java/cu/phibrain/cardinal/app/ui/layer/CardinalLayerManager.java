@@ -172,6 +172,13 @@ public enum CardinalLayerManager {
         jo.put(IGpLayer.LAYERENABLED_TAG, true);
         cardinalLayersDefinitions.add(jo);
 
+        //Capa de Bifurcaciones desabilitada por defecto
+        jo = new JSONObject();
+        jo.put(IGpLayer.LAYERTYPE_TAG, BifurcationLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, BifurcationLayer.getName(context));
+        jo.put(IGpLayer.LAYERENABLED_TAG, false);
+        cardinalLayersDefinitions.add(jo);
+
         jo = new JSONObject();
         jo.put(IGpLayer.LAYERTYPE_TAG, CardinalLineLayer.class.getCanonicalName());
         jo.put(IGpLayer.LAYERNAME_TAG, CardinalLineLayer.getName(context));
@@ -263,7 +270,7 @@ public enum CardinalLayerManager {
         }
 
         if (userLayersDefinitions.size() == 0) {
-            EOnlineTileSources source = EOnlineTileSources.Open_Street_Map_Standard;
+            EOnlineTileSources source = EOnlineTileSources.Cardus_Open_Street_Map_Standard_Proxy;
             CardinalLayerManager.INSTANCE.addBitmapTileService(source.getName(), source.getUrl(), source.getTilePath(), source.getMaxZoom(), 1f, null);
         }
         //
@@ -353,6 +360,10 @@ public enum CardinalLayerManager {
                     CardinalJoinsLayer sysLayer = new CardinalJoinsLayer(mapView, activitySupporter);
                     sysLayer.load();
                     sysLayer.setEnabled(isEnabled);
+                } else if (layerClass.equals(BifurcationLayer.class.getCanonicalName())) {
+                    BifurcationLayer sysLayer = new BifurcationLayer(mapView, activitySupporter);
+                    sysLayer.load();
+                    sysLayer.setEnabled(isEnabled);
                 }
 
 
@@ -394,6 +405,13 @@ public enum CardinalLayerManager {
         jo.put(IGpLayer.LAYERNAME_TAG, CardinalEdgesLayer.getName(context));
         cardinalLayersDefinitions.add(edgeLayer.toJson());
         edgeLayer.load();
+
+        BifurcationLayer bifurcationLayer = new BifurcationLayer(mapView, activitySupporter);
+        jo = new JSONObject();
+        jo.put(IGpLayer.LAYERTYPE_TAG, BifurcationLayer.class.getCanonicalName());
+        jo.put(IGpLayer.LAYERNAME_TAG, BifurcationLayer.getName(context));
+        cardinalLayersDefinitions.add(bifurcationLayer.toJson());
+        bifurcationLayer.load();
 
 //        CardinalLineLayer lineLayer = new CardinalLineLayer(mapView, activitySupporter);
 //        jo = new JSONObject();
@@ -630,6 +648,14 @@ public enum CardinalLayerManager {
                             JSONObject jo = new JSONObject();
                             jo.put(IGpLayer.LAYERTYPE_TAG, CardinalJoinsLayer.class.getCanonicalName());
                             jo.put(IGpLayer.LAYERNAME_TAG, CardinalJoinsLayer.getName(context));
+                            jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
+                            cardinalLayersArray.put(jo);
+                            gpLayer.dispose();
+                        }else if(layer instanceof ICardinalBifurcation){
+                            IGpLayer gpLayer = (IGpLayer) layer;
+                            JSONObject jo = new JSONObject();
+                            jo.put(IGpLayer.LAYERTYPE_TAG, BifurcationLayer.class.getCanonicalName());
+                            jo.put(IGpLayer.LAYERNAME_TAG, BifurcationLayer.getName(context));
                             jo.put(IGpLayer.LAYERENABLED_TAG, layer.isEnabled());
                             cardinalLayersArray.put(jo);
                             gpLayer.dispose();
@@ -940,7 +966,8 @@ public enum CardinalLayerManager {
             if (!layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalEdgesLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalLineLayer.class.getCanonicalName())
                     && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalPolygonLayer.class.getCanonicalName())
-                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalJoinsLayer.class.getCanonicalName())) {
+                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(CardinalJoinsLayer.class.getCanonicalName())
+                    && !layerObj.getString(IGpLayer.LAYERTYPE_TAG).equals(BifurcationLayer.class.getCanonicalName())) {
                 Long layerId = layerObj.getLong(ICardinalLayer.LAYERID_TAG);
                 cu.phibrain.plugins.cardinal.io.database.entity.model.Layer layer = LayerOperations.getInstance().load(layerId);
                 layer.setIsActive(enabled);

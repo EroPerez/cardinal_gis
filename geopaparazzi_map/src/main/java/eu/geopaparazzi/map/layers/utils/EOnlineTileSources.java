@@ -81,7 +81,9 @@ public enum EOnlineTileSources {
             "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.",
             "https://basemaps.cartocdn.com/dark_all", "/{Z}/{X}/{Y}.png", "20", "0"), //
     CartoDb_Positron("CartoDb Positron", "", "", " Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.",
-            "https://basemaps.cartocdn.com/light_all", "/{Z}/{X}/{Y}.png", "20", "0");
+            "https://basemaps.cartocdn.com/light_all", "/{Z}/{X}/{Y}.png", "20", "0"),
+    Cardus_Open_Street_Map_Standard_Proxy("Cardus Open Street Map Proxy", "", "", "OpenStreetMap contributors, CC-BY-SA",
+            "http://srv23118-206152.vps.etecsa.cu/mbtiles", "/{Z}/{X}/{Y}.png", "22", "0");
 
     private String _name;
     private String _attribution;

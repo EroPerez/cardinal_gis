@@ -1068,6 +1068,10 @@ public class MapObject implements Serializable, IExportable, KmlRepresenter, Gpx
     }
 
 
+    public boolean isComponent() {
+        return this.getJoinObj() != null;
+    }
+
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 788755102)
     public void __setDaoSession(DaoSession daoSession) {

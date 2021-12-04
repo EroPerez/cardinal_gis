@@ -1,5 +1,7 @@
 package cu.phibrain.plugins.cardinal.io.database.entity.operations;
 
+import org.greenrobot.greendao.query.QueryBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,25 +35,34 @@ public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObje
     }
 
 
-    public List<MapObjecType> topologicalMtoFirewall(MapObjecType mto, List<MapObjecType> objcTypeList) {
-        if (objcTypeList == null)
-            objcTypeList = new ArrayList<>();
-
-        //Yo tambien me incluyo dice jorge que no
-        //if(!mto.getIsAbstract())
-        //objcTypeList.add(mto);
+    public List<MapObjecType> topologicalMtoFirewall(MapObjecType mto, List<MapObjecType> mapObjecTypeList) {
+        if (mapObjecTypeList == null)
+            mapObjecTypeList = new ArrayList<>();
 
         List<TopologicalRule> rulers = mto.getTopoRule();
         for (TopologicalRule rule : rulers) {
-            Layer layer_mto = LayerOperations.getInstance().load(rule.getTargetObj().getLayerId());
-            if (!rule.getTargetObj().getIsAbstract() && layer_mto.getIsActive() && !objcTypeList.contains(rule.getTargetObj()))
-                objcTypeList.add(rule.getTargetObj());
+            MapObjecType targetObj = rule.getTargetObj();
+            Layer layer = targetObj.getLayerObj();
+            if (!targetObj.getIsAbstract()
+                    && layer.getEnabled()
+                    && !mapObjecTypeList.contains(targetObj)) {
+
+                mapObjecTypeList.add(targetObj);
+            } else if (targetObj.getIsAbstract()) {
+                List<MapObjecType> offspring = this.getOffspring(targetObj.getId());
+                for (MapObjecType child : offspring) {
+                    Layer childLayer = child.getLayerObj();
+                    if (!mapObjecTypeList.contains(child) && childLayer.getEnabled()) {
+                        mapObjecTypeList.add(child);
+                    }
+                }
+            }
         }
 
         if (mto.getParentObj() != null)
-            topologicalMtoFirewall(mto.getParentObj(), objcTypeList);
+            topologicalMtoFirewall(mto.getParentObj(), mapObjecTypeList);
 
-        return objcTypeList;
+        return mapObjecTypeList;
     }
 
 
@@ -92,6 +103,13 @@ public class MapObjecTypeOperations extends BaseOperations<MapObjecType, MapObje
             mapObjectObjectType = mapObjectObjectType.getParentObj();
         }
         return attributes;
+    }
+
+    public List<MapObjecType> getOffspring(Long mapObjecTypeId) {
+        QueryBuilder<MapObjecType> queryBuilder = this.queryBuilder()
+                .where(MapObjecTypeDao.Properties.ParentId.eq(mapObjecTypeId));
+
+        return queryBuilder.list();
     }
 
 }

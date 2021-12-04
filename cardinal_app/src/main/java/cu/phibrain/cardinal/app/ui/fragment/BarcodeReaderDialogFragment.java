@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,6 +37,7 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.BifurcationLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
@@ -47,11 +47,9 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.LabelSubLot;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Layer;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjecType;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObject;
-import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.RouteSegment;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
-import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
 import eu.geopaparazzi.library.database.GPLog;
@@ -210,7 +208,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
                             continueButton.setEnabled(true);
                             continueButton.setVisibility(View.VISIBLE);
-                        }else{
+                        } else {
                             continueButton.setEnabled(false);
                             continueButton.setVisibility(View.GONE);
                         }
@@ -262,7 +260,9 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                         currentObj.setJoinId(previousObj.getId());
                     }
                     MapObjectOperations.getInstance().save(currentObj);
-                    launchPickupPhoto(currentObj);
+                    if (!currentObj.isComponent()) {
+                        launchPickupPhoto(currentObj);
+                    }
 
                     if (!currentObj.isTerminal() && !compositeMode) {
                         appContainer.setCurrentMapObject(currentObj);
@@ -372,7 +372,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                 subIndex++;
                 if (mapObjectJoin.getCode().equals(code)) {
                     code = String.format("%s-%s",
-                            mapObjectJoin.getCode(),
+                            mapObject.getCode(),
                             NumberUtiles.lPadZero(subIndex, 2)
                     );
                 }
@@ -393,6 +393,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         if (compositeMode) {
             mapView.reloadLayer(CardinalJoinsLayer.class);
         }
+        mapView.reloadLayer(BifurcationLayer.class);
     }
 
     void refreshUI(boolean terminalFound) {
@@ -452,7 +453,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
 
         continueButton = v.findViewById(R.id.cancelbutton);
-        if (currentObj.getImages().size() < LatLongUtils.getMinImageToTake()){
+        if (currentObj.getImages().size() < LatLongUtils.getMinImageToTake()) {
             continueButton.setEnabled(false);
             continueButton.setVisibility(View.GONE);
         }
@@ -490,10 +491,10 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
 
         continueButton.setOnClickListener(v1 -> {
-           currentObj.resetImages();
-           if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
-               ad.cancel();
-           }
+            currentObj.resetImages();
+            if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
+                ad.cancel();
+            }
 //                GPDialogs.yesNoMessageDialog(activity,
 //                        String.format(
 //                                activity.getString(R.string.map_object_must_have_a_image_number_taken_exit_confirm),

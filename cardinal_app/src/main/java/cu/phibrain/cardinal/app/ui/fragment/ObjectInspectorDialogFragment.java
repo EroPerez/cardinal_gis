@@ -52,6 +52,7 @@ import cu.phibrain.cardinal.app.ui.adapter.MapObjectDefectsAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectImagesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.MapObjectStatesAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.StockAutoCompleteAdapter;
+import cu.phibrain.cardinal.app.ui.layer.BifurcationLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
@@ -198,7 +199,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
                 ((CardinalGPMapView) mapView).reloadLayer(
                         appContainer.getMapObjecTypeActive().getLayerId()
                 );
-
+            mapView.reloadLayer(BifurcationLayer.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -250,7 +251,7 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         WorkSession session = appContainer.getWorkSessionActive();
 
         // Codigo del nodo
-        if (session.getId() != object.getSessionId()) {
+        if (session.getId() != object.getSessionId() || object.isComponent()) {
             edtCode.setVisibility(View.GONE);
             edtCodeFake.setVisibility(View.VISIBLE);
             edtCodeFake.setText(object.getCode());
@@ -374,7 +375,11 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
 
 //Type
         EditText edtType = view.findViewById(R.id.edtType);
-        edtType.setText(object.getObjectType().getCaption());
+        String objectType = object.getObjectType().getCaption();
+        if (object.isTerminal()) {
+            objectType = String.format("%s - (Terminal)", objectType);
+        }
+        edtType.setText(objectType);
 //Geometry
         EditText edtGeometry = view.findViewById(R.id.edtGeometry);
         edtGeometry.setText(object.getObjectType().getGeomType().name());

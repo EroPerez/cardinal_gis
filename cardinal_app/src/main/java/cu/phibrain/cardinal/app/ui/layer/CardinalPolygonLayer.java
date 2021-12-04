@@ -31,6 +31,7 @@ import java.util.List;
 import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
+import cu.phibrain.cardinal.app.helpers.DialogUtils;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -252,6 +253,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
                         ((CardinalGPMapView) mapView).reloadLayer(editLayer.getId());
                         mapView.reloadLayer(CardinalSelectPointLayer.class);
                         mapView.reloadLayer(CardinalJoinsLayer.class);
+                        mapView.reloadLayer(BifurcationLayer.class);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -272,18 +274,19 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
     public void addNewFeatureByGeometry(Geometry geometry, int srid) throws Exception {
         AppCompatActivity activity = (MapviewActivity) this.activitySupporter;
 
-        GPDialogs.inputMessageDialog(activity, activity.getString(R.string.inspector_object_grade), "2", new TextRunnable() {
-            @Override
-            public void run() {
-                long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
-                BarcodeReaderDialogFragment.newInstance(
-                        mapView, LatLongUtils.toGpGeoPoints(geometry), grade
-                ).show(
-                        activity.getSupportFragmentManager(),
-                        "dialog"
-                );
-            }
-        });
+        DialogUtils.inputNumberDialog(activity, activity.getString(R.string.inspector_object_grade),
+                2l, 0l, 10l, new TextRunnable() {
+                    @Override
+                    public void run() {
+                        long grade = NumberUtiles.parseStringToLong(theTextToRunOn, 0L);
+                        BarcodeReaderDialogFragment.newInstance(
+                                mapView, LatLongUtils.toGpGeoPoints(geometry), grade
+                        ).show(
+                                activity.getSupportFragmentManager(),
+                                "dialog"
+                        );
+                    }
+                });
     }
 
     @Override
@@ -324,6 +327,7 @@ public class CardinalPolygonLayer extends VectorLayer implements ISystemLayer, I
         mapView.reloadLayer(CardinalSelectPointLayer.class);
         mapView.reloadLayer(CardinalLineLayer.class);
         mapView.reloadLayer(CardinalJoinsLayer.class);
+        mapView.reloadLayer(BifurcationLayer.class);
 
         GPDialogs.quickInfo(mapView, ((MapviewActivity) activitySupporter).getString(cu.phibrain.cardinal.app.R.string.map_object_saved_message));
 

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import cu.phibrain.cardinal.app.CardinalApplication;
+import cu.phibrain.cardinal.app.MapviewActivity;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.injections.AppContainer;
@@ -164,10 +165,14 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
                                         }
 
                                         protected void onPostExecute(String response) {
-                                            mapObject.setJoinId(null);
+                                            // mapObject.setJoinId(null);
 
-                                            MapObjectOperations.getInstance().save(mapObject);
+                                            MapObjectOperations.getInstance().delete(mapObject);
                                             refreshList();
+                                            Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
+                                            intent.putExtra("update_map_object_active", true);
+                                            intent.putExtra("update_map_object_type_active", true);
+                                            MapObjectJoinedActivity.this.sendBroadcast(intent);
                                         }
                                     }.execute((String) null);
 
@@ -182,13 +187,17 @@ public class MapObjectJoinedActivity extends AppCompatActivity {
                     if (mapObject2 != null) {
                         currentMOA.setActiveObject(mapObject2);
 
-                        GPGeoPoint centerPoint = LatLongUtils.centerPoint(mapObject2.getCoord(), mapObject2.getObjectType().getGeomType());
+                        GPGeoPoint centerPoint = mapObject2.getCentroid();
 
                         Intent intent = new Intent(getContext(), MapsSupportService.class);
                         intent.putExtra(MapsSupportService.CENTER_ON_POSITION_REQUEST, true);
                         intent.putExtra(LibraryConstants.LONGITUDE, centerPoint.getLongitude());
                         intent.putExtra(LibraryConstants.LATITUDE, centerPoint.getLatitude());
-                        intent.putExtra(LibraryConstants.ZOOMLEVEL, (int) mapObject2.getElevation() <= 0 ? LatLongUtils.getLineAndPolygonViewZoom() : (int) mapObject2.getElevation());
+                        intent.putExtra(LibraryConstants.ZOOMLEVEL,
+                                (int) mapObject2.getElevation() <= 0
+                                        ? LatLongUtils.getLineAndPolygonViewZoom()
+                                        : (int) mapObject2.getElevation()
+                        );
                         getContext().startService(intent);
 
                     }

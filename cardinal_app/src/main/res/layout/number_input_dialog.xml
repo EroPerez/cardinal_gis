@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingTop="25dp">
+
+    <ImageButton
+        android:id="@+id/imageButtonMinus"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/dialogTextLayout"
+        android:background="@drawable/button_background_states"
+        app:srcCompat="@drawable/ic_minus"
+        tools:srcCompat="@drawable/ic_minus" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/dialogTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:hint="dummy hint"
+        app:helperText="@string/inspector_object_grade"
+        app:helperTextTextAppearance="@style/GPTitleTextViewStyle"
+        app:helperTextTextColor="@color/main_text_color_neutral">
+
+        <EditText
+            android:id="@+id/dialogEdittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:ems="9"
+            android:inputType="number"
+            android:text="2"
+            android:textAlignment="center">
+
+            <requestFocus />
+        </EditText>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ImageButton
+        android:id="@+id/imageButtonAdd"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/dialogTextLayout"
+        android:background="@drawable/button_background_states"
+        app:srcCompat="@drawable/ic_add"
+        tools:srcCompat="@drawable/ic_add" />
+
+</RelativeLayout>

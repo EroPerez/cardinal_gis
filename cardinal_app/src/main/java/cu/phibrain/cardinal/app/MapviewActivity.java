@@ -86,6 +86,7 @@ import cu.phibrain.cardinal.app.ui.adapter.MtoAdapter;
 import cu.phibrain.cardinal.app.ui.adapter.NetworkAdapter;
 import cu.phibrain.cardinal.app.ui.fragment.BarcodeReaderDialogFragment;
 import cu.phibrain.cardinal.app.ui.fragment.ObjectInspectorDialogFragment;
+import cu.phibrain.cardinal.app.ui.layer.BifurcationLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalGPMapView;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
@@ -221,6 +222,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
 
     };
+
     private BroadcastReceiver storageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -233,6 +235,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         }
 
     };
+
     private BroadcastReceiver mMessageUiUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -375,7 +378,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
          */
         try {
             mapView = new CardinalGPMapView(this);
-        } catch (Exception ex){
+        } catch (Exception ex) {
             mapView = new CardinalGPMapView(this);
         }
 
@@ -505,6 +508,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 mapView.reloadLayer(CardinalEdgesLayer.class);
                 mapView.reloadLayer(CardinalSelectPointLayer.class);
                 mapView.reloadLayer(CardinalJoinsLayer.class);
+                mapView.reloadLayer(BifurcationLayer.class);
                 for (Layer layer :
                         LayerOperations.getInstance().getAll()) {
                     if (layer.getEnabled())
@@ -1177,6 +1181,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             if (currentMO != null && currentMO.belongToTopoLayer() && !currentMO.isTerminal()) {
                 currentMO.setNodeGrade(currentMO.getNodeGrade() + 1);
                 MapObjectOperations.getInstance().save(currentMO);
+                try {
+                    mapView.reloadLayer(BifurcationLayer.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 GPDialogs.quickInfo(mapView, getString(R.string.inspector_object_grade) + ": " + currentMO.getNodeGrade());
             }
@@ -1616,8 +1625,14 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         appContainer.setMapObjecTypeActive(_mtoModel);
         if (appContainer.getMapObjecTypeActive() != null) {
 
-            if (descriptorMto != null) //evitar exception cuando se invoca este método en un lugar distinto del buttonsheet
-                descriptorMto.setText(_mtoModel.getCaption());
+            if (descriptorMto != null) { // Evitar exception cuando se invoca este método en un lugar distinto del buttonsheet
+
+                String objectType = _mtoModel.getCaption();
+                if(_mtoModel.getIsTerminal()){
+                    objectType = String.format("%s - (Terminal)", objectType);
+                }
+                descriptorMto.setText(objectType);
+            }
 
             byte[] icon = _mtoModel.getIconAsByteArray();
             if (icon != null) {
