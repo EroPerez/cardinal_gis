@@ -106,6 +106,15 @@ public class NetworkUtilitiesCardinalOl {
     }
 
 
+    public static AuthToken login(String server, String user, String password) throws IOException {
+        Response<AuthToken> response = ApiClient.getApiService(server).postAuthToken(new LoginModel(user, password)).execute();
+        if (response.isSuccessful()) {
+            return response.body();
+        }
+        return null;
+    }
+
+
     /**
      * Send via HTTP GET a request to obtain project data list
      *

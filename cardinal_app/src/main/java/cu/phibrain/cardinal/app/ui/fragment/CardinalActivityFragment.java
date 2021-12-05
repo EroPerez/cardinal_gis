@@ -5,6 +5,7 @@ package cu.phibrain.cardinal.app.ui.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetManager;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.system.Os;
@@ -56,6 +58,8 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOperations;
+import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
+import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
 import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
@@ -83,6 +87,7 @@ import eu.geopaparazzi.library.database.TableDescriptions;
 import eu.geopaparazzi.library.gps.GpsLoggingStatus;
 import eu.geopaparazzi.library.gps.GpsServiceStatus;
 import eu.geopaparazzi.library.gps.GpsServiceUtilities;
+import eu.geopaparazzi.library.network.NetworkUtilities;
 import eu.geopaparazzi.library.profiles.Profile;
 import eu.geopaparazzi.library.profiles.ProfilesHandler;
 import eu.geopaparazzi.library.sensors.OrientationSensor;
@@ -516,25 +521,45 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 GPLog.error(this, null, e); //$NON-NLS-1$
             }
         } else if (v == mMapviewButton) {
-
-            try {
-                if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
-                    AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
-                    if (appContainer.getProjectActive() == null) {
-                        GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
-                    } else if (appContainer.getWorkSessionActive() == null) {
-                        GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
-                    } else {
-                        Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
-                        startActivity(importIntent);
-                    }
+            if (mLastGpsLoggingStatus == GpsLoggingStatus.GPS_DATABASELOGGING_ON) {
+                AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+                if (appContainer.getProjectActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
+                } else if (appContainer.getWorkSessionActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
                 } else {
-                    GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
+                    Worker worker = appContainer.getCurrentWorker();
+                    ProgressDialog validatingDialog = ProgressDialog.show(
+                            getContext(),
+                            worker.getFullName(),
+                            getString(R.string.validating)
+                    );
+
+                    new AsyncTask<Boolean, Void, Boolean>() {
+
+                        @Override
+                        protected Boolean doInBackground(Boolean... booleans) {
+                            return CardinalActivityFragment.this.validateWorker();
+                        }
+
+                        protected void onPostExecute(Boolean validateWorker) { // on UI thread!
+                            GPDialogs.dismissProgressDialog(validatingDialog);
+                            try {
+                                if (validateWorker) {
+                                    Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
+                                    startActivity(importIntent);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.execute();
+
+                }
+            } else {
+                GPDialogs.warningDialog(getActivity(), getString(eu.geopaparazzi.core.R.string.gpslogging_only), null);
+            }
         } else if (v == mImportButton) {
             Intent importIntent = new Intent(getActivity(), ImportActivity.class);
             //startActivity(importIntent);
@@ -544,7 +569,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String user = preferences.getString(Constants.PREF_KEY_USER, "cardinal"); //$NON-NLS-1$
+            String user = preferences.getString(Constants.PREF_KEY_USER, ""); //$NON-NLS-1$
 
             try {
                 if (appContainer.getProjectActive() != null) {
@@ -567,13 +592,40 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             try {
                 if (appContainer.getProjectActive() == null) {
                     GPDialogs.infoDialog(getContext(), getString(R.string.not_project_active), null);
-                    return;
+                } else if (appContainer.getWorkSessionActive() == null) {
+                    GPDialogs.infoDialog(getContext(), getString(R.string.work_session_not_active), null);
+                } else {
+
+                    Worker worker = appContainer.getCurrentWorker();
+                    ProgressDialog validatingDialog = ProgressDialog.show(
+                            getContext(),
+                             worker.getFullName(),
+                            getString(R.string.validating)
+                    );
+
+                    new AsyncTask<Boolean, Void, Boolean>() {
+
+                        @Override
+                        protected Boolean doInBackground(Boolean... booleans) {
+                            return CardinalActivityFragment.this.validateWorker();
+                        }
+
+                        protected void onPostExecute(Boolean validateWorker) { // on UI thread!
+                            GPDialogs.dismissProgressDialog(validatingDialog);
+                            try {
+                                if (validateWorker) {
+                                    Intent exportIntent = new Intent(getActivity(), ExportActivity.class);
+                                    startActivity(exportIntent);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.execute();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Intent exportIntent = new Intent(getActivity(), ExportActivity.class);
-            startActivity(exportIntent);
         } else if (v == mPanicFAB) {
             if (mLastGpsPosition == null) {
                 return;
@@ -921,5 +973,38 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         AlertDialog ad = builder.create();
         ad.setCancelable(true);
         ad.show();
+    }
+
+    protected boolean validateWorker() {
+        Context context = getContext();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final String user = preferences.getString(Constants.PREF_KEY_USER, ""); //$NON-NLS-1$
+        final String passwd = preferences.getString(Constants.PREF_KEY_PWD, ""); //$NON-NLS-1$
+        final String server = preferences.getString(Constants.PREF_KEY_SERVER, ""); //$NON-NLS-1$
+
+        if (!NetworkUtilities.isNetworkAvailable(context)) {
+            GPDialogs.infoDialog(context, context.getString(cu.phibrain.plugins.cardinal.io.R.string.available_only_with_network), null);
+            return false;
+        }
+
+        if (server.length() == 0 || user.length() == 0 || passwd.length() == 0) {
+            GPDialogs.infoDialog(context, context.getString(cu.phibrain.plugins.cardinal.io.R.string.error_set_cloud_settings_cardinal), null);
+            return false;
+        }
+
+        try {
+            AuthToken authToken = NetworkUtilitiesCardinalOl.login(server, user, passwd);
+
+            if (authToken != null) {
+                return true;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        GPDialogs.infoDialog(context, String.format(context.getString(R.string.worker_have_not_active), user), null);
+
+        return false;
     }
 }

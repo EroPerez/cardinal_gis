@@ -84,4 +84,5 @@
     <string name="images_upload_summary_off">Only upload images when manually requested</string>
     <string name="continue_fuck">Continue</string>
     <string name="layername_bifuration">Bifurcations</string>
+    <string name="validating">Validating the session...</string>
 </resources>

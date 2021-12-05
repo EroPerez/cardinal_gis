@@ -295,7 +295,9 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             if (is_map_object_terminal) {
                 disableEditing();
             }
+
             Long create_map_object_by_select_edge = intent.getLongExtra("create_map_object_by_select_edge", -1L);
+
             if (create_map_object_by_select_edge > 0) {
                 RouteSegment edge = RouteSegmentOperations.getInstance().load(create_map_object_by_select_edge);
                 appContainer.setRouteSegmentActive(edge);
@@ -1482,6 +1484,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
         try {
             mapView.reloadLayer(CardinalSelectPointLayer.class);
+            mapView.reloadLayer(BifurcationLayer.class);
         } catch (Exception e) {
             e.printStackTrace();
         }

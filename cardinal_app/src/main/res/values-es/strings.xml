@@ -74,5 +74,6 @@
     <string name="scanner">Escanear</string>
     <string name="select_layer">Capa de selección</string>
     <string name="layername_bifuration">Bifurcaciones</string>
+    <string name="validating">Validando la sesión...</string>
 
 </resources>
