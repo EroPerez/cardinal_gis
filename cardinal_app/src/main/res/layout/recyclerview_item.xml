@@ -22,8 +22,6 @@
                 android:layout_gravity="center|center_vertical"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-
-
                 />
 
         </RelativeLayout>

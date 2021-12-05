@@ -730,7 +730,7 @@ public enum WebDataProjectManager {
 
             } else {
                 error = new APIError(500, e.getMessage());
-                throw new DownloadError(NetworkUtilities.getMessageForCode(context, error.status(), null));
+                throw new DownloadError(error.message());
             }
         }
     }

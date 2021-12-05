@@ -9,7 +9,7 @@
     <string name="cardinal_polygon">Polygon type map object layer</string>
     <string name="no_topology_layer">The selected map object it is not a topological item.</string>
 
-    <string name="seleccione_un_objeto_de_mapa">Select a Map Object</string>
+    <string name="seleccione_un_objeto_de_mapa">Select a map object type</string>
     <string name="panic">Panic button</string>
     <string name="work_session_not_active">Please, you must activate a work session</string>
     <string name="worker_have_not_active">The worker %s seem to be inactive in cardus cloud</string>
@@ -56,7 +56,7 @@
     <string name="do_you_want_to_undock_this_map_object">Do you want to un-dock this map object?</string>
     <string name="map_object_already_docked_message">The selected map object is already docked to another map object.</string>
     <string name="map_object_already_docked_to_that_mapobject_message">The selected map object is already docked to this map object.</string>
-    <string name="layername_jointo">Candinal join to layer</string>
+    <string name="layername_jointo">Map object component layer</string>
     <string name="do_you_want_to_logout_this_work_session">Are you sure you want to logout? Please note that this process could not be undo.</string>
     <string name="version">Version %s</string>
     <string name="phibrainsoft" translatable="false">Phibrain Soft</string>
@@ -83,4 +83,6 @@
     <string name="images_upload_summary_on">Automatically upload images for outgoing project. Disable if you know what you are doing</string>
     <string name="images_upload_summary_off">Only upload images when manually requested</string>
     <string name="continue_fuck">Continue</string>
+    <string name="layername_bifuration">Bifurcations</string>
+    <string name="validating">Validating the session...</string>
 </resources>

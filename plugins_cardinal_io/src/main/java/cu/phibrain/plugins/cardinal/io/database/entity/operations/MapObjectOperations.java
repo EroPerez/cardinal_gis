@@ -124,4 +124,24 @@ public class MapObjectOperations extends BaseOperations<MapObject, MapObjectDao>
 
     }
 
+
+    public long getRouteSegmentsCount(long Id) {
+        Query<RouteSegment> mapObject_RouteSegmentsQuery = null;
+        synchronized (this) {
+            if (mapObject_RouteSegmentsQuery == null) {
+                RouteSegmentDao targetDao = daoSession.getRouteSegmentDao();
+                QueryBuilder<RouteSegment> queryBuilder = targetDao.queryBuilder();
+                queryBuilder.where(
+                        RouteSegmentDao.Properties.Deleted.eq(false),
+                        queryBuilder.or(RouteSegmentDao.Properties.OriginId.eq(Id),
+                                RouteSegmentDao.Properties.DestinyId.eq(Id))
+                );
+
+                return queryBuilder.count();
+            }
+        }
+
+        return 0L;
+    }
+
 }

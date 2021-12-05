@@ -9,6 +9,12 @@ import android.util.Log;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
+import org.acra.ACRA;
+import org.acra.ReportField;
+import org.acra.ReportingInteractionMode;
+import org.acra.config.ACRAConfiguration;
+import org.acra.config.ACRAConfigurationException;
+import org.acra.config.ConfigurationBuilder;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -68,7 +74,29 @@ public class CardinalApplication extends GeopaparazziApplication {
         return daoSession;
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        try {
+            GeopaparazziApplication.mailTo = "eperezm1986@gmail.com";
+            ACRAConfiguration config = new ConfigurationBuilder(this) //
+                    .setMailTo(mailTo)//
+                    .setCustomReportContent(//
+                            ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, //
+                            ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL, //
+                            ReportField.CUSTOM_DATA, ReportField.STACK_TRACE, ReportField.LOGCAT,
+                            ReportField.AVAILABLE_MEM_SIZE, ReportField.SHARED_PREFERENCES) //
+                    .setResToastText(eu.geopaparazzi.core.R.string.crash_toast_text)//
+                    .setLogcatArguments("-t", "400", "-v", "time", "GPLOG:I", "*:S") //
+                    .setReportingInteractionMode(ReportingInteractionMode.TOAST)//
+                    .build();
 
+
+            ACRA.init(this, config);
+        } catch (ACRAConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onCreate() {
         super.onCreate();

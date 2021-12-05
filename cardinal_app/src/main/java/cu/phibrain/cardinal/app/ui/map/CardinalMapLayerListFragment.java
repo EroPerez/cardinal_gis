@@ -52,11 +52,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import cu.phibrain.cardinal.app.ui.layer.BifurcationLayer;
+import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalJoinsLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLayerManager;
 import cu.phibrain.cardinal.app.ui.layer.CardinalLineLayer;
 import cu.phibrain.cardinal.app.ui.layer.CardinalPolygonLayer;
-import cu.phibrain.cardinal.app.ui.layer.CardinalEdgesLayer;
 import cu.phibrain.cardinal.app.ui.layer.ICardinalLayer;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.util.AppsUtilities;
@@ -365,6 +366,8 @@ public class CardinalMapLayerListFragment extends Fragment implements IActivityS
             if (layerClass.equals(CardinalEdgesLayer.class.getCanonicalName()))
                 layerItem = getCardinalSimpleItem(index, layerDefinition);
             else if (layerClass.equals(CardinalJoinsLayer.class.getCanonicalName()))
+                layerItem = getCardinalSimpleItem(index, layerDefinition);
+            else if (layerClass.equals(BifurcationLayer.class.getCanonicalName()))
                 layerItem = getCardinalSimpleItem(index, layerDefinition);
             else
                 layerItem = getCardinalLayerItem(index, layerDefinition);

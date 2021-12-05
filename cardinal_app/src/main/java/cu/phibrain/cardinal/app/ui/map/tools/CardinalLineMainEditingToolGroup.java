@@ -39,6 +39,7 @@ import cu.phibrain.cardinal.app.injections.UserMode;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
 import eu.geopaparazzi.library.GPApplication;
+import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.Compat;
 import eu.geopaparazzi.library.util.IActivitySupporter;
@@ -239,6 +240,7 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
                     cameraButton.setVisibility(View.GONE);
                 }catch (Exception e){
                     e.printStackTrace();
+                    GPLog.error(this, null, e);
                     appContainer.setMode(UserMode.NONE);
                     editCoordButton.setVisibility(View.VISIBLE);
                     deleteButton.setVisibility(View.VISIBLE);
@@ -257,6 +259,7 @@ public class CardinalLineMainEditingToolGroup implements ToolGroup, OnClickListe
                 editLayer.deleteFeatures(null);
             } catch (Exception e) {
                 e.printStackTrace();
+                GPLog.error(this, null, e);
                 appContainer.setMode(UserMode.NONE);
             }
         } else if (v == editCoordButton) {

@@ -233,8 +233,15 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
                             () -> activity.runOnUiThread(() -> {
                                 // yes
                                 joinObj.setJoinObj(null);
-                                MapObjectOperations.getInstance().save(joinObj);
                                 joinObj.resetJoinedList();
+                                long layerId = joinObj.getLayer().getId();
+                                MapObjectOperations.getInstance().delete(joinObj);
+
+                                try {
+                                    ((CardinalGPMapView) mapView).reloadLayer(layerId);
+                                } catch (Exception exception) {
+                                    exception.printStackTrace();
+                                }
                                 remove(selectedJoinObj);
                                 update();
 
@@ -262,9 +269,11 @@ public class CardinalJoinsLayer extends VectorLayer implements ISystemLayer, IEd
 
         if (item != null) {
             MapObject objectSelected = MapObjectOperations.getInstance().load(item.getId());
-            MapObject JoinObj = objectSelected.getJoinObj();
-            appContainer.setCurrentMapObject(JoinObj);
-            appContainer.setMapObjecTypeActive(JoinObj.getObjectType());
+            if (objectSelected != null) {
+                MapObject JoinObj = objectSelected.getJoinObj();
+                appContainer.setCurrentMapObject(JoinObj);
+                appContainer.setMapObjecTypeActive(JoinObj.getObjectType());
+            }
 
             //Update ui
             Intent intent = new Intent(MapviewActivity.ACTION_UPDATE_UI);
