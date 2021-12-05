@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -117,50 +116,51 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        BottomSheetDialog dialog = new ObjectInspectorDialogFragment.MyBottomSheetDialog(this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme);
+        BottomSheetDialog dialog = new ObjectInspectorDialogFragment.MyBottomSheetDialog(
+        BarcodeReaderDialogFragment.this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme
+        );
 
-        View view = View.inflate(getContext(), R.layout.fragment_barcode_reader_dialog_list_dialog, null);
-
-        appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
-        currentSession = appContainer.getWorkSessionActive();
+        View view = View.inflate(BarcodeReaderDialogFragment.this.getContext(), R.layout.fragment_barcode_reader_dialog_list_dialog, null);
+        this.appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();
+        this.currentSession = BarcodeReaderDialogFragment.this.appContainer.getWorkSessionActive();
 
         //View objects
-        buttonScan = view.findViewById(R.id.scanBtn);
-        buttonSave = view.findViewById(R.id.imgBtnSave);
-        buttonSave.setVisibility(View.GONE);
-        autoCompleteTextViewCode = view.findViewById(R.id.autoCompleteTextViewCode);
-        labelAutoCompleteAdapter = new LabelAutoCompleteAdapter(
+        this.buttonScan = view.findViewById(R.id.scanBtn);
+        this.buttonSave = view.findViewById(R.id.imgBtnSave);
+        this.buttonSave.setVisibility(View.GONE);
+        this.autoCompleteTextViewCode = view.findViewById(R.id.autoCompleteTextViewCode);
+        this.labelAutoCompleteAdapter = new LabelAutoCompleteAdapter(
                 this.getContext(), R.layout.spinner_inv, R.id.tvSpinnerValue,
                 LabelSubLotOperations.getInstance().loadAll(currentSession.getId(), false)
         );
-        autoCompleteTextViewCode.setAdapter(labelAutoCompleteAdapter);
-        autoCompleteTextViewCode.setOnItemClickListener((adapterView, view1, position, id) -> {
+        this.autoCompleteTextViewCode.setAdapter(BarcodeReaderDialogFragment.this.labelAutoCompleteAdapter);
+        this. autoCompleteTextViewCode.setOnItemClickListener((adapterView, view1, position, id) -> {
             //this is the way to find selected object/item
-            label = (LabelSubLot) adapterView.getItemAtPosition(position);
-            if (label != null) {
-                buttonSave.setVisibility(View.VISIBLE);
+            this.label = (LabelSubLot) adapterView.getItemAtPosition(position);
+            if (this.label != null) {
+                this.buttonSave.setVisibility(View.VISIBLE);
             } else {
-                buttonSave.setVisibility(View.GONE);
+                this.buttonSave.setVisibility(View.GONE);
             }
 
         });
 
         //intializing scan object
-        code128BarcodeScan = IntentIntegrator.forSupportFragment(this); // `this` is the current Fragment
-        code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES);
-        code128BarcodeScan.setPrompt(getString(R.string.scan_map_object_barcode_message));
-        code128BarcodeScan.setOrientationLocked(false);
+        this.code128BarcodeScan = IntentIntegrator.forSupportFragment(BarcodeReaderDialogFragment.this); // `this` is the current Fragment
+        this.code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES);
+        this.code128BarcodeScan.setPrompt(getString(R.string.scan_map_object_barcode_message));
+        this.code128BarcodeScan.setOrientationLocked(false);
         //no label checkbox
-        checkBoxNoLabel = view.findViewById(R.id.checkBoxWithoutTag);
-        checkBoxNoLabel.setEnabled(appContainer.getCurrentMapObject() != null);
+        this.checkBoxNoLabel = view.findViewById(R.id.checkBoxWithoutTag);
+        this.checkBoxNoLabel.setEnabled(this.appContainer.getCurrentMapObject() != null);
 
         //attaching onclick listener
-        buttonScan.setOnClickListener(this);
-        buttonSave.setOnClickListener(this);
-        checkBoxNoLabel.setOnCheckedChangeListener(this);
+        this.buttonScan.setOnClickListener(BarcodeReaderDialogFragment.this);
+        this.buttonSave.setOnClickListener(BarcodeReaderDialogFragment.this);
+        this.checkBoxNoLabel.setOnCheckedChangeListener(BarcodeReaderDialogFragment.this);
 
         dialog.setContentView(view);
-        mBehavior = BottomSheetBehavior.from((View) view.getParent());
+        this.mBehavior = BottomSheetBehavior.from((View) view.getParent());
         return dialog;
     }
 
@@ -168,7 +168,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     @Override
     public void onStart() {
         super.onStart();
-        mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        this.mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     @Override
@@ -187,12 +187,12 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             } else {
                 //if qr contains data
                 String barcode = result.getContents();
-                label = LabelSubLotOperations.getInstance().load(currentSession.getId(), barcode);
-                if (label != null && !label.getGeolocated()) { //setting values to textviews
-                    autoCompleteTextViewCode.setText(label.toString(), true);
-                    buttonSave.setVisibility(View.VISIBLE);
+                this.label = LabelSubLotOperations.getInstance().load(this.currentSession.getId(), barcode);
+                if (this.label != null && !this.label.getGeolocated()) { //setting values to textviews
+                    this.autoCompleteTextViewCode.setText(this.label.toString(), true);
+                    this.buttonSave.setVisibility(View.VISIBLE);
                 } else {
-                    buttonSave.setVisibility(View.GONE);
+                    this.buttonSave.setVisibility(View.GONE);
                     GPDialogs.toast(getActivity(), String.format(getString(R.string.barcode_notavailable_message), barcode), Toast.LENGTH_LONG);
                 }
 
@@ -204,15 +204,14 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             switch (requestCode) {
                 case (RETURNCODE_FOR_TAKE_PICTURE):
                     if (resultCode == Activity.RESULT_OK) {
-                        currentObj.resetImages();
-                        if (currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
-                            continueButton.setEnabled(true);
-                            continueButton.setVisibility(View.VISIBLE);
+                        this.currentObj.resetImages();
+                        if (this.currentObj.getImages().size() >= LatLongUtils.getMinImageToTake()) {
+                            this.continueButton.setEnabled(true);
+                            this.continueButton.setVisibility(View.VISIBLE);
                         } else {
-                            continueButton.setEnabled(false);
-                            continueButton.setVisibility(View.GONE);
+                            this.continueButton.setEnabled(false);
+                            this.continueButton.setVisibility(View.GONE);
                         }
-                        Log.d("Cardus", "aqui");
                     }
                     break;
 
@@ -232,54 +231,54 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         int i = v.getId();
         if (i == R.id.scanBtn) {
             //initiating the qr code scan
-            code128BarcodeScan.initiateScan();
+            this.code128BarcodeScan.initiateScan();
         } else if (i == R.id.imgBtnSave) {
             FragmentActivity activity = getActivity();
             boolean terminalFound = false;
             String mapObjectCode = this.getMapObjectCode();
             try {
-                MapObjecType currentSelectedObjectType = appContainer.getMapObjecTypeActive();
-                MapObject previousObj = appContainer.getCurrentMapObject();
+                MapObjecType currentSelectedObjectType = this.appContainer.getMapObjecTypeActive();
+                MapObject previousObj = this.appContainer.getCurrentMapObject();
 
-                if (appContainer.getRouteSegmentActive() == null) {
+                if (this.appContainer.getRouteSegmentActive() == null) {
                     Layer currentSelectedObjectTypeLayer = currentSelectedObjectType.getLayerObj();
 
-                    currentObj = new MapObject();
-                    currentObj.setCode(mapObjectCode);
-                    currentObj.setCoord(this.coordinates);
-                    currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
+                    this.currentObj = new MapObject();
+                    this.currentObj.setCode(mapObjectCode);
+                    this.currentObj.setCoord(this.coordinates);
+                    this.currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
-                    grade = currentSelectedObjectType.getIsTerminal() ? 1 : grade;
+                    this.grade = currentSelectedObjectType.getIsTerminal() ? 1 : this.grade;
 
-                    currentObj.setNodeGrade(grade);
-                    currentObj.setSessionId(currentSession.getId());
-                    currentObj.setIsCompleted(false);
-                    currentObj.setCreatedAt(new Date());
-                    currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
-                    if (compositeMode && previousObj != null) {
-                        currentObj.setJoinId(previousObj.getId());
+                    this.currentObj.setNodeGrade(this.grade);
+                    this.currentObj.setSessionId(this.currentSession.getId());
+                    this.currentObj.setIsCompleted(false);
+                    this.currentObj.setCreatedAt(new Date());
+                    this.currentObj.setElevation(this.mapView.getMapPosition().getZoomLevel() + 0.0f);
+                    if (this.compositeMode && previousObj != null) {
+                        this.currentObj.setJoinId(previousObj.getId());
                     }
-                    MapObjectOperations.getInstance().save(currentObj);
-                    if (!currentObj.isComponent()) {
-                        launchPickupPhoto(currentObj);
+                    MapObjectOperations.getInstance().save(this.currentObj);
+                    if (!this.currentObj.isComponent()) {
+                        launchPickupPhoto(this.currentObj);
                     }
 
-                    if (!currentObj.isTerminal() && !compositeMode) {
-                        appContainer.setCurrentMapObject(currentObj);
-                    } else if (currentObj.isTerminal()) {
-                        appContainer.setCurrentMapObject(null);
-                        appContainer.setMapObjecTypeActive(null);
-                        appContainer.setNetworksActive(null);
+                    if (!this.currentObj.isTerminal() && !this.compositeMode) {
+                        this.appContainer.setCurrentMapObject(this.currentObj);
+                    } else if (this.currentObj.isTerminal()) {
+                        this.appContainer.setCurrentMapObject(null);
+                        this.appContainer.setMapObjecTypeActive(null);
+                        this.appContainer.setNetworksActive(null);
                         terminalFound = true;
                     }
-                    appContainer.setMode(UserMode.NONE);
+                    this.appContainer.setMode(UserMode.NONE);
                     reloadLayer(currentSelectedObjectTypeLayer);
-                    GPDialogs.quickInfo(mapView, getString(R.string.map_object_saved_message));
+                    GPDialogs.quickInfo(this.mapView, getString(R.string.map_object_saved_message));
 
 //                LatLongUtils.showTip(activity, LatLongUtils.distance(previousObj, currentObj));
 
                     if (
-                            !currentObj.belongToTopoLayer()
+                            !this.currentObj.belongToTopoLayer()
                                     || previousObj == null
                                     || !previousObj.belongToTopoLayer()
                                     || previousObj.getIsCompleted()
@@ -296,7 +295,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                         LatLongUtils.getMaxDistance()),
                                 () -> activity.runOnUiThread(() -> {
                                     // yes
-                                    appContainer.setCurrentMapObject(null);
+                                    BarcodeReaderDialogFragment.this.appContainer.setCurrentMapObject(null);
                                     refreshUI(tf);
 
                                 }), () -> activity.runOnUiThread(() -> {
@@ -304,43 +303,44 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
                                     GPLog.addLogEntry(String.format(activity.getString(R.string.max_distance_threshold_broken_message),
                                             LatLongUtils.getMaxDistance()));
 
-                                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
+                                    RouteSegment edge = new RouteSegment(null, previousObj.getId(), BarcodeReaderDialogFragment.this.currentObj.getId());
                                     RouteSegmentOperations.getInstance().save(edge);
                                     try {
                                         mapView.reloadLayer(CardinalEdgesLayer.class);
                                     } catch (Exception e) {
                                         e.printStackTrace();
+                                        GPLog.error(BarcodeReaderDialogFragment.this, null, e);
                                     }
 
                                     refreshUI(tf);
                                 })
                         );
                     } else {
-                        RouteSegment edge = new RouteSegment(null, previousObj.getId(), currentObj.getId());
+                        RouteSegment edge = new RouteSegment(null, previousObj.getId(), this.currentObj.getId());
                         RouteSegmentOperations.getInstance().save(edge);
-                        mapView.reloadLayer(CardinalEdgesLayer.class);
+                        this.mapView.reloadLayer(CardinalEdgesLayer.class);
                         refreshUI(terminalFound);
                     }
 
                 } else { // convertir segmento de ruta a objeto
-                    currentObj = new MapObject();
-                    currentObj.setCode(mapObjectCode);
-                    currentObj.setCoord(this.coordinates);
-                    currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
+                    this.currentObj = new MapObject();
+                    this.currentObj.setCode(mapObjectCode);
+                    this.currentObj.setCoord(this.coordinates);
+                    this.currentObj.setMapObjectTypeId(currentSelectedObjectType.getId());
 
-                    currentObj.setNodeGrade(grade);
-                    currentObj.setSessionId(currentSession.getId());
-                    currentObj.setIsCompleted(false);
-                    currentObj.setCreatedAt(new Date());
-                    currentObj.setElevation(mapView.getMapPosition().getZoomLevel() + 0.0f);
-                    if (compositeMode && previousObj != null) {
-                        currentObj.setJoinId(previousObj.getId());
+                    this.currentObj.setNodeGrade(this.grade);
+                    this.currentObj.setSessionId(this.currentSession.getId());
+                    this.currentObj.setIsCompleted(false);
+                    this.currentObj.setCreatedAt(new Date());
+                    this.currentObj.setElevation(this.mapView.getMapPosition().getZoomLevel() + 0.0f);
+                    if (this.compositeMode && previousObj != null) {
+                        this.currentObj.setJoinId(previousObj.getId());
                     }
 
-                    MapObjectOperations.getInstance().save(currentObj);
-                    launchPickupPhoto(currentObj);
-                    appContainer.setRouteSegmentActive(null);
-                    mapView.reloadLayer(CardinalLineLayer.class);
+                    MapObjectOperations.getInstance().save(this.currentObj);
+                    launchPickupPhoto(this.currentObj);
+                    this.appContainer.setRouteSegmentActive(null);
+                    this.mapView.reloadLayer(CardinalLineLayer.class);
 
                     refreshUI(terminalFound);
 
@@ -361,7 +361,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     private String getMapObjectCode() {
         String code = "";
         if (this.compositeMode) {
-            MapObject mapObject = appContainer.getCurrentMapObject();
+            MapObject mapObject = this.appContainer.getCurrentMapObject();
             int subIndex = mapObject.getJoinedList().size() + 1;
             code = String.format("%s-%s",
                     mapObject.getCode(),
@@ -379,7 +379,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
             }
         } else {
-            code = label.toString();
+            code = this.label.toString();
         }
 
         return code;
@@ -388,12 +388,12 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     void reloadLayer(Layer layer) throws Exception {
 
         EditManager.INSTANCE.getEditLayer().reloadData();
-        ((CardinalGPMapView) mapView).reloadLayer(layer.getId());
-        mapView.reloadLayer(CardinalSelectPointLayer.class);
-        if (compositeMode) {
-            mapView.reloadLayer(CardinalJoinsLayer.class);
+        ((CardinalGPMapView) this.mapView).reloadLayer(layer.getId());
+        this.mapView.reloadLayer(CardinalSelectPointLayer.class);
+        if (this.compositeMode) {
+            this.mapView.reloadLayer(CardinalJoinsLayer.class);
         }
-        mapView.reloadLayer(BifurcationLayer.class);
+        this.mapView.reloadLayer(BifurcationLayer.class);
     }
 
     void refreshUI(boolean terminalFound) {
@@ -438,7 +438,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
 
     private void launchPickupPhoto(MapObject currentObj) {
-        FragmentActivity activity = getActivity();
+        FragmentActivity activity = this.getActivity();
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View v = getLayoutInflater().inflate(R.layout.pickup_quick_photo, null);
         builder.setView(v);

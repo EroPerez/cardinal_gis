@@ -60,7 +60,6 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerOperatio
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkerRouteOperations;
 import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
 import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
-import eu.geopaparazzi.core.GeopaparazziApplication;
 import eu.geopaparazzi.core.database.DaoGpsLog;
 import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.core.database.objects.Metadata;
@@ -428,7 +427,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                         if (file.exists()) {
                             Utilities.setLastFilePath(activity, filePath);
                             try {
-                                DatabaseUtilities.setNewDatabase(activity, GeopaparazziApplication.getInstance(), file.getAbsolutePath());
+                                DatabaseUtilities.setNewDatabase(activity, CardinalApplication.getInstance(), file.getAbsolutePath());
 
                                 if (appChangeListener != null) {
                                     appChangeListener.onApplicationNeedsRestart();
@@ -547,10 +546,11 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                             GPDialogs.dismissProgressDialog(validatingDialog);
                             try {
                                 if (validateWorker) {
-                                    Intent importIntent = new Intent(getActivity(), MapviewActivity.class);
-                                    startActivity(importIntent);
+                                    Intent importIntent = new Intent(CardinalActivityFragment.this.getActivity(), MapviewActivity.class);
+                                    CardinalActivityFragment.this.startActivity(importIntent);
                                 }
                             } catch (Exception e) {
+                                GPLog.error(CardinalActivityFragment.this, null, e);
                                 e.printStackTrace();
                             }
                         }
@@ -585,6 +585,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                GPLog.error(this, null, e);
             }
 
         } else if (v == mExportButton) {
@@ -599,7 +600,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                     Worker worker = appContainer.getCurrentWorker();
                     ProgressDialog validatingDialog = ProgressDialog.show(
                             getContext(),
-                             worker.getFullName(),
+                            worker.getFullName(),
                             getString(R.string.validating)
                     );
 
@@ -614,17 +615,19 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                             GPDialogs.dismissProgressDialog(validatingDialog);
                             try {
                                 if (validateWorker) {
-                                    Intent exportIntent = new Intent(getActivity(), ExportActivity.class);
-                                    startActivity(exportIntent);
+                                    Intent exportIntent = new Intent(CardinalActivityFragment.this.getActivity(), ExportActivity.class);
+                                    CardinalActivityFragment.this.startActivity(exportIntent);
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                GPLog.error(CardinalActivityFragment.this, null, e);
                             }
                         }
                     }.execute();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                GPLog.error(CardinalActivityFragment.this, null, e);
             }
         } else if (v == mPanicFAB) {
             if (mLastGpsPosition == null) {
@@ -649,6 +652,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                GPLog.error(CardinalActivityFragment.this, null, e);
             }
 
         }
@@ -805,7 +809,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
 
         try {
-            GeopaparazziApplication.getInstance().getDatabase();
+            CardinalApplication.getInstance().getDatabase();
 
             // Set the project name in the metadata, if not already available
             List<Metadata> projectMetadata = DaoMetadata.getProjectMetadata();
@@ -839,7 +843,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     }
 
     private void handleGpsLogAction() {
-        final GPApplication appContext = GeopaparazziApplication.getInstance();
+        final GPApplication appContext = CardinalApplication.getInstance();
         final FragmentActivity activity = getActivity();
         if (activity == null)
             return;
@@ -918,15 +922,24 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
 
         } catch (IllegalAccessException e) {
+            GPLog.error(this, null, e);
             e.printStackTrace();
             return false;
         } catch (java.lang.InstantiationException e) {
+            GPLog.error(this, null, e);
             e.printStackTrace();
             return false;
         } catch (ClassNotFoundException e) {
+            GPLog.error(this, null, e);
             e.printStackTrace();
             return false;
+        } catch (IOException e) {
+            GPLog.error(this, null, e);
+            e.printStackTrace();
+            // ignore and create a new one
+            return false;
         } catch (Exception e) {
+            GPLog.error(this, null, e);
             e.printStackTrace();
             // ignore and create a new one
             return false;
@@ -976,7 +989,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     }
 
     protected boolean validateWorker() {
-        Context context = getContext();
+        Context context = CardinalActivityFragment.this.getContext();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String user = preferences.getString(Constants.PREF_KEY_USER, ""); //$NON-NLS-1$
         final String passwd = preferences.getString(Constants.PREF_KEY_PWD, ""); //$NON-NLS-1$
@@ -997,13 +1010,15 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
             if (authToken != null) {
                 return true;
+            } else {
+                GPDialogs.infoDialog(context, String.format(context.getString(R.string.worker_have_not_active), user), null);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            GPLog.error(CardinalActivityFragment.this, context.getString(R.string.validating), e);
+            GPDialogs.errorDialog(context, e, null);
         }
-
-        GPDialogs.infoDialog(context, String.format(context.getString(R.string.worker_have_not_active), user), null);
 
         return false;
     }

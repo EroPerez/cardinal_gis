@@ -1392,7 +1392,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
     public void onMenuMTO() {
 
-        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+        View bottomSheetView = LayoutInflater.from(MapviewActivity.this.getApplicationContext())
                 .inflate(
                         cu.phibrain.cardinal.app.R.layout.layout_bottom_sheet,
                         (LinearLayout) findViewById(cu.phibrain.cardinal.app.R.id.bottomSheetContainer)
@@ -1402,15 +1402,15 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 MapviewActivity.this,
                 cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme
         );
-        descriptorMto = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.descriptorMto);
+        this.descriptorMto = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.descriptorMto);
 
         //filter Networks
         try {
-            List<Networks> networks = appContainer.getProjectActive().getNetworks();
+            List<Networks> networks = MapviewActivity.this.appContainer.getProjectActive().getNetworks();
 
-            NetworkAdapter networksAdapter = new NetworkAdapter(this, cu.phibrain.cardinal.app.R.layout.spinner, networks);
-            filterNetworks = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.spinnerNetworks);
-            filterNetworks.setAdapter(networksAdapter);
+            NetworkAdapter networksAdapter = new NetworkAdapter(MapviewActivity.this, cu.phibrain.cardinal.app.R.layout.spinner, networks);
+            this.filterNetworks = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.spinnerNetworks);
+            this.filterNetworks.setAdapter(networksAdapter);
 
             //Recivler View Menu Mto
             RecyclerView recyclerView = bottomSheetView.findViewById(cu.phibrain.cardinal.app.R.id.rvMto);
@@ -1420,33 +1420,33 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             recyclerView.setLayoutManager(horizontalLayoutManager);
             recyclerView.addItemDecoration(new DividerItemDecoration(bottomSheetView.getContext(), DividerItemDecoration.VERTICAL));
             //update Network Select
-            appContainer.setNetworksActive(((Networks) filterNetworks.getSelectedItem()));
+            this.appContainer.setNetworksActive(((Networks) this.filterNetworks.getSelectedItem()));
             List<MapObjecType> mtoList;
-            if (appContainer.getRouteSegmentActive() == null) {
-                if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
+            if (this.appContainer.getRouteSegmentActive() == null) {
+                if (this.appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
                     //Muestro todos por capas
-                    mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem());
+                    mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) this.filterNetworks.getSelectedItem());
                 } else {
                     //Muestro solo los aptos segun reglas topologicas
-                    mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(appContainer.getCurrentMapObject().getObjectType(), null);
+                    mtoList = MapObjecTypeOperations.getInstance().topologicalMtoFirewall(this.appContainer.getCurrentMapObject().getObjectType(), null);
                 }
             } else {
-                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) filterNetworks.getSelectedItem(), MapObjecType.GeomType.POLYLINE);
+                mtoList = NetworksOperations.getInstance().getMapObjectTypes((Networks) this.filterNetworks.getSelectedItem(), MapObjecType.GeomType.POLYLINE);
             }
 
-            MtoAdapter mtoAdapter = new MtoAdapter(mtoList, this);
+            MtoAdapter mtoAdapter = new MtoAdapter(mtoList, MapviewActivity.this);
             recyclerView.setAdapter(mtoAdapter);
             bottomSheetDialog.setContentView(bottomSheetView);
 
-            if (appContainer.getCurrentMapObject() == null || appContainer.getMode() == UserMode.OBJECT_EDITION) {
+            if (this.appContainer.getCurrentMapObject() == null || this.appContainer.getMode() == UserMode.OBJECT_EDITION) {
                 filterNetworks.setVisibility(View.VISIBLE);
                 filterNetworks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                         //update Network Select
-                        appContainer.setNetworksActive(networks.get(position));
-                        descriptorMto.setText("");
-                        mtoAdapter.getFilter().filter(appContainer.getNetworksActive().getId().toString());
+                        MapviewActivity.this.appContainer.setNetworksActive(networks.get(position));
+                        MapviewActivity.this.descriptorMto.setText("");
+                        mtoAdapter.getFilter().filter(MapviewActivity.this.appContainer.getNetworksActive().getId().toString());
 
                     }
 
@@ -1457,10 +1457,11 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
                 });
             } else {
-                filterNetworks.setVisibility(View.GONE);
+                MapviewActivity.this.filterNetworks.setVisibility(View.GONE);
             }
             bottomSheetDialog.show();
         } catch (Exception e) {
+            GPLog.error(MapviewActivity.this, null, e);
             e.printStackTrace();
         }
     }
@@ -1470,22 +1471,23 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
             byte[] icon = mto.getIconAsByteArray();
             if (icon != null) {
                 Bitmap bmp = BitmapFactory.decodeByteArray(icon, 0, icon.length);
-                selectMo.setImageBitmap(Bitmap.createScaledBitmap(bmp, 48,
+                MapviewActivity.this.selectMo.setImageBitmap(Bitmap.createScaledBitmap(bmp, 48,
                         48, false));
             } else {
                 Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
-                selectMo.setImageBitmap(bitmap);
+                MapviewActivity.this.selectMo.setImageBitmap(bitmap);
             }
         } else {
             Bitmap bitmap = ImageUtil.getBitmap(getContext(), R.drawable.ic_mapview_mot_parent_24dp);
-            selectMo.setImageBitmap(bitmap);
+            MapviewActivity.this.selectMo.setImageBitmap(bitmap);
         }
-        appContainer.setMode(UserMode.NONE);
-        addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
+        MapviewActivity.this.appContainer.setMode(UserMode.NONE);
+        MapviewActivity.this.addRouteSegmentbutton.setImageDrawable(Compat.getDrawable(this, R.drawable.ic_create_route_segment_line_24dp));
         try {
-            mapView.reloadLayer(CardinalSelectPointLayer.class);
-            mapView.reloadLayer(BifurcationLayer.class);
+            MapviewActivity.this.mapView.reloadLayer(CardinalSelectPointLayer.class);
+            MapviewActivity.this.mapView.reloadLayer(BifurcationLayer.class);
         } catch (Exception e) {
+            GPLog.error(MapviewActivity.this, null, e);
             e.printStackTrace();
         }
     }
@@ -1498,8 +1500,8 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
 
         if (isEditing) {
             disableEditing();
-            mapView.releaseMapBlock();
-        } else if (appContainer.getMode() != UserMode.OBJECT_DOCK && appContainer.getMode() != UserMode.OBJECT_ADDING_EDGE) {
+            MapviewActivity.this.mapView.releaseMapBlock();
+        } else if (this.appContainer.getMode() != UserMode.OBJECT_DOCK && this.appContainer.getMode() != UserMode.OBJECT_ADDING_EDGE) {
             editByGeometry();
         }
 
