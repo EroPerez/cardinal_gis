@@ -40,7 +40,7 @@ public class LabelAutoCompleteAdapter extends ArrayAdapter<LabelSubLot> {
         }
         LabelSubLot subLot = items.get(position);
         if (subLot != null) {
-            TextView lblName =  view.findViewById(textViewResourceId);
+            TextView lblName = view.findViewById(textViewResourceId);
             if (lblName != null) {
                 lblName.setText(subLot.getLabelObj().getCode());
                 if (isEnabled(position)) {
@@ -52,6 +52,7 @@ public class LabelAutoCompleteAdapter extends ArrayAdapter<LabelSubLot> {
         }
         return view;
     }
+
     @Override
     public boolean isEnabled(int position) {
         return !getItem(position).getGeolocated();
@@ -95,10 +96,13 @@ public class LabelAutoCompleteAdapter extends ArrayAdapter<LabelSubLot> {
         protected void publishResults(CharSequence constraint, FilterResults results) {
             List<LabelSubLot> filterList = (ArrayList<LabelSubLot>) results.values;
             if (results != null && results.count > 0) {
+                setNotifyOnChange(false);
                 clear();
-                for (LabelSubLot subLot : filterList) {
-                    add(subLot);
-                }
+                setNotifyOnChange(true);
+                addAll(filterList);
+//                for (LabelSubLot subLot : filterList) {
+//                    addAll(subLot);
+//                }
             } else {
                 notifyDataSetInvalidated();
             }

@@ -129,11 +129,12 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         this.buttonSave = view.findViewById(R.id.imgBtnSave);
         this.buttonSave.setVisibility(View.GONE);
         this.autoCompleteTextViewCode = view.findViewById(R.id.autoCompleteTextViewCode);
+        this.autoCompleteTextViewCode.setThreshold(3);
         this.labelAutoCompleteAdapter = new LabelAutoCompleteAdapter(
                 this.getContext(), R.layout.spinner_inv, R.id.tvSpinnerValue,
                 LabelSubLotOperations.getInstance().loadAll(currentSession.getId(), false)
         );
-        this.autoCompleteTextViewCode.setAdapter(BarcodeReaderDialogFragment.this.labelAutoCompleteAdapter);
+        this.autoCompleteTextViewCode.setAdapter(this.labelAutoCompleteAdapter);
         this. autoCompleteTextViewCode.setOnItemClickListener((adapterView, view1, position, id) -> {
             //this is the way to find selected object/item
             this.label = (LabelSubLot) adapterView.getItemAtPosition(position);

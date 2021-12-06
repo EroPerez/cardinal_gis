@@ -315,7 +315,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         super.onCreate(icicle);
         setContentView(cu.phibrain.cardinal.app.R.layout.activity_mapview);
 
-        appContainer = ((CardinalApplication) getApplication()).getContainer();
+        this.appContainer = ((CardinalApplication) getApplication()).getContainer();
 
         mapsSupportBroadcastReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
@@ -381,6 +381,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         try {
             mapView = new CardinalGPMapView(this);
         } catch (Exception ex) {
+            GPLog.error(this, null, ex);
             mapView = new CardinalGPMapView(this);
         }
 
@@ -491,7 +492,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
         if (sessionBBox != null) {
             MapPosition mapPosition = mapView.map().getMapPosition();
             mapPosition.setByBoundingBox(sessionBBox, mapView.getViewportWidth(), mapView.getViewportHeight());
-            mapPosition.setZoomLevel(12);
+            mapPosition.setZoomLevel(17);
             mapView.setMapPosition(new GPMapPosition(mapPosition));
         }
 
@@ -518,6 +519,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                GPLog.error(this, null, e);
             }
 
         }
@@ -1187,6 +1189,7 @@ public class MapviewActivity extends AppCompatActivity implements MtoAdapter.Sel
                     mapView.reloadLayer(BifurcationLayer.class);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    GPLog.error(this, null, e);
                 }
 
                 GPDialogs.quickInfo(mapView, getString(R.string.inspector_object_grade) + ": " + currentMO.getNodeGrade());

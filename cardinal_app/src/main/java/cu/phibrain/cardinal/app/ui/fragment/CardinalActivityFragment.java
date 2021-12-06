@@ -160,7 +160,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             GpsServiceUtilities.startGpsService(getActivity());
         } catch (Exception e) {
             e.printStackTrace();
-
             GPLog.error(this, null, e);
         }
 
@@ -168,6 +167,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             packageName = ResourcesManager.getInstance(getActivity()).getPackageName();
         } catch (Exception e) {
             e.printStackTrace();
+            GPLog.error(this, null, e);
         }
 
         return v; // return the fragment's view for display
@@ -789,6 +789,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             Os.setenv("PROJ_LIB", projFolderWithDate.getAbsolutePath(), true);//NON-NLS
         } catch (Exception e) {
             e.printStackTrace();
+            GPLog.error(this, null, e);
         }
 
 
@@ -1006,7 +1007,11 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         }
 
         try {
-            AuthToken authToken = NetworkUtilitiesCardinalOl.login(server, user, passwd);
+            String serverTrailed = server;
+            if (!server.endsWith("/")) {
+                serverTrailed = server + "/";
+            }
+            AuthToken authToken = NetworkUtilitiesCardinalOl.login(serverTrailed, user, passwd);
 
             if (authToken != null) {
                 return true;
