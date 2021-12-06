@@ -65,6 +65,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
             mContract = ContractOperations.getInstance().findOneBy(appContainer.getProjectActive().getId(), appContainer.getCurrentWorker().getId(), true);
         } catch (Exception e) {
             e.printStackTrace();
+            GPLog.error(this, null, e);
         }
 
     }
@@ -160,7 +161,7 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
             aSession.setActive(true);
             aSession.setStartDate(new Date());
             WorkSessionOperations.getInstance().save(aSession);
-            appContainer.setWorkSessionActive(aSession);
+            this.appContainer.setWorkSessionActive(aSession);
             finish();
         } else {
             GPDialogs.yesNoMessageDialog(WorkSessionListActivity.this, getString(R.string.do_you_want_to_logout_this_work_session),
