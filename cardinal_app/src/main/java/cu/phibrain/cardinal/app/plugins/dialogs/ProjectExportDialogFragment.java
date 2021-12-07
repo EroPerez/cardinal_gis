@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.database.CursorWindow;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -31,6 +32,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import androidx.fragment.app.DialogFragment;
+
+import java.lang.reflect.Field;
 
 import cu.phibrain.plugins.cardinal.io.WebDataProjectManager;
 import eu.geopaparazzi.core.R;
@@ -87,6 +90,14 @@ public class ProjectExportDialogFragment extends DialogFragment {
         user = getArguments().getString(KEY_USER);
         pwd = getArguments().getString(KEY_PWD);
         projectId = getArguments().getLong(KEY_PRO);
+
+        try {
+            Field field = CursorWindow.class.getDeclaredField("sCursorWindowSize");
+            field.setAccessible(true);
+            field.set(null, 100 * 1024 * 1024); //the 100MB is the new size
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
