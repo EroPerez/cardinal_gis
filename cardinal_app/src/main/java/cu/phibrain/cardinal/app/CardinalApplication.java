@@ -62,6 +62,7 @@ public class CardinalApplication extends GeopaparazziApplication {
     private DaoSession daoSession;
     private static Context context;
     protected AppContainer appContainer;
+    public static String mailTo = "eperezm1986@gmail.com";
 
     public CardinalApplication() {
     }
@@ -78,7 +79,6 @@ public class CardinalApplication extends GeopaparazziApplication {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         try {
-            GeopaparazziApplication.mailTo = "eperezm1986@gmail.com";
             ACRAConfiguration config = new ConfigurationBuilder(this) //
                     .setMailTo(mailTo)//
                     .setCustomReportContent(//

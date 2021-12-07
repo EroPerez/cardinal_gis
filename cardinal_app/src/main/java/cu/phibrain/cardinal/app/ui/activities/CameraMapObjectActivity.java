@@ -64,6 +64,8 @@ public class CameraMapObjectActivity extends AbstractCameraActivity {
     public void doSaveData() {
         StringBuilder infoBuilder = new StringBuilder();
         try {
+
+
             Intent intent = getIntent();
             byte[] imageDataArray = ImageUtilities.getImageFromPath(imageFilePath, 5);
 
@@ -136,12 +138,12 @@ public class CameraMapObjectActivity extends AbstractCameraActivity {
 
     private byte[] imagenTratada(byte[] imagem_img) {
 
-        while (imagem_img!=null && imagem_img.length > 800000) {
+        if (imagem_img!=null && imagem_img.length > 800000) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(imagem_img, 0, imagem_img.length);
             Bitmap resized = Bitmap.createScaledBitmap(
                     bitmap,
-                    (int) (bitmap.getWidth() * 0.8),
-                    (int) (bitmap.getHeight() * 0.8),
+                    768,
+                    1024,
                     true
             );
             ByteArrayOutputStream stream = new ByteArrayOutputStream();

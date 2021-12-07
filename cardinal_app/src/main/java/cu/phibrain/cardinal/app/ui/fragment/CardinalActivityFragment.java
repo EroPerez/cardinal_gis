@@ -216,7 +216,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         Profile activeProfile = ProfilesHandler.INSTANCE.getActiveProfile();
         checkProfileColor(activeProfile);
 
-        GpsServiceUtilities.triggerBroadcast(getActivity());
+        GpsServiceUtilities.triggerBroadcast(this.getActivity());
 
         View view = getView();
         try {
