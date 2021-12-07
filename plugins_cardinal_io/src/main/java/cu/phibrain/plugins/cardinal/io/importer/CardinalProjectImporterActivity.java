@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.CursorWindow;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -26,6 +27,7 @@ import net.danlew.android.joda.JodaTimeAndroid;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,6 +88,15 @@ public class CardinalProjectImporterActivity extends ListActivity {
 
         filterText = (EditText) findViewById(R.id.search_box);
         filterText.addTextChangedListener(filterTextWatcher);
+
+        try {
+            Field field = CursorWindow.class.getDeclaredField("sCursorWindowSize");
+            field.setAccessible(true);
+            field.set(null, 100 * 1024 * 1024); //the 100MB is the new size
+        } catch (Exception e) {
+            e.printStackTrace();
+            GPLog.error(this, null, e);
+        }
 
 
         downloadDataListDialog = ProgressDialog.show(this, getString(R.string.downloading),

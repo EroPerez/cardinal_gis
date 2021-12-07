@@ -148,7 +148,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
 
         //intializing scan object
         this.code128BarcodeScan = IntentIntegrator.forSupportFragment(BarcodeReaderDialogFragment.this); // `this` is the current Fragment
-        this.code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES);
+        this.code128BarcodeScan.setDesiredBarcodeFormats(IntentIntegrator.CODE_128);
         this.code128BarcodeScan.setPrompt(getString(R.string.scan_map_object_barcode_message));
         this.code128BarcodeScan.setOrientationLocked(false);
         //no label checkbox

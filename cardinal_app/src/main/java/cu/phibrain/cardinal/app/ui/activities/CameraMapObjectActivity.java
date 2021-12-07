@@ -4,11 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
 
 import cu.phibrain.plugins.cardinal.io.database.entity.model.MapObjectImages;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectImagesOperations;
@@ -79,7 +83,12 @@ public class CameraMapObjectActivity extends AbstractCameraActivity {
             if (imageDataArray != null)
                 infoBuilder.append("imageDataArray size: ").append(imageDataArray.length).append("\n");
 
-            MapObjectImages image = new MapObjectImages(null, mapObjectId, imageDataArray, currentDate, lon, lat, elevation, azimuth);
+            MapObjectImages image = new MapObjectImages(
+                    null,
+                    mapObjectId,
+                    imagenTratada(imageDataArray),
+                    currentDate, lon, lat, elevation, azimuth
+            );
             MapObjectImagesOperations.getInstance().insert(image);
 
 
@@ -124,5 +133,24 @@ public class CameraMapObjectActivity extends AbstractCameraActivity {
             return 0;
         }
     }
+
+    private byte[] imagenTratada(byte[] imagem_img) {
+
+        while (imagem_img!=null && imagem_img.length > 800000) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imagem_img, 0, imagem_img.length);
+            Bitmap resized = Bitmap.createScaledBitmap(
+                    bitmap,
+                    (int) (bitmap.getWidth() * 0.8),
+                    (int) (bitmap.getHeight() * 0.8),
+                    true
+            );
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            resized.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            imagem_img = stream.toByteArray();
+        }
+        return imagem_img;
+
+    }
+
 
 }

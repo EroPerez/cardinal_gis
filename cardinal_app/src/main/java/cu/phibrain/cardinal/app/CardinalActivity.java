@@ -67,6 +67,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             field.set(null, 100 * 1024 * 1024); //the 100MB is the new size
         } catch (Exception e) {
             e.printStackTrace();
+            GPLog.error(this, null, e);
         }
 
 
