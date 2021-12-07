@@ -17,16 +17,8 @@
  */
 package eu.geopaparazzi.core;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-
-import org.acra.ACRA;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
-import org.acra.config.ACRAConfiguration;
-import org.acra.config.ACRAConfigurationException;
-import org.acra.config.ConfigurationBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +42,7 @@ public class GeopaparazziApplication extends GPApplication {
     private DatabaseManager databaseManager;
     private File databaseFile;
 
-    @Override
+   /* @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         try {
@@ -71,7 +63,7 @@ public class GeopaparazziApplication extends GPApplication {
         } catch (ACRAConfigurationException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     public void onCreate() {
