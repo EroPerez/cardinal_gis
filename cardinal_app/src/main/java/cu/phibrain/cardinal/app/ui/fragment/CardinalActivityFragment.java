@@ -2,6 +2,8 @@
 // Contains the Flag Quiz logic
 package cu.phibrain.cardinal.app.ui.fragment;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -16,6 +18,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.AssetManager;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.system.Os;
@@ -52,6 +55,9 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.activities.SyncSettingActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccount;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccountAuthenticator;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudSyncManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
@@ -132,6 +138,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private boolean hasProfilesProvider = false;
     private String packageName = "eu.hydrologis.geopaparazzi";
 
+    private boolean autoSync;
+    private long syncFrequency;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -207,6 +216,25 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         mPanicFAB.setOnClickListener(this);
         enablePanic(false);
 
+        //Initialize Sync Manager
+        CloudSyncManager.init(this.getActivity());
+
+        //Configuration shared preferences
+        autoSync = PreferenceManager.getDefaultSharedPreferences(this.getActivity())
+                .getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
+
+        syncFrequency = Long.parseLong(
+                PreferenceManager.getDefaultSharedPreferences(this.getActivity())
+                        .getString("REFS_KEY_SYNC_FREQUENCY", "0")
+        );
+
+        if (this.autoSync) {
+            CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
+        } else {
+            CloudSyncManager.getInstance().setSyncFrecuency(0l);
+        }
+
+
     }
 
     @Override
@@ -259,6 +287,21 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             if (projectName != null) {
                 if (projectName.length() > 10) projectName = projectName.substring(0, 10) + "...";
                 metadataTextView.setText(projectName);
+            }
+
+            //Configuration shared preferences
+            autoSync = PreferenceManager.getDefaultSharedPreferences(this.getActivity())
+                    .getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
+
+            syncFrequency = Long.parseLong(
+                    PreferenceManager.getDefaultSharedPreferences(this.getActivity())
+                            .getString("REFS_KEY_SYNC_FREQUENCY", "0")
+            );
+
+            if (this.autoSync) {
+                CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
+            } else {
+                CloudSyncManager.getInstance().setSyncFrecuency(0l);
             }
 
         } catch (Exception e) {
@@ -552,6 +595,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                             } catch (Exception e) {
                                 GPLog.error(CardinalActivityFragment.this, null, e);
                                 e.printStackTrace();
+                                GPDialogs.infoDialog(CardinalActivityFragment.this.getContext(), getString(R.string.opetator_validation_failed, worker.getUsername()), null);
                             }
                         }
                     }.execute();
@@ -621,6 +665,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 GPLog.error(CardinalActivityFragment.this, null, e);
+                                GPDialogs.infoDialog(CardinalActivityFragment.this.getContext(), getString(R.string.opetator_validation_failed, worker.getUsername()), null);
                             }
                         }
                     }.execute();
@@ -1011,9 +1056,45 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             if (!server.endsWith("/")) {
                 serverTrailed = server + "/";
             }
+
             AuthToken authToken = NetworkUtilitiesCardinalOl.login(serverTrailed, user, passwd);
 
             if (authToken != null) {
+                //Create account if needed
+                // Create the account type and default account
+                Account newAccount = new Account(user, CloudAccount.ACCOUNT_TYPE);
+                // Get an instance of the Android account manager
+                AccountManager accountManager = AccountManager.get(context);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    for (Account oldAccount : accountManager.getAccounts()) {
+                        if (!newAccount.equals(oldAccount)) {
+                            accountManager.removeAccountExplicitly(oldAccount);
+                        }
+
+                    }
+                }
+                /*
+                 * Add the account and account type, no password or user data
+                 * If successful, return the Account object, otherwise report an error.
+                 */
+                if (accountManager.addAccountExplicitly(newAccount, passwd, null)) {
+                    // Ojo: hay que setear el token explicitamente si la cuenta no existe,
+                    // no basta con mandarlo al authenticator
+                    accountManager.setAuthToken(newAccount, CloudAccount.ACCOUNT_TYPE, authToken.toString());
+                } else {
+                    accountManager.setPassword(newAccount, passwd);
+                    CloudAccountAuthenticator.init(CardinalActivityFragment.this.getActivity());
+                    CloudAccountAuthenticator.getInstance().getTokenForAccountCreateIfNeeded(
+                            CloudAccount.ACCOUNT_TYPE, CloudAccount.AUTHTOKEN_TYPE
+                    );
+                }
+
+                if (CardinalActivityFragment.this.autoSync) {
+                    CloudSyncManager.getInstance().setSyncFrecuency(CardinalActivityFragment.this.syncFrequency);
+                } else {
+                    CloudSyncManager.getInstance().setSyncFrecuency(0l);
+                }
+
                 return true;
             } else {
                 GPDialogs.infoDialog(context, String.format(context.getString(R.string.worker_have_not_active), user), null);
@@ -1022,7 +1103,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } catch (Exception e) {
             e.printStackTrace();
             GPLog.error(CardinalActivityFragment.this, context.getString(R.string.validating), e);
-            GPDialogs.errorDialog(context, e, null);
+            //GPDialogs.errorDialog(context, e, null);
         }
 
         return false;

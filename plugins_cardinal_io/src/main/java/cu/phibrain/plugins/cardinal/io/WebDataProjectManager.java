@@ -170,67 +170,6 @@ public enum WebDataProjectManager {
                         }
                     }
 
-                    // Synchronize signal events
-                    session.resetEvents();
-                    List<SignalEvents> eventList = session.getEvents();
-                    for (SignalEvents event : eventList) {
-                        if (event.mustExport()) {
-                            if (event.getIsSync()) {
-                                if (!NetworkUtilitiesCardinalOl.sendPut2SignalEvents(server, token, (SignalEvents) event.toRemoteObject())) {
-                                    interrupted = true;
-                                    break;
-                                } else {
-                                    event.setSyncDate(new Date());
-                                }
-                            } else {
-                                SignalEvents remoteEvent = NetworkUtilitiesCardinalOl.sendPostSignalEvents(server, token, (SignalEvents) event.toRemoteObject());
-                                if (remoteEvent != null) {
-                                    event.setIsSync(true);
-                                    event.setSyncDate(new Date());
-                                    event.setRemoteId(remoteEvent.getId());
-                                } else {
-                                    interrupted = true;
-                                    break;
-                                }
-                            }
-                            event.update();
-                        }
-
-                    }
-
-                    // Synchronize worker route
-                    session.resetWorkerRoute();
-                    List<WorkerRoute> routeList = session.getWorkerRoute();
-                    for (WorkerRoute wroute : routeList) {
-                        if (wroute.mustExport()) {
-                            Line line = DaoGpsLog.getGpslogAsLine(wroute.getGpsLogsTableId(), -1);
-                            DynamicDoubleArray lonArray = line.getLonList();
-                            DynamicDoubleArray latArray = line.getLatList();
-                            DynamicDoubleArray elevArray = line.getAltimList();
-                            List<String> dates = line.getDateList();
-                            for (int i = (int) wroute.getSyncPointCount(); i < lonArray.size(); i++) {
-                                double elev = elevArray.get(i);
-                                double lat = latArray.get(i);
-                                double lon = lonArray.get(i);
-                                String dateStr = dates.get(i);
-                                long time = Long.parseLong(dateStr);
-
-                                if (!NetworkUtilitiesCardinalOl.sendPostWorkerRoute(server, token, new WorkerRoute(null, session.getId(), lat, lon, elev, new Date(time)))) {
-                                    interrupted = true;
-                                    break;
-                                }
-                            }
-
-                            if (!interrupted) {
-                                wroute.setIsSync(true);
-                                wroute.setSyncDate(new Date());
-                                wroute.setSyncPointCount(lonArray.size());
-                                WorkerRouteOperations.getInstance().update2(wroute);
-                            }
-                        }
-
-                    }
-
                     // Synchronize map objects
                     session.resetMapObjects();
                     List<MapObject> mapObjectList = session.getMapObjects();
@@ -437,11 +376,72 @@ public enum WebDataProjectManager {
                         }
 
                     }
+
+                    // Synchronize signal events
+                    session.resetEvents();
+                    List<SignalEvents> eventList = session.getEvents();
+                    for (SignalEvents event : eventList) {
+                        if (event.mustExport()) {
+                            if (event.getIsSync()) {
+                                if (!NetworkUtilitiesCardinalOl.sendPut2SignalEvents(server, token, (SignalEvents) event.toRemoteObject())) {
+                                    interrupted = true;
+                                    break;
+                                } else {
+                                    event.setSyncDate(new Date());
+                                }
+                            } else {
+                                SignalEvents remoteEvent = NetworkUtilitiesCardinalOl.sendPostSignalEvents(server, token, (SignalEvents) event.toRemoteObject());
+                                if (remoteEvent != null) {
+                                    event.setIsSync(true);
+                                    event.setSyncDate(new Date());
+                                    event.setRemoteId(remoteEvent.getId());
+                                } else {
+                                    interrupted = true;
+                                    break;
+                                }
+                            }
+                            event.update();
+                        }
+
+                    }
+
+                    // Synchronize worker route
+                    session.resetWorkerRoute();
+                    List<WorkerRoute> routeList = session.getWorkerRoute();
+                    for (WorkerRoute wroute : routeList) {
+                        if (wroute.mustExport()) {
+                            Line line = DaoGpsLog.getGpslogAsLine(wroute.getGpsLogsTableId(), -1);
+                            DynamicDoubleArray lonArray = line.getLonList();
+                            DynamicDoubleArray latArray = line.getLatList();
+                            DynamicDoubleArray elevArray = line.getAltimList();
+                            List<String> dates = line.getDateList();
+                            for (int i = (int) wroute.getSyncPointCount(); i < lonArray.size(); i++) {
+                                double elev = elevArray.get(i);
+                                double lat = latArray.get(i);
+                                double lon = lonArray.get(i);
+                                String dateStr = dates.get(i);
+                                long time = Long.parseLong(dateStr);
+
+                                if (!NetworkUtilitiesCardinalOl.sendPostWorkerRoute(server, token, new WorkerRoute(null, session.getId(), lat, lon, elev, new Date(time)))) {
+                                    interrupted = true;
+                                    break;
+                                }
+                            }
+
+                            if (!interrupted) {
+                                wroute.setIsSync(true);
+                                wroute.setSyncDate(new Date());
+                                wroute.setSyncPointCount(lonArray.size());
+                                WorkerRouteOperations.getInstance().update2(wroute);
+                            }
+                        }
+
+                    }
                 }
 
             }
 
-            //Finally sync al rout segment to server
+            //Finally sync al route segment to server
             for (RouteSegment route : routeSegments) {
 
 //                Log.d("RouteSegmenTag", route.toString());

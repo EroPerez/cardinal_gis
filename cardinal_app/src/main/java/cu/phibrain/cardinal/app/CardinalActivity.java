@@ -16,6 +16,10 @@ import java.lang.reflect.Field;
 
 import cu.phibrain.cardinal.app.ui.fragment.CardinalActivityFragment;
 import cu.phibrain.cardinal.app.ui.permissions.PermissionCamera;
+import cu.phibrain.cardinal.app.ui.permissions.PermissionManageAccount;
+import cu.phibrain.cardinal.app.ui.permissions.PermissionReadSyncSettings;
+import cu.phibrain.cardinal.app.ui.permissions.PermissionWriteSyncSettings;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccountAuthenticator;
 import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoBookmarks;
 import eu.geopaparazzi.library.core.ResourcesManager;
@@ -44,7 +48,15 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
         super.onCreate(savedInstanceState);
 
         permissionHelper = new PermissionWriteStorage();
-        permissionHelper.add(new PermissionFineLocation()).add(new PermissionForegroundService()).add(new PermissionCamera());
+        permissionHelper.add(new PermissionFineLocation())
+                .add(new PermissionForegroundService())
+                .add(new PermissionCamera())
+                .add(new PermissionManageAccount())
+               // .add(new PermissionUseCredentials())
+               // .add(new PermissionAuthenticateAccounts())
+               // .add(new PermissionGetAccount())
+                .add(new PermissionReadSyncSettings())
+                .add(new PermissionWriteSyncSettings());
 
         // PERMISSIONS START
         if (permissionHelper.hasPermission(this) && permissionHelper.getNextWithoutPermission(this) == null) {
@@ -83,6 +95,8 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
                 getSupportFragmentManager().beginTransaction();
         transaction.replace(cu.phibrain.cardinal.app.R.id.cardinalFragmentContainer, cardinalActivityFragment);
         transaction.commitAllowingStateLoss();
+
+        CloudAccountAuthenticator.init(this);
     }
 
     private void checkIncomingProject() {
@@ -175,6 +189,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
                 GpsServiceUtilities.unregisterFromBroadcasts(this, cardinalActivityFragment.getGpsServiceBroadcastReceiver());
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
+                GPLog.error(this, null, e);
             }
             CardinalApplication.getInstance().closeDatabase();
             ResourcesManager.resetManager();
@@ -182,6 +197,7 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
                 ((CardinalApplication) CardinalApplication.getInstance()).reconstructContainer();
             } catch (Exception e) {
                 e.printStackTrace();
+                GPLog.error(this, null, e);
             }
 
         }
@@ -194,6 +210,5 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             }
         }, 10);
     }
-
 
 }
