@@ -23,7 +23,7 @@ public class PermissionUseCredentials extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "USE_CREDENTIALS";
+        return "Use Credentials";
     }
 
     /**

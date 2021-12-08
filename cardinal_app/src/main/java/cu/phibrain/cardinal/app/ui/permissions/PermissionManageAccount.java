@@ -23,7 +23,7 @@ public class PermissionManageAccount extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "MANAGE_ACCOUNTS";
+        return "Manage Accounts";
     }
 
     /**

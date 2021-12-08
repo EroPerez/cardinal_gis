@@ -23,7 +23,7 @@ public class PermissionCamera extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "CAMERA";
+        return "Camera";
     }
 
     /**

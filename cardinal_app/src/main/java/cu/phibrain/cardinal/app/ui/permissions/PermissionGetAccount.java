@@ -24,7 +24,7 @@ public class PermissionGetAccount extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "GET_ACCOUNTS";
+        return "Get Accounts";
     }
 
     /**

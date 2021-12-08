@@ -23,7 +23,7 @@ public class PermissionAuthenticateAccounts extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "AUTHENTICATE_ACCOUNTS";
+        return "Authenticate Accounts";
     }
 
     /**

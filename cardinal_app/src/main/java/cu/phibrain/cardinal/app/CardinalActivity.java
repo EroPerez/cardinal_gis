@@ -52,9 +52,9 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
                 .add(new PermissionForegroundService())
                 .add(new PermissionCamera())
                 .add(new PermissionManageAccount())
-               // .add(new PermissionUseCredentials())
-               // .add(new PermissionAuthenticateAccounts())
-               // .add(new PermissionGetAccount())
+//                .add(new PermissionUseCredentials())
+//                .add(new PermissionAuthenticateAccounts())
+//                .add(new PermissionGetAccount())
                 .add(new PermissionReadSyncSettings())
                 .add(new PermissionWriteSyncSettings());
 

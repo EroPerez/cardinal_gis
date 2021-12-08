@@ -24,7 +24,7 @@ public class PermissionReadSyncSettings extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "READ_SYNC_SETTINGS";
+        return "Read Sync Settings";
     }
 
     /**

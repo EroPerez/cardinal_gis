@@ -24,7 +24,7 @@ public class PermissionWriteSyncSettings extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "WRITE_SYNC_SETTINGS";
+        return "Write Sync Settings";
     }
 
     /**
