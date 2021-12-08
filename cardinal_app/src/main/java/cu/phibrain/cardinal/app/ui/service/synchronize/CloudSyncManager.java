@@ -88,10 +88,18 @@ public class CloudSyncManager {
 
         setAccountSyncable();
 
-        ContentResolver.addPeriodicSync(account, authority, Bundle.EMPTY, SYNC_FREQUENCY);
+        /*
+         * Turn on periodic syncing
+         */
+        ContentResolver.addPeriodicSync(
+                account,
+                authority,
+                Bundle.EMPTY,
+                SYNC_FREQUENCY
+        );
 
 
-        ContentResolver.setSyncAutomatically(account, authority, true);
+        //ContentResolver.setSyncAutomatically(account, authority, true);
 
     }
 
