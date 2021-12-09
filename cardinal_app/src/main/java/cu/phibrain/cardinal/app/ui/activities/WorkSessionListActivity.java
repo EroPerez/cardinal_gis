@@ -1,6 +1,8 @@
 package cu.phibrain.cardinal.app.ui.activities;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -12,6 +14,7 @@ import android.widget.ListView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -21,12 +24,20 @@ import cu.phibrain.cardinal.app.CardinalApplication;
 import cu.phibrain.cardinal.app.R;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.adapter.WorkSessionAdapter;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccount;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccountAuthenticator;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudSyncManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Contract;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
+import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.ContractOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.WorkSessionOperations;
 import cu.phibrain.plugins.cardinal.io.database.objects.ItemComparators;
+import cu.phibrain.plugins.cardinal.io.network.NetworkUtilitiesCardinalOl;
+import cu.phibrain.plugins.cardinal.io.network.api.AuthToken;
+import eu.geopaparazzi.core.utilities.Constants;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.network.NetworkUtilities;
 import eu.geopaparazzi.library.util.GPDialogs;
 
 public class WorkSessionListActivity extends AppCompatActivity implements WorkSessionAdapter.OnClickCallback {
@@ -62,7 +73,13 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         try {
-            mContract = ContractOperations.getInstance().findOneBy(appContainer.getProjectActive().getId(), appContainer.getCurrentWorker().getId(), true);
+            mContract = ContractOperations
+                    .getInstance()
+                    .findOneBy(
+                            appContainer.getProjectActive().getId(),
+                            appContainer.getCurrentWorker().getId(),
+                            true
+                    );
         } catch (Exception e) {
             e.printStackTrace();
             GPLog.error(this, null, e);
@@ -162,7 +179,73 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
             aSession.setStartDate(new Date());
             WorkSessionOperations.getInstance().save(aSession);
             this.appContainer.setWorkSessionActive(aSession);
-            finish();
+            Worker worker = this.appContainer.getCurrentWorker();
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            final String passwd = preferences.getString(Constants.PREF_KEY_PWD, "");
+            final String server = preferences.getString(Constants.PREF_KEY_SERVER, "");
+            final String serverTrailed = (!server.endsWith("/")) ? server + "/" : server;
+            final String user = worker.getUsername();
+
+            if (!NetworkUtilities.isNetworkAvailable(this)) {
+                GPDialogs.infoDialog(this, getString(cu.phibrain.plugins.cardinal.io.R.string.available_only_with_network), null);
+                return;
+            }
+
+            if (server.length() == 0 || user.length() == 0 || passwd.length() == 0) {
+                GPDialogs.infoDialog(this, getString(cu.phibrain.plugins.cardinal.io.R.string.error_set_cloud_settings_cardinal), null);
+                return;
+            }
+
+            ProgressDialog validatingDialog = ProgressDialog.show(
+                    this,
+                    worker.getFullName(),
+                    getString(R.string.validating)
+            );
+
+            new AsyncTask<Boolean, Void, AuthToken>() {
+
+                @Override
+                protected AuthToken doInBackground(Boolean... booleans) {
+                    try {
+                        return NetworkUtilitiesCardinalOl.login(
+                                serverTrailed,
+                                user,
+                                passwd
+                        );
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        GPLog.error(WorkSessionListActivity.this, null, e);
+                        return null;
+                    }
+                }
+
+                protected void onPostExecute(AuthToken authToken) { // on UI thread!
+                    GPDialogs.dismissProgressDialog(validatingDialog);
+                    try {
+                        if (authToken != null) {
+                            WorkSessionListActivity.this.createAppAccount(user, passwd, authToken);
+                            WorkSessionListActivity.this.finish();
+                        } else {
+                            GPDialogs.infoDialog(
+                                    WorkSessionListActivity.this,
+                                    String.format(
+                                            WorkSessionListActivity.this.getString(
+                                                    R.string.worker_have_not_active
+                                            ),
+                                            user
+                                    ),
+                                    null
+                            );
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        GPLog.error(WorkSessionListActivity.this, null, e);
+                    }
+                }
+            }.execute();
+
+
         } else {
             GPDialogs.yesNoMessageDialog(WorkSessionListActivity.this, getString(R.string.do_you_want_to_logout_this_work_session),
                     () -> WorkSessionListActivity.this.runOnUiThread(() -> {
@@ -175,6 +258,20 @@ public class WorkSessionListActivity extends AppCompatActivity implements WorkSe
                     }), null
             );
 
+        }
+    }
+
+    private void createAppAccount(String user, String passwd, AuthToken authToken) {
+
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (!CloudSyncManager.getInstance().addAccount(user, passwd, authToken.toString())) {
+            CloudAccountAuthenticator.init(this);
+            CloudAccountAuthenticator.getInstance().getTokenForAccountCreateIfNeeded(
+                    CloudAccount.ACCOUNT_TYPE, CloudAccount.AUTHTOKEN_TYPE
+            );
         }
     }
 }

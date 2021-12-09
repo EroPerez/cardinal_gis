@@ -166,6 +166,7 @@ public class CardinalApplication extends GeopaparazziApplication {
     }
 
     public void reconstructContainer() throws IOException {
+        DaoSessionManager.getInstance().resetDaoSession();
         DaoSessionManager.getInstance().setContext(context);
         DaoSessionManager.getInstance().setDatabaseName(this.getDatabase().getPath());
         daoSession = DaoSessionManager.getInstance().getDaoSession();

@@ -69,9 +69,15 @@ public class ExportProjectMenuEntry extends MenuEntry {
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final String user = preferences.getString(Constants.PREF_KEY_USER, "cardinal"); //$NON-NLS-1$
-        final String pwd = preferences.getString(Constants.PREF_KEY_PWD, "admin"); //$NON-NLS-1$
+        final String user = preferences.getString(Constants.PREF_KEY_USER, ""); //$NON-NLS-1$
+        final String pwd = preferences.getString(Constants.PREF_KEY_PWD, ""); //$NON-NLS-1$
         final String serverUrl = preferences.getString(Constants.PREF_KEY_SERVER, ""); //$NON-NLS-1$
+        final boolean autoSync = preferences .getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
+
+        if(autoSync){
+            GPDialogs.infoDialog(context, context.getString(R.string.auto_sync_activated), null);
+            return;
+        }
 
         long projectId = -1L;
         AppContainer appContainer = ((CardinalApplication) CardinalApplication.getInstance()).getContainer();

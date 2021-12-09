@@ -59,12 +59,12 @@
     <string name="layername_jointo">Map object component layer</string>
     <string name="do_you_want_to_logout_this_work_session">Are you sure you want to logout? Please note that this process could not be undo.</string>
     <string name="version">Version %s</string>
-    <string name="phibrainsoft" translatable="false">Phibrain Soft</string>
+    <string name="phibrainsoft" translatable="false">Cardinal Soft</string>
     <string name="derechos">All rights reserved</string>
     <string name="desarrollado_por">Developers:</string>
     <string name="autores1" translatable="false">Erodis Pérez Michel (eperezm1986@nauta.cu)</string>
     <string name="autores2" translatable="false">Daniel García Fernández (dgarciaf@nauta.cu)</string>
-    <string name="select_layer">Candinal selection layer</string>
+    <string name="select_layer">Cardinal selection layer</string>
     <string name="map_object_without_tag_mesagge">Composite mode?</string>
     <string name="map_object_aggregation_mode_actived_message">Component aggregation mode enabled</string>
     <string name="map_object_aggregation_mode_disabled_message">Component aggregation mode disabled</string>
@@ -85,4 +85,36 @@
     <string name="continue_fuck">Continue</string>
     <string name="layername_bifuration">Bifurcations</string>
     <string name="validating">Validating the session...</string>
+    <string name="opetator_validation_failed">The worker %s could not be validated, check credentials</string>
+    <string name="auto_sync">Auto sync</string>
+    <string name="project_auto_upload_summary_off">Auto upload project only when manually requested</string>
+    <string name="project_auto_upload_title">Self uploading to the cloud</string>
+    <string name="project_auto_upload_summary_on">Automatically upload the project to the cloud. Disable if you know what you are doing</string>
+    <string name="content_authority" translatable="false">cu.phibrain.cardinal.app</string>
+    <string name="accountType" translatable="false">cu.phibrain.cardinal</string>
+    <string name="permissions_needed">This permission is required for automatic synchronization</string>
+    <string name="pref_title_sync_frequency">Frequency</string>
+    <string name="sync_frequency_sumary">Configure the synchronization frequency</string>
+    <string name="auto_sync_activated">The automatic upload to the cloud is enabled. To use this option disable it in the synchronization options</string>
+    <string name="session_worker_not_match">The user(%s) set in the setup and the active user(%s) in the newly loaded database do not match</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>1 minute</item>
+        <item>5 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Manual</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>60</item>
+        <item>300</item>
+        <item>900</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>10800</item>
+        <item>21600</item>
+        <item>0</item>
+    </string-array>
 </resources>

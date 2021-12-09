@@ -52,6 +52,7 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.activities.SyncSettingActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
+import cu.phibrain.cardinal.app.ui.service.synchronize.CloudSyncManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkerRoute;
@@ -132,6 +133,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
     private boolean hasProfilesProvider = false;
     private String packageName = "eu.hydrologis.geopaparazzi";
 
+    private boolean autoSync;
+    private long syncFrequency;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -207,6 +211,9 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         mPanicFAB.setOnClickListener(this);
         enablePanic(false);
 
+        //Initialize Sync Manager
+        CloudSyncManager.init(this.getActivity());
+
     }
 
     @Override
@@ -259,6 +266,53 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             if (projectName != null) {
                 if (projectName.length() > 10) projectName = projectName.substring(0, 10) + "...";
                 metadataTextView.setText(projectName);
+            }
+
+            //Configuration shared preferences
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+            final String user = preferences.getString(Constants.PREF_KEY_USER, "");
+            final String passwd = preferences.getString(Constants.PREF_KEY_PWD, "");
+            final String server = preferences.getString(Constants.PREF_KEY_SERVER, "");
+            autoSync = preferences.getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
+
+            if (!username.equals(getResources().getString(R.string.select_one))
+                    && !username.equals(user)) {
+                mMapviewButton.setEnabled(false);
+                mImportButton.setEnabled(false);
+                mExportButton.setEnabled(false);
+                mSessionButton.setEnabled(false);
+                mGpslogButton.setEnabled(false);
+                GPDialogs.infoDialog(
+                        this.getActivity(),
+                        getResources().getString(R.string.session_worker_not_match, user, username),
+                        null
+                );
+                return;
+            } else {
+                mMapviewButton.setEnabled(true);
+                mImportButton.setEnabled(true);
+                mExportButton.setEnabled(true);
+                mSessionButton.setEnabled(true);
+                mGpslogButton.setEnabled(true);
+            }
+
+            if (server.length() != 0
+                    && user.length() != 0
+                    && passwd.length() != 0
+                    && !username.equals(getResources().getString(R.string.select_one))
+            ) {
+
+                CloudSyncManager.getInstance().addAccount(user, passwd, null);
+
+                syncFrequency = Long.parseLong(
+                        preferences.getString("REFS_KEY_SYNC_FREQUENCY", "0")
+                );
+
+                if (this.autoSync) {
+                    CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
+                } else {
+                    CloudSyncManager.getInstance().setSyncFrecuency(0l);
+                }
             }
 
         } catch (Exception e) {
@@ -552,6 +606,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                             } catch (Exception e) {
                                 GPLog.error(CardinalActivityFragment.this, null, e);
                                 e.printStackTrace();
+                                GPDialogs.infoDialog(CardinalActivityFragment.this.getContext(), getString(R.string.opetator_validation_failed, worker.getUsername()), null);
                             }
                         }
                     }.execute();
@@ -621,6 +676,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 GPLog.error(CardinalActivityFragment.this, null, e);
+                                GPDialogs.infoDialog(CardinalActivityFragment.this.getContext(), getString(R.string.opetator_validation_failed, worker.getUsername()), null);
                             }
                         }
                     }.execute();
@@ -1011,6 +1067,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             if (!server.endsWith("/")) {
                 serverTrailed = server + "/";
             }
+
             AuthToken authToken = NetworkUtilitiesCardinalOl.login(serverTrailed, user, passwd);
 
             if (authToken != null) {
@@ -1022,7 +1079,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         } catch (Exception e) {
             e.printStackTrace();
             GPLog.error(CardinalActivityFragment.this, context.getString(R.string.validating), e);
-            GPDialogs.errorDialog(context, e, null);
+            //GPDialogs.errorDialog(context, e, null);
         }
 
         return false;

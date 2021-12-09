@@ -8,13 +8,14 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import cu.phibrain.cardinal.app.R;
 import eu.geopaparazzi.library.permissions.AChainedPermissionHelper;
 
-public class PermissionCamera extends AChainedPermissionHelper {
+public class PermissionGetAccount extends AChainedPermissionHelper {
 
     protected boolean canAskPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
 
-    public static int CAMERA_PERMISSION_REQUESTCODE = 86;
+    public static int GET_ACCOUNTS_PERMISSION_REQUESTCODE = 88;
 
     /**
      * Get a description of this permission helper.
@@ -23,7 +24,7 @@ public class PermissionCamera extends AChainedPermissionHelper {
      */
     @Override
     public String getDescription() {
-        return "Camera";
+        return "Get Accounts";
     }
 
     /**
@@ -37,7 +38,7 @@ public class PermissionCamera extends AChainedPermissionHelper {
         if (canAskPermission) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 return context.checkSelfPermission(
-                        Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+                        Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED;
             }
         }
         return true;
@@ -53,21 +54,21 @@ public class PermissionCamera extends AChainedPermissionHelper {
         if (canAskPermission) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (activity.checkSelfPermission(
-                        Manifest.permission.CAMERA) !=
+                        Manifest.permission.GET_ACCOUNTS) !=
                         PackageManager.PERMISSION_GRANTED) {
 
                     if (activity.shouldShowRequestPermissionRationale(
-                            Manifest.permission.CAMERA)) {
+                            Manifest.permission.GET_ACCOUNTS)) {
                         AlertDialog.Builder builder =
                                 new AlertDialog.Builder(activity);
-                        builder.setMessage(activity.getString(eu.geopaparazzi.library.R.string.permissions_location));
+                        builder.setMessage(activity.getString(R.string.permissions_needed));
                         builder.setPositiveButton(android.R.string.ok,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         activity.requestPermissions(new String[]{
-                                                        Manifest.permission.CAMERA},
-                                                CAMERA_PERMISSION_REQUESTCODE);
+                                                        Manifest.permission.GET_ACCOUNTS},
+                                                GET_ACCOUNTS_PERMISSION_REQUESTCODE);
                                     }
                                 }
                         );
@@ -76,8 +77,8 @@ public class PermissionCamera extends AChainedPermissionHelper {
                     } else {
                         // request permission
                         activity.requestPermissions(
-                                new String[]{Manifest.permission.CAMERA},
-                                CAMERA_PERMISSION_REQUESTCODE);
+                                new String[]{Manifest.permission.GET_ACCOUNTS},
+                                GET_ACCOUNTS_PERMISSION_REQUESTCODE);
                     }
                 }
             }
@@ -95,7 +96,7 @@ public class PermissionCamera extends AChainedPermissionHelper {
      */
     @Override
     public boolean hasGainedPermission(int requestCode, int[] grantResults) {
-        return requestCode == CAMERA_PERMISSION_REQUESTCODE &&
+        return requestCode == GET_ACCOUNTS_PERMISSION_REQUESTCODE &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED;
     }
 }
