@@ -3,19 +3,25 @@ package cu.phibrain.cardinal.app.ui.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.MediaRouteButton;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -34,6 +40,7 @@ import cu.phibrain.cardinal.app.helpers.LatLongUtils;
 import cu.phibrain.cardinal.app.helpers.NumberUtiles;
 import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.injections.UserMode;
+import cu.phibrain.cardinal.app.ui.TextChangedListener;
 import cu.phibrain.cardinal.app.ui.activities.CameraMapObjectActivity;
 import cu.phibrain.cardinal.app.ui.adapter.LabelAutoCompleteAdapter;
 import cu.phibrain.cardinal.app.ui.layer.BifurcationLayer;
@@ -51,6 +58,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
+import eu.geopaparazzi.core.database.objects.Metadata;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.GPDialogs;
@@ -117,7 +125,7 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         BottomSheetDialog dialog = new ObjectInspectorDialogFragment.MyBottomSheetDialog(
-        BarcodeReaderDialogFragment.this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme
+                BarcodeReaderDialogFragment.this.getContext(), cu.phibrain.cardinal.app.R.style.BottomSheetDialogTheme
         );
 
         View view = View.inflate(BarcodeReaderDialogFragment.this.getContext(), R.layout.fragment_barcode_reader_dialog_list_dialog, null);
@@ -130,12 +138,32 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
         this.buttonSave.setVisibility(View.GONE);
         this.autoCompleteTextViewCode = view.findViewById(R.id.autoCompleteTextViewCode);
         this.autoCompleteTextViewCode.setThreshold(3);
+        List<LabelSubLot> labelSubLotOperations = LabelSubLotOperations.getInstance().loadAll(currentSession.getId(), false);
+        this.autoCompleteTextViewCode.addTextChangedListener(new TextChangedListener<EditText>(autoCompleteTextViewCode) {
+            @Override
+            public void onTextChanged(EditText target, Editable s) {
+                String text_code = s.toString();
+                buttonSave.setVisibility(View.GONE);
+                if (text_code.length() >3) {
+                    for (final LabelSubLot label : labelSubLotOperations) {
+                        if (label.toString().equals(text_code)) {
+                            buttonSave.setVisibility(View.VISIBLE);
+                            return;
+                        }
+                    }
+                }else{
+                    buttonSave.setVisibility(View.GONE);
+                }
+            }
+        });
+
+
         this.labelAutoCompleteAdapter = new LabelAutoCompleteAdapter(
                 this.getContext(), R.layout.spinner_inv, R.id.tvSpinnerValue,
-                LabelSubLotOperations.getInstance().loadAll(currentSession.getId(), false)
+                labelSubLotOperations
         );
         this.autoCompleteTextViewCode.setAdapter(this.labelAutoCompleteAdapter);
-        this. autoCompleteTextViewCode.setOnItemClickListener((adapterView, view1, position, id) -> {
+        this.autoCompleteTextViewCode.setOnItemClickListener((adapterView, view1, position, id) -> {
             //this is the way to find selected object/item
             this.label = (LabelSubLot) adapterView.getItemAtPosition(position);
             if (this.label != null) {
