@@ -8,19 +8,7 @@
     <!-- NORMAL PERMISSIONS -->
     <uses-feature android:name="android.hardware.location.gps" />
 
-    <uses-permission
-        android:name="android.permission.AUTHENTICATE_ACCOUNTS"
-        android:maxSdkVersion="22" />
-    <uses-permission
-        android:name="android.permission.GET_ACCOUNTS"
-        android:maxSdkVersion="22" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.USE_CREDENTIALS"
-        android:maxSdkVersion="22" />
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -34,6 +22,21 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+
+    <!-- client -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+
+
+    <!-- Authenticator -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
+    <!-- Sync Adapter -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:name=".CardinalApplication"
@@ -154,18 +157,16 @@
                 <category android:name="androidsrc.intent.category.MENU_PROVIDER" />
             </intent-filter>
         </service>
-        <service
-            android:name=".ui.service.CloudAuthenticatorService"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
 
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
+        <!--Sync Adapter stuff-->
+
+        <provider
+            android:name=".ui.service.synchronize.StubContentProvider"
+            android:authorities="@string/content_authority"
+            android:exported="false"
+            android:syncable="true">
+        </provider>
+
         <service
             android:name=".ui.service.AutoSyncProjectService"
             android:exported="true"
@@ -179,6 +180,20 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
+        <service
+            android:name=".ui.service.CloudAuthenticatorService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+
         <receiver
             android:name=".ui.service.AutoSyncProjectService$SyncOnConnectionAvailable"
             android:enabled="false">
@@ -187,11 +202,7 @@
             </intent-filter>
         </receiver>
 
-        <provider
-            android:name=".ui.service.synchronize.StubContentProvider"
-            android:authorities="@string/content_authority"
-            android:exported="false"
-            android:syncable="true" />
+
     </application>
 
 </manifest>

@@ -90,12 +90,13 @@
     <string name="project_auto_upload_summary_off">Auto upload project only when manually requested</string>
     <string name="project_auto_upload_title">Self uploading to the cloud</string>
     <string name="project_auto_upload_summary_on">Automatically upload the project to the cloud. Disable if you know what you are doing</string>
-    <string name="content_authority" translatable="false">cu.phibrain.cardinal.app.ui.service.synchronize</string>
+    <string name="content_authority" translatable="false">cu.phibrain.cardinal.app</string>
     <string name="accountType" translatable="false">cu.phibrain.cardinal</string>
     <string name="permissions_needed">This permission is required for automatic synchronization</string>
     <string name="pref_title_sync_frequency">Frequency</string>
     <string name="sync_frequency_sumary">Configure the synchronization frequency</string>
     <string name="auto_sync_activated">The automatic upload to the cloud is enabled. To use this option disable it in the synchronization options</string>
+    <string name="session_worker_not_match">The user(%s) set in the setup and the active user(%s) in the newly loaded database do not match</string>
     <string-array name="pref_sync_frequency_titles">
         <item>1 minute</item>
         <item>5 minutes</item>

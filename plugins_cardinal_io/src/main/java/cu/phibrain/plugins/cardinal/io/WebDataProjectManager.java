@@ -126,7 +126,8 @@ public enum WebDataProjectManager {
             List<MapObject> mapObjectListToDelete = new ArrayList<>();
             // Collect all session in project
             for (Contract contract : contractList) {
-                Worker worker = contract.getTheWorker();
+               // Worker worker = contract.getTheWorker();
+                Worker worker = WorkerOperations.getInstance().load(contract.getWorkerId());
 
                 // export to server from here
                 for (Devices device : worker.getDevices()) {

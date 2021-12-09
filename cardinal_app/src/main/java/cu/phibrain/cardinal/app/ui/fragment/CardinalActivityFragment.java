@@ -2,8 +2,6 @@
 // Contains the Flag Quiz logic
 package cu.phibrain.cardinal.app.ui.fragment;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -18,7 +16,6 @@ import android.content.pm.ProviderInfo;
 import android.content.res.AssetManager;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.system.Os;
@@ -55,8 +52,6 @@ import cu.phibrain.cardinal.app.injections.AppContainer;
 import cu.phibrain.cardinal.app.ui.activities.SessionsStatsActivity;
 import cu.phibrain.cardinal.app.ui.activities.SyncSettingActivity;
 import cu.phibrain.cardinal.app.ui.activities.WorkSessionListActivity;
-import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccount;
-import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccountAuthenticator;
 import cu.phibrain.cardinal.app.ui.service.synchronize.CloudSyncManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Worker;
@@ -219,22 +214,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
         //Initialize Sync Manager
         CloudSyncManager.init(this.getActivity());
 
-        //Configuration shared preferences
-        autoSync = PreferenceManager.getDefaultSharedPreferences(this.getActivity())
-                .getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
-
-        syncFrequency = Long.parseLong(
-                PreferenceManager.getDefaultSharedPreferences(this.getActivity())
-                        .getString("REFS_KEY_SYNC_FREQUENCY", "0")
-        );
-
-        if (this.autoSync) {
-            CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
-        } else {
-            CloudSyncManager.getInstance().setSyncFrecuency(0l);
-        }
-
-
     }
 
     @Override
@@ -290,18 +269,50 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             }
 
             //Configuration shared preferences
-            autoSync = PreferenceManager.getDefaultSharedPreferences(this.getActivity())
-                    .getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+            final String user = preferences.getString(Constants.PREF_KEY_USER, "");
+            final String passwd = preferences.getString(Constants.PREF_KEY_PWD, "");
+            final String server = preferences.getString(Constants.PREF_KEY_SERVER, "");
+            autoSync = preferences.getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
 
-            syncFrequency = Long.parseLong(
-                    PreferenceManager.getDefaultSharedPreferences(this.getActivity())
-                            .getString("REFS_KEY_SYNC_FREQUENCY", "0")
-            );
-
-            if (this.autoSync) {
-                CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
+            if (!username.equals(getResources().getString(R.string.select_one))
+                    && !username.equals(user)) {
+                mMapviewButton.setEnabled(false);
+                mImportButton.setEnabled(false);
+                mExportButton.setEnabled(false);
+                mSessionButton.setEnabled(false);
+                mGpslogButton.setEnabled(false);
+                GPDialogs.infoDialog(
+                        this.getActivity(),
+                        getResources().getString(R.string.session_worker_not_match, user, username),
+                        null
+                );
+                return;
             } else {
-                CloudSyncManager.getInstance().setSyncFrecuency(0l);
+                mMapviewButton.setEnabled(true);
+                mImportButton.setEnabled(true);
+                mExportButton.setEnabled(true);
+                mSessionButton.setEnabled(true);
+                mGpslogButton.setEnabled(true);
+            }
+
+            if (server.length() != 0
+                    && user.length() != 0
+                    && passwd.length() != 0
+                    && !username.equals(getResources().getString(R.string.select_one))
+            ) {
+
+                CloudSyncManager.getInstance().addAccount(user, passwd, null);
+
+                syncFrequency = Long.parseLong(
+                        preferences.getString("REFS_KEY_SYNC_FREQUENCY", "0")
+                );
+
+                if (this.autoSync) {
+                    CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
+                } else {
+                    CloudSyncManager.getInstance().setSyncFrecuency(0l);
+                }
             }
 
         } catch (Exception e) {
@@ -1060,41 +1071,6 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             AuthToken authToken = NetworkUtilitiesCardinalOl.login(serverTrailed, user, passwd);
 
             if (authToken != null) {
-                //Create account if needed
-                // Create the account type and default account
-                Account newAccount = new Account(user, CloudAccount.ACCOUNT_TYPE);
-                // Get an instance of the Android account manager
-                AccountManager accountManager = AccountManager.get(context);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    for (Account oldAccount : accountManager.getAccounts()) {
-                        if (!newAccount.equals(oldAccount)) {
-                            accountManager.removeAccountExplicitly(oldAccount);
-                        }
-
-                    }
-                }
-                /*
-                 * Add the account and account type, no password or user data
-                 * If successful, return the Account object, otherwise report an error.
-                 */
-                if (accountManager.addAccountExplicitly(newAccount, passwd, null)) {
-                    // Ojo: hay que setear el token explicitamente si la cuenta no existe,
-                    // no basta con mandarlo al authenticator
-                    accountManager.setAuthToken(newAccount, CloudAccount.ACCOUNT_TYPE, authToken.toString());
-                } else {
-                    accountManager.setPassword(newAccount, passwd);
-                    CloudAccountAuthenticator.init(CardinalActivityFragment.this.getActivity());
-                    CloudAccountAuthenticator.getInstance().getTokenForAccountCreateIfNeeded(
-                            CloudAccount.ACCOUNT_TYPE, CloudAccount.AUTHTOKEN_TYPE
-                    );
-                }
-
-                if (CardinalActivityFragment.this.autoSync) {
-                    CloudSyncManager.getInstance().setSyncFrecuency(CardinalActivityFragment.this.syncFrequency);
-                } else {
-                    CloudSyncManager.getInstance().setSyncFrecuency(0l);
-                }
-
                 return true;
             } else {
                 GPDialogs.infoDialog(context, String.format(context.getString(R.string.worker_have_not_active), user), null);
