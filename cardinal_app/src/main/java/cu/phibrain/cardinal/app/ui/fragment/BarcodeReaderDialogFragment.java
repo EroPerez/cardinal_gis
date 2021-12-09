@@ -3,14 +3,11 @@ package cu.phibrain.cardinal.app.ui.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.MediaRouteButton;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -21,7 +18,6 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -58,7 +54,6 @@ import cu.phibrain.plugins.cardinal.io.database.entity.model.WorkSession;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.LabelSubLotOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.RouteSegmentOperations;
-import eu.geopaparazzi.core.database.objects.Metadata;
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.GPDialogs;
@@ -144,14 +139,14 @@ public class BarcodeReaderDialogFragment extends BottomSheetDialogFragment imple
             public void onTextChanged(EditText target, Editable s) {
                 String text_code = s.toString();
                 buttonSave.setVisibility(View.GONE);
-                if (text_code.length() >3) {
+                if (text_code.length() > 3) {
                     for (final LabelSubLot label : labelSubLotOperations) {
                         if (label.toString().equals(text_code)) {
                             buttonSave.setVisibility(View.VISIBLE);
                             return;
                         }
                     }
-                }else{
+                } else {
                     buttonSave.setVisibility(View.GONE);
                 }
             }
