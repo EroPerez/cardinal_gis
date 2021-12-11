@@ -119,4 +119,5 @@
     </string-array>
     <string name="sync_started">Automatic synchronization of the project has been started</string>
     <string name="sync_stopped">Automatic synchronization of the project has been stopped</string>
+    <string name="inspector_object_created_at">Created At</string>
 </resources>

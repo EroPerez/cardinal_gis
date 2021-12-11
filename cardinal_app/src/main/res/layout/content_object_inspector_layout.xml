@@ -289,6 +289,33 @@
 
             </TableRow>
 
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1">
+
+                <TextView
+                    style="@style/Widget.MaterialComponents.TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/inspector_object_created_at"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvCreatedAt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2021-12-21 12:24"
+                    android:textAlignment="viewEnd"
+                    android:textSize="14sp" />
+
+            </TableRow>
+
             <!--Photos-->
             <TableRow
                 android:layout_width="match_parent"
