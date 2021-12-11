@@ -117,4 +117,6 @@
         <item>21600</item>
         <item>0</item>
     </string-array>
+    <string name="sync_started">Automatic synchronization of the project has been started</string>
+    <string name="sync_stopped">Automatic synchronization of the project has been stopped</string>
 </resources>

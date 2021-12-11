@@ -22,9 +22,10 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:icon="@drawable/ic_sync_black24dp"
-        app:title="@string/auto_sync">
+    <PreferenceCategory>
+<!--        android:icon="@drawable/ic_sync_black24dp"-->
+<!--        app:title="@string/auto_sync"-->
+
 
         <SwitchPreferenceCompat
             app:defaultValue="false"

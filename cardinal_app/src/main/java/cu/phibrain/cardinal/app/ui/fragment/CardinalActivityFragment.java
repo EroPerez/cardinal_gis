@@ -274,6 +274,10 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
             final String passwd = preferences.getString(Constants.PREF_KEY_PWD, "");
             final String server = preferences.getString(Constants.PREF_KEY_SERVER, "");
             autoSync = preferences.getBoolean("REFS_KEY_AUTO_SYNC_SESSION", false);
+            final boolean autoSyncAlreadyStarted = preferences.getBoolean(
+                    CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED,
+                    false
+            );
 
             if (!username.equals(getResources().getString(R.string.select_one))
                     && !username.equals(user)) {
@@ -300,6 +304,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                     && user.length() != 0
                     && passwd.length() != 0
                     && !username.equals(getResources().getString(R.string.select_one))
+                    && !autoSyncAlreadyStarted
             ) {
 
                 CloudSyncManager.getInstance().addAccount(user, passwd, null);
@@ -308,10 +313,31 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
                         preferences.getString("REFS_KEY_SYNC_FREQUENCY", "0")
                 );
 
+                Log.d("SYNC_PARAM", "Frecuency: " + syncFrequency);
+                Log.d("SYNC_PARAM", "autoSync: " + autoSync);
+                Log.d("SYNC_PARAM", "autoSyncAlreadyStarted: " + autoSyncAlreadyStarted);
+
                 if (this.autoSync) {
                     CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean(CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED, true);
+                    editor.commit();
+                    GPDialogs.toast(
+                            this.getActivity(),
+                            this.getResources().
+                                    getString(R.string.sync_started),
+                            1);
                 } else {
                     CloudSyncManager.getInstance().setSyncFrecuency(0l);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean(CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED, false);
+                    editor.putString("REFS_KEY_SYNC_FREQUENCY", "0");
+                    editor.commit();
+//                    GPDialogs.toast(
+//                            this.getActivity(),
+//                            this.getResources().
+//                                    getString(R.string.sync_started),
+//                            1);
                 }
             }
 

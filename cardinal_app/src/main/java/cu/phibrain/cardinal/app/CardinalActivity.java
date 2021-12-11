@@ -40,7 +40,8 @@ import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_DATABASE_T
 public class CardinalActivity extends GeopaparazziCoreActivity {
     private AChainedPermissionHelper permissionHelper = new PermissionWriteStorage();
     private CardinalActivityFragment cardinalActivityFragment;
-    public static final int DOWNLOADDATA_RETURN_CODE = 667;
+    public static final String REFS_KEY_AUTO_SYNC_ALREADY_STARTED = "REFS_KEY_AUTO_SYNC_ALREADY_STARTED";
+
 
     // configure the GeopaparazziCoreActivity
     @Override
@@ -82,6 +83,12 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             GPLog.error(this, null, e);
         }
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if(!sharedPreferences.contains(CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED)) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED, false);
+            editor.commit();
+        }
 
     }
 
