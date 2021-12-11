@@ -315,7 +315,7 @@ public class CardinalActivityFragment extends GeopaparazziActivityFragment {
 
                 Log.d("SYNC_PARAM", "Frecuency: " + syncFrequency);
                 Log.d("SYNC_PARAM", "autoSync: " + autoSync);
-                Log.d("SYNC_PARAM", "autoSyncAlreadyStarted: " + autoSyncAlreadyStarted);
+               // Log.d("SYNC_PARAM", "autoSyncAlreadyStarted: " + autoSyncAlreadyStarted);
 
                 if (this.autoSync) {
                     CloudSyncManager.getInstance().setSyncFrecuency(this.syncFrequency);
