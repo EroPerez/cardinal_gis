@@ -160,7 +160,7 @@ public class NetworkUtilitiesCardinalOl {
                 return response.body();
             }
             throw new ServerError(response.message(), response.code());
-        } catch (IOException e) {
+        } catch (Exception e) {
 
             // handle error
             throw new DownloadError(e.getMessage(), e);

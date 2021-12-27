@@ -11,6 +11,8 @@ import android.preference.PreferenceManager;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
+import org.joda.time.DateTime;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 
@@ -22,8 +24,10 @@ import cu.phibrain.cardinal.app.ui.permissions.PermissionWriteSyncSettings;
 import cu.phibrain.cardinal.app.ui.service.synchronize.CloudAccountAuthenticator;
 import eu.geopaparazzi.core.GeopaparazziCoreActivity;
 import eu.geopaparazzi.core.database.DaoBookmarks;
+import eu.geopaparazzi.core.database.DaoMetadata;
 import eu.geopaparazzi.library.core.ResourcesManager;
 import eu.geopaparazzi.library.database.GPLog;
+import eu.geopaparazzi.library.database.TableDescriptions;
 import eu.geopaparazzi.library.gps.GpsServiceUtilities;
 import eu.geopaparazzi.library.permissions.AChainedPermissionHelper;
 import eu.geopaparazzi.library.permissions.PermissionFineLocation;
@@ -40,7 +44,8 @@ import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_DATABASE_T
 public class CardinalActivity extends GeopaparazziCoreActivity {
     private AChainedPermissionHelper permissionHelper = new PermissionWriteStorage();
     private CardinalActivityFragment cardinalActivityFragment;
-    public static final int DOWNLOADDATA_RETURN_CODE = 667;
+    public static final String REFS_KEY_AUTO_SYNC_ALREADY_STARTED = "REFS_KEY_AUTO_SYNC_ALREADY_STARTED";
+
 
     // configure the GeopaparazziCoreActivity
     @Override
@@ -82,6 +87,12 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
             GPLog.error(this, null, e);
         }
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!sharedPreferences.contains(CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED)) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(CardinalActivity.REFS_KEY_AUTO_SYNC_ALREADY_STARTED, false);
+            editor.commit();
+        }
 
     }
 
@@ -209,6 +220,22 @@ public class CardinalActivity extends GeopaparazziCoreActivity {
                 recreate();
             }
         }, 10);
+
+
+    }
+
+    @Override
+    public void onAppIsShuttingDown() {
+        try {
+            DaoMetadata.setValue(
+                    TableDescriptions.MetadataTableDefaultValues.KEY_LASTTS.getFieldName(),
+                    String.valueOf((new DateTime()).getMillis())
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        super.onAppIsShuttingDown();
     }
 
 }

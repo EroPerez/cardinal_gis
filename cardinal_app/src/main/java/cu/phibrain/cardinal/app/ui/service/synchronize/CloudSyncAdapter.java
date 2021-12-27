@@ -20,7 +20,6 @@ import cu.phibrain.plugins.cardinal.io.WebDataProjectManager;
 import cu.phibrain.plugins.cardinal.io.database.entity.model.Project;
 import eu.geopaparazzi.core.utilities.Constants;
 import eu.geopaparazzi.library.database.GPLog;
-import eu.geopaparazzi.library.util.GPDialogs;
 
 public class CloudSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = CloudSyncAdapter.class.getSimpleName();
@@ -47,7 +46,7 @@ public class CloudSyncAdapter extends AbstractThreadedSyncAdapter {
 
             Field field = CursorWindow.class.getDeclaredField("sCursorWindowSize");
             field.setAccessible(true);
-            field.set(null, 160 * 1024 * 1024); //the 100MB is the new size
+            field.set(null, 160 * 1024 * 1024); //the 160MB is the new size
 
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -59,7 +58,7 @@ public class CloudSyncAdapter extends AbstractThreadedSyncAdapter {
             String result = WebDataProjectManager.INSTANCE.uploadProject(this.getContext(), serverUrl, account.name, pwd, project.getId(), uploadImages);
 
             Log.d(TAG, "Sync result --> " + result);
-            GPDialogs.toast(this.getContext(), result, 1);
+
 
 
         } catch (Exception e) {

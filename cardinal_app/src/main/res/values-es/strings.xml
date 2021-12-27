@@ -106,5 +106,8 @@
     <string name="opetator_validation_failed">El operario %s no ha podido ser validado, compruebe las credenciales</string>
     <string name="auto_sync_activated">La subida automática a la nube está activada. Para utilizar esta opción desactívela en las opciones de sincronización</string>
     <string name="session_worker_not_match">El usuario (%s) establecido en la configuración y el usuario activo(%s) en la base de datos recién cargada no coinciden</string>
+    <string name="sync_started">Se ha iniciado la sincronización automática del proyecto</string>
+    <string name="sync_stopped">Se ha detenido la sincronización automática del proyecto</string>
+    <string name="inspector_object_created_at">Creado</string>
 
 </resources>

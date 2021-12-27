@@ -246,15 +246,18 @@ public class CardinalProjectImporterActivity extends ListActivity {
             }
 
             // sanitize name
-            prefix = prefix.replaceAll("[^a-zA-Z0-9]+", "");
+            prefix = prefix.replaceAll("[^a-zA-Z0-9]+", "") + "_" + user;
         } else {
-            prefix = "projects";
+            prefix = "projects_" + user;
         }
         if (outputDir == null) {
             timestamp = TimeUtilities.INSTANCE.TIMESTAMPFORMATTER_LOCAL.format(new Date());
             return prefix + "_" + timestamp + LibraryConstants.GEOPAPARAZZI_DB_EXTENSION;
         } else {
-            timestamp = TimeUtilities.INSTANCE.DATEONLY_FORMATTER.format(new Date()).replace("-", "");
+            timestamp = TimeUtilities.INSTANCE.iso8601Format.format(new Date())
+                    .replace("-", "")
+                    .replace(":", "")
+                    .replace(" ", "_");
             String baseName = prefix + "_" + timestamp;
             File f = new File(outputDir, baseName + LibraryConstants.GEOPAPARAZZI_DB_EXTENSION);
             int i = 1;

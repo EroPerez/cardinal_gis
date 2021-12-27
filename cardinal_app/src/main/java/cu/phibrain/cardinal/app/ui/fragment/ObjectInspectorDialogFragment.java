@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
@@ -72,6 +73,7 @@ import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectMetad
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.MapObjectOperations;
 import cu.phibrain.plugins.cardinal.io.database.entity.operations.StockOperations;
 import cu.phibrain.plugins.cardinal.io.utils.ImageUtil;
+import cu.phibrain.plugins.cardinal.io.utils.JodaTimeHelper;
 import eu.geopaparazzi.library.images.ImageUtilities;
 import eu.geopaparazzi.library.util.GPDialogs;
 import eu.geopaparazzi.library.util.LibraryConstants;
@@ -464,6 +466,9 @@ public class ObjectInspectorDialogFragment extends BottomSheetDialogFragment {
         editCoord.setVisibility(View.GONE);
 
         updateCompleteness(view, object);
+
+        TextView createdAt = view.findViewById(R.id.tvCreatedAt);
+        createdAt.setText(JodaTimeHelper.formatDate("dd/MM/yyyy h:mm", object.getCreatedAt()));
 
     }
 
